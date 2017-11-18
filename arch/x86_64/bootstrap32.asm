@@ -18,11 +18,11 @@ dw 0
 dd 8
 multiboot2_end:
 
-
 NO_CPUID_STRING: db "No CPUID support!", 0
 NO_LONG_MODE: db "No long mode support! Use a 32-bit build!", 0
 NO_SSE_STRING: db "No SSE2 support! Use a 32-bit build!", 0
 
+extern bootstrap64
 
 align 4096
 gdt64:                           ; Global Descriptor Table (64-bit).
@@ -221,4 +221,9 @@ bootstrap32:
 
     lgdt [gdt64.pointer]         ; Load the 64-bit global descriptor table.
 
-    ; jmp 0x08:(trampoline)
+    jmp 0x08:(trampoline)
+
+bits 64
+trampoline:
+    mov rcx, bootstrap64
+    jmp rcx

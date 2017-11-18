@@ -57,6 +57,7 @@ include(${PLATFORM_FILE})
 add_executable(quark.kernel "")
 add_subdirectory(${ARCH_PATH})
 add_subdirectory(kernel)
+add_subdirectory(lib)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -Iinclude -std=gnu11 -fcolor-diagnostics -O3")
 message(STATUS "CFLAGS: " ${CMAKE_C_FLAGS})

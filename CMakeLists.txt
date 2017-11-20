@@ -50,7 +50,7 @@ include(${PLATFORM_FILE})
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -Iinclude -fcolor-diagnostics -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -fno-rtti -fno-exceptions -fcolor-diagnostics -O3")
 message(STATUS "CXXFLAGS: " ${CMAKE_CXX_FLAGS})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib")

@@ -43,8 +43,9 @@
 *.idb
 *.pdb
 
-# Generated directories
+# Generated directories and files
 build/
+include/arch
 
 # CMake
 CMakeCache.txt

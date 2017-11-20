@@ -54,11 +54,6 @@ endif()
 message(STATUS "Platform file: " ${PLATFORM_FILE})
 include(${PLATFORM_FILE})
 
-add_executable(quark.kernel "")
-add_subdirectory(${ARCH_PATH})
-add_subdirectory(kernel)
-add_subdirectory(lib)
-
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -Iinclude -fcolor-diagnostics -O3")
@@ -75,5 +70,15 @@ if(NOT DEFINED SYSROOT)
     set(SYSROOT "${CMAKE_SOURCE_DIR}/../hdd")
 endif()
 message(STATUS "Sysroot: " ${SYSROOT})
+
+set(CREATE_ARCH_SYMLINK ${CMAKE_COMMAND} -E create_symlink ${ARCH_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/include/arch)
+execute_process(
+    COMMAND ${CREATE_ARCH_SYMLINK}
+)
+
+add_executable(quark.kernel "")
+add_subdirectory(${ARCH_PATH})
+add_subdirectory(kernel)
+add_subdirectory(lib)
 
 install(TARGETS quark.kernel DESTINATION "${SYSROOT}/boot")

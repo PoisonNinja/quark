@@ -19,10 +19,17 @@ SECTIONS
     	*(.text)
 	}
 
+    .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - 0xFFFFFFFF80000000)
+    {
+        __constructors_start = .;
+        *(SORT(.ctors*))
+        __constructors_end = .;
+        *(.rodata)
+    }
+
     .data ALIGN (0x1000) : AT(ADDR(.data) - 0xFFFFFFFF80000000)
     {
         *(.data)
-        *(.rodata)
     }
 
 	.eh_frame ALIGN(0x1000) : AT(ADDR(.eh_frame) - 0xFFFFFFFF80000000)

@@ -30,12 +30,19 @@
  */
 
 #include <arch/kernel/multiboot2.h>
+#include <boot/constructors.h>
 #include <kernel.h>
 
 extern void x86_64_initialize_serial(void);
 
+extern "C" {
+void *__constructors_start;
+void *__constructors_end;
+}
+
 void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
+    constructors_initialize(&__constructors_start, &__constructors_end);
     x86_64_initialize_serial();
     printk(INFO, "x86_64 preinitialization...\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {

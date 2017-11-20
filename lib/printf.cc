@@ -60,9 +60,9 @@ static void sprintf_putcf(struct printf_data *data, char c)
 }
 
 static void puts(struct parameters *params, struct printf_data *data,
-                 char *message)
+                 const char *message)
 {
-    char *tmp = message;
+    const char *tmp = message;
     int n = params->padding;
     while (*tmp++ && n)
         n--;

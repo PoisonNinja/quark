@@ -36,7 +36,7 @@
 
 #define PRINTK_MAX 1024
 
-static char* colors[] = {
+static const char* colors[] = {
     "\e[36m",  // Blue for debug
     "\e[32m",  // Green for info
     "\e[33m",  // Yellow for warning

@@ -6,7 +6,7 @@
 struct console {
     size_t (*write)(const char* buffer, size_t size);
     struct list_element list;
-    char* name;
+    const char* name;
 };
 
 extern status_t console_register(struct console* console);

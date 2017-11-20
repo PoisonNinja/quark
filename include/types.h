@@ -37,3 +37,5 @@
 #include <stdint.h>
 
 typedef enum { SUCCESS, FAILURE } status_t;
+
+typedef uint64_t time_t;

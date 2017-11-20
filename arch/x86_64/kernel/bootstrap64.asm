@@ -1,7 +1,7 @@
 bits 64
 section .text
 
-extern x86_64_init
+extern asm_to_c_trampoline
 
 global bootstrap64
 bootstrap64:
@@ -28,7 +28,7 @@ bootstrap64:
     push rdi
 
     ; Call x86_64 initialization function
-    call x86_64_init
+    call asm_to_c_trampoline
 
     ; We shouldn't reach here, but if we do, loop forever
     jmp halt64

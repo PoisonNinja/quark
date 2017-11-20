@@ -102,3 +102,10 @@ void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
     for (;;)
         asm("hlt");
 }
+
+extern "C" {
+void asm_to_c_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
+{
+    x86_64_init(magic, multiboot);
+}
+}

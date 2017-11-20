@@ -33,7 +33,7 @@
 
 void *memchr(const void *str, int c, size_t n)
 {
-    const uint8_t *d = str;
+    const uint8_t *d = (uint8_t *)str;
     while (n--) {
         if (*d == (uint8_t)c)
             return (void *)d;
@@ -44,7 +44,7 @@ void *memchr(const void *str, int c, size_t n)
 
 int memcmp(const void *str1, const void *str2, size_t n)
 {
-    const uint8_t *a = str1, *b = str2;
+    const uint8_t *a = (uint8_t *)str1, *b = (uint8_t *)str2;
     while (n--) {
         if (*a != *b)
             return *a - *b;
@@ -55,8 +55,8 @@ int memcmp(const void *str1, const void *str2, size_t n)
 
 void *memcpy(void *dest, const void *src, size_t n)
 {
-    uint8_t *a = dest;
-    const uint8_t *b = src;
+    uint8_t *a = (uint8_t *)dest;
+    const uint8_t *b = (uint8_t *)src;
     while (n--) {
         *a++ = *b++;
     }
@@ -68,8 +68,8 @@ void *memmove(void *dest, const void *src, size_t n)
     if (dest < src)
         return memcpy(dest, src, n);
     else {
-        uint8_t *a = dest + n - 1;
-        const uint8_t *b = src + n - 1;
+        uint8_t *a = (uint8_t *)dest + n - 1;
+        const uint8_t *b = (uint8_t *)src + n - 1;
         while (n--) {
             *a-- = *b--;
         }
@@ -79,7 +79,7 @@ void *memmove(void *dest, const void *src, size_t n)
 
 void *__attribute__((weak)) memset(void *str, int c, size_t n)
 {
-    uint8_t *a = str;
+    uint8_t *a = (uint8_t *)str;
     while (n--) {
         *a++ = (uint8_t)c;
     }

@@ -59,7 +59,9 @@ add_subdirectory(${ARCH_PATH})
 add_subdirectory(kernel)
 add_subdirectory(lib)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -Iinclude -std=gnu11 -fcolor-diagnostics -O3")
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -Iinclude -fcolor-diagnostics -O3")
 message(STATUS "CFLAGS: " ${CMAKE_C_FLAGS})
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib")
@@ -74,4 +76,4 @@ if(NOT DEFINED SYSROOT)
 endif()
 message(STATUS "Sysroot: " ${SYSROOT})
 
-install(TARGETS quark.kernel RUNTIME DESTINATION "${SYSROOT}/boot")
+install(TARGETS quark.kernel DESTINATION "${SYSROOT}/boot")

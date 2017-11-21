@@ -12,6 +12,5 @@ public:
         ERROR,
         CONTINUE,
     };
-
     static size_t printk(int level, const char *format, ...);
 };

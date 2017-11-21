@@ -42,7 +42,6 @@ void *__constructors_end;
 
 void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    constructors_initialize(&__constructors_start, &__constructors_end);
     x86_64_initialize_serial();
     Log::printk(Log::INFO, "x86_64 preinitialization...\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
@@ -114,8 +113,9 @@ void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
 }
 
 extern "C" {
-void asm_to_c_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
+void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
 {
+    constructors_initialize(&__constructors_start, &__constructors_end);
     x86_64_init(magic, multiboot);
 }
 }

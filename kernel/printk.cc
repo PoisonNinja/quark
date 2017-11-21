@@ -45,7 +45,7 @@ static const char* colors[] = {
 
 static char printk_buffer[PRINTK_MAX];
 
-size_t _printk(int level, const char* format, ...)
+size_t Log::printk(int level, const char* format, ...)
 {
     size_t r = 0;
     if (level < CONTINUE) {

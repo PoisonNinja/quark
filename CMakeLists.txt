@@ -9,8 +9,26 @@ set(CMAKE_SYSTEM_NAME       Generic)
 set(CMAKE_SYSTEM_VERSION    1)
 
 find_program(CLANGCXX clang++)
-find_program(LD.LLD ld.lld)
+if(NOT CLANGCXX)
+    message(FATAL_ERROR "clang++ not found! Run the \
+                         toolchain script in Pepper to build a toolchain. If \
+                         you have already built it, make sure that you have run \
+                         envsetup.sh before configuring CMake.")
+endif()
 
+find_program(LD.LLD ld.lld)
+if(NOT LD.LLD)
+    message(FATAL_ERROR "ld.lld not found! Run the \
+                         toolchain script in Pepper to build a toolchain. If \
+                         you have already built it, make sure that you have run \
+                         envsetup.sh before configuring CMake.")
+endif()
+
+# Skip compiler checks since we're targeting ELF binaries, and thus those
+# would fail on MacOS with the error file was built for unsupported file format,
+# which makes sense since MacOS uses MachO. Unfortunately, the way that CMake
+# does the compiler checks means that it already
+set(CMAKE_CXX_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER ${CLANGCXX})
 set(CMAKE_CXX_LINKER ${LD.LLD})
 
@@ -46,6 +64,22 @@ message(STATUS "Sysroot: " ${SYSROOT})
 
 project(Quark CXX)
 
+# Rudimentary compiler checks
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+    # AppleClang is screwed up, it can only produce MachO binaries
+    message(FATAL_ERROR "The active compiler is AppleClang. Unfortunately, \
+                         AppleClang can't produce ELF binaries. You need to \
+                         build LLVM using the \
+                         toolchain script provided in Pepper. If you have \
+                         already done so, make sure you executed envsetup.sh. \
+                         This only needs to be done once during configuration.")
+endif()
+
+if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 5.0)
+    message(FATAL_ERROR "Your version of Clang is too old! Rerun the toolchain \
+                         script to build a newer version.")
+endif()
+
 include(${PLATFORM_FILE})
 
 set(CMAKE_CXX_STANDARD 11)
@@ -60,7 +94,7 @@ set(INCLUDE_DIRS "${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include/")
 include_directories(${INCLUDE_DIRS})
 message(STATUS "Include directories: " ${INCLUDE_DIRS})
 
-set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINKER} <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET>")
+set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINKER} <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 set(CREATE_ARCH_SYMLINK ${CMAKE_COMMAND} -E create_symlink ${ARCH_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/include/arch)
 execute_process(

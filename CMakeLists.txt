@@ -32,6 +32,9 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER ${CLANGCXX})
 set(CMAKE_CXX_LINKER ${LD.LLD})
 
+message(STATUS "CXX Compiler: " ${CLANGCXX})
+message(STATUS "CXX Linker: " ${LD.LLD})
+
 enable_language(ASM_NASM)
 
 set(ARCH "x86_64" CACHE STRING "Architecture to build for")

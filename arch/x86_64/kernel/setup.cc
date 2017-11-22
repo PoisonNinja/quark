@@ -29,20 +29,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/constructors.h>
 #include <kernel.h>
-
-extern void x86_64_initialize_serial(void);
 
 extern "C" {
 void *__constructors_start;
 void *__constructors_end;
 }
 
+X86Serial serial_console;
+
 void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    x86_64_initialize_serial();
     Log::printk(Log::INFO, "x86_64 preinitialization...\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");

@@ -34,7 +34,11 @@
 #include <lib/printf.h>
 #include <lib/string.h>
 
+namespace Log
+{
 #define PRINTK_MAX 1024
+
+List<LogOutput*> output;
 
 static const char* colors[] = {
     "\e[36m",  // Blue for debug
@@ -45,10 +49,10 @@ static const char* colors[] = {
 
 static char printk_buffer[PRINTK_MAX];
 
-size_t Log::printk(int level, const char* format, ...)
+size_t printk(int level, const char* format, ...)
 {
     size_t r = 0;
-    if (level < CONTINUE) {
+    if (level < Log::CONTINUE) {
         memset(printk_buffer, 0, PRINTK_MAX);
         // time_t t = ktime_get();
         time_t sec = 0;   // t / NSEC_PER_SEC;
@@ -65,3 +69,9 @@ size_t Log::printk(int level, const char* format, ...)
     console_write(printk_buffer, r);
     return r;
 }
+
+void RegisterLogOutput(LogOutput* output)
+{
+    // this->output.insert(output);
+}
+}  // namespace Log

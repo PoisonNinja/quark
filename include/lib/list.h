@@ -33,6 +33,25 @@
 
 #include <types.h>
 
+template <class T>
+class Node
+{
+public:
+    Node *next, *prev;
+    T *data;
+};
+
+template <class T>
+class List
+{
+public:
+    void insert(Node<T> *node);
+
+private:
+    Node<T> *head;
+    size_t size;
+};
+
 /*
  * A simplified version of the Linux linked list implementation. Everything
  * is self written, except for the containerof macro

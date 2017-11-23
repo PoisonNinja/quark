@@ -6,10 +6,10 @@
  * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ *   List of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
+ *   this List of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
  *
  * * Neither the name of the copyright holder nor the names of its
@@ -33,72 +33,132 @@
 
 #include <types.h>
 
-template <class T>
+template <typename T>
+class Node
+{
+    template <typename S, Node<S> S::*>
+    friend class List;
+    template <typename S, Node<S> S::*>
+    friend class iterator;
+
+    T* next;
+    Node<T>* prev;
+
+public:
+    Node() : next(), prev()
+    {
+    }
+    Node(Node const&)
+    {
+    }
+    void operator=(Node const&)
+    {
+    }
+};
+
+template <typename T, Node<T> T::*Link>
+class iterator
+{
+    template <typename S, Node<S> S::*>
+    friend class List;
+    Node<T>* current;
+
+public:
+    explicit iterator(Node<T>* current) : current(current)
+    {
+    }
+    T& operator*()
+    {
+        return *this->operator->();
+    }
+    T* operator->()
+    {
+        return this->current->next;
+    }
+    bool operator==(iterator const& other) const
+    {
+        return this->current == other.current;
+    }
+    bool operator!=(iterator const& other) const
+    {
+        return !(*this == other);
+    }
+    iterator& operator++()
+    {
+        this->current = &(this->current->next->*Link);
+        return *this;
+    }
+    iterator operator++(int)
+    {
+        iterator rc(*this);
+        this->operator++();
+        return rc;
+    }
+    iterator& operator--()
+    {
+        this->current = this->current->prev;
+        return *this;
+    }
+    iterator operator--(int)
+    {
+        iterator rc(*this);
+        this->operator--();
+        return rc;
+    }
+};
+
+template <typename T, Node<T> T::*Link>
 class List
 {
+    Node<T> content;
+
 public:
-    class iterator
+    List()
     {
-    public:
-        iterator(T ptr) : ptr(ptr)
-        {
-        }
-        iterator operator++()
-        {
-            iterator i = *this;
-            ptr = ptr->next;
-            return i;
-        }
-        iterator operator++(int __attribute__((unused)) discard)
-        {
-            ptr = ptr->next;
-            return *this;
-        }
-        T &operator*()
-        {
-            return ptr;
-        }
-        T *operator->()
-        {
-            return ptr;
-        }
-        bool operator==(const iterator &rhs)
-        {
-            return ptr == rhs.ptr;
-        }
-        bool operator!=(const iterator &rhs)
-        {
-            return ptr != rhs.ptr;
-        }
-
-    private:
-        T ptr;
-    };
-
-    iterator begin()
+        this->content.prev = &this->content;
+    }
+    iterator<T, Link> begin()
     {
-        return iterator(head);
+        return iterator<T, Link>(&this->content);
+    }
+    iterator<T, Link> end()
+    {
+        return iterator<T, Link>(this->content.prev);
     }
 
-    iterator end()
+    T& front()
     {
-        return iterator(sentry);
+        return *this->content.next;
     }
-
-    void insert(T node)
+    T& back()
     {
-        if (!this->size) {
-            this->head = node;
-            node->next = sentry;
-        } else {
-            node->next = this->head;
-            this->head = node;
-        }
-        this->size++;
+        return *(this->content.prev->prev->next);
     }
-
-private:
-    T sentry;
-    T head;
-    size_t size;
+    bool empty() const
+    {
+        return &this->content == this->content.prev;
+    }
+    void push_back(T& Node)
+    {
+        this->insert(this->end(), Node);
+    }
+    void push_front(T& Node)
+    {
+        this->insert(this->begin(), Node);
+    }
+    void insert(iterator<T, Link> pos, T& Node)
+    {
+        (Node.*Link).next = pos.current->next;
+        ((Node.*Link).next ? (pos.current->next->*Link).prev :
+                             this->content.prev) = &(Node.*Link);
+        (Node.*Link).prev = pos.current;
+        pos.current->next = &Node;
+    }
+    iterator<T, Link> erase(iterator<T, Link> it)
+    {
+        it.current->next = (it.current->next->*Link).next;
+        (it.current->next ? (it.current->next->*Link).prev :
+                            this->content.prev) = it.current;
+        return iterator<T, Link>(&(it.current->next->*Link));
+    }
 };

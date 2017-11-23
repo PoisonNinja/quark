@@ -30,14 +30,17 @@
  */
 
 #include <kernel.h>
+#include <kernel/log.h>
 #include <lib/printf.h>
 #include <lib/string.h>
+
+#include <arch/drivers/io.h>
 
 namespace Log
 {
 #define PRINTK_MAX 1024
 
-List<LogOutput*> output;
+List<LogOutput, &LogOutput::node> output;
 
 static const char* colors[] = {
     "\e[36m",  // Blue for debug
@@ -58,8 +61,8 @@ size_t printk(int level, const char* format, ...)
         time_t nsec = 0;  // t % NSEC_PER_SEC;
         r = snprintf(printk_buffer, PRINTK_MAX, "%s[%05lu.%09lu]%s ",
                      colors[level], sec, nsec, "\e[39m");
-        for (auto i : output) {
-            (*i).write(printk_buffer, r);
+        for (auto& i : output) {
+            i.write(printk_buffer, r);
         }
     }
     memset(printk_buffer, 0, PRINTK_MAX);
@@ -67,14 +70,14 @@ size_t printk(int level, const char* format, ...)
     va_start(args, format);
     r = vsnprintf(printk_buffer, PRINTK_MAX, format, args);
     va_end(args);
-    for (auto i : output) {
-        (*i).write(printk_buffer, r);
+    for (auto& i : output) {
+        i.write(printk_buffer, r);
     }
     return r;
 }
 
-void RegisterLogOutput(LogOutput* device)
+void RegisterLogOutput(LogOutput& device)
 {
-    output.insert(device);
+    output.push_back(device);
 }
 }  // namespace Log

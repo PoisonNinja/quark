@@ -33,6 +33,17 @@
 
 #include <types.h>
 
+/*
+ * Taken from https://stackoverflow.com/a/34142739/8108655, with minor
+ * modifications to fix some bugs and match the requirements of Quark.
+ * The code is licensed under the CC-Wiki license, per
+ * https://stackoverflow.blog/2009/06/25/attribution-required/
+ *
+ * In the event that the answer disappears or the URL changes:
+ * Author: Dietmar Kühl
+ * Date: Dec 07 2015 at 20:37
+ * Retrieved: Nov 23 2017 at 17:58
+ */
 template <typename T>
 class Node
 {

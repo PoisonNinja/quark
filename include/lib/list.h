@@ -34,87 +34,71 @@
 #include <types.h>
 
 template <class T>
-class Node
-{
-public:
-    Node *next, *prev;
-    T *data;
-};
-
-template <class T>
 class List
 {
 public:
-    void insert(Node<T> *node);
+    class iterator
+    {
+    public:
+        iterator(T ptr) : ptr(ptr)
+        {
+        }
+        iterator operator++()
+        {
+            iterator i = *this;
+            ptr = ptr->next;
+            return i;
+        }
+        iterator operator++(int __attribute__((unused)) discard)
+        {
+            ptr = ptr->next;
+            return *this;
+        }
+        T &operator*()
+        {
+            return ptr;
+        }
+        T *operator->()
+        {
+            return ptr;
+        }
+        bool operator==(const iterator &rhs)
+        {
+            return ptr == rhs.ptr;
+        }
+        bool operator!=(const iterator &rhs)
+        {
+            return ptr != rhs.ptr;
+        }
 
-private:
-    Node<T> *head;
-    size_t size;
-};
+    private:
+        T ptr;
+    };
 
-/*
- * A simplified version of the Linux linked list implementation. Everything
- * is self written, except for the containerof macro
- */
-#define containerof(ptr, type, member)                     \
-    ({                                                     \
-        const typeof(((type *)0)->member) *__mptr = (ptr); \
-        (type *)((char *)__mptr - offsetof(type, member)); \
-    })
-
-struct list_element {
-    struct list_element *next, *prev;
-};
-
-#define LIST_COMPILE_INIT(list)       \
-    {                                 \
-        .next = &list, .prev = &list, \
+    iterator begin()
+    {
+        return iterator(head);
     }
 
-static inline void list_runtime_init(struct list_element *list)
-{
-    list->next = list;
-    list->prev = list;
-}
+    iterator end()
+    {
+        return iterator(sentry);
+    }
 
-static inline void list_add(struct list_element *list,
-                            struct list_element *element)
-{
-    element->next = list->next;
-    element->prev = list;
-    list->next->prev = element;
-    list->next = element;
-}
+    void insert(T node)
+    {
+        if (!this->size) {
+            this->head = node;
+            node->next = sentry;
+        } else {
+            node->next = this->head;
+            this->head = node;
+        }
+        this->size++;
+    }
 
-static inline void list_add_tail(struct list_element *list,
-                                 struct list_element *element)
-{
-    element->next = list;
-    element->prev = list->prev;
-    list->prev->next = element;
-    list->prev = element;
-}
-
-static inline void list_delete(struct list_element *element)
-{
-    element->next->prev = element->prev;
-    element->prev->next = element->next;
-    element->next = NULL;
-    element->prev = NULL;
-}
-
-static inline int list_empty(struct list_element *list)
-{
-    return list->next == list;
-}
-
-#define list_first_entry(list, type, member) \
-    containerof((list)->next, type, member)
-
-#define list_next_entry(pos, member) \
-    containerof((pos)->member.next, typeof(*(pos)), member)
-
-#define list_for_each(list, member, pos)                          \
-    for ((pos) = containerof((list)->next, typeof(*pos), member); \
-         &(pos)->member != (list);                                \
-         pos = containerof((pos)->member.next, typeof(*pos), member))
+private:
+    T sentry;
+    T head;
+    size_t size;
+};

@@ -7,6 +7,7 @@ class LogOutput
 {
 public:
     virtual size_t write(const char* buffer, size_t size) = 0;
+    LogOutput *next, *prev;
 };
 
 namespace Log
@@ -20,5 +21,5 @@ enum {
 };
 size_t printk(int level, const char* format, ...);
 
-void RegisterLogOutput(LogOutput* output);
+void RegisterLogOutput(LogOutput* device);
 }  // namespace Log

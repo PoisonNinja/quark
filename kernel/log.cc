@@ -30,7 +30,6 @@
  */
 
 #include <kernel.h>
-#include <kernel/console.h>
 #include <lib/printf.h>
 #include <lib/string.h>
 
@@ -59,19 +58,23 @@ size_t printk(int level, const char* format, ...)
         time_t nsec = 0;  // t % NSEC_PER_SEC;
         r = snprintf(printk_buffer, PRINTK_MAX, "%s[%05lu.%09lu]%s ",
                      colors[level], sec, nsec, "\e[39m");
-        console_write(printk_buffer, r);
+        for (auto i : output) {
+            (*i).write(printk_buffer, r);
+        }
     }
     memset(printk_buffer, 0, PRINTK_MAX);
     va_list args;
     va_start(args, format);
     r = vsnprintf(printk_buffer, PRINTK_MAX, format, args);
     va_end(args);
-    console_write(printk_buffer, r);
+    for (auto i : output) {
+        (*i).write(printk_buffer, r);
+    }
     return r;
 }
 
-void RegisterLogOutput(LogOutput* output)
+void RegisterLogOutput(LogOutput* device)
 {
-    // this->output.insert(output);
+    output.insert(device);
 }
 }  // namespace Log

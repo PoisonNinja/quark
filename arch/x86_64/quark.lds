@@ -4,8 +4,6 @@ SECTIONS
 {
 	. = 0x100000;
 
-    __kernel_start = .;
-
 	.bootstrap :
 	{
 		*(.bootstrap)
@@ -39,13 +37,10 @@ SECTIONS
 
     .bss ALIGN(0x1000) : AT(ADDR(.bss) - 0xFFFFFFFF80000000)
     {
-        __bss_start = .;
         *(.bss)
         *(COMMON)
-        __bss_end = .;
     }
 
-    __kernel_end = . - 0xFFFFFFFF80000000;
     /DISCARD/ :
     {
        	*(.comment)

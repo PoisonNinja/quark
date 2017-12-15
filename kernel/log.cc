@@ -76,7 +76,7 @@ size_t printk(int level, const char* format, ...)
     return r;
 }
 
-void RegisterLogOutput(LogOutput& device)
+void registerLogOutput(LogOutput& device)
 {
     output.push_back(device);
 }

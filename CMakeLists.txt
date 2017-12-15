@@ -107,6 +107,7 @@ execute_process(
 add_executable(quark.kernel "")
 add_subdirectory(${ARCH_PATH})
 add_subdirectory(boot)
+add_subdirectory(cpu)
 add_subdirectory(kernel)
 add_subdirectory(lib)
 

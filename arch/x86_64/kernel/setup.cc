@@ -43,7 +43,7 @@ X86Serial serial_console;
 
 void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    Log::RegisterLogOutput(serial_console);
+    Log::registerLogOutput(serial_console);
     Log::printk(Log::INFO, "x86_64 preinitialization...\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");

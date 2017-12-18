@@ -40,7 +40,7 @@ namespace Log
 {
 #define PRINTK_MAX 1024
 
-List<LogOutput, &LogOutput::node> output;
+static List<LogOutput, &LogOutput::node> output;
 
 static const char* colors[] = {
     "\e[36m",  // Blue for debug

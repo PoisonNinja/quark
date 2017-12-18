@@ -2,8 +2,8 @@
 
 namespace IDT
 {
-static void set_gate(struct IDT::Entry* entry, uint64_t offset,
-                     uint16_t selector, uint8_t attributes)
+static void set_entry(struct IDT::Entry* entry, uint64_t offset,
+                      uint16_t selector, uint8_t attributes)
 {
     entry->offset_low = offset & 0xFFFF;
     entry->selector = selector;
@@ -17,4 +17,4 @@ static void set_gate(struct IDT::Entry* entry, uint64_t offset,
 void load()
 {
 }
-}
+}  // namespace IDT

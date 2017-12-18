@@ -29,6 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <arch/cpu/gdt.h>
 #include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/constructors.h>
@@ -109,6 +110,7 @@ void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
                 Log::printk(Log::INFO, "    Unknown/unhandled\n");
         }
     }
+    GDT::init();
     for (;;)
         asm("hlt");
 }

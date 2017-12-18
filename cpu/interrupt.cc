@@ -1,4 +1,5 @@
 #include <cpu/interrupt.h>
+#include <kernel.h>
 #include <stdatomic.h>
 
 namespace Interrupt
@@ -23,6 +24,21 @@ int enable(void)
     if (atomic_fetch_sub(&interrupt_depth, 1) == 1)
         Interrupt::arch_enable();
     return interrupt_depth;
+}
+
+void dispatch(int int_no, struct interrupt_ctx* ctx)
+{
+    if (handlers[int_no].empty()) {
+        if (int_no < 32) {
+            Kernel::panic("Unhandled exception #%d\n", int_no);
+        } else {
+            return;
+        }
+    } else {
+        for (auto& handler : handlers[int_no]) {
+            handler.handler(int_no, handler.dev_id, ctx);
+        }
+    }
 }
 
 status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)

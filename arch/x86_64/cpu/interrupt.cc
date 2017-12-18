@@ -1,3 +1,4 @@
+#include <arch/cpu/registers.h>
 #include <cpu/interrupt.h>
 
 namespace Interrupt
@@ -14,5 +15,6 @@ void arch_enable(void)
 
 extern "C" void arch_handler(struct interrupt_ctx* ctx)
 {
+    Interrupt::dispatch(ctx->int_no, ctx);
 }
 };  // namespace Interrupt

@@ -12,14 +12,16 @@ namespace Interrupt
 typedef void (*interrupt_handler_t)(int, void *, struct interrupt_ctx *);
 
 struct Handler {
-    const interrupt_handler_t handler;
-    const char *dev_name;
-    const void *dev_id;
+    interrupt_handler_t handler;
+    char *dev_name;
+    void *dev_id;
     Node<Handler> node;
 };
 
 int disable();
 int enable();
+
+void dispatch(int int_no, struct interrupt_ctx *ctx);
 
 status_t register_handler(uint32_t int_no, Interrupt::Handler &handler);
 

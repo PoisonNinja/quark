@@ -54,57 +54,75 @@ void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
                 multiboot, multiboot->total_size);
     struct multiboot_tag *tag;
     Log::printk(Log::INFO, "Parsing Multiboot tag information: \n");
-    for (tag = (struct multiboot_tag *)((addr_t)multiboot + 8);
+    for (tag = reinterpret_cast<struct multiboot_tag *>(
+             reinterpret_cast<addr_t>(multiboot + 8));
          tag->type != MULTIBOOT_TAG_TYPE_END;
-         tag = (struct multiboot_tag *)((multiboot_uint8_t *)tag +
-                                        ((tag->size + 7) & ~7))) {
+         tag = reinterpret_cast<struct multiboot_tag *>(
+             reinterpret_cast<multiboot_uint8_t *>(tag) +
+             ((tag->size + 7) & ~7))) {
         Log::printk(Log::INFO, "Tag 0x%d, Size 0x%x\n", tag->type, tag->size);
         switch (tag->type) {
             case MULTIBOOT_TAG_TYPE_CMDLINE:
-                Log::printk(Log::INFO, "    Command line = %s\n",
-                            ((struct multiboot_tag_string *)tag)->string);
+                Log::printk(
+                    Log::INFO, "    Command line = %s\n",
+                    (reinterpret_cast<struct multiboot_tag_string *>(tag))
+                        ->string);
                 break;
             case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-                Log::printk(Log::INFO, "    Boot loader name = %s\n",
-                            ((struct multiboot_tag_string *)tag)->string);
+                Log::printk(
+                    Log::INFO, "    Boot loader name = %s\n",
+                    (reinterpret_cast<struct multiboot_tag_string *>(tag))
+                        ->string);
                 break;
             case MULTIBOOT_TAG_TYPE_MODULE:
-                Log::printk(Log::INFO,
-                            "    Module at 0x%x - 0x%x. Command line %s\n",
-                            ((struct multiboot_tag_module *)tag)->mod_start,
-                            ((struct multiboot_tag_module *)tag)->mod_end,
-                            ((struct multiboot_tag_module *)tag)->cmdline);
+                Log::printk(
+                    Log::INFO, "    Module at 0x%x - 0x%x. Command line %s\n",
+                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
+                        ->mod_start,
+                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
+                        ->mod_end,
+                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
+                        ->cmdline);
                 break;
             case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
                 Log::printk(
                     Log::INFO, "    Lower memory = %uKB, Upper memory = %uKB\n",
-                    ((struct multiboot_tag_basic_meminfo *)tag)->mem_lower,
-                    ((struct multiboot_tag_basic_meminfo *)tag)->mem_upper);
+                    (reinterpret_cast<struct multiboot_tag_basic_meminfo *>(
+                         tag))
+                        ->mem_lower,
+                    (reinterpret_cast<struct multiboot_tag_basic_meminfo *>(
+                         tag))
+                        ->mem_upper);
                 break;
             case MULTIBOOT_TAG_TYPE_BOOTDEV:
-                Log::printk(Log::INFO, "    Boot device 0x%x,%u,%u\n",
-                            ((struct multiboot_tag_bootdev *)tag)->biosdev,
-                            ((struct multiboot_tag_bootdev *)tag)->slice,
-                            ((struct multiboot_tag_bootdev *)tag)->part);
+                Log::printk(
+                    Log::INFO, "    Boot device 0x%x,%u,%u\n",
+                    (reinterpret_cast<struct multiboot_tag_bootdev *>(tag))
+                        ->biosdev,
+                    (reinterpret_cast<struct multiboot_tag_bootdev *>(tag))
+                        ->slice,
+                    (reinterpret_cast<struct multiboot_tag_bootdev *>(tag))
+                        ->part);
                 break;
             case MULTIBOOT_TAG_TYPE_MMAP: {
                 multiboot_memory_map_t *mmap;
                 Log::printk(Log::INFO, "    Memory map:\n");
-                for (mmap = ((struct multiboot_tag_mmap *)tag)->entries;
-                     (multiboot_uint8_t *)mmap <
-                     (multiboot_uint8_t *)tag + tag->size;
-                     mmap = (multiboot_memory_map_t
-                                 *)((addr_t)mmap +
-                                    ((struct multiboot_tag_mmap *)tag)
-                                        ->entry_size))
+                for (mmap = (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
+                                ->entries;
+                     reinterpret_cast<multiboot_uint8_t *>(mmap) <
+                     reinterpret_cast<multiboot_uint8_t *>(tag) + tag->size;
+                     mmap = reinterpret_cast<multiboot_memory_map_t *>(
+                         reinterpret_cast<addr_t>(mmap) +
+                         (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
+                             ->entry_size))
                     Log::printk(Log::INFO,
                                 "        Base = 0x%08x%08x,"
                                 " Length = 0x%08x%08x, Type = 0x%x\n",
-                                (addr_t)(mmap->addr >> 32),
-                                (addr_t)(mmap->addr & 0xffffffff),
-                                (addr_t)(mmap->len >> 32),
-                                (addr_t)(mmap->len & 0xffffffff),
-                                (addr_t)mmap->type);
+                                static_cast<addr_t>(mmap->addr >> 32),
+                                static_cast<addr_t>(mmap->addr & 0xffffffff),
+                                static_cast<addr_t>(mmap->len >> 32),
+                                static_cast<addr_t>(mmap->len & 0xffffffff),
+                                static_cast<addr_t>(mmap->type));
             } break;
             default:
                 Log::printk(Log::INFO, "    Unknown/unhandled\n");

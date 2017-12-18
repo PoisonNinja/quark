@@ -20,4 +20,7 @@ struct Handler {
 
 status_t register_interrupt_handler(uint32_t int_no,
                                     Interrupt::Handler &handler);
+
+status_t unregister_interrupt_handler(uint32_t int_no,
+                                      const Interrupt::Handler &handler);
 };  // namespace Interrupt

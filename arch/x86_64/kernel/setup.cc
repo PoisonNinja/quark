@@ -30,9 +30,11 @@
  */
 
 #include <arch/cpu/gdt.h>
+#include <arch/cpu/idt.h>
 #include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/constructors.h>
+#include <cpu/interrupt.h>
 #include <kernel.h>
 
 extern "C" {
@@ -44,6 +46,7 @@ X86Serial serial_console;
 
 void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
+    Interrupt::disable();
     Log::register_log_output(serial_console);
     Log::printk(Log::INFO, "x86_64 preinitialization...\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
@@ -129,6 +132,7 @@ void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
         }
     }
     GDT::init();
+    IDT::init();
     for (;;)
         asm("hlt");
 }

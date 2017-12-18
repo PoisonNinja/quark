@@ -19,5 +19,5 @@ struct Entry {
     uint32_t zero_two;
 } __attribute__((packed));
 
-void load();
-}
+void init();
+}  // namespace IDT

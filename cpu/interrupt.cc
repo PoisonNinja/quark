@@ -49,4 +49,4 @@ status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
     }
     return FAILURE;
 }
-};  // namespace Interrupt
+}  // namespace Interrupt

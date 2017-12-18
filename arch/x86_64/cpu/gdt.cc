@@ -54,6 +54,6 @@ void init()
                    ACCESS_PRESENT(1) | ACCESS_PRIVL(3) | ACCESS_MANDATORY(1) |
                        ACCESS_DATA(0, 1),
                    FLAG_LONG | FLAG_4KIB);
-    gdt_load(reinterpret_cast<addr_t>(&descriptor));
+    GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
 }
 }  // namespace GDT

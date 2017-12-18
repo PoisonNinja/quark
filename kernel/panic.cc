@@ -17,7 +17,7 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     va_start(args, format);
     r = vsnprintf(panic_buffer, PANIC_MAX, format, args);
     va_end(args);
-    Log::printk(Log::ERROR, "%s", panic_buffer);
+    Log::Printk(Log::ERROR, "%s", panic_buffer);
     for (;;)
         asm("hlt");
 }

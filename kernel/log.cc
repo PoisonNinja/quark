@@ -40,7 +40,7 @@ namespace Log
 {
 #define PRINTK_MAX 1024
 
-List<LogOutput, &LogOutput::node> output;
+static List<Log::LogOutput, &Log::LogOutput::node> output;
 
 static const char* colors[] = {
     "\e[36m",  // Blue for debug
@@ -51,7 +51,7 @@ static const char* colors[] = {
 
 static char printk_buffer[PRINTK_MAX];
 
-size_t printk(int level, const char* format, ...)
+size_t Printk(int level, const char* format, ...)
 {
     size_t r = 0;
     if (level < Log::CONTINUE) {
@@ -76,7 +76,7 @@ size_t printk(int level, const char* format, ...)
     return r;
 }
 
-void registerLogOutput(LogOutput& device)
+void RegisterLogOutput(LogOutput& device)
 {
     output.push_back(device);
 }

@@ -3,18 +3,18 @@
 #include <lib/list.h>
 #include <types.h>
 
+namespace Log
+{
 class LogOutput
 {
 public:
-    virtual size_t write(const char*, size_t)
+    virtual size_t Write(const char*, size_t)
     {
         return 0;
     };
     Node<LogOutput> node;
 };
 
-namespace Log
-{
 enum {
     DEBUG = 0,
     INFO,
@@ -22,7 +22,7 @@ enum {
     ERROR,
     CONTINUE,
 };
-size_t printk(int level, const char* format, ...);
+size_t Printk(int level, const char* format, ...);
 
-void registerLogOutput(LogOutput& device);
+void RegisterLogOutput(LogOutput& device);
 }  // namespace Log

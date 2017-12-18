@@ -24,5 +24,5 @@ enum {
 };
 size_t printk(int level, const char* format, ...);
 
-void registerLogOutput(LogOutput& device);
+void register_log_output(LogOutput& device);
 }  // namespace Log

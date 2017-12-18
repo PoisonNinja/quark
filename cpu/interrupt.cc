@@ -1,12 +1,31 @@
 #include <cpu/interrupt.h>
+#include <stdatomic.h>
 
 namespace Interrupt
 {
 static List<Interrupt::Handler, &Interrupt::Handler::node>
     handlers[INTERRUPT_MAX];
 
-status_t register_interrupt_handler(uint32_t int_no,
-                                    Interrupt::Handler& handler)
+static _Atomic int interrupt_depth = 1;
+
+extern void arch_disable(void);
+extern void arch_enable(void);
+
+int disable(void)
+{
+    if (!atomic_fetch_add(&interrupt_depth, 1))
+        Interrupt::arch_disable();
+    return interrupt_depth;
+}
+
+int enable(void)
+{
+    if (atomic_fetch_sub(&interrupt_depth, 1) == 1)
+        Interrupt::arch_enable();
+    return interrupt_depth;
+}
+
+status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
 {
     if (int_no > INTERRUPT_MAX) {
         return FAILURE;
@@ -15,8 +34,7 @@ status_t register_interrupt_handler(uint32_t int_no,
     return SUCCESS;
 }
 
-status_t unregister_interrupt_handler(uint32_t int_no,
-                                      const Interrupt::Handler& handler)
+status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 {
     if (int_no > INTERRUPT_MAX) {
         return FAILURE;

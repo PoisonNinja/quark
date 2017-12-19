@@ -1,5 +1,7 @@
 #include <boot/constructors.h>
 
+namespace Boot
+{
 typedef void (*constructor_t)();
 
 void constructors_initialize(void* __constructors_start,
@@ -12,3 +14,4 @@ void constructors_initialize(void* __constructors_start,
         (*current)();
     }
 }
+}  // namespace Boot

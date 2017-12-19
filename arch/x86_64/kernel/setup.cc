@@ -34,113 +34,126 @@
 #include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/constructors.h>
+#include <boot/info.h>
 #include <cpu/interrupt.h>
 #include <kernel.h>
 
+extern void kmain(struct Boot::info &info);
+
+namespace X64
+{
 extern "C" {
 void *__constructors_start;
 void *__constructors_end;
 }
 
-X86Serial serial_console;
+static X86Serial serial_console;
+static struct Boot::info info;
 
-void x86_64_init(uint32_t magic, struct multiboot_fixed *multiboot)
+void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     Interrupt::disable();
     Log::register_log_output(serial_console);
-    Log::printk(Log::INFO, "x86_64 preinitialization...\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");
     }
-    Log::printk(Log::INFO,
-                "Multiboot information at %p with total size 0x%llX\n",
-                multiboot, multiboot->total_size);
     struct multiboot_tag *tag;
-    Log::printk(Log::INFO, "Parsing Multiboot tag information: \n");
     for (tag = reinterpret_cast<struct multiboot_tag *>(
-             reinterpret_cast<addr_t>(multiboot + 8));
+             reinterpret_cast<addr_t>(multiboot) + 8);
          tag->type != MULTIBOOT_TAG_TYPE_END;
          tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<multiboot_uint8_t *>(tag) +
              ((tag->size + 7) & ~7))) {
-        Log::printk(Log::INFO, "Tag 0x%d, Size 0x%x\n", tag->type, tag->size);
         switch (tag->type) {
             case MULTIBOOT_TAG_TYPE_CMDLINE:
-                Log::printk(
-                    Log::INFO, "    Command line = %s\n",
-                    (reinterpret_cast<struct multiboot_tag_string *>(tag))
-                        ->string);
+                info.cmdline =
+                    reinterpret_cast<struct multiboot_tag_string *>(tag)
+                        ->string;
                 break;
-            case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-                Log::printk(
-                    Log::INFO, "    Boot loader name = %s\n",
-                    (reinterpret_cast<struct multiboot_tag_string *>(tag))
-                        ->string);
-                break;
-            case MULTIBOOT_TAG_TYPE_MODULE:
-                Log::printk(
-                    Log::INFO, "    Module at 0x%x - 0x%x. Command line %s\n",
-                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
-                        ->mod_start,
-                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
-                        ->mod_end,
-                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
-                        ->cmdline);
-                break;
-            case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-                Log::printk(
-                    Log::INFO, "    Lower memory = %uKB, Upper memory = %uKB\n",
-                    (reinterpret_cast<struct multiboot_tag_basic_meminfo *>(
-                         tag))
-                        ->mem_lower,
-                    (reinterpret_cast<struct multiboot_tag_basic_meminfo *>(
-                         tag))
-                        ->mem_upper);
-                break;
-            case MULTIBOOT_TAG_TYPE_BOOTDEV:
-                Log::printk(
-                    Log::INFO, "    Boot device 0x%x,%u,%u\n",
-                    (reinterpret_cast<struct multiboot_tag_bootdev *>(tag))
-                        ->biosdev,
-                    (reinterpret_cast<struct multiboot_tag_bootdev *>(tag))
-                        ->slice,
-                    (reinterpret_cast<struct multiboot_tag_bootdev *>(tag))
-                        ->part);
-                break;
-            case MULTIBOOT_TAG_TYPE_MMAP: {
-                multiboot_memory_map_t *mmap;
-                Log::printk(Log::INFO, "    Memory map:\n");
-                for (mmap = (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
-                                ->entries;
-                     reinterpret_cast<multiboot_uint8_t *>(mmap) <
-                     reinterpret_cast<multiboot_uint8_t *>(tag) + tag->size;
-                     mmap = reinterpret_cast<multiboot_memory_map_t *>(
-                         reinterpret_cast<addr_t>(mmap) +
-                         (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
-                             ->entry_size))
-                    Log::printk(Log::INFO,
-                                "        Base = 0x%08x%08x,"
-                                " Length = 0x%08x%08x, Type = 0x%x\n",
-                                static_cast<addr_t>(mmap->addr >> 32),
-                                static_cast<addr_t>(mmap->addr & 0xffffffff),
-                                static_cast<addr_t>(mmap->len >> 32),
-                                static_cast<addr_t>(mmap->len & 0xffffffff),
-                                static_cast<addr_t>(mmap->type));
-            } break;
-            default:
-                Log::printk(Log::INFO, "    Unknown/unhandled\n");
+                // case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
+                //     Log::printk(
+                //         Log::INFO, "    Boot loader name = %s\n",
+                //         (reinterpret_cast<struct multiboot_tag_string
+                //         *>(tag))
+                //             ->string);
+                //     break;
+                // case MULTIBOOT_TAG_TYPE_MODULE:
+                //     Log::printk(
+                //         Log::INFO, "    Module at 0x%x - 0x%x. Command line
+                //         %s\n", (reinterpret_cast<struct multiboot_tag_module
+                //         *>(tag))
+                //             ->mod_start,
+                //         (reinterpret_cast<struct multiboot_tag_module
+                //         *>(tag))
+                //             ->mod_end,
+                //         (reinterpret_cast<struct multiboot_tag_module
+                //         *>(tag))
+                //             ->cmdline);
+                //     break;
+                // case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
+                //     Log::printk(
+                //         Log::INFO, "    Lower memory = %uKB, Upper memory =
+                //         %uKB\n", (reinterpret_cast<struct
+                //         multiboot_tag_basic_meminfo *>(
+                //              tag))
+                //             ->mem_lower,
+                //         (reinterpret_cast<struct multiboot_tag_basic_meminfo
+                //         *>(
+                //              tag))
+                //             ->mem_upper);
+                //     break;
+                // case MULTIBOOT_TAG_TYPE_BOOTDEV:
+                //     Log::printk(
+                //         Log::INFO, "    Boot device 0x%x,%u,%u\n",
+                //         (reinterpret_cast<struct multiboot_tag_bootdev
+                //         *>(tag))
+                //             ->biosdev,
+                //         (reinterpret_cast<struct multiboot_tag_bootdev
+                //         *>(tag))
+                //             ->slice,
+                //         (reinterpret_cast<struct multiboot_tag_bootdev
+                //         *>(tag))
+                //             ->part);
+                //     break;
+                // case MULTIBOOT_TAG_TYPE_MMAP: {
+                //     multiboot_memory_map_t *mmap;
+                //     Log::printk(Log::INFO, "    Memory map:\n");
+                //     for (mmap = (reinterpret_cast<struct multiboot_tag_mmap
+                //     *>(tag))
+                //                     ->entries;
+                //          reinterpret_cast<multiboot_uint8_t *>(mmap) <
+                //          reinterpret_cast<multiboot_uint8_t *>(tag) +
+                //          tag->size; mmap =
+                //          reinterpret_cast<multiboot_memory_map_t *>(
+                //              reinterpret_cast<addr_t>(mmap) +
+                //              (reinterpret_cast<struct multiboot_tag_mmap
+                //              *>(tag))
+                //                  ->entry_size))
+                //         Log::printk(Log::INFO,
+                //                     "        Base = 0x%08x%08x,"
+                //                     " Length = 0x%08x%08x, Type = 0x%x\n",
+                //                     static_cast<addr_t>(mmap->addr >> 32),
+                //                     static_cast<addr_t>(mmap->addr &
+                //                     0xffffffff),
+                //                     static_cast<addr_t>(mmap->len >> 32),
+                //                     static_cast<addr_t>(mmap->len &
+                //                     0xffffffff),
+                //                     static_cast<addr_t>(mmap->type));
+                // } break;
+                // default:
+                //     Log::printk(Log::INFO, "    Unknown/unhandled\n");
         }
     }
     GDT::init();
     IDT::init();
-    for (;;)
-        asm("hlt");
+    kmain(info);
 }
 
 extern "C" {
 void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    constructors_initialize(&__constructors_start, &__constructors_end);
-    x86_64_init(magic, multiboot);
+    Boot::constructors_initialize(&__constructors_start, &__constructors_end);
+    X64::init(magic, multiboot);
 }
 }
+}  // namespace X64

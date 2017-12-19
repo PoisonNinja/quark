@@ -46,6 +46,7 @@
 # Generated directories and files
 build/
 include/arch
+include/kernel/version.h
 
 # CMake
 CMakeCache.txt

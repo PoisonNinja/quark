@@ -1,6 +1,12 @@
 # Required for target_sources
 cmake_minimum_required(VERSION 3.1)
 
+set(QUARK_VERSION_MAJOR "0")
+set(QUARK_VERSION_MINOR "0")
+set(QUARK_VERSION_PATCH "1")
+set(QUARK_VERSION_SUFFIX "-rc1")
+set(QUARK_VERSION "${QUARK_VERSION_MAJOR}.${QUARK_VERSION_MINOR}.${QUARK_VERSION_PATCH}${QUARK_VERSION_SUFFIX}")
+
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source builds are not allowed.")
 endif("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -25,9 +31,10 @@ if(NOT LD.LLD)
 endif()
 
 # Skip compiler checks since we're targeting ELF binaries, and thus those
-# would fail on MacOS with the error file was built for unsupported file format,
+# would fail on MacOS with the error `file was built for unsupported file format`,
 # which makes sense since MacOS uses MachO. Unfortunately, the way that CMake
-# does the compiler checks means that it already
+# does the compiler checks means that it performs the compiler checks without
+# letting us inject flags to force Clang to generate ELF binaries
 set(CMAKE_CXX_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER ${CLANGCXX})
 set(CMAKE_CXX_LINKER ${LD.LLD})
@@ -104,7 +111,16 @@ execute_process(
     COMMAND ${CREATE_ARCH_SYMLINK}
 )
 
-add_executable(quark.kernel "")
+add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/include/kernel/version.h
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/version.sh
+        ${QUARK_VERSION}
+        ${ARCH}
+        ${CMAKE_CXX_COMPILER}
+    COMMENT "Generating version header"
+)
+
+add_executable(quark.kernel ${CMAKE_SOURCE_DIR}/include/kernel/version.h)
 add_subdirectory(${ARCH_PATH})
 add_subdirectory(boot)
 add_subdirectory(cpu)

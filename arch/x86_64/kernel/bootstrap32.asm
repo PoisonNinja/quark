@@ -52,23 +52,24 @@ gdt64:                           ; Global Descriptor Table (64-bit).
     dq gdt64                     ; Base.
 
 align 4096
-pml4_base:
-    dq (pml3_base + 0x7)
-    times 510 dq 0
-    dq (pml3_base + 0x7)
+pml4:
+    dq (pml3 + 0x7)
+    times 509 dq 0
+    dq (pml4 + 0x7)
+    dq (pml3 + 0x7)
 
 align 4096
-pml3_base:
-    dq (pml2_base + 0x7)
+pml3:
+    dq (pml2 + 0x7)
     times 509 dq 0
-    dq (pml2_base + 0x7)
+    dq (pml2 + 0x7)
     dq 0
 
 align 4096
-pml2_base:
+pml2:
     %assign i 0
     %rep 25
-    dq (pml1_base + i + 0x7)
+    dq (pml1 + i + 0x7)
     %assign i i+4096
     %endrep
 
@@ -78,7 +79,7 @@ align 4096
 ; 15 tables are described here
 ; this maps 40 MB from address 0x0
 ; to an identity mapping
-pml1_base:
+pml1:
     %assign i 0
     %rep 512*25
     dq (i << 12) | 0x087
@@ -203,7 +204,7 @@ bootstrap32:
 
     ; Create long mode page table and init CR3 to
     ; point to the base of the PML4 page table
-    mov eax, pml4_base
+    mov eax, pml4
     mov cr3, eax
 
     ; Enable Long mode, SYSCALL / SYSRET instructions, and NX bit

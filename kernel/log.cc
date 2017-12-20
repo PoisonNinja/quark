@@ -55,7 +55,7 @@ size_t printk(int level, const char* format, ...)
 {
     size_t r = 0;
     if (level < Log::CONTINUE) {
-        memset(printk_buffer, 0, PRINTK_MAX);
+        String::memset(printk_buffer, 0, PRINTK_MAX);
         // time_t t = ktime_get();
         time_t sec = 0;   // t / NSEC_PER_SEC;
         time_t nsec = 0;  // t % NSEC_PER_SEC;
@@ -65,7 +65,7 @@ size_t printk(int level, const char* format, ...)
             i.write(printk_buffer, r);
         }
     }
-    memset(printk_buffer, 0, PRINTK_MAX);
+    String::memset(printk_buffer, 0, PRINTK_MAX);
     va_list args;
     va_start(args, format);
     r = vsnprintf(printk_buffer, PRINTK_MAX, format, args);

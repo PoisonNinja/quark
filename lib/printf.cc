@@ -188,14 +188,14 @@ static void printf_format(struct printf_data *data, const char *format,
                           va_list arg)
 {
     struct parameters params;
-    memset(&params, 0, sizeof(struct parameters));
+    String::memset(&params, 0, sizeof(struct parameters));
     const char *pos = format;
     while (*pos != '\0') {
         if (*pos == '%') {
             // 22 chars for max value of long long in octal + 1 for null
             char buffer[23];
             params.buffer = buffer;
-            memset(buffer, 0, 23);
+            String::memset(buffer, 0, 23);
             uint8_t lng = 0;
             pos++;
             if (*pos == '0') {
@@ -280,7 +280,7 @@ static void printf_format(struct printf_data *data, const char *format,
                     data->putcf(data, '%');
                     break;
             }
-            memset(&params, 0, sizeof(struct parameters));
+            String::memset(&params, 0, sizeof(struct parameters));
         } else {
             data->putcf(data, *pos++);
         }

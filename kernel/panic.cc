@@ -12,7 +12,7 @@ namespace Kernel
 void __attribute__((noreturn)) panic(const char* format, ...)
 {
     size_t r = 0;
-    memset(panic_buffer, 0, PANIC_MAX);
+    String::memset(panic_buffer, 0, PANIC_MAX);
     va_list args;
     va_start(args, format);
     r = vsnprintf(panic_buffer, PANIC_MAX, format, args);
@@ -21,4 +21,4 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     for (;;)
         asm("hlt");
 }
-}
+}  // namespace Kernel

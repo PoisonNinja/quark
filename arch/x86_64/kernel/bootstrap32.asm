@@ -53,10 +53,11 @@ gdt64:                           ; Global Descriptor Table (64-bit).
 
 align 4096
 pml4:
-    dq (pml3 + 0x7)
-    times 509 dq 0
-    dq (pml4 + 0x7)
-    dq (pml3 + 0x7)
+    dq (pml3 + 0x7)              ; Identity map
+    times 508 dq 0
+    dq (phys_pml3 + 0x7)         ; Physical memory manager page
+    dq (pml4 + 0x7)              ; Fractal mapping
+    dq (pml3 + 0x7)              ; -2GB mapping
 
 align 4096
 pml3:
@@ -85,6 +86,26 @@ pml1:
     dq (i << 12) | 0x087
     %assign i i+1
     %endrep
+
+align 4096
+phys_pml3:
+    dq (phys_pml2 + 0x7)
+    times 511 dq 0
+
+align 4096
+phys_pml2:
+    dq (phys_pml1 + 0x7)
+    times 511 dq 0
+
+align 4096
+phys_pml1:
+    dq (phys_pml0 + 0x7)
+    times 511 dq 0
+
+align 4096
+phys_pml0:
+    times 512 dq 0
+
 
 halt32:
     cli

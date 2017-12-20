@@ -4,12 +4,9 @@
 
 namespace Memory
 {
-#define PML4_INDEX(x) ((x >> 39) & 0x1FF)
-#define PDPT_INDEX(x) ((x >> 30) & 0x1FF)
-#define PD_INDEX(x) ((x >> 21) & 0x1FF)
-#define PT_INDEX(x) ((x >> 12) & 0x1FF)
-
-#define RECURSIVE_ENTRY 510
+namespace Virtual
+{
+const size_t PAGE_SIZE = 4096;
 
 struct page {
     uint32_t present : 1;
@@ -31,6 +28,21 @@ struct page {
 struct page_table {
     struct page pages[512];
 };
+}  // namespace Virtual
+
+namespace Physical
+{
+addr_t* const STACK = reinterpret_cast<addr_t*>(0xFFFFFE8000000000);
+}
+
+namespace X64
+{
+#define PML4_INDEX(x) ((x >> 39) & 0x1FF)
+#define PDPT_INDEX(x) ((x >> 30) & 0x1FF)
+#define PD_INDEX(x) ((x >> 21) & 0x1FF)
+#define PT_INDEX(x) ((x >> 12) & 0x1FF)
+
+#define RECURSIVE_ENTRY 510
 
 static inline uint64_t read_cr3(void)
 {
@@ -53,8 +65,8 @@ static inline void invlpg(void* addr)
  * Convert a table entry into the recursive mapping address. Taken from
  * some forum post on osdev.org
  */
-static inline void* entry_to_address(uint64_t pml4, uint64_t pdp, uint64_t pd,
-                                     uint64_t pt)
+static inline void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
+                                   uint64_t pt)
 {
     uint64_t address = (pml4 << 39);
 
@@ -68,4 +80,5 @@ static inline void* entry_to_address(uint64_t pml4, uint64_t pdp, uint64_t pd,
     address |= pt << 12;
     return (void*)address;
 }
+}  // namespace X64
 }  // namespace Memory

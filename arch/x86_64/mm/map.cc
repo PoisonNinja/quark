@@ -1,18 +1,17 @@
 #include <arch/mm/mm.h>
 #include <kernel.h>
+#include <lib/string.h>
+#include <mm/physical.h>
 #include <mm/virtual.h>
-#include <string.h>
 
 namespace Memory
 {
 namespace Virtual
 {
-static inline int __set_address(struct Memory::page* page)
+static inline int __set_address(struct Memory::Virtual::page* page)
 {
     if (!page->present) {
-        Kernel::panic(
-            "Page not present, and we don't have page allocation support "
-            "yet!\n");
+        page->address = Memory::Physical::get() / 0x1000;
         return 1;
     }
     return 0;
@@ -29,13 +28,13 @@ static inline void __set_flags(struct page* page, uint8_t flags)
 
 bool arch_map(addr_t v, addr_t p, int flags)
 {
-    struct page_table* pml4 = (struct page_table*)entry_to_address(
+    struct page_table* pml4 = (struct page_table*)Memory::X64::decode_fractal(
         RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
-    struct page_table* pdpt = (struct page_table*)entry_to_address(
+    struct page_table* pdpt = (struct page_table*)Memory::X64::decode_fractal(
         RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v));
-    struct page_table* pd = (struct page_table*)entry_to_address(
+    struct page_table* pd = (struct page_table*)Memory::X64::decode_fractal(
         RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v));
-    struct page_table* pt = (struct page_table*)entry_to_address(
+    struct page_table* pt = (struct page_table*)Memory::X64::decode_fractal(
         RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
     int r = 0;
     r = __set_address(&pml4->pages[PML4_INDEX(v)]);
@@ -45,17 +44,17 @@ bool arch_map(addr_t v, addr_t p, int flags)
      * If it did, we need to memset it ourselves to 0.
      */
     if (r) {
-        memset(pdpt, 0, sizeof(struct page_table));
+        String::memset(pdpt, 0, sizeof(struct page_table));
     }
     r = __set_address(&pdpt->pages[PDPT_INDEX(v)]);
     __set_flags(&pdpt->pages[PDPT_INDEX(v)], flags);
     if (r) {
-        memset(pd, 0, sizeof(struct page_table));
+        String::memset(pd, 0, sizeof(struct page_table));
     }
     r = __set_address(&pd->pages[PD_INDEX(v)]);
     __set_flags(&pd->pages[PD_INDEX(v)], flags);
     if (r) {
-        memset(pt, 0, sizeof(struct page_table));
+        String::memset(pt, 0, sizeof(struct page_table));
     }
     __set_flags(&pt->pages[PT_INDEX(v)], flags);
     pt->pages[PT_INDEX(v)].address = p / 0x1000;

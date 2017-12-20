@@ -45,6 +45,9 @@ namespace X64
 extern "C" {
 void *__constructors_start;
 void *__constructors_end;
+
+void *__kernel_start;
+void *__kernel_end;
 }
 
 static X86Serial serial_console;
@@ -58,6 +61,8 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
         Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");
     }
     info.architecture_data = multiboot;
+    info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
+    info.kernel_end = reinterpret_cast<addr_t>(&__kernel_end);
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<addr_t>(multiboot) + 8);

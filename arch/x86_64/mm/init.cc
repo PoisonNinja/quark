@@ -8,6 +8,8 @@ namespace Memory
 {
 void arch_init(struct Boot::info &info)
 {
+    Log::printk(Log::INFO, "Kernel: %p -> %p\n", info.kernel_start,
+                info.kernel_end);
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
     struct multiboot_tag *tag;
@@ -35,8 +37,15 @@ void arch_init(struct Boot::info &info)
                                 static_cast<addr_t>(mmap->addr),
                                 static_cast<addr_t>(mmap->len),
                                 static_cast<addr_t>(mmap->type));
-                    if (mmap->type == 1) {
-                        Memory::Physical::put_range(mmap->addr, mmap->len);
+                    if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                        for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
+                             i += Memory::Virtual::PAGE_SIZE) {
+                            if (i >= info.kernel_start && i < info.kernel_end) {
+                                Log::printk(Log::DEBUG, "    Rejected %p\n", i);
+                            } else {
+                                Memory::Physical::put(i);
+                            }
+                        }
                     }
                 }
             } break;

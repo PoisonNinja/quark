@@ -12,6 +12,8 @@ SECTIONS
 
 	. += 0xFFFFFFFF80000000;
 
+    __kernel_start = . - 0xFFFFFFFF80000000;
+
     .text ALIGN (0x1000) : AT(ADDR(.text) - 0xFFFFFFFF80000000)
     {
     	*(.text)
@@ -45,4 +47,6 @@ SECTIONS
     {
        	*(.comment)
     }
+
+    __kernel_end = . - 0xFFFFFFFF80000000;
 }

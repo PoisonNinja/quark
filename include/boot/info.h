@@ -6,5 +6,6 @@ namespace Boot
 {
 struct info {
     const char* cmdline;
+    void* architecture_data;
 };
 }  // namespace Boot

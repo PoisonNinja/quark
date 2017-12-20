@@ -57,6 +57,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");
     }
+    info.architecture_data = multiboot;
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<addr_t>(multiboot) + 8);

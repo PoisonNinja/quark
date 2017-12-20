@@ -126,5 +126,6 @@ add_subdirectory(boot)
 add_subdirectory(cpu)
 add_subdirectory(kernel)
 add_subdirectory(lib)
+add_subdirectory(mm)
 
 install(TARGETS quark.kernel DESTINATION "${SYSROOT}/boot")

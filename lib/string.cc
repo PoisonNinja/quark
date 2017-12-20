@@ -41,7 +41,7 @@ void *memchr(const void *str, int c, size_t n)
             return (void *)d;
         d++;
     }
-    return NULL;
+    return nullptr;
 }
 
 int memcmp(const void *str1, const void *str2, size_t n)
@@ -117,7 +117,7 @@ char *strchr(const char *str, int c)
     char *ret = (char *)str;
     while (*ret != (char)c) {
         if (*ret++ == '\0')
-            return NULL;
+            return nullptr;
     }
     return ret;
 }
@@ -166,7 +166,7 @@ size_t strlen(const char *str)
 
 char *strrchr(const char *str, int c)
 {
-    char *last = NULL;
+    char *last = nullptr;
     while (*str++ != '\0') {
         if (*str == c)
             last = (char *)str;
@@ -187,7 +187,7 @@ size_t strcspn(const char *s1, const char *s2)
 {
     const char *sc1;
     for (sc1 = s1; *sc1 != '\0'; sc1++)
-        if (strchr(s2, *sc1) != NULL)
+        if (strchr(s2, *sc1) != nullptr)
             return (sc1 - s1);
     return sc1 - s1; /* terminating nulls match */
 }
@@ -196,7 +196,7 @@ size_t strspn(const char *s1, const char *s2)
 {
     const char *sc1;
     for (sc1 = s1; *sc1 != '\0'; sc1++)
-        if (strchr(s2, *sc1) == NULL)
+        if (strchr(s2, *sc1) == nullptr)
             return (sc1 - s1);
     return sc1 - s1; /* terminating nulls don't match */
 }
@@ -209,7 +209,7 @@ char *strtok_r(char *s, const char *delimiters, char **lasts)
 
     if (*sbegin == '\0') {
         *lasts = (char *)"";
-        return NULL;
+        return nullptr;
     }
 
     send = sbegin + strcspn(sbegin, delimiters);

@@ -53,27 +53,35 @@ static char printk_buffer[PRINTK_MAX];
 
 size_t printk(int level, const char* format, ...)
 {
-    size_t r = 0;
-    if (level < Log::CONTINUE) {
+#ifndef QUARK_DEBUG
+    if (level != Log::DEBUG) {
+#endif
+        size_t r = 0;
+        if (level < Log::CONTINUE) {
+            String::memset(printk_buffer, 0, PRINTK_MAX);
+            // time_t t = ktime_get();
+            time_t sec = 0;   // t / NSEC_PER_SEC;
+            time_t nsec = 0;  // t % NSEC_PER_SEC;
+            r = snprintf(printk_buffer, PRINTK_MAX, "%s[%05lu.%09lu]%s ",
+                         colors[level], sec, nsec, "\e[39m");
+            for (auto& i : output) {
+                i.write(printk_buffer, r);
+            }
+        }
         String::memset(printk_buffer, 0, PRINTK_MAX);
-        // time_t t = ktime_get();
-        time_t sec = 0;   // t / NSEC_PER_SEC;
-        time_t nsec = 0;  // t % NSEC_PER_SEC;
-        r = snprintf(printk_buffer, PRINTK_MAX, "%s[%05lu.%09lu]%s ",
-                     colors[level], sec, nsec, "\e[39m");
+        va_list args;
+        va_start(args, format);
+        r = vsnprintf(printk_buffer, PRINTK_MAX, format, args);
+        va_end(args);
         for (auto& i : output) {
             i.write(printk_buffer, r);
         }
+        return r;
+#ifndef QUARK_DEBUG
+    } else {
+        return 0;
     }
-    String::memset(printk_buffer, 0, PRINTK_MAX);
-    va_list args;
-    va_start(args, format);
-    r = vsnprintf(printk_buffer, PRINTK_MAX, format, args);
-    va_end(args);
-    for (auto& i : output) {
-        i.write(printk_buffer, r);
-    }
-    return r;
+#endif
 }
 
 void register_log_output(LogOutput& device)

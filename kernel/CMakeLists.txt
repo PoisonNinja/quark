@@ -4,3 +4,5 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/log.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/panic.cc
 )
+
+add_subdirectory(time)

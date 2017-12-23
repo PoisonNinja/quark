@@ -40,7 +40,10 @@ void arch_init(struct Boot::info &info)
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
                              i += Memory::Virtual::PAGE_SIZE) {
-                            if (i >= info.kernel_start && i < info.kernel_end) {
+                            if (i >= Memory::Virtual::align_down(
+                                         info.kernel_start) &&
+                                i < Memory::Virtual::align_up(
+                                        info.kernel_end)) {
                                 Log::printk(Log::DEBUG, "    Rejected %p\n", i);
                             } else {
                                 Memory::Physical::put(i);

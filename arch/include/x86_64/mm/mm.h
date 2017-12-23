@@ -8,6 +8,16 @@ namespace Virtual
 {
 const size_t PAGE_SIZE = 4096;
 
+inline addr_t align_up(addr_t address)
+{
+    return ((address + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
+}
+
+inline addr_t align_down(addr_t address)
+{
+    return ((address / PAGE_SIZE) * PAGE_SIZE);
+}
+
 struct page {
     uint32_t present : 1;
     uint32_t writable : 1;

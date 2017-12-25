@@ -120,39 +120,6 @@ static long long l_warningCount = 0;      ///< Number of warnings encountered
 static long long l_errorCount = 0;        ///< Number of actual errors
 static long long l_possibleOverruns = 0;  ///< Number of possible overruns
 
-// ***********   HELPER FUNCTIONS  *******************************
-
-static void *liballoc_memset(void *s, int c, size_t n)
-{
-    unsigned int i;
-    for (i = 0; i < n; i++)
-        ((char *)s)[i] = c;
-
-    return s;
-}
-static void *liballoc_memcpy(void *s1, const void *s2, size_t n)
-{
-    char *cdest;
-    char *csrc;
-    unsigned int *ldest = (unsigned int *)s1;
-    unsigned int *lsrc = (unsigned int *)s2;
-
-    while (n >= sizeof(unsigned int)) {
-        *ldest++ = *lsrc++;
-        n -= sizeof(unsigned int);
-    }
-
-    cdest = (char *)ldest;
-    csrc = (char *)lsrc;
-
-    while (n > 0) {
-        *cdest++ = *csrc++;
-        n -= 1;
-    }
-
-    return s1;
-}
-
 // ***************************************************************
 
 static struct liballoc_major *allocate_new_page(unsigned int size)

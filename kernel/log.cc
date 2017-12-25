@@ -34,8 +34,6 @@
 #include <lib/printf.h>
 #include <lib/string.h>
 
-#include <arch/drivers/io.h>
-
 namespace Log
 {
 #define PRINTK_MAX 1024

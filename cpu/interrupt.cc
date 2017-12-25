@@ -1,4 +1,5 @@
 #include <cpu/interrupt.h>
+#include <drivers/irqchip/irqchip.h>
 #include <kernel.h>
 #include <stdatomic.h>
 
@@ -9,17 +10,18 @@ static List<Interrupt::Handler, &Interrupt::Handler::node>
 
 static _Atomic int interrupt_depth = 1;
 
-extern void arch_disable(void);
-extern void arch_enable(void);
+extern void arch_disable();
+extern void arch_enable();
+extern void arch_init();
 
-int disable(void)
+int disable()
 {
     if (!atomic_fetch_add(&interrupt_depth, 1))
         Interrupt::arch_disable();
     return interrupt_depth;
 }
 
-int enable(void)
+int enable()
 {
     if (atomic_fetch_sub(&interrupt_depth, 1) == 1)
         Interrupt::arch_enable();
@@ -38,6 +40,9 @@ void dispatch(int int_no, struct interrupt_ctx* ctx)
         for (auto& handler : handlers[int_no]) {
             handler.handler(int_no, handler.dev_id, ctx);
         }
+    }
+    if (int_no >= 32) {
+        IrqChip::ack(Interrupt::interrupt_to_irq(int_no));
     }
 }
 
@@ -64,5 +69,11 @@ status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
         }
     }
     return FAILURE;
+}
+
+void init()
+{
+    Interrupt::arch_init();
+    Interrupt::enable();
 }
 }  // namespace Interrupt

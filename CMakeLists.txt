@@ -95,7 +95,7 @@ include(${PLATFORM_FILE})
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -fno-rtti -fno-exceptions -fcolor-diagnostics")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O2 -DQUARK_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -DQUARK_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DQUARK_RELEASE")
 message(STATUS "CXXFLAGS: " ${CMAKE_CXX_FLAGS})
 
@@ -124,8 +124,8 @@ add_custom_command(
 
 add_executable(quark.kernel ${CMAKE_SOURCE_DIR}/include/kernel/version.h)
 add_subdirectory(${ARCH_PATH})
-add_subdirectory(boot)
 add_subdirectory(cpu)
+add_subdirectory(drivers)
 add_subdirectory(kernel)
 add_subdirectory(lib)
 add_subdirectory(mm)

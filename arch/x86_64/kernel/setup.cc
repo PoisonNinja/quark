@@ -33,10 +33,10 @@
 #include <arch/cpu/idt.h>
 #include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
-#include <boot/constructors.h>
 #include <boot/info.h>
 #include <cpu/interrupt.h>
 #include <kernel.h>
+#include <lib/libcxx.h>
 
 extern void kmain(struct Boot::info &info);
 
@@ -158,7 +158,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
 extern "C" {
 void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    Boot::constructors_initialize(&__constructors_start, &__constructors_end);
+    libcxx::constructors_initialize(&__constructors_start, &__constructors_end);
     X64::init(magic, multiboot);
 }
 }

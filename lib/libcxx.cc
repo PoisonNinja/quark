@@ -1,6 +1,7 @@
-#include <boot/constructors.h>
+#include <kernel.h>
+#include <lib/libcxx.h>
 
-namespace Boot
+namespace libcxx
 {
 typedef void (*constructor_t)();
 
@@ -14,4 +15,9 @@ void constructors_initialize(void* __constructors_start,
         (*current)();
     }
 }
-}  // namespace Boot
+
+extern "C" __attribute__((noreturn)) void __cxa_pure_virtual()
+{
+    Kernel::panic("__cxa_pure_virtual encountered!\n");
+}
+}

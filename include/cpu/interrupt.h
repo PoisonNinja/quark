@@ -23,7 +23,7 @@ typedef void (*interrupt_handler_t)(int, void *, struct interrupt_ctx *);
 
 struct Handler {
     interrupt_handler_t handler;
-    char *dev_name;
+    const char *dev_name;
     void *dev_id;
     Node<Handler> node;
 };

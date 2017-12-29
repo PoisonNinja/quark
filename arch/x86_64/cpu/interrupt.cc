@@ -20,7 +20,6 @@ void arch_enable(void)
 void arch_init(void)
 {
     IrqChip::Intel8259* pic = new IrqChip::Intel8259();
-    Log::printk(Log::INFO, "PIC at %p\n", pic);
     IrqChip::set_irqchip(*pic);
 }
 

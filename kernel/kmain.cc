@@ -12,6 +12,7 @@ void kmain(struct Boot::info& info)
     Memory::init(info);
     Interrupt::init();
     Time::init();
+    Interrupt::enable();
     for (;;)
         __asm__("hlt");
 }

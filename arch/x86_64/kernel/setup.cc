@@ -55,7 +55,6 @@ static struct Boot::info info;
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    Interrupt::disable();
     Log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");

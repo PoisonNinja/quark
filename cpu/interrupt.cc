@@ -72,6 +72,5 @@ status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 void init()
 {
     Interrupt::arch_init();
-    Interrupt::enable();
 }
 }  // namespace Interrupt

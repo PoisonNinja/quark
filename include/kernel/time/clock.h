@@ -14,4 +14,17 @@ public:
     virtual status_t disable() = 0;
     Node<Clock> node;
 };
+
+class Timer
+{
+public:
+    virtual status_t schedule(time_t interval) = 0;
+    virtual status_t periodic() = 0;
+    virtual status_t disable() = 0;
+    virtual time_t precision() = 0;
+    virtual int irq() = 0;
+    Node<Timer> node;
+};
+
+status_t register_timer(Timer& timer);
 }  // namespace Time

@@ -8,6 +8,9 @@ static const int PIC1_DATA = 0x21;
 static const int PIC2_COMMAND = 0xA0;
 static const int PIC2_DATA = 0xA1;
 
+static const int PIC1_OFFSET = 0x20;  // 32
+static const int PIC2_OFFSET = 0x28;  // 40
+
 static const int COMMAND_EOI = 0x20;
 static const int COMMAND_INIT = 0x10; /* Initialization - required! */
 
@@ -20,9 +23,9 @@ status_t Intel8259::enable()
     iowait();
     outb(PIC2_COMMAND, COMMAND_INIT + CONFIG_ICW4);
     iowait();
-    outb(PIC1_DATA, 0);
+    outb(PIC1_DATA, PIC1_OFFSET);
     iowait();
-    outb(PIC2_DATA, 8);
+    outb(PIC2_DATA, PIC2_OFFSET);
     iowait();
     outb(PIC1_DATA, 4);
     iowait();

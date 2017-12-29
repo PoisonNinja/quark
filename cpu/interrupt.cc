@@ -33,8 +33,6 @@ void dispatch(int int_no, struct interrupt_ctx* ctx)
     if (handlers[int_no].empty()) {
         if (int_no < 32) {
             Kernel::panic("Unhandled exception #%d\n", int_no);
-        } else {
-            return;
         }
     } else {
         for (auto& handler : handlers[int_no]) {

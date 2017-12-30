@@ -21,3 +21,18 @@ struct Entry {
 
 void init();
 }  // namespace GDT
+
+namespace TSS
+{
+struct Entry {
+    uint32_t reserved0;
+    uint64_t stack0; /* This is not naturally aligned, so packed is needed. */
+    uint64_t stack1;
+    uint64_t stack2;
+    uint64_t reserved1;
+    uint64_t ist[7];
+    uint64_t reserved2;
+    uint16_t reserved3;
+    uint16_t iomap_base;
+} __attribute__((packed));
+}

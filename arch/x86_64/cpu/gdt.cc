@@ -1,5 +1,5 @@
 #include <arch/cpu/gdt.h>
-#include <string.h>
+#include <lib/string.h>
 
 namespace GDT
 {

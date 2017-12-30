@@ -1,9 +1,9 @@
 #include <arch/mm/layout.h>
 #include <arch/mm/mm.h>
 #include <kernel.h>
+#include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
-#include <string.h>
 
 static uint64_t heap_end = HEAP_START;
 

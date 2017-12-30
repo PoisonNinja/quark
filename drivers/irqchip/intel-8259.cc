@@ -94,4 +94,4 @@ bool Intel8259::spurious()
     // TODO: Implement
     return false;
 }
-}
+}  // namespace IrqChip

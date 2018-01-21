@@ -29,13 +29,13 @@ status_t register_timer(Timer& timer)
             Interrupt::unregister_handler(current_timer->irq(), tick_handler);
             current_timer->disable();
             current_timer = &timer;
-            timer.periodic();
             Interrupt::register_handler(timer.irq(), tick_handler);
+            timer.periodic();
         }
     } else {
         current_timer = &timer;
-        timer.periodic();
         Interrupt::register_handler(timer.irq(), tick_handler);
+        timer.periodic();
     }
     return SUCCESS;
 }

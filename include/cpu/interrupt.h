@@ -34,7 +34,6 @@ int enable();
 void dispatch(int int_no, struct interrupt_ctx *ctx);
 
 status_t register_handler(uint32_t int_no, Interrupt::Handler &handler);
-
 status_t unregister_handler(uint32_t int_no, const Interrupt::Handler &handler);
 
 void init();

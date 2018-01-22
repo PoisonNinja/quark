@@ -38,4 +38,7 @@
 
 typedef enum { SUCCESS, FAILURE } status_t;
 
+typedef int32_t pid_t;
+typedef int32_t tid_t;
+
 typedef uint64_t time_t;

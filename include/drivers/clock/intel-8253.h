@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cpu/interrupt.h>
 #include <kernel/time/clock.h>
 
 struct interrupt_ctx;
@@ -13,6 +14,8 @@ public:
     status_t periodic() override;
     status_t disable() override;
     time_t precision() override;
-    int irq() override;
+
+private:
+    static Interrupt::interrupt_handler_t handler;
 };
 }  // namespace Time

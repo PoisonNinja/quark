@@ -42,9 +42,4 @@ time_t Intel8253::precision()
 {
     return PRECISION;
 }
-
-int Intel8253::irq()
-{
-    return Interrupt::irq_to_interrupt(0);
-}
 }  // namespace Time

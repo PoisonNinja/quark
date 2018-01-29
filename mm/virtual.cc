@@ -19,5 +19,12 @@ status_t get(addr_t v, struct page& page)
 {
     return Memory::Virtual::arch_get(v, page);
 }
+
+extern status_t arch_clone();
+
+status_t clone()
+{
+    return arch_clone();
+}
 }  // namespace Virtual
 }  // namespace Memory

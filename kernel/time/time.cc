@@ -5,7 +5,7 @@
 namespace Time
 {
 static List<Timer, &Timer::node> timer_list;
-static Timer* current_timer = NULL;
+static Timer* current_timer = nullptr;
 
 extern void arch_init();
 

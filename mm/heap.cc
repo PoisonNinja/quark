@@ -103,9 +103,9 @@ struct liballoc_minor {
 };
 
 static struct liballoc_major *l_memRoot =
-    NULL;  ///< The root memory block acquired from the system.
+    nullptr;  ///< The root memory block acquired from the system.
 static struct liballoc_major *l_bestBet =
-    NULL;  ///< The major with the most free memory.
+    nullptr;  ///< The major with the most free memory.
 
 static unsigned int l_pageSize =
     4096;  ///< The size of an individual page. Set up in liballoc_init.
@@ -144,17 +144,17 @@ static struct liballoc_major *allocate_new_page(unsigned int size)
 
     maj = (struct liballoc_major *)map_heap(st);
 
-    if (maj == NULL) {
+    if (maj == nullptr) {
         l_warningCount += 1;
-        return NULL;  // uh oh, we ran out of memory.
+        return nullptr;  // uh oh, we ran out of memory.
     }
 
-    maj->prev = NULL;
-    maj->next = NULL;
+    maj->prev = nullptr;
+    maj->next = nullptr;
     maj->pages = st;
     maj->size = st * l_pageSize;
     maj->usage = sizeof(struct liballoc_major);
-    maj->first = NULL;
+    maj->first = nullptr;
 
     l_allocated += maj->size;
 
@@ -165,7 +165,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
 {
     int startedBet = 0;
     unsigned long long bestSize = 0;
-    void *p = NULL;
+    void *p = nullptr;
     uintptr_t diff;
     struct liballoc_major *maj;
     struct liballoc_minor *min;
@@ -187,12 +187,12 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
         return malloc(1);
     }
 
-    if (l_memRoot == NULL) {
+    if (l_memRoot == nullptr) {
         // This is the first time we are being used.
         l_memRoot = allocate_new_page(size);
-        if (l_memRoot == NULL) {
+        if (l_memRoot == nullptr) {
             liballoc_unlock();
-            return NULL;
+            return nullptr;
         }
     }
     // Now we need to bounce through every major and find enough space....
@@ -201,7 +201,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
     startedBet = 0;
 
     // Start at the best bet....
-    if (l_bestBet != NULL) {
+    if (l_bestBet != nullptr) {
         bestSize = l_bestBet->size - l_bestBet->usage;
 
         if (bestSize > (size + sizeof(struct liballoc_minor))) {
@@ -210,7 +210,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
         }
     }
 
-    while (maj != NULL) {
+    while (maj != nullptr) {
         diff = maj->size - maj->usage;
         // free memory in the block
 
@@ -223,7 +223,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
         // CASE 1:  There is not enough space in this major block.
         if (diff < (size + sizeof(struct liballoc_minor))) {
             // Another major block next to this one?
-            if (maj->next != NULL) {
+            if (maj->next != nullptr) {
                 maj = maj->next;  // Hop to that one.
                 continue;
             }
@@ -237,7 +237,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
 
             // Create a new major block next to this one and...
             maj->next = allocate_new_page(size);  // next one will be okay.
-            if (maj->next == NULL)
+            if (maj->next == nullptr)
                 break;  // no more memory.
             maj->next->prev = maj;
             maj = maj->next;
@@ -246,14 +246,14 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
         }
 
         // CASE 2: It's a brand new block.
-        if (maj->first == NULL) {
+        if (maj->first == nullptr) {
             maj->first =
                 (struct liballoc_minor *)((uintptr_t)maj +
                                           sizeof(struct liballoc_major));
 
             maj->first->magic = LIBALLOC_MAGIC;
-            maj->first->prev = NULL;
-            maj->first->next = NULL;
+            maj->first->prev = nullptr;
+            maj->first->next = nullptr;
             maj->first->block = maj;
             maj->first->size = size;
             maj->first->req_size = req_size;
@@ -284,7 +284,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
             maj->first = maj->first->prev;
 
             maj->first->magic = LIBALLOC_MAGIC;
-            maj->first->prev = NULL;
+            maj->first->prev = nullptr;
             maj->first->block = maj;
             maj->first->size = size;
             maj->first->req_size = req_size;
@@ -305,9 +305,9 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
         min = maj->first;
 
         // Looping within the block now...
-        while (min != NULL) {
+        while (min != nullptr) {
             // CASE 4.1: End of minors in a block. Space from last and end?
-            if (min->next == NULL) {
+            if (min->next == nullptr) {
                 // the rest of this block is free...  is it big enough?
                 diff = (uintptr_t)(maj) + maj->size;
                 diff -= (uintptr_t)min;
@@ -324,7 +324,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
                                                   min->size);
                     min->next->prev = min;
                     min = min->next;
-                    min->next = NULL;
+                    min->next = nullptr;
                     min->magic = LIBALLOC_MAGIC;
                     min->block = maj;
                     min->size = size;
@@ -343,7 +343,7 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
             }
 
             // CASE 4.2: Is there space between two minors?
-            if (min->next != NULL) {
+            if (min->next != nullptr) {
                 // is the difference between here and next big enough?
                 diff = (uintptr_t)(min->next);
                 diff -= (uintptr_t)min;
@@ -378,13 +378,13 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
                     liballoc_unlock();  // release the lock
                     return p;
                 }
-            }  // min->next != NULL
+            }  // min->next != nullptr
 
             min = min->next;
-        }  // while min != NULL ...
+        }  // while min != nullptr ...
 
         // CASE 5: Block full! Ensure next block and loop.
-        if (maj->next == NULL) {
+        if (maj->next == nullptr) {
             if (startedBet == 1) {
                 maj = l_memRoot;
                 startedBet = 0;
@@ -394,16 +394,16 @@ static void *__attribute__((malloc)) malloc(size_t req_size)
             // we've run out. we need more...
             maj->next =
                 allocate_new_page(size);  // next one guaranteed to be okay
-            if (maj->next == NULL)
+            if (maj->next == nullptr)
                 break;  //  uh oh,  no more memory.....
             maj->next->prev = maj;
         }
 
         maj = maj->next;
-    }  // while (maj != NULL)
+    }  // while (maj != nullptr)
 
     liballoc_unlock();  // release the lock
-    return NULL;
+    return nullptr;
 }
 
 static void free(void *ptr)
@@ -411,7 +411,7 @@ static void free(void *ptr)
     struct liballoc_minor *min;
     struct liballoc_major *maj;
 
-    if (ptr == NULL) {
+    if (ptr == nullptr) {
         l_warningCount += 1;
         return;
     }
@@ -445,33 +445,33 @@ static void free(void *ptr)
     maj->usage -= (min->size + sizeof(struct liballoc_minor));
     min->magic = LIBALLOC_DEAD;  // No mojo.
 
-    if (min->next != NULL)
+    if (min->next != nullptr)
         min->next->prev = min->prev;
-    if (min->prev != NULL)
+    if (min->prev != nullptr)
         min->prev->next = min->next;
 
-    if (min->prev == NULL)
+    if (min->prev == nullptr)
         maj->first = min->next;
     // Might empty the block. This was the first
     // minor.
 
     // We need to clean up after the majors now....
 
-    if (maj->first == NULL)  // Block completely unused.
+    if (maj->first == nullptr)  // Block completely unused.
     {
         if (l_memRoot == maj)
             l_memRoot = maj->next;
         if (l_bestBet == maj)
-            l_bestBet = NULL;
-        if (maj->prev != NULL)
+            l_bestBet = nullptr;
+        if (maj->prev != nullptr)
             maj->prev->next = maj->next;
-        if (maj->next != NULL)
+        if (maj->next != nullptr)
             maj->next->prev = maj->prev;
         l_allocated -= maj->size;
 
         free_heap(maj, maj->pages);
     } else {
-        if (l_bestBet != NULL) {
+        if (l_bestBet != nullptr) {
             int bestSize = l_bestBet->size - l_bestBet->usage;
             int majSize = maj->size - maj->usage;
 

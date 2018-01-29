@@ -1,7 +1,6 @@
 #include <cpu/interrupt.h>
-#include <kernel/time/time.h>
-
 #include <kernel.h>
+#include <kernel/time/time.h>
 
 namespace Time
 {
@@ -17,16 +16,13 @@ void tick()
 status_t register_timer(Timer& timer)
 {
     timer_list.push_back(timer);
+    Log::printk(Log::INFO, "Selecting %s as the system tick source\n",
+                timer.name());
     if (current_timer) {
-        if (timer.precision() > current_timer->precision()) {
-            current_timer->disable();
-            current_timer = &timer;
-            timer.periodic();
-        }
-    } else {
-        current_timer = &timer;
-        timer.periodic();
+        current_timer->disable();
     }
+    current_timer = &timer;
+    timer.periodic();
     return SUCCESS;
 }
 

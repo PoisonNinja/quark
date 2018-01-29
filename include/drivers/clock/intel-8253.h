@@ -13,9 +13,6 @@ public:
     status_t schedule(time_t interval) override;
     status_t periodic() override;
     status_t disable() override;
-    time_t precision() override;
-
-private:
-    static Interrupt::interrupt_handler_t handler;
+    const char* name() override;
 };
 }  // namespace Time

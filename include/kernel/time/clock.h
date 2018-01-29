@@ -21,7 +21,7 @@ public:
     virtual status_t schedule(time_t interval) = 0;
     virtual status_t periodic() = 0;
     virtual status_t disable() = 0;
-    virtual time_t precision() = 0;
+    virtual const char* name() = 0;
     Node<Timer> node;
 };
 

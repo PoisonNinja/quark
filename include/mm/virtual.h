@@ -15,5 +15,6 @@ namespace Virtual
 #define PAGE_COW 0x40
 
 bool map(addr_t v, addr_t p, int flags);
+status_t get(addr_t v, struct page& page);
 }  // namespace Virtual
 }  // namespace Memory

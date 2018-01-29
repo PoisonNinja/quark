@@ -1,7 +1,6 @@
 target_sources(quark.kernel
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/clone.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/get.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/init.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/map.cc
 )

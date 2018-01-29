@@ -32,7 +32,7 @@ void arch_init(struct Boot::info &info)
                          (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                              ->entry_size)) {
                     Log::printk(Log::INFO,
-                                "    Base = 0x%016x, Length = 0x%016x, "
+                                "    Base = %p, Length = %p, "
                                 "Type = 0x%x\n",
                                 static_cast<addr_t>(mmap->addr),
                                 static_cast<addr_t>(mmap->len),

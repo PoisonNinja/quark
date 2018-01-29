@@ -44,7 +44,8 @@ void arch_init(struct Boot::info &info)
                                          info.kernel_start) &&
                                 i < Memory::Virtual::align_up(
                                         info.kernel_end)) {
-                                Log::printk(Log::DEBUG, "    Rejected %p\n", i);
+                                Log::printk(Log::DEBUG, "        Rejected %p\n",
+                                            i);
                             } else {
                                 Memory::Physical::put(i);
                             }

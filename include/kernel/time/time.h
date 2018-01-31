@@ -13,6 +13,6 @@ struct timespec {
     time_t tv_nsec;
 };
 
-void tick();
+void tick(struct interrupt_ctx* ctx);
 void init();
 }  // namespace Time

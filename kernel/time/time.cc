@@ -9,7 +9,7 @@ static Timer* current_timer = nullptr;
 
 extern void arch_init();
 
-void tick()
+void tick(struct interrupt_ctx* ctx)
 {
 }
 

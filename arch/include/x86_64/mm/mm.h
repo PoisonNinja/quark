@@ -52,7 +52,8 @@ namespace X64
 #define PD_INDEX(x) ((x >> 21) & 0x1FF)
 #define PT_INDEX(x) ((x >> 12) & 0x1FF)
 
-#define RECURSIVE_ENTRY 510
+#define RECURSIVE_ENTRY (510UL)
+#define COPY_ENTRY (508UL)
 
 static inline uint64_t read_cr3(void)
 {

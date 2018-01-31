@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/list.h>
-#include <tm/thread.h>
+#include <proc/thread.h>
 #include <types.h>
 
 class Process

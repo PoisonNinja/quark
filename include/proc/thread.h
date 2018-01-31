@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arch/tm/registers.h>
+#include <arch/proc/registers.h>
 #include <lib/list.h>
 #include <types.h>
 

@@ -8,8 +8,8 @@ namespace Time
 const int FREQUENCY = 1193181;  // Frequency in HZ
 const int HZ = 1000;            // # of interrupts per second
 const int CHANNEL0 = 0x40;
-const int CHANNEL1 = 0x41;
-const int CHANNEL2 = 0x42;
+// const int CHANNEL1 = 0x41;
+// const int CHANNEL2 = 0x42;
 const int COMMAND = 0x43;
 const char* NAME = "Intel 8253";
 

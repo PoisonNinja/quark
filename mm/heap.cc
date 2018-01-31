@@ -18,7 +18,7 @@ static void *map_heap(size_t size)
     return reinterpret_cast<void *>(heap_end - size);
 }
 
-static void free_heap(void *start, size_t size)
+static void free_heap(void * /*start*/, size_t /*size*/)
 {
     // size *= Memory::Virtual::PAGE_SIZE;
     // for (size_t i = 0; i < size; i += Memory::Virtual::PAGE_SIZE) {

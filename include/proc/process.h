@@ -7,7 +7,13 @@
 class Process
 {
 public:
+    Process(Process* parent);
+    ~Process();
     pid_t pid;
+    status_t add_thread(Thread* thread);
+    status_t remove_thread(Thread* thread);
+
+private:
     Process *parent, *children;
     List<Thread, &Thread::process_node> threads;
 };

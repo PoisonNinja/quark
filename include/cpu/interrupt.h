@@ -1,9 +1,8 @@
 #pragma once
 
+#include <arch/cpu/registers.h>
 #include <lib/list.h>
 #include <types.h>
-
-struct interrupt_ctx;
 
 namespace Interrupt
 {

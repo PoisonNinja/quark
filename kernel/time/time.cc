@@ -1,6 +1,7 @@
 #include <cpu/interrupt.h>
 #include <kernel.h>
 #include <kernel/time/time.h>
+#include <proc/sched.h>
 
 namespace Time
 {
@@ -11,6 +12,7 @@ extern void arch_init();
 
 void tick(struct interrupt_ctx* ctx)
 {
+    Scheduler::tick(ctx);
 }
 
 status_t register_timer(Timer& timer)

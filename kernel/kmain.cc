@@ -4,6 +4,7 @@
 #include <kernel/time/time.h>
 #include <kernel/version.h>
 #include <mm/mm.h>
+#include <proc/sched.h>
 
 void kmain(struct Boot::info& info)
 {
@@ -13,6 +14,7 @@ void kmain(struct Boot::info& info)
     Interrupt::init();
     Time::init();
     Interrupt::enable();
+    Scheduler::init();
     for (;;)
         __asm__("hlt");
 }

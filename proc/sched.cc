@@ -57,6 +57,7 @@ void tick(struct interrupt_ctx* ctx)
         runnable.push_back(*current_thread);
     }
     load_context(&next, ctx);
+    current_thread = &next;
 }
 
 void init()

@@ -16,5 +16,8 @@ namespace Virtual
 
 bool map(addr_t v, addr_t p, int flags);
 status_t clone();
+
+addr_t get_address_space_root();
+void set_address_space_root(addr_t root);
 }  // namespace Virtual
 }  // namespace Memory

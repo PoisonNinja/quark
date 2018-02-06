@@ -19,5 +19,19 @@ status_t clone()
 {
     return arch_clone();
 }
+
+extern addr_t arch_get_address_space_root();
+
+addr_t get_address_space_root()
+{
+    return arch_get_address_space_root();
+}
+
+extern void arch_set_address_space_root(addr_t root);
+
+void set_address_space_root(addr_t root)
+{
+    return arch_set_address_space_root(root);
+}
 }  // namespace Virtual
 }  // namespace Memory

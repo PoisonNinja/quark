@@ -38,7 +38,7 @@ struct page {
 struct page_table {
     struct page pages[512];
 };
-}  // namespace Virtual
+}
 
 namespace Physical
 {

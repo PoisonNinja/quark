@@ -14,7 +14,6 @@ static Thread* kidle;
 static void idle()
 {
     while (1) {
-        Log::printk(Log::INFO, "Idle\n");
         __asm__("hlt");
     }
 }
@@ -70,13 +69,13 @@ void tick(struct interrupt_ctx* ctx)
 void init()
 {
     Log::printk(Log::INFO, "Initializing scheduler...\n");
-    // We are the root :)
     kernel_process = new Process(nullptr);
     kernel_process->address_space = Memory::Virtual::get_address_space_root();
     // TODO: Move this to architecture specific
     Thread* kinit = new Thread(kernel_process);
     kidle = new Thread(kernel_process);
     kidle->cpu_ctx.rip = reinterpret_cast<addr_t>(idle);
+    kidle->cpu_ctx.rsp = reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
     Scheduler::insert(kinit);
     /*
      * Set kinit as current_thread, so on the first task switch caused by the

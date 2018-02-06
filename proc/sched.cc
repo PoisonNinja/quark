@@ -1,6 +1,7 @@
 #include <cpu/interrupt.h>
 #include <kernel.h>
 #include <lib/list.h>
+#include <mm/virtual.h>
 #include <proc/sched.h>
 
 namespace Scheduler
@@ -46,15 +47,21 @@ status_t remove(Thread* thread)
 
 void tick(struct interrupt_ctx* ctx)
 {
+    if (current_thread) {
+        save_context(current_thread, ctx);
+        runnable.push_back(*current_thread);
+    }
     if (runnable.empty()) {
-        // load_context(kidle, ctx);
+        load_context(kidle, ctx);
         return;
     }
     Thread& next = runnable.front();
     remove(&next);
     if (current_thread) {
-        save_context(current_thread, ctx);
-        runnable.push_back(*current_thread);
+        if (current_thread->parent->address_space !=
+            next.parent->address_space) {
+            Memory::Virtual::set_address_space_root(next.parent->address_space);
+        }
     }
     load_context(&next, ctx);
     current_thread = &next;
@@ -65,6 +72,8 @@ void init()
     Log::printk(Log::INFO, "Initializing scheduler...\n");
     // We are the root :)
     kernel_process = new Process(nullptr);
+    kernel_process->address_space = Memory::Virtual::get_address_space_root();
+    // TODO: Move this to architecture specific
     Thread* kinit = new Thread(kernel_process);
     kidle = new Thread(kernel_process);
     kidle->cpu_ctx.rip = reinterpret_cast<addr_t>(idle);

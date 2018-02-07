@@ -79,3 +79,16 @@ void init()
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
 }
 }  // namespace GDT
+
+namespace TSS
+{
+void set_stack(addr_t stack)
+{
+    GDT::tss.stack0 = stack;
+}
+
+addr_t get_stack()
+{
+    return GDT::tss.stack0;
+}
+}

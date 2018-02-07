@@ -35,4 +35,7 @@ struct Entry {
     uint16_t reserved3;
     uint16_t iomap_base;
 } __attribute__((packed));
+
+void set_stack(addr_t stack);
+addr_t get_stack();
 }

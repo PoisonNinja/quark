@@ -1,3 +1,4 @@
+#include <arch/cpu/gdt.h>
 #include <cpu/interrupt.h>
 #include <proc/thread.h>
 
@@ -49,4 +50,14 @@ status_t arch_load_context(Thread* thread, struct interrupt_ctx* ctx)
     ctx->rip = registers->rip;
     ctx->rflags = registers->rflags;
     return SUCCESS;
+}
+
+void arch_set_stack(addr_t stack)
+{
+    TSS::set_stack(stack);
+}
+
+addr_t arch_get_stack()
+{
+    return TSS::get_stack();
 }

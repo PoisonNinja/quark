@@ -12,5 +12,7 @@ status_t remove(Thread* thread);
 void init();
 void tick(struct interrupt_ctx* ctx);
 
+Process* get_current_process();
+
 pid_t get_free_pid();
 };

@@ -86,4 +86,9 @@ void init()
     current_thread = kinit;
     Log::printk(Log::INFO, "Scheduler initialized\n");
 }
+
+Process* get_current_process()
+{
+    return current_thread->parent;
+}
 }

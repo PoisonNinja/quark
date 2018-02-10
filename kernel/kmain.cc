@@ -1,5 +1,6 @@
 #include <boot/info.h>
 #include <cpu/interrupt.h>
+#include <fs/fs.h>
 #include <kernel.h>
 #include <kernel/time/time.h>
 #include <kernel/version.h>
@@ -15,6 +16,7 @@ void kmain(struct Boot::info& info)
     Time::init();
     Interrupt::enable();
     Scheduler::init();
+    Filesystem::init();
     for (;;)
         __asm__("hlt");
 }

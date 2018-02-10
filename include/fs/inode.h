@@ -2,9 +2,10 @@
 
 #include <types.h>
 
-namespace FS
+namespace Filesystem
 {
-class Dentry;
+struct Dentry;
+class Superblock;
 class Inode
 {
 public:
@@ -17,6 +18,15 @@ public:
 
     size_t size;
 
-    virtual int lookup(Dentry *);
+    Superblock* superblock;
+
+    virtual int lookup(Dentry*);
 };
+
+namespace InodeCache
+{
+void init();
+Inode* get(Superblock* superblock, ino_t ino);
+void set(Inode* inode);
+}
 }

@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace FS
+namespace Filesystem
 {
 class Inode;
 

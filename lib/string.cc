@@ -143,6 +143,7 @@ char *strcpy(char *dest, const char *src)
 {
     for (; *src != '\0'; dest++, src++)
         *dest = *src;
+    *dest = *src;
     return dest;
 }
 
@@ -154,6 +155,13 @@ char *strncpy(char *dest, const char *src, size_t n)
     while (n-- > 0)
         *dest = '\0';
     return dest;
+}
+
+char *strdup(const char *str)
+{
+    char *ret = new char[strlen(str) + 1];
+    strcpy(ret, str);
+    return ret;
 }
 
 size_t strlen(const char *str)

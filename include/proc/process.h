@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fs/inode.h>
 #include <lib/list.h>
 #include <proc/thread.h>
 #include <types.h>
@@ -13,6 +14,8 @@ public:
     addr_t address_space;
     status_t add_thread(Thread* thread);
     status_t remove_thread(Thread* thread);
+    Filesystem::Inode* cwd;
+    Filesystem::Inode* root;
 
 private:
     Process *parent, *children;

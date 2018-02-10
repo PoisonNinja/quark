@@ -5,6 +5,8 @@ Process::Process(Process* parent)
 {
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
+    this->cwd = nullptr;
+    this->root = nullptr;
 }
 
 Process::~Process()

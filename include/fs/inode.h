@@ -4,6 +4,7 @@
 
 namespace FS
 {
+class Dentry;
 class Inode
 {
 public:
@@ -14,6 +15,8 @@ public:
     dev_t dev;
     mode_t mode;
 
-private:
+    size_t size;
+
+    virtual int lookup(Dentry *);
 };
 }

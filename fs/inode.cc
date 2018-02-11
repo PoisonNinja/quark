@@ -13,6 +13,11 @@ Inode::~Inode()
 {
 }
 
+Inode* Inode::create(Dentry* dentry, int flags, mode_t mode)
+{
+    return nullptr;
+}
+
 int Inode::lookup(Dentry*)
 {
     return -ENOSYS;

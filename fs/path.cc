@@ -11,6 +11,35 @@ namespace Filesystem
 {
 namespace Path
 {
+const char* dirname(const char* original)
+{
+    char* path = String::strdup(original);
+    char* p;
+    if (path == NULL || *path == '\0')
+        return "/";
+    p = path + String::strlen(path) - 1;
+    while (*p == '/') {
+        if (p == path)
+            return path;
+        *p-- = '\0';
+    }
+    while (p >= path && *p != '/')
+        p--;
+    return p < path ? "/" : p == path ? "/" : (*p = '\0', path);
+}
+
+static char* basename(const char* name)
+{
+    const char* base = name;
+
+    while (*name) {
+        if (*name++ == '/') {
+            base = name;
+        }
+    }
+    return (char*)base;
+}
+
 static Inode* resolve_real(Inode* start, const char* path, int flags)
 {
     if (!start) {
@@ -34,11 +63,35 @@ static Inode* resolve_real(Inode* start, const char* path, int flags)
             next->ino = dentry->ino;
             next->superblock = dentry->superblock;
             next->superblock->read_inode(next);
+            Filesystem::InodeCache::set(next);
         }
         inode = next;
     }
     delete[] str;
     return inode;
+}
+
+static Inode* resolve_real_create(Inode* start, const char* path, int flags,
+                                  mode_t mode)
+{
+    Inode* ret = nullptr;
+    const char* dir = dirname(path);
+    const char* base = basename(path);
+    Inode* parent = resolve_real(start, dir, (flags & ~O_CREAT));
+    if (!parent) {
+        delete[] dir;
+        return nullptr;
+    }
+    if ((ret = resolve_real(parent, base, flags))) {
+        return ret;
+    }
+    Dentry* dentry = new Dentry;
+    String::strncpy(dentry->name, base, DENTRY_MAX_LENGTH);
+    ret = parent->create(dentry, flags, mode);
+    Filesystem::InodeCache::set(ret);
+    delete dentry;
+    delete[] dir;
+    return ret;
 }
 
 Inode* resolve(const char* path, int flags, mode_t mode)
@@ -53,8 +106,11 @@ Inode* resolve(const char* path, int flags, mode_t mode)
     } else {
         start = Scheduler::get_current_process()->cwd;
     }
-    // TODO: Handle O_CREAT
-    return resolve_real(start, path, flags);
+    if (flags & O_CREAT) {
+        return resolve_real_create(start, path, flags, mode);
+    } else {
+        return resolve_real(start, path, flags);
+    }
 }
 }
 }

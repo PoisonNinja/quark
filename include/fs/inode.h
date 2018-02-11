@@ -20,6 +20,7 @@ public:
 
     Superblock* superblock;
 
+    virtual Inode* create(Dentry* dentry, int flags, mode_t mode);
     virtual int lookup(Dentry*);
 };
 

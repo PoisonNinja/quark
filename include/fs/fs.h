@@ -15,19 +15,5 @@ namespace Filesystem
 #define O_NOFOLLOW 0x1000
 #define O_PATH 0x2000
 
-class Superblock;
-
-class Driver
-{
-public:
-    const char* name;
-    virtual int mount(Superblock*);
-    Node<Driver> node;
-};
-
-status_t register_driver(Driver& driver);
-status_t unregister_driver(Driver& driver);
-Driver* get_driver(const char* name);
-
 void init();
 }

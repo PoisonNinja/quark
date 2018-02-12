@@ -16,7 +16,6 @@ void kmain(struct Boot::info& info)
     Time::init();
     Interrupt::enable();
     Scheduler::init();
-    Filesystem::init();
     for (;;)
         __asm__("hlt");
 }

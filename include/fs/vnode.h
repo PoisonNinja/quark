@@ -1,20 +1,14 @@
 #pragma once
 
-#include <types.h>
+#include <fs/inode.h>
 
 namespace Filesystem
 {
-class Inode
+class Vnode
 {
 public:
     ino_t ino;
     dev_t dev;
     mode_t mode;
-};
-
-class BaseInode : public Inode
-{
-public:
-
 };
 }

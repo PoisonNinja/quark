@@ -5,3 +5,5 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/inode.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/vnode.cc
 )
+
+add_subdirectory(initfs)

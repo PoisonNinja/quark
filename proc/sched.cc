@@ -14,7 +14,6 @@ static Thread* kidle;
 static void idle()
 {
     while (1) {
-        Interrupt::enable();
         // TODO: Get rid of hlt
         __asm__("hlt");
     }

@@ -17,6 +17,7 @@ Directory::~Directory()
 
 Ref<Inode> Directory::open(const char* name, int flags, mode_t mode)
 {
+    return Ref<Inode>(nullptr);
 }
 }
 }

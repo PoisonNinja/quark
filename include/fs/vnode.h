@@ -13,6 +13,7 @@ public:
     mode_t mode;
 
     Vnode(Ref<Inode> inode);
+    Ref<Vnode> open(const char* name, int flags, mode_t mode);
 
 private:
     Ref<Inode> inode;

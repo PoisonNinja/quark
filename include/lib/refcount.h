@@ -16,7 +16,6 @@
  * A class that implements reference counting.
  */
 
-
 #pragma once
 
 #include <types.h>
@@ -24,12 +23,27 @@
 class RefcountBase
 {
 public:
-    RefcountBase() :count(0) {};
+    RefcountBase() : count(0){};
     ~RefcountBase(){};
-    void increment_refcount() { count++; };
-    void decrement_refcount() { count--; if (!count) delete this; };
-    size_t refcount() const { return count; };
-    bool unique() const { return count == 1; };
+    void increment_refcount()
+    {
+        count++;
+    };
+    void decrement_refcount()
+    {
+        count--;
+        if (!count) {
+            delete this;
+        }
+    };
+    size_t refcount() const
+    {
+        return count;
+    };
+    bool unique() const
+    {
+        return count == 1;
+    };
 
 private:
     size_t count;
@@ -39,81 +53,128 @@ template <class T>
 class Ref
 {
 public:
-constexpr Ref() : obj(NULL) { }
-	explicit Ref(T* obj) : obj(obj) { if ( obj ) obj->increment_refcount(); }
-	template <class U>
-	explicit Ref(U* obj) : obj(obj) { if ( obj ) obj->increment_refcount(); }
-	Ref(const Ref<T>& r) : obj(r.get()) { if ( obj ) obj->increment_refcount(); }
-	template <class U>
-	Ref(const Ref<U>& r) : obj(r.get()) { if ( obj ) obj->increment_refcount(); }
-	~Ref() { if ( obj ) obj->decrement_refcount(); }
+    constexpr Ref() : obj(NULL)
+    {
+    }
+    explicit Ref(T* obj) : obj(obj)
+    {
+        if (obj)
+            obj->increment_refcount();
+    }
+    template <class U>
+    explicit Ref(U* obj) : obj(obj)
+    {
+        if (obj)
+            obj->increment_refcount();
+    }
+    Ref(const Ref<T>& r) : obj(r.get())
+    {
+        if (obj)
+            obj->increment_refcount();
+    }
+    template <class U>
+    Ref(const Ref<U>& r) : obj(r.get())
+    {
+        if (obj)
+            obj->increment_refcount();
+    }
+    ~Ref()
+    {
+        if (obj)
+            obj->decrement_refcount();
+    }
 
-	Ref& operator=(const Ref r)
-	{
-		if ( obj == r.get() )
-			return *this;
-		if ( obj )
-		{
-			obj->decrement_refcount();
-			obj = NULL;
-		}
-		if ( (obj = r.get()) )
-			obj->increment_refcount();
-		return *this;
-	}
+    Ref& operator=(const Ref r)
+    {
+        if (obj == r.get())
+            return *this;
+        if (obj) {
+            obj->decrement_refcount();
+            obj = NULL;
+        }
+        if ((obj = r.get()))
+            obj->increment_refcount();
+        return *this;
+    }
 
-	template <class U>
-	Ref operator=(const Ref<U> r)
-	{
-		if ( obj == r.get() )
-			return *this;
-		if ( obj )
-		{
-			obj->decrement_refcount();
-			obj = NULL;
-		}
-		if ( (obj = r.get()) )
-			obj->increment_refcount();
-		return *this;
-	}
+    template <class U>
+    Ref operator=(const Ref<U> r)
+    {
+        if (obj == r.get())
+            return *this;
+        if (obj) {
+            obj->decrement_refcount();
+            obj = NULL;
+        }
+        if ((obj = r.get()))
+            obj->increment_refcount();
+        return *this;
+    }
 
-	bool operator==(const Ref& other)
-	{
-		return (*this).get() == other.get();
-	}
+    bool operator==(const Ref& other)
+    {
+        return (*this).get() == other.get();
+    }
 
-	template <class U> bool operator==(const Ref<U>& other)
-	{
-		return (*this).get() == other.get();
-	}
+    template <class U>
+    bool operator==(const Ref<U>& other)
+    {
+        return (*this).get() == other.get();
+    }
 
-	template <class U> bool operator==(const U* const& other)
-	{
-		return (*this).get() == other;
-	}
+    template <class U>
+    bool operator==(const U* const& other)
+    {
+        return (*this).get() == other;
+    }
 
-	bool operator!=(const Ref& other)
-	{
-		return !((*this) == other);
-	}
+    bool operator!=(const Ref& other)
+    {
+        return !((*this) == other);
+    }
 
-	template <class U> bool operator!=(const Ref<U>& other)
-	{
-		return !((*this) == other);
-	}
+    template <class U>
+    bool operator!=(const Ref<U>& other)
+    {
+        return !((*this) == other);
+    }
 
-	template <class U> bool operator!=(const U* const& other)
-	{
-		return !((*this) == other);
-	}
+    template <class U>
+    bool operator!=(const U* const& other)
+    {
+        return !((*this) == other);
+    }
 
-	void reset() { if ( obj ) obj->decrement_refcount(); obj = NULL; }
-	T* get() const { return obj; }
-	T& operator *() const { return *obj; }
-	T* operator->() const { return obj; }
-	operator bool() const { return obj != NULL; }
-	size_t refcount() const { return obj ? obj->refcount : 0; }
-	bool unique() const { return obj->unique(); }
+    void reset()
+    {
+        if (obj)
+            obj->decrement_refcount();
+        obj = NULL;
+    }
+    T* get() const
+    {
+        return obj;
+    }
+    T& operator*() const
+    {
+        return *obj;
+    }
+    T* operator->() const
+    {
+        return obj;
+    }
+    operator bool() const
+    {
+        return obj != NULL;
+    }
+    size_t refcount() const
+    {
+        return obj ? obj->refcount : 0;
+    }
+    bool unique() const
+    {
+        return obj->unique();
+    }
 
 private:
     T* obj;

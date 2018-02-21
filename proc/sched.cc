@@ -14,6 +14,7 @@ static Thread* kidle;
 static void idle()
 {
     while (1) {
+        // TODO: Get rid of hlt
         __asm__("hlt");
     }
 }

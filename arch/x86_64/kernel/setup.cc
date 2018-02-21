@@ -75,34 +75,30 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                     reinterpret_cast<struct multiboot_tag_string *>(tag)
                         ->string;
                 break;
-                // case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-                //     Log::printk(
-                //         Log::INFO, "    Boot loader name = %s\n",
-                //         (reinterpret_cast<struct multiboot_tag_string
-                //         *>(tag))
-                //             ->string);
-                //     break;
-                // case MULTIBOOT_TAG_TYPE_MODULE:
-                //     Log::printk(
-                //         Log::INFO, "    Module at 0x%x - 0x%x. Command line
-                //         %s\n", (reinterpret_cast<struct multiboot_tag_module
-                //         *>(tag))
-                //             ->mod_start,
-                //         (reinterpret_cast<struct multiboot_tag_module
-                //         *>(tag))
-                //             ->mod_end,
-                //         (reinterpret_cast<struct multiboot_tag_module
-                //         *>(tag))
-                //             ->cmdline);
-                //     break;
+            // case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
+            //     Log::printk(
+            //         Log::INFO, "    Boot loader name = %s\n",
+            //         (reinterpret_cast<struct multiboot_tag_string
+            //         *>(tag))
+            //             ->string);
+            //     break;
+            case MULTIBOOT_TAG_TYPE_MODULE:
+                info.initrd_start =
+                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
+                        ->mod_start;
+                info.initrd_end =
+                    (reinterpret_cast<struct multiboot_tag_module *>(tag))
+                        ->mod_end;
+                break;
                 // case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
                 //     Log::printk(
-                //         Log::INFO, "    Lower memory = %uKB, Upper memory =
-                //         %uKB\n", (reinterpret_cast<struct
+                //         Log::INFO, "    Lower memory = %uKB, Upper memory
+                //         = %uKB\n", (reinterpret_cast<struct
                 //         multiboot_tag_basic_meminfo *>(
                 //              tag))
                 //             ->mem_lower,
-                //         (reinterpret_cast<struct multiboot_tag_basic_meminfo
+                //         (reinterpret_cast<struct
+                //         multiboot_tag_basic_meminfo
                 //         *>(
                 //              tag))
                 //             ->mem_upper);
@@ -123,7 +119,8 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 // case MULTIBOOT_TAG_TYPE_MMAP: {
                 //     multiboot_memory_map_t *mmap;
                 //     Log::printk(Log::INFO, "    Memory map:\n");
-                //     for (mmap = (reinterpret_cast<struct multiboot_tag_mmap
+                //     for (mmap = (reinterpret_cast<struct
+                //     multiboot_tag_mmap
                 //     *>(tag))
                 //                     ->entries;
                 //          reinterpret_cast<multiboot_uint8_t *>(mmap) <
@@ -136,9 +133,10 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 //                  ->entry_size))
                 //         Log::printk(Log::INFO,
                 //                     "        Base = 0x%08x%08x,"
-                //                     " Length = 0x%08x%08x, Type = 0x%x\n",
-                //                     static_cast<addr_t>(mmap->addr >> 32),
-                //                     static_cast<addr_t>(mmap->addr &
+                //                     " Length = 0x%08x%08x, Type =
+                //                     0x%x\n",
+                //                     static_cast<addr_t>(mmap->addr >>
+                //                     32), static_cast<addr_t>(mmap->addr &
                 //                     0xffffffff),
                 //                     static_cast<addr_t>(mmap->len >> 32),
                 //                     static_cast<addr_t>(mmap->len &

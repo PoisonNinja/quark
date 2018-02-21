@@ -159,8 +159,9 @@ char *strncpy(char *dest, const char *src, size_t n)
 
 char *strdup(const char *str)
 {
-    char *ret = new char[strlen(str) + 1];
-    strcpy(ret, str);
+    size_t size = strlen(str) + 1;
+    char *ret = new char[size];
+    memcpy(ret, str, size);
     return ret;
 }
 

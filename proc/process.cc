@@ -5,8 +5,8 @@ Process::Process(Process* parent)
 {
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
-    this->cwd = nullptr;
-    this->root = nullptr;
+    this->cwd = Ref<Filesystem::Descriptor>(nullptr);
+    this->root = Ref<Filesystem::Descriptor>(nullptr);
 }
 
 Process::~Process()

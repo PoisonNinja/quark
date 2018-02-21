@@ -9,5 +9,7 @@ struct info {
     void* architecture_data;
     addr_t kernel_start;
     addr_t kernel_end;
+    addr_t initrd_start;
+    addr_t initrd_end;
 };
 }  // namespace Boot

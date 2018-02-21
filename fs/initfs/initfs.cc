@@ -47,7 +47,10 @@ ssize_t File::pwrite(uint8_t* buffer, size_t count, off_t offset)
     if (count + offset > buffer_size) {
         size_t new_buffer_size = count + offset;
         uint8_t* new_buffer = new uint8_t[new_buffer_size];
-        String::memcpy(new_buffer, data, buffer_size);
+        if (data) {
+            String::memcpy(new_buffer, data, buffer_size);
+            delete[] data;
+        }
         buffer_size = new_buffer_size;
         data = new_buffer;
     }

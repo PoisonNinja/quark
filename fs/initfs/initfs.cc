@@ -24,13 +24,32 @@ File::File(ino_t ino, dev_t dev, mode_t mode)
     this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
     this->mode = mode;
     // Allocate when actually used
-    buffer = nullptr;
+    data = nullptr;
     buffer_size = 0;
-    buffer_used = 0;
 }
 
 File::~File()
 {
+}
+
+ssize_t File::pread(uint8_t* buffer, size_t count, off_t offset)
+{
+    String::memcpy(buffer, data + offset, count);
+    return count;
+}
+
+ssize_t File::pwrite(uint8_t* buffer, size_t count, off_t offset)
+{
+    size_t size =
+        ((static_cast<size_t>(offset) < buffer_size) ? buffer_size : offset) +
+        count;
+    // We always reallocate to make things simpler
+    uint8_t* new_buffer = new uint8_t[size];
+    String::memcpy(new_buffer, data, buffer_size);
+    String::memcpy(new_buffer + offset, buffer, count);
+    buffer_size = size;
+    data = new_buffer;
+    return count;
 }
 
 Directory::Directory(ino_t ino, dev_t dev, mode_t mode)

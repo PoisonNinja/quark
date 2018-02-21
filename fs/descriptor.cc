@@ -7,6 +7,7 @@ namespace Filesystem
 Descriptor::Descriptor(Ref<Vnode> vnode)
 {
     this->vnode = vnode;
+    current_offset = 0;
 }
 
 Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
@@ -27,6 +28,36 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
         ret = next_descriptor;
     }
     delete[] path;
+    return ret;
+}
+
+ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
+{
+    return vnode->pread(buffer, count, offset);
+}
+
+ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
+{
+    return vnode->pwrite(buffer, count, offset);
+}
+
+ssize_t Descriptor::read(uint8_t* buffer, size_t count)
+{
+    ssize_t ret = pread(buffer, count, current_offset);
+    if (ret > 0) {
+        // TODO: Properly handle overflows
+        current_offset += ret;
+    }
+    return ret;
+}
+
+ssize_t Descriptor::write(uint8_t* buffer, size_t count)
+{
+    ssize_t ret = pwrite(buffer, count, current_offset);
+    if (ret > 0) {
+        // TODO: Properly handle overflows
+        current_offset += ret;
+    }
     return ret;
 }
 }

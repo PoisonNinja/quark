@@ -35,6 +35,7 @@ public:
     Directory(ino_t ino, dev_t dev, mode_t mode);
     virtual ~Directory();
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;
+    virtual int mkdir(const char* name, mode_t mode) override;
 
 private:
     Ref<Inode> find_child(const char* name);

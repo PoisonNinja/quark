@@ -13,6 +13,7 @@ public:
     mode_t mode;
 
     virtual ~Inode(){};
+    virtual int mkdir(const char* name, mode_t mode) = 0;
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) = 0;
     virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset) = 0;
@@ -25,6 +26,7 @@ class BaseInode : public Inode
 public:
     BaseInode();
     virtual ~BaseInode();
+    virtual int mkdir(const char* name, mode_t mode);
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode);
     virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     virtual ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);

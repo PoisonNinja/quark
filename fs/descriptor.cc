@@ -10,6 +10,10 @@ Descriptor::Descriptor(Ref<Vnode> vnode)
     current_offset = 0;
 }
 
+int Descriptor::mkdir(const char* name, mode_t mode)
+{
+}
+
 Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 {
     char* path = String::strdup(name);

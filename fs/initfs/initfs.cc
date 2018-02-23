@@ -87,6 +87,14 @@ Ref<Inode> Directory::open(const char* name, int flags, mode_t mode)
     return child;
 }
 
+int Directory::mkdir(const char* name, mode_t mode)
+{
+    Ref<Directory> dir(new Directory(0, 0, mode));
+    InitFSNode* node = new InitFSNode(dir, name);
+    children.push_back(*node);
+    return 0;
+}
+
 Ref<Inode> Directory::find_child(const char* name)
 {
     for (auto& i : children) {

@@ -14,6 +14,11 @@ BaseInode::~BaseInode()
 {
 }
 
+int BaseInode::mkdir(const char*, mode_t)
+{
+    return -EBADF;
+}
+
 Ref<Inode> BaseInode::open(const char*, int, mode_t)
 {
     return Ref<Inode>(nullptr);

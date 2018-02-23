@@ -7,6 +7,11 @@ Vnode::Vnode(Ref<Inode> inode)
     this->inode = inode;
 }
 
+int Vnode::mkdir(const char* name, mode_t mode)
+{
+    return inode->mkdir(name, mode);
+}
+
 Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 {
     Ref<Inode> retinode = inode->open(name, flags, mode);

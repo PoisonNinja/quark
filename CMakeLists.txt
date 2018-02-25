@@ -68,7 +68,7 @@ include(${PLATFORM_FILE})
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdlibinc -nostdinc++ -Wall -Wextra -ffreestanding -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -fcolor-diagnostics")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -ffreestanding -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -fdiagnostics-color=always")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -DQUARK_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DQUARK_RELEASE")
 message(STATUS "CXXFLAGS: " ${CMAKE_CXX_FLAGS})
@@ -79,8 +79,6 @@ message(STATUS "LDFLAGS: " ${CMAKE_EXE_LINKER_FLAGS})
 set(INCLUDE_DIRS "${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include/")
 include_directories(${INCLUDE_DIRS})
 message(STATUS "Include directories: " ${INCLUDE_DIRS})
-
-set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINKER} <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 set(CREATE_ARCH_SYMLINK ${CMAKE_COMMAND} -E create_symlink ${ARCH_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/include/arch)
 execute_process(

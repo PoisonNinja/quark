@@ -291,6 +291,8 @@ int vsprintf(char *s, const char *format, va_list arg)
 {
     struct printf_data data = {
         .buffer = s,
+        .max = 0,
+        .used = 0,
         .putcf = sprintf_putcf,
     };
     printf_format(&data, format, arg);
@@ -313,6 +315,7 @@ int vsnprintf(char *s, size_t size, const char *format, va_list arg)
     struct printf_data data = {
         .buffer = s,
         .max = size,
+        .used = 0,
         .putcf = snprintf_putcf,
     };
     printf_format(&data, format, arg);

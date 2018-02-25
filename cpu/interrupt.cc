@@ -1,14 +1,14 @@
 #include <cpu/interrupt.h>
 #include <drivers/irqchip/irqchip.h>
 #include <kernel.h>
-#include <stdatomic.h>
+#include <atomic>
 
 namespace Interrupt
 {
 static List<Interrupt::Handler, &Interrupt::Handler::node>
     handlers[INTERRUPT_MAX];
 
-static _Atomic int interrupt_depth = 1;
+static std::atomic<int> interrupt_depth(1);
 
 extern void arch_disable();
 extern void arch_enable();

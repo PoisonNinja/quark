@@ -264,8 +264,10 @@ static void printf_format(struct printf_data *data, const char *format,
                     params.padding = 16;
                     lng = 2;
 #endif
+                    [[fallthrough]];
                 case 'X':
                     params.uppercase = 1;
+                    [[fallthrough]];
                 case 'x':
                     params.base = 16;
                     if (lng == 0)

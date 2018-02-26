@@ -21,6 +21,8 @@ inline int irq_to_interrupt(int irq)
 typedef void (*interrupt_handler_t)(int, void *, struct interrupt_ctx *);
 
 struct Handler {
+    Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
+        : handler(handler), dev_name(dev_name), dev_id(dev_id){};
     interrupt_handler_t handler;
     const char *dev_name;
     void *dev_id;

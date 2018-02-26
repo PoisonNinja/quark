@@ -19,9 +19,7 @@ static void interrupt_handler(int /* irq */, void* /* dev_id */,
     Time::tick(ctx);
 }
 
-static struct Interrupt::Handler handler {
-    .handler = interrupt_handler, .dev_name = NAME, .dev_id = &handler
-};
+static struct Interrupt::Handler handler(interrupt_handler, NAME, &handler);
 
 status_t Intel8253::schedule(time_t interval)
 {

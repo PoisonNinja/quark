@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fs/fs.h>
 #include <fs/initfs/initfs.h>
 #include <kernel.h>
@@ -71,6 +72,17 @@ Directory::~Directory()
         Log::printk(Log::WARNING,
                     "initfs directory freed, but children not freed.\n");
     }
+}
+
+int Directory::link(const char* name, Ref<Inode> node)
+{
+    Ref<Inode> child = find_child(name);
+    if (child) {
+        return -EEXIST;
+    }
+    InitFSNode* wrapper = new InitFSNode(node, name);
+    children.push_back(*wrapper);
+    return 0;
 }
 
 Ref<Inode> Directory::open(const char* name, int flags, mode_t mode)

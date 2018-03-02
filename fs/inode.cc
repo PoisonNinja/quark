@@ -14,6 +14,11 @@ BaseInode::~BaseInode()
 {
 }
 
+int BaseInode::link(const char*, Ref<Inode>)
+{
+    return -EBADF;
+}
+
 int BaseInode::mkdir(const char*, mode_t)
 {
     return -EBADF;

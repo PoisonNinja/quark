@@ -93,7 +93,7 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
     char* filename = basename(name);
     Ref<Descriptor> ret(this);
     while ((current = String::strtok_r(path, "/", &path))) {
-        Log::printk(Log::INFO, "%s\n", current);
+        Log::printk(Log::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags = flags;
         mode_t checked_mode = mode;
         if (String::strcmp(current, filename)) {

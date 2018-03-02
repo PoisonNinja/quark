@@ -13,6 +13,7 @@ public:
     mode_t mode;
 
     Vnode(Ref<Inode> inode);
+    int link(const char* name, Ref<Vnode> node);
     int mkdir(const char* name, mode_t mode);
     Ref<Vnode> open(const char* name, int flags, mode_t mode);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);

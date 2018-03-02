@@ -7,6 +7,11 @@ Vnode::Vnode(Ref<Inode> inode)
     this->inode = inode;
 }
 
+int Vnode::link(const char* name, Ref<Vnode> node)
+{
+    return this->inode->link(name, node->inode);
+}
+
 int Vnode::mkdir(const char* name, mode_t mode)
 {
     return inode->mkdir(name, mode);

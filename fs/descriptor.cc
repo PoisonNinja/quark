@@ -70,6 +70,22 @@ Descriptor::Descriptor(Ref<Vnode> vnode)
     current_offset = 0;
 }
 
+int Descriptor::link(const char* name, Ref<Descriptor> node)
+{
+    const char* dir = dirname(name);
+    const char* file = basename(name);
+    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+    if (!directory) {
+        delete[] dir;
+        delete[] file;
+        return -ENOENT;
+    }
+    int ret = directory->vnode->link(file, node->vnode);
+    delete[] dir;
+    delete[] file;
+    return ret;
+}
+
 int Descriptor::mkdir(const char* name, mode_t mode)
 {
     const char* dir = dirname(name);

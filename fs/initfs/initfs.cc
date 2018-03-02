@@ -62,7 +62,7 @@ Directory::Directory(ino_t ino, dev_t dev, mode_t mode)
 {
     this->ino = (ino) ? ino : reinterpret_cast<ino_t>(this);
     this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
-    this->mode = mode;
+    this->mode = mode | S_IFDIR;
 }
 
 Directory::~Directory()

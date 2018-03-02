@@ -14,7 +14,7 @@ public:
     mode_t mode;
 
     Descriptor(Ref<Vnode> vnode);
-    int Descriptor::mkdir(const char* name, mode_t mode);
+    int mkdir(const char* name, mode_t mode);
     Ref<Descriptor> open(const char* name, int flags, mode_t mode);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);

@@ -44,6 +44,15 @@ void *memchr(const void *str, int c, size_t n)
     return nullptr;
 }
 
+void *memrchr(const void *str, int c, size_t n) {
+    const uint8_t *d = (uint8_t*)str + n;
+    while (n--) {
+        if (*--d == (uint8_t)c)
+            return (void*)d;
+    }
+    return nullptr;
+}
+
 int memcmp(const void *str1, const void *str2, size_t n)
 {
     const uint8_t *a = (uint8_t *)str1, *b = (uint8_t *)str2;

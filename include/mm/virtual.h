@@ -15,6 +15,7 @@ namespace Virtual
 #define PAGE_COW 0x40
 
 bool map(addr_t v, addr_t p, int flags);
+bool map(addr_t v, addr_t p, size_t size, int flags);
 status_t clone();
 
 addr_t get_address_space_root();

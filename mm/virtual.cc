@@ -1,3 +1,4 @@
+#include <arch/mm/mm.h>
 #include <kernel.h>
 #include <mm/mm.h>
 #include <mm/virtual.h>
@@ -11,6 +12,16 @@ extern bool arch_map(addr_t v, addr_t p, int flags);
 bool map(addr_t v, addr_t p, int flags)
 {
     return Memory::Virtual::arch_map(v, p, flags);
+}
+
+bool map(addr_t v, addr_t p, size_t size, int flags)
+{
+    for (addr_t i = 0; i < Memory::Virtual::align_up(size); i += PAGE_SIZE) {
+        if (!map(v + i, p + i, flags)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 extern status_t arch_clone();

@@ -17,8 +17,8 @@ char* dirname(const char* path)
             slash = (const char*)String::memrchr(path, '/', slash - path);
         }
         size_t diff = slash - path;
-        if (!diff) {
-            return String::strdup("/");
+        if (!diff || !slash) {
+            return String::strdup(".");
         }
         char* ret = new char[diff + 1];
         String::memcpy(ret, path, diff);
@@ -46,7 +46,7 @@ char* basename(const char* path)
              * entire string was just /) and return /
              */
             if (terminate == path) {
-                return String::strdup("/");
+                return String::strdup(".");
             }
             // Set the location of the new slash
             slash = (const char*)String::memrchr(path, '/', terminate - path);
@@ -90,13 +90,15 @@ int Descriptor::mkdir(const char* name, mode_t mode)
 {
     const char* dir = dirname(name);
     const char* file = basename(name);
+    Log::printk(Log::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n", dir,
+                file);
     Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
         delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->mkdir(name, mode);
+    int ret = directory->vnode->mkdir(file, mode);
     delete[] dir;
     delete[] file;
     return ret;
@@ -117,8 +119,10 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
             mode = 0;
         }
         Ref<Vnode> next_vnode =
-            vnode->open(current, checked_flags, checked_mode);
+            ret->vnode->open(current, checked_flags, checked_mode);
         if (!next_vnode) {
+            Log::printk(Log::ERROR, "[descriptor->open] Failed to open %s\n",
+                        current);
             return Ref<Descriptor>(nullptr);
         }
         Ref<Descriptor> next_descriptor(new Descriptor(next_vnode));

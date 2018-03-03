@@ -7,3 +7,4 @@ target_sources(quark.kernel
 )
 
 add_subdirectory(initfs)
+add_subdirectory(initrd)

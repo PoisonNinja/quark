@@ -101,7 +101,13 @@ Ref<Inode> Directory::open(const char* name, int flags, mode_t mode)
 
 int Directory::mkdir(const char* name, mode_t mode)
 {
+    Ref<Inode> child = find_child(name);
+    if (child) {
+        return -EEXIST;
+    }
     Ref<Directory> dir(new Directory(0, 0, mode));
+    dir->link(".", dir);
+    dir->link("..", Ref<Directory>(this));
     InitFSNode* node = new InitFSNode(dir, name);
     children.push_back(*node);
     return 0;
@@ -109,7 +115,9 @@ int Directory::mkdir(const char* name, mode_t mode)
 
 Ref<Inode> Directory::find_child(const char* name)
 {
+    Log::printk(Log::DEBUG, "[find_child]: Looking for: %s\n", name);
     for (auto& i : children) {
+        Log::printk(Log::DEBUG, "[find_child]: %s\n", i.name);
         if (!String::strcmp(i.name, name)) {
             return i.inode;
         }

@@ -35,9 +35,20 @@ gdt_load:
     push r13      ;save current r13
     push r14      ;save current r14
     push r15      ;save current r15
+
+    mov ebp, ds
+    push rbp
+
+    mov bp, 0x10
+    mov ds, ebp
+    mov es, ebp
 %endmacro
 
 %macro POPA 0
+    pop rbp
+    mov ebp, ds
+    mov ebp, es
+
     pop r15      ;restore current r15
     pop r14      ;restore current r14
     pop r13      ;restore current r13

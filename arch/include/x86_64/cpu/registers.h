@@ -3,6 +3,7 @@
 #include <types.h>
 
 struct interrupt_ctx {
+    uint64_t ds;
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;

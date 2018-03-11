@@ -24,6 +24,9 @@ status_t arch_save_context(Thread* thread, struct interrupt_ctx* ctx)
     registers->r13 = ctx->r13;
     registers->rip = ctx->rip;
     registers->rflags = ctx->rflags;
+    registers->ss = ctx->ss;
+    registers->cs = ctx->cs;
+    registers->ds = ctx->ds;
     return SUCCESS;
 }
 
@@ -49,6 +52,9 @@ status_t arch_load_context(Thread* thread, struct interrupt_ctx* ctx)
     ctx->r13 = registers->r13;
     ctx->rip = registers->rip;
     ctx->rflags = registers->rflags;
+    ctx->ss = registers->ss;
+    ctx->cs = registers->cs;
+    ctx->ds = registers->ds;
     return SUCCESS;
 }
 

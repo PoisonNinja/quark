@@ -17,7 +17,13 @@ gdt_load:
     push rcx             ; new RIP
     iretq
 .reloadcs:
-	ret
+    ret
+
+global tss_load
+tss_load:
+    mov ax, (0x28 | 3)
+    ltr ax
+    ret
 
 %macro PUSHA 0
     push rax      ;save current rax

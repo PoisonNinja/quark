@@ -16,6 +16,7 @@ namespace GDT
 #define FLAG_4KIB (1 << 3)
 
 extern "C" void gdt_load(addr_t);
+extern "C" void tss_load();
 
 static struct GDT::Entry entries[NUM_ENTRIES];
 static struct GDT::Descriptor descriptor = {
@@ -77,6 +78,7 @@ void init()
                    FLAG_LONG | FLAG_4KIB);
     GDT::write_tss(&entries[5], &entries[6], &tss, 0x0);
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
+    GDT::tss_load();
 }
 }  // namespace GDT
 

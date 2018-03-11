@@ -19,6 +19,7 @@ public:
     virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual ssize_t read(uint8_t* buffer, size_t count) = 0;
+    virtual int stat(struct stat* st) = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count) = 0;
 };
 
@@ -33,6 +34,12 @@ public:
     virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     virtual ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
     virtual ssize_t read(uint8_t* buffer, size_t count);
+    virtual int stat(struct stat* st);
     virtual ssize_t write(uint8_t* buffer, size_t count);
+
+protected:
+    size_t size;
+    uid_t uid;
+    gid_t gid;
 };
 }

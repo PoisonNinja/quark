@@ -155,6 +155,11 @@ ssize_t Descriptor::read(uint8_t* buffer, size_t count)
     return ret;
 }
 
+int Descriptor::stat(struct stat* st)
+{
+    return vnode->stat(st);
+}
+
 ssize_t Descriptor::write(uint8_t* buffer, size_t count)
 {
     ssize_t ret = pwrite(buffer, count, current_offset);

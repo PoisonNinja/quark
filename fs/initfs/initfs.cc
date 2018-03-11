@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fs/fs.h>
 #include <fs/initfs/initfs.h>
+#include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
 
@@ -24,6 +25,9 @@ File::File(ino_t ino, dev_t dev, mode_t mode)
     this->ino = (ino) ? ino : reinterpret_cast<ino_t>(this);
     this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
     this->mode = mode;
+    this->size = 0;
+    this->uid = 0;
+    this->gid = 0;
     // Allocate when actually used
     data = nullptr;
     buffer_size = 0;
@@ -55,6 +59,7 @@ ssize_t File::pwrite(uint8_t* buffer, size_t count, off_t offset)
         buffer_size = new_buffer_size;
         data = new_buffer;
     }
+    this->size = buffer_size;
     String::memcpy(data + offset, buffer, count);
     return count;
 }

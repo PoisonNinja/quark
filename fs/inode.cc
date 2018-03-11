@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fs/inode.h>
+#include <fs/stat.h>
 
 namespace Filesystem
 {
@@ -42,6 +43,12 @@ ssize_t BaseInode::pwrite(uint8_t*, size_t, off_t)
 ssize_t BaseInode::read(uint8_t*, size_t)
 {
     return -EBADF;
+}
+
+int BaseInode::stat(struct stat* st)
+{
+    st->st_size = size;
+    return 0;
 }
 
 ssize_t BaseInode::write(uint8_t*, size_t)

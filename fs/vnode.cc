@@ -41,6 +41,11 @@ ssize_t Vnode::read(uint8_t* buffer, size_t count)
     return inode->read(buffer, count);
 }
 
+int Vnode::stat(struct stat* st)
+{
+    return inode->stat(st);
+}
+
 ssize_t Vnode::write(uint8_t* buffer, size_t count)
 {
     return inode->write(buffer, count);

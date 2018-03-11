@@ -26,7 +26,7 @@ bool map(addr_t v, addr_t p, size_t size, int flags)
 
 extern status_t arch_clone();
 
-status_t clone()
+addr_t clone()
 {
     return arch_clone();
 }

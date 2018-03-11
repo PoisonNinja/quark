@@ -78,7 +78,7 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
     }
 }
 
-status_t arch_clone()
+addr_t arch_clone()
 {
     // Fractal mapping address of original PML4
     struct page_table* old_pml4 =
@@ -140,7 +140,7 @@ status_t arch_clone()
                 i);
         }
     }
-    return SUCCESS;
+    return fork_pml4_phys;
 }
 }
 }

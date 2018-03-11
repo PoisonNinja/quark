@@ -126,7 +126,7 @@ void init()
     IDT::set_entry(&entries[47], reinterpret_cast<uint64_t>(irq15), 0x08, 0x8E);
 
     IDT::set_entry(&entries[0x80], reinterpret_cast<uint64_t>(isr128), 0x08,
-                   0x8E);
+                   0xEE);
 
     IDT::idt_load(reinterpret_cast<addr_t>(&descriptor));
 }

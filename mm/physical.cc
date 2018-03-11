@@ -15,7 +15,7 @@ static void expand_stack()
 {
     addr_t phys = Memory::Physical::get();
     addr_t virt = reinterpret_cast<addr_t>(STACK + stack_size);
-    Memory::Virtual::map(virt, phys, PAGE_PRESENT | PAGE_WRITABLE);
+    Memory::Virtual::map(virt, phys, PAGE_WRITABLE);
     stack_size += Memory::Virtual::PAGE_SIZE / sizeof(addr_t);
 }
 

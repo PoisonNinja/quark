@@ -36,7 +36,7 @@ void load(addr_t binary, Thread* thread)
             for (size_t i = 0; i < phdr->p_filesz;
                  i += Memory::Virtual::PAGE_SIZE) {
                 Memory::Virtual::map(i + phdr->p_vaddr, Memory::Physical::get(),
-                                     PAGE_PRESENT | PAGE_USER | PAGE_WRITABLE);
+                                     PAGE_USER | PAGE_WRITABLE);
                 String::memset(reinterpret_cast<void*>(i + phdr->p_vaddr), 0,
                                Memory::Virtual::PAGE_SIZE);
                 String::memcpy(
@@ -48,7 +48,7 @@ void load(addr_t binary, Thread* thread)
     }
     addr_t phys_stack = Memory::Physical::get();
     Memory::Virtual::map(0x1000, phys_stack,
-                         PAGE_PRESENT | PAGE_WRITABLE | PAGE_USER);
+                         PAGE_WRITABLE | PAGE_USER);
     String::memset((void*)0x1000, 0, 4096);
     String::memset(&thread->cpu_ctx, 0, sizeof(thread->cpu_ctx));
     Log::printk(Log::DEBUG, "Entry point: %p\n", header->e_entry);

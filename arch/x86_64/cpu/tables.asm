@@ -52,8 +52,8 @@ tss_load:
 
 %macro POPA 0
     pop rbp
-    mov ebp, ds
-    mov ebp, es
+    mov ds, ebp
+    mov es, ebp
 
     pop r15      ;restore current r15
     pop r14      ;restore current r14

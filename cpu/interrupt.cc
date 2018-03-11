@@ -32,7 +32,7 @@ void dispatch(int int_no, struct interrupt_ctx* ctx)
 {
     if (handlers[int_no].empty()) {
         if (int_no < 32) {
-            Kernel::panic("Unhandled exception #%d\n", int_no);
+            Kernel::panic("Unhandled exception #%d, error code 0x%X\n", int_no, ctx->err_code);
         }
     } else {
         for (auto& handler : handlers[int_no]) {

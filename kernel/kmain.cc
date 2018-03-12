@@ -38,8 +38,14 @@ void init_go()
     ELF::load(reinterpret_cast<addr_t>(init_raw), thread);
     Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
     Scheduler::insert(thread);
-    for (;;)
-        __asm__("hlt");
+    // Commit suicide
+    if (!Scheduler::remove(Scheduler::get_current_thread())) {
+        Log::printk(Log::WARNING, "Failed to deschedule kinit\n");
+    }
+    for (;;) {
+        // Loop until we're descheduled
+        asm("hlt");
+    }
 }
 
 void kmain(struct Boot::info& info)

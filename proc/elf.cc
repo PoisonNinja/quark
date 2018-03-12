@@ -26,13 +26,13 @@ void load(addr_t binary, Thread* thread)
             binary + header->e_phoff + (header->e_phentsize * i));
         Log::printk(Log::DEBUG, "Header type: %X\n", phdr->p_type);
         if (phdr->p_type == PT_LOAD) {
-            Log::printk(Log::DEBUG, "Flags: %X\n", phdr->p_flags);
-            Log::printk(Log::DEBUG, "Offset: %p\n", phdr->p_offset);
-            Log::printk(Log::DEBUG, "Virtual address: %p\n", phdr->p_vaddr);
+            Log::printk(Log::DEBUG, "Flags:            %X\n", phdr->p_flags);
+            Log::printk(Log::DEBUG, "Offset:           %p\n", phdr->p_offset);
+            Log::printk(Log::DEBUG, "Virtual address:  %p\n", phdr->p_vaddr);
             Log::printk(Log::DEBUG, "Physical address: %p\n", phdr->p_paddr);
-            Log::printk(Log::DEBUG, "File size: %llX\n", phdr->p_filesz);
-            Log::printk(Log::DEBUG, "Memory size: %llX\n", phdr->p_memsz);
-            Log::printk(Log::DEBUG, "Align: %p\n", phdr->p_align);
+            Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
+            Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
+            Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
             for (size_t i = 0; i < phdr->p_filesz;
                  i += Memory::Virtual::PAGE_SIZE) {
                 Memory::Virtual::map(i + phdr->p_vaddr, Memory::Physical::get(),

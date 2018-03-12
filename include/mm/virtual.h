@@ -17,7 +17,7 @@ namespace Virtual
 
 bool map(addr_t v, addr_t p, int flags);
 bool map(addr_t v, addr_t p, size_t size, int flags);
-addr_t clone();
+addr_t fork();
 
 addr_t get_address_space_root();
 void set_address_space_root(addr_t root);

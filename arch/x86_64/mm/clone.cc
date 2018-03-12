@@ -78,7 +78,7 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
     }
 }
 
-addr_t arch_clone()
+addr_t arch_fork()
 {
     // Fractal mapping address of original PML4
     struct page_table* old_pml4 =

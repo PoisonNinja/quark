@@ -24,11 +24,11 @@ bool map(addr_t v, addr_t p, size_t size, int flags)
     return true;
 }
 
-extern status_t arch_clone();
+extern status_t arch_fork();
 
-addr_t clone()
+addr_t fork()
 {
-    return arch_clone();
+    return arch_fork();
 }
 
 extern addr_t arch_get_address_space_root();

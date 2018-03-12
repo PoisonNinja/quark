@@ -15,7 +15,7 @@
 
 void init_go()
 {
-    addr_t cloned = Memory::Virtual::clone();
+    addr_t cloned = Memory::Virtual::fork();
     Process* initp = new Process(nullptr);
     initp->root = Scheduler::get_current_process()->root;
     initp->cwd = Scheduler::get_current_process()->cwd;

@@ -2,7 +2,7 @@
 
 #include <arch/types.h>
 
-typedef enum { SUCCESS, FAILURE } status_t;
+typedef enum { FAILURE, SUCCESS } status_t;
 
 typedef int32_t pid_t;
 typedef int32_t tid_t;

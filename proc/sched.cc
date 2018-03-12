@@ -49,19 +49,22 @@ void tick(struct interrupt_ctx* ctx)
 {
     if (current_thread) {
         save_context(current_thread, ctx);
-        runnable.push_back(*current_thread);
     }
     if (runnable.empty()) {
         load_context(kidle, ctx);
+        current_thread = kidle;
         return;
     }
     Thread& next = runnable.front();
     remove(&next);
+    runnable.push_back(next);
     if (current_thread) {
         if (current_thread->parent->address_space !=
             next.parent->address_space) {
             Memory::Virtual::set_address_space_root(next.parent->address_space);
         }
+    } else {
+        Memory::Virtual::set_address_space_root(next.parent->address_space);
     }
     load_context(&next, ctx);
     current_thread = &next;
@@ -91,5 +94,10 @@ void init()
 Process* get_current_process()
 {
     return current_thread->parent;
+}
+
+Thread* get_current_thread()
+{
+    return current_thread;
 }
 }

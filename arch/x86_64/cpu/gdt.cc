@@ -48,13 +48,12 @@ static void set_entry(struct GDT::Entry *entry, uint32_t base, uint32_t limit,
 }
 
 static void write_tss(struct GDT::Entry *gdt1, struct GDT::Entry *gdt2,
-                      struct TSS::Entry *tss, addr_t rsp0)
+                      struct TSS::Entry *tss)
 {
     uint64_t base = (uint64_t)tss;
     uint32_t limit = sizeof(struct TSS::Entry);
     GDT::set_entry(gdt1, base, limit, 0xE9, 0);
     GDT::set_entry(gdt2, (base >> 48) & 0xFFFF, (base >> 32) & 0xFFFF, 0, 0);
-    tss->stack0 = rsp0;  // Set the kernel stack pointer.
 }
 
 void init()
@@ -76,7 +75,7 @@ void init()
                    ACCESS_PRESENT(1) | ACCESS_PRIVL(3) | ACCESS_MANDATORY(1) |
                        ACCESS_DATA(0, 1),
                    FLAG_LONG | FLAG_4KIB);
-    GDT::write_tss(&entries[5], &entries[6], &tss, 0x0);
+    GDT::write_tss(&entries[5], &entries[6], &tss);
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
     GDT::tss_load();
 }

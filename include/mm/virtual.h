@@ -13,6 +13,7 @@ namespace Virtual
 #define PAGE_NX 0x8
 #define PAGE_HUGE 0x10
 #define PAGE_COW 0x20
+#define PAGE_MMAP 0x40
 
 bool map(addr_t v, addr_t p, int flags);
 bool map(addr_t v, addr_t p, size_t size, int flags);

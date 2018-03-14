@@ -54,6 +54,20 @@ addr_t load(addr_t binary)
             }
         }
     }
+    for (int i = 0; i < header->e_shnum; i++) {
+        struct elf64_shdr* shdr = reinterpret_cast<struct elf64_shdr*>(
+            binary + header->e_shoff + (header->e_shentsize * i));
+        if (shdr->sh_type == SHT_NOBITS) {
+            if (!shdr->sh_size)
+                continue;
+            if (shdr->sh_flags & SHF_ALLOC) {
+                Log::printk(Log::DEBUG, "Found .bss section, asking for %p\n",
+                            shdr->sh_addr);
+                String::memset(reinterpret_cast<void*>(shdr->sh_addr), 0,
+                               shdr->sh_size);
+            }
+        }
+    }
     Log::printk(Log::DEBUG, "Entry point: %p\n", header->e_entry);
     // TODO: More sanity checks
     return header->e_entry;

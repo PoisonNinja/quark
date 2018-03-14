@@ -16,6 +16,8 @@ public:
     Thread(Process *p);
     ~Thread();
     void load(addr_t entry);
+    status_t save_context(struct interrupt_ctx *ctx);
+    status_t load_context(struct interrupt_ctx *ctx);
     tid_t tid;
     ThreadState state;
     struct thread_ctx cpu_ctx;
@@ -24,9 +26,6 @@ public:
     Node<Thread> scheduler_node;
     Process *parent;
 };
-
-status_t save_context(Thread *thread, struct interrupt_ctx *ctx);
-status_t load_context(Thread *thread, struct interrupt_ctx *ctx);
 
 void set_stack(addr_t stack);
 addr_t get_stack();

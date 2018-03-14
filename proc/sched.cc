@@ -48,10 +48,10 @@ status_t remove(Thread* thread)
 void tick(struct interrupt_ctx* ctx)
 {
     if (current_thread) {
-        save_context(current_thread, ctx);
+        current_thread->save_context(ctx);
     }
     if (runnable.empty()) {
-        load_context(kidle, ctx);
+        kidle->load_context(ctx);
         current_thread = kidle;
         return;
     }
@@ -66,7 +66,7 @@ void tick(struct interrupt_ctx* ctx)
     } else {
         Memory::Virtual::set_address_space_root(next.parent->address_space);
     }
-    load_context(&next, ctx);
+    next.load_context(ctx);
     current_thread = &next;
 }
 

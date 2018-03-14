@@ -1,13 +1,16 @@
 #include <arch/cpu/gdt.h>
 #include <cpu/interrupt.h>
+#include <lib/string.h>
+#include <mm/physical.h>
+#include <mm/virtual.h>
 #include <proc/thread.h>
 
-status_t arch_save_context(Thread* thread, struct interrupt_ctx* ctx)
+status_t Thread::save_context(struct interrupt_ctx* ctx)
 {
-    if (!thread || !ctx) {
+    if (!ctx) {
         return FAILURE;
     }
-    struct thread_ctx* registers = &thread->cpu_ctx;
+    struct thread_ctx* registers = &cpu_ctx;
     registers->rax = ctx->rax;
     registers->rbx = ctx->rbx;
     registers->rcx = ctx->rcx;
@@ -30,12 +33,13 @@ status_t arch_save_context(Thread* thread, struct interrupt_ctx* ctx)
     return SUCCESS;
 }
 
-status_t arch_load_context(Thread* thread, struct interrupt_ctx* ctx)
+status_t Thread::load_context(struct interrupt_ctx* ctx)
 {
-    if (!thread || !ctx) {
+    set_stack(kernel_stack);
+    if (!ctx) {
         return FAILURE;
     }
-    struct thread_ctx* registers = &thread->cpu_ctx;
+    struct thread_ctx* registers = &cpu_ctx;
     ctx->rax = registers->rax;
     ctx->rbx = registers->rbx;
     ctx->rcx = registers->rcx;
@@ -56,6 +60,21 @@ status_t arch_load_context(Thread* thread, struct interrupt_ctx* ctx)
     ctx->cs = registers->cs;
     ctx->ds = registers->ds;
     return SUCCESS;
+}
+
+void Thread::load(addr_t entry)
+{
+    addr_t phys_stack = Memory::Physical::allocate();
+    Memory::Virtual::map(0x1000, phys_stack, PAGE_WRITABLE | PAGE_USER);
+    String::memset((void*)0x1000, 0, 4096);
+    String::memset(&cpu_ctx, 0, sizeof(cpu_ctx));
+    cpu_ctx.rip = entry;
+    cpu_ctx.cs = 0x18 | 3;
+    cpu_ctx.ds = 0x20 | 3;
+    cpu_ctx.ss = 0x20 | 3;
+    cpu_ctx.rsp = cpu_ctx.rbp = 0x2000;
+    cpu_ctx.rflags = 0x200;
+    kernel_stack = reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
 }
 
 void arch_set_stack(addr_t stack)

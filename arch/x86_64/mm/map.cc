@@ -58,7 +58,7 @@ bool arch_map(addr_t v, addr_t p, int flags)
     }
     __set_flags(&pt->pages[PT_INDEX(v)], flags);
     pt->pages[PT_INDEX(v)].address = p / 0x1000;
-    return r;
+    return SUCCESS;
 }
 }  // namespace Virtual
 }  // namespace Memory

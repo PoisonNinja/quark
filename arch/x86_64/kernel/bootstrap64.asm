@@ -5,6 +5,10 @@ extern asm_to_cxx_trampoline
 
 global bootstrap64
 bootstrap64:
+    mov rax, cr3
+    mov [rax], dword 0x0
+    mov cr3, rax
+
     ; From here on out, we are running instructions
     ; within the higher half (0xffffffff80000000 ... )
 

@@ -5,10 +5,6 @@ extern asm_to_cxx_trampoline
 
 global bootstrap64
 bootstrap64:
-    mov rax, cr3
-    mov [rax], dword 0x0
-    mov cr3, rax
-
     ; From here on out, we are running instructions
     ; within the higher half (0xffffffff80000000 ... )
 
@@ -30,6 +26,11 @@ bootstrap64:
     ; push the parameters (just in case)
     push rsi
     push rdi
+
+    ; Unmap the lower half
+    mov rax, cr3
+    mov [rax], dword 0x0
+    mov cr3, rax
 
     ; Call x86_64 initialization function
     call asm_to_cxx_trampoline

@@ -41,16 +41,14 @@ addr_t load(addr_t binary)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX;
             }
-            for (size_t i = 0; i < phdr->p_filesz;
+            for (size_t i = 0; i < phdr->p_memsz;
                  i += Memory::Virtual::PAGE_SIZE) {
                 Memory::Virtual::map(i + phdr->p_vaddr,
                                      Memory::Physical::allocate(), flags);
-                String::memset(reinterpret_cast<void*>(i + phdr->p_vaddr), 0,
-                               Memory::Virtual::PAGE_SIZE);
                 String::memcpy(
                     reinterpret_cast<void*>(i + phdr->p_vaddr),
                     reinterpret_cast<void*>(binary + i + phdr->p_offset),
-                    Memory::Virtual::PAGE_SIZE);
+                    phdr->p_memsz);
             }
         }
     }

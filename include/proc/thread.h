@@ -15,6 +15,7 @@ class Thread
 public:
     Thread(Process *p);
     ~Thread();
+    void load(addr_t entry);
     tid_t tid;
     ThreadState state;
     struct thread_ctx cpu_ctx;

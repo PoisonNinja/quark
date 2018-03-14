@@ -4,7 +4,6 @@
 #include <fs/initrd/initrd.h>
 #include <fs/stat.h>
 #include <kernel.h>
-#include <proc/syscall.h>
 #include <kernel/time/time.h>
 #include <kernel/version.h>
 #include <lib/string.h>
@@ -12,6 +11,7 @@
 #include <mm/virtual.h>
 #include <proc/elf.h>
 #include <proc/sched.h>
+#include <proc/syscall.h>
 
 void init_go()
 {
@@ -35,7 +35,8 @@ void init_go()
     Log::printk(Log::DEBUG, "init binary has size of %llu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
-    ELF::load(reinterpret_cast<addr_t>(init_raw), thread);
+    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw));
+    thread->load(entry);
     Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
     Scheduler::insert(thread);
     // Commit suicide

@@ -20,7 +20,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
         if (old_pt->pages[i].present) {
             String::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
-            addr_t new_page = Memory::Physical::get();
+            addr_t new_page = Memory::Physical::allocate();
             new_pt->pages[i].address = new_page / 0x1000;
             /*
              * Map the new page into a page that we control so we can copy
@@ -47,7 +47,7 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
         if (old_pd->pages[i].present) {
             String::memcpy(&new_pd->pages[i], &old_pd->pages[i],
                            sizeof(struct page));
-            addr_t new_pt = Memory::Physical::get();
+            addr_t new_pt = Memory::Physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
             __copy_pt_entry((struct page_table*)Memory::X64::decode_fractal(
                                 COPY_ENTRY, pml4_index, pdpt_index, i),
@@ -66,7 +66,7 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
         if (old_pdpt->pages[i].present) {
             String::memcpy(&new_pdpt->pages[i], &old_pdpt->pages[i],
                            sizeof(struct page));
-            addr_t new_pd = Memory::Physical::get();
+            addr_t new_pd = Memory::Physical::allocate();
             new_pdpt->pages[i].address = new_pd / 0x1000;
             __copy_pd_entry(
                 (struct page_table*)Memory::X64::decode_fractal(
@@ -95,7 +95,7 @@ addr_t arch_fork()
         (struct page_table*)Memory::X64::decode_fractal(
             COPY_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
     // Allocate a new page for the PML4
-    addr_t fork_pml4_phys = Memory::Physical::get();
+    addr_t fork_pml4_phys = Memory::Physical::allocate();
     /*
      * Map the new PML4 into a page that we control, which we reserved
      * using fork_page. This is so we can set up the fractal mapping
@@ -129,7 +129,7 @@ addr_t arch_fork()
             String::memcpy(&new_pml4->pages[i], &old_pml4->pages[i],
                            sizeof(struct page));
             // Allocate a new PDPT
-            addr_t new_pdpt = Memory::Physical::get();
+            addr_t new_pdpt = Memory::Physical::allocate();
             // Set the page address
             new_pml4->pages[i].address = new_pdpt / 0x1000;
             __copy_pdpt_entry(

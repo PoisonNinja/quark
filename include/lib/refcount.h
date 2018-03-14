@@ -67,13 +67,13 @@ public:
         if (obj)
             obj->increment_refcount();
     }
-    Ref(const Ref<T>& r) : obj(r.get())
+    Ref(const Ref<T>& r) : obj(r.allocate())
     {
         if (obj)
             obj->increment_refcount();
     }
     template <class U>
-    Ref(const Ref<U>& r) : obj(r.get())
+    Ref(const Ref<U>& r) : obj(r.allocate())
     {
         if (obj)
             obj->increment_refcount();
@@ -86,13 +86,13 @@ public:
 
     Ref& operator=(const Ref r)
     {
-        if (obj == r.get())
+        if (obj == r.allocate())
             return *this;
         if (obj) {
             obj->decrement_refcount();
             obj = NULL;
         }
-        if ((obj = r.get()))
+        if ((obj = r.allocate()))
             obj->increment_refcount();
         return *this;
     }
@@ -100,32 +100,32 @@ public:
     template <class U>
     Ref operator=(const Ref<U> r)
     {
-        if (obj == r.get())
+        if (obj == r.allocate())
             return *this;
         if (obj) {
             obj->decrement_refcount();
             obj = NULL;
         }
-        if ((obj = r.get()))
+        if ((obj = r.allocate()))
             obj->increment_refcount();
         return *this;
     }
 
     bool operator==(const Ref& other)
     {
-        return (*this).get() == other.get();
+        return (*this).allocate() == other.allocate();
     }
 
     template <class U>
     bool operator==(const Ref<U>& other)
     {
-        return (*this).get() == other.get();
+        return (*this).allocate() == other.allocate();
     }
 
     template <class U>
     bool operator==(const U* const& other)
     {
-        return (*this).get() == other;
+        return (*this).allocate() == other;
     }
 
     bool operator!=(const Ref& other)
@@ -151,7 +151,7 @@ public:
             obj->decrement_refcount();
         obj = NULL;
     }
-    T* get() const
+    T* allocate() const
     {
         return obj;
     }

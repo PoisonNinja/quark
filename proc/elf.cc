@@ -35,7 +35,7 @@ void load(addr_t binary, Thread* thread)
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
             for (size_t i = 0; i < phdr->p_filesz;
                  i += Memory::Virtual::PAGE_SIZE) {
-                Memory::Virtual::map(i + phdr->p_vaddr, Memory::Physical::get(),
+                Memory::Virtual::map(i + phdr->p_vaddr, Memory::Physical::allocate(),
                                      PAGE_USER | PAGE_WRITABLE);
                 String::memset(reinterpret_cast<void*>(i + phdr->p_vaddr), 0,
                                Memory::Virtual::PAGE_SIZE);
@@ -46,7 +46,7 @@ void load(addr_t binary, Thread* thread)
             }
         }
     }
-    addr_t phys_stack = Memory::Physical::get();
+    addr_t phys_stack = Memory::Physical::allocate();
     Memory::Virtual::map(0x1000, phys_stack,
                          PAGE_WRITABLE | PAGE_USER);
     String::memset((void*)0x1000, 0, 4096);

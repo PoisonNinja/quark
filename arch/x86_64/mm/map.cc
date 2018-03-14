@@ -11,7 +11,7 @@ namespace Virtual
 static inline int __set_address(struct Memory::Virtual::page* page)
 {
     if (!page->present) {
-        page->address = Memory::Physical::get() / 0x1000;
+        page->address = Memory::Physical::allocate() / 0x1000;
         return 1;
     }
     return 0;

@@ -11,7 +11,7 @@ static void *map_heap(size_t size)
 {
     size *= Memory::Virtual::PAGE_SIZE;
     for (size_t i = 0; i < size; i += Memory::Virtual::PAGE_SIZE) {
-        Memory::Virtual::map(heap_end + i, Memory::Physical::get(),
+        Memory::Virtual::map(heap_end + i, Memory::Physical::allocate(),
                              PAGE_WRITABLE);
     }
     heap_end += size;

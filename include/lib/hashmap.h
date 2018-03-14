@@ -97,7 +97,7 @@ public:
         }
     }
 
-    bool get(const K &key, V &value)
+    bool allocate(const K &key, V &value)
     {
         unsigned long hashValue = hash(key);
         HashNode<K, V> *entry = table[hashValue];
@@ -114,7 +114,7 @@ public:
         return false;
     }
 
-    void put(const K &key, const V &value)
+    void free(const K &key, const V &value)
     {
         unsigned long hashValue = hash(key);
         HashNode<K, V> *prev = NULL;

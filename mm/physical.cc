@@ -13,20 +13,20 @@ static size_t stack_size = Memory::Virtual::PAGE_SIZE / sizeof(addr_t);
 
 static void expand_stack()
 {
-    addr_t phys = Memory::Physical::get();
+    addr_t phys = Memory::Physical::allocate();
     addr_t virt = reinterpret_cast<addr_t>(STACK + stack_size);
     Memory::Virtual::map(virt, phys, PAGE_WRITABLE);
     stack_size += Memory::Virtual::PAGE_SIZE / sizeof(addr_t);
 }
 
-addr_t get()
+addr_t allocate()
 {
     addr_t result = STACK[--stack_used];
     // TODO: Perform sanity checks
     return result;
 }
 
-void put(addr_t address)
+void free(addr_t address)
 {
     // TODO: Round address
     if (stack_used == stack_size) {
@@ -38,7 +38,7 @@ void put(addr_t address)
 void put_range(addr_t base, size_t size)
 {
     for (addr_t i = base; i < base + size; i += Memory::Virtual::PAGE_SIZE) {
-        Memory::Physical::put(i);
+        Memory::Physical::free(i);
     }
 }
 }  // namespace Physical

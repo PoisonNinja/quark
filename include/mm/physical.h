@@ -6,8 +6,8 @@ namespace Memory
 {
 namespace Physical
 {
-addr_t get();
-void put(addr_t address);
+addr_t allocate();
+void free(addr_t address);
 
 void put_range(addr_t base, size_t size);
 }  // namespace Physical

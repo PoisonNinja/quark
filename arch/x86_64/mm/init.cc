@@ -47,7 +47,7 @@ void arch_init(struct Boot::info &info)
                                 Log::printk(Log::DEBUG, "        Rejected %p\n",
                                             i);
                             } else {
-                                Memory::Physical::put(i);
+                                Memory::Physical::free(i);
                             }
                         }
                     }

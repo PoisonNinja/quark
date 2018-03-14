@@ -34,11 +34,17 @@ addr_t load(addr_t binary)
             Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
             Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
+            int flags = PAGE_USER;
+            if (phdr->p_flags & PF_W) {
+                flags |= PAGE_WRITABLE;
+            }
+            if (!(phdr->p_flags & PF_X)) {
+                flags |= PAGE_NX;
+            }
             for (size_t i = 0; i < phdr->p_filesz;
                  i += Memory::Virtual::PAGE_SIZE) {
                 Memory::Virtual::map(i + phdr->p_vaddr,
-                                     Memory::Physical::allocate(),
-                                     PAGE_USER | PAGE_WRITABLE);
+                                     Memory::Physical::allocate(), flags);
                 String::memset(reinterpret_cast<void*>(i + phdr->p_vaddr), 0,
                                Memory::Virtual::PAGE_SIZE);
                 String::memcpy(

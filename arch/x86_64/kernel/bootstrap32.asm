@@ -83,7 +83,7 @@ align 4096
 pml1:
     %assign i 0
     %rep 512*25
-    dq (i << 12) | 0x087
+    dq (i << 12) | 0x083
     %assign i i+1
     %endrep
 

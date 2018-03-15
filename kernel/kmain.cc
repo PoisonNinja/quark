@@ -36,7 +36,15 @@ void init_go()
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
     addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw));
-    thread->load(entry);
+    int argc = 1;
+    const char* argv[] = {
+        "/sbin/init",
+    };
+    int envc = 1;
+    const char* envp[] = {
+        "hello=world",
+    };
+    thread->load(entry, argc, argv, envc, envp);
     Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
     Scheduler::insert(thread);
     // Commit suicide

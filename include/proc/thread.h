@@ -15,7 +15,8 @@ class Thread
 public:
     Thread(Process *p);
     ~Thread();
-    void load(addr_t entry);
+    void load(addr_t entry, int argc, const char *argv[], int envc,
+              const char *envp[]);
     status_t save_context(struct interrupt_ctx *ctx);
     status_t load_context(struct interrupt_ctx *ctx);
     tid_t tid;

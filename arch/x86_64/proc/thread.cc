@@ -62,13 +62,18 @@ status_t Thread::load_context(struct interrupt_ctx* ctx)
     return SUCCESS;
 }
 
-void Thread::load(addr_t entry)
+void Thread::load(addr_t entry, int argc, const char* argv[], int envc,
+                  const char* envp[])
 {
     addr_t phys_stack = Memory::Physical::allocate();
     Memory::Virtual::map(0x1000, phys_stack, PAGE_WRITABLE | PAGE_USER);
     String::memset((void*)0x1000, 0, 4096);
     String::memset(&cpu_ctx, 0, sizeof(cpu_ctx));
     cpu_ctx.rip = entry;
+    cpu_ctx.rdi = argc;
+    cpu_ctx.rsi = reinterpret_cast<uint64_t>(argv);
+    cpu_ctx.rdx = envc;
+    cpu_ctx.rcx = reinterpret_cast<uint64_t>(envp);
     cpu_ctx.cs = 0x18 | 3;
     cpu_ctx.ds = 0x20 | 3;
     cpu_ctx.ss = 0x20 | 3;

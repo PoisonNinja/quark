@@ -2,6 +2,7 @@
 
 #include <arch/proc/registers.h>
 #include <lib/list.h>
+#include <mm/section.h>
 #include <types.h>
 
 struct interrupt_ctx;
@@ -15,7 +16,7 @@ class Thread
 public:
     Thread(Process *p);
     ~Thread();
-    void load(addr_t entry, int argc, const char *argv[], int envc,
+    bool load(addr_t entry, int argc, const char *argv[], int envc,
               const char *envp[]);
     status_t save_context(struct interrupt_ctx *ctx);
     status_t load_context(struct interrupt_ctx *ctx);
@@ -25,6 +26,7 @@ public:
     addr_t kernel_stack;
     Node<Thread> process_node;
     Node<Thread> scheduler_node;
+    Memory::SectionManager *sections;
     Process *parent;
 };
 

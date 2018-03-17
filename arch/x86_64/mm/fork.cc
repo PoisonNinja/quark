@@ -118,9 +118,7 @@ addr_t arch_fork()
     old_pml4->pages[COPY_ENTRY].writable = 1;
     old_pml4->pages[COPY_ENTRY].address = fork_pml4_phys / 0x1000;
 
-    // Flush the entire TLB by reloading cr3
-    // TODO: Use invlpg
-    Memory::X64::write_cr3(Memory::X64::read_cr3());
+    Memory::X64::invlpg(old_pml4);
 
     // Copy only user pages
     for (int i = 0; i < 256; i++) {

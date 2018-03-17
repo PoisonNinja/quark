@@ -6,17 +6,10 @@
 
 namespace ELF
 {
-addr_t add(void* base, size_t offset)
-{
-    return reinterpret_cast<addr_t>(base) + offset;
-}
-
-static char magic[] = {0x7F, 'E', 'L', 'F'};
-
-addr_t load(addr_t binary)
+addr_t load(addr_t binary, Thread* thread)
 {
     struct elf64_hdr* header = reinterpret_cast<struct elf64_hdr*>(binary);
-    if (String::memcmp(header->e_ident, magic, 4)) {
+    if (String::memcmp(header->e_ident, ELFMAG, 4)) {
         Log::printk(Log::ERROR, "Binary passed in is not an ELF file!\n");
         return 0;
     }
@@ -34,6 +27,7 @@ addr_t load(addr_t binary)
             Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
             Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
+            thread->sections->add_section(phdr->p_vaddr, phdr->p_memsz);
             int flags = PAGE_USER;
             if (phdr->p_flags & PF_W) {
                 flags |= PAGE_WRITABLE;

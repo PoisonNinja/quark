@@ -1,6 +1,7 @@
 #include <cpu/interrupt.h>
 #include <kernel.h>
 #include <lib/list.h>
+#include <lib/string.h>
 #include <mm/virtual.h>
 #include <proc/sched.h>
 
@@ -78,8 +79,12 @@ void init()
     // TODO: Move this to architecture specific
     Thread* kinit = new Thread(kernel_process);
     kidle = new Thread(kernel_process);
+    String::memset(&kidle->cpu_ctx, 0, sizeof(kidle->cpu_ctx));
+    kidle->cpu_ctx.ds = kidle->cpu_ctx.ss = 0x10;
+    kidle->cpu_ctx.cs = 0x08;
     kidle->cpu_ctx.rip = reinterpret_cast<addr_t>(idle);
-    kidle->cpu_ctx.rsp = reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
+    kidle->cpu_ctx.rsp = kidle->cpu_ctx.rbp =
+        reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
     Scheduler::insert(kinit);
     /*
      * Set kinit as current_thread, so on the first task switch caused by the

@@ -35,18 +35,22 @@ void init_go()
     Log::printk(Log::DEBUG, "init binary has size of %llu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
-    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw));
-    int argc = 1;
+    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw), thread);
+    int argc = 2;
     const char* argv[] = {
         "/sbin/init",
+        "test",
     };
     int envc = 1;
     const char* envp[] = {
         "hello=world",
     };
-    thread->load(entry, argc, argv, envc, envp);
-    Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
-    Scheduler::insert(thread);
+    if (!thread->load(entry, argc, argv, envc, envp)) {
+        Log::printk(Log::ERROR, "Failed to load thread state\n");
+    } else {
+        Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
+        Scheduler::insert(thread);
+    }
     // Commit suicide
     if (!Scheduler::remove(Scheduler::get_current_thread())) {
         Log::printk(Log::WARNING, "Failed to deschedule kinit\n");

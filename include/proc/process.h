@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs/descriptor.h>
+#include <fs/dtable.h>
 #include <lib/list.h>
 #include <proc/thread.h>
 #include <types.h>
@@ -16,6 +17,7 @@ public:
     status_t remove_thread(Thread* thread);
     Ref<Filesystem::Descriptor> cwd;
     Ref<Filesystem::Descriptor> root;
+    Filesystem::DTable fds;
 
 private:
     Process *parent, *children;

@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fs/descriptor.h>
 #include <fs/fs.h>
+#include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
 
@@ -84,6 +85,25 @@ int Descriptor::link(const char* name, Ref<Descriptor> node)
     delete[] dir;
     delete[] file;
     return ret;
+}
+
+off_t Descriptor::lseek(off_t offset, int whence)
+{
+    off_t start;
+    if (whence == SEEK_SET) {
+        start = 0;
+    } else if (whence == SEEK_CUR) {
+        start = current_offset;
+    } else if (whence == SEEK_END) {
+        struct Filesystem::stat st;
+        stat(&st);
+        start = st.st_size;
+    }
+    off_t result = 0;
+    if (__builtin_add_overflow(start, offset, &result)) {
+        return -EOVERFLOW;
+    }
+    return current_offset = result;
 }
 
 int Descriptor::mkdir(const char* name, mode_t mode)

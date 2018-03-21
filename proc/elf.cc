@@ -35,14 +35,17 @@ addr_t load(addr_t binary, Thread* thread)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX;
             }
-            for (size_t i = 0; i < phdr->p_memsz;
+            for (size_t i = 0; i < Memory::Virtual::align_up(phdr->p_memsz);
                  i += Memory::Virtual::PAGE_SIZE) {
+                Log::printk(Log::DEBUG, "Mapping %p\n", i + phdr->p_vaddr);
                 Memory::Virtual::map(i + phdr->p_vaddr,
                                      Memory::Physical::allocate(), flags);
                 String::memcpy(
                     reinterpret_cast<void*>(i + phdr->p_vaddr),
                     reinterpret_cast<void*>(binary + i + phdr->p_offset),
-                    phdr->p_memsz);
+                    (i - phdr->p_filesz >= Memory::Virtual::PAGE_SIZE) ?
+                        Memory::Virtual::PAGE_SIZE :
+                        phdr->p_filesz - i);
             }
         }
     }

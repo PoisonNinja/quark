@@ -99,12 +99,12 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
         Log::printk(Log::ERROR, "Failed to locate stack\n");
         return false;
     }
-    Memory::Virtual::map(envp_zone, Memory::Physical::allocate(),
-                         PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map(argv_zone, Memory::Physical::allocate(),
                          PAGE_USER | PAGE_NX | PAGE_WRITABLE);
+    Memory::Virtual::map(envp_zone, Memory::Physical::allocate(),
+                         PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map(stack_zone, Memory::Physical::allocate(),
-                         PAGE_WRITABLE | PAGE_USER);
+                         PAGE_USER | PAGE_WRITABLE);
     char* target =
         reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
     char** target_argv = reinterpret_cast<char**>(argv_zone);
@@ -132,7 +132,7 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
     cpu_ctx.cs = 0x18 | 3;
     cpu_ctx.ds = 0x20 | 3;
     cpu_ctx.ss = 0x20 | 3;
-    cpu_ctx.rsp = cpu_ctx.rbp = reinterpret_cast<uint64_t>(stack_zone);
+    cpu_ctx.rsp = cpu_ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     cpu_ctx.rflags = 0x200;
     kernel_stack = reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
     return true;

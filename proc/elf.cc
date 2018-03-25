@@ -27,7 +27,10 @@ addr_t load(addr_t binary, Thread* thread)
             Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
             Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
-            thread->sections->add_section(phdr->p_vaddr, phdr->p_memsz);
+            if (!thread->sections->add_section(phdr->p_vaddr, phdr->p_memsz)) {
+                Log::printk(Log::ERROR, "Failed to add section\n");
+                return 0;
+            }
             int flags = PAGE_USER;
             if (phdr->p_flags & PF_W) {
                 flags |= PAGE_WRITABLE;

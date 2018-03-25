@@ -28,7 +28,7 @@ public:
     SectionManager(addr_t s, addr_t e);
     ~SectionManager();
 
-    bool add_section(addr_t start, size_t size, bool safe = false);
+    bool add_section(addr_t start, size_t size);
     bool locate_range(addr_t& start, addr_t hint, size_t size);
 
 private:

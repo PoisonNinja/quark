@@ -48,9 +48,8 @@ SectionManager::~SectionManager()
     }
 }
 
-bool SectionManager::add_section(addr_t start, size_t size, bool safe)
+bool SectionManager::add_section(addr_t start, size_t size)
 {
-    // Align to a page
     start = Memory::Virtual::align_down(start);
     size = Memory::Virtual::align_up(size);
     // Allocate a new section

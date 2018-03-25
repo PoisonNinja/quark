@@ -52,14 +52,6 @@ if(NOT CXX)
                          envsetup.sh before configuring CMake.")
 endif()
 
-# Skip compiler checks since we're targeting ELF binaries, and thus those
-# would fail on MacOS with the error `file was built for unsupported file format`,
-# which makes sense since MacOS uses MachO. Unfortunately, the way that CMake
-# does the compiler checks means that it performs the compiler checks without
-# letting us inject flags to force Clang to generate ELF binaries
-set(CMAKE_CXX_COMPILER_WORKS 1)
-set(CMAKE_CXX_COMPILER ${CXX})
-
 message(STATUS "CXX Compiler: " ${CXX})
 
 project(Quark CXX)

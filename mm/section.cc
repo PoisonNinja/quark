@@ -128,15 +128,15 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
     // Check for gaps before the first section that can hold
     if (sections.front().start() - start > size) {
         // Check if the hint is completely inside the gap
-        if (sections.front().start() <= hint &&
-            sections.front().start() - start >= size) {
+        if (sections.front().start() >= hint + size) {
             // Yes, so hint is good
             ret = hint;
             return true;
         }
+        addr_t target = sections.front().start() - size;
         // No, so set fuzz value
-        ret = start;
-        best = (start < hint) ? hint - start : start - hint;
+        ret = target;
+        best = (target < hint) ? hint - target : target - hint;
         found = true;
     }
     // Iterate through all the sections
@@ -146,8 +146,8 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
         // Check if this section is the last one
         if (it != --sections.end()) {
             /*
-             * The gap is between the end of this section and the start of the
-             * next one
+             * The gap is between the end of this section and the start of
+             * the next one
              */
             auto tmp = it;
             tmp++;
@@ -156,8 +156,8 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
             zone_end = j.start();
         } else {
             /*
-             * Last section, so gap is between end of this section and the end
-             * of the entire zone
+             * Last section, so gap is between end of this section and the
+             * end of the entire zone
              */
             zone_start = i.end();
             zone_end = end;
@@ -177,17 +177,21 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
                 return true;
             }
             // Calculate the distance from the zone to the hint
-            // TODO: Calculate the distance from middle of zone
-            prelim =
-                (zone_start < hint) ? hint - zone_start : zone_start - hint;
+            addr_t target;
+            if (zone_start >= hint) {
+                target = zone_start;
+            } else {
+                target = zone_end - size;
+            }
+            prelim = (target < hint) ? hint - target : target - hint;
             if (!found) {
-                ret = zone_start;
+                ret = target;
                 best = prelim;
                 found = true;
             } else {
                 if (prelim < best) {
+                    ret = target;
                     best = prelim;
-                    start = zone_start;
                 }
             }
         }

@@ -52,6 +52,7 @@ if(NOT CXX)
                          envsetup.sh before configuring CMake.")
 endif()
 
+set(CMAKE_CXX_COMPILER ${CXX})
 message(STATUS "CXX Compiler: " ${CXX})
 
 project(Quark CXX)

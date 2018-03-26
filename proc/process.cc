@@ -1,3 +1,4 @@
+#include <arch/mm/layout.h>
 #include <proc/process.h>
 #include <proc/sched.h>
 
@@ -7,6 +8,7 @@ Process::Process(Process* parent)
     this->pid = Scheduler::get_free_pid();
     this->cwd = Ref<Filesystem::Descriptor>(nullptr);
     this->root = Ref<Filesystem::Descriptor>(nullptr);
+    this->sections = new Memory::SectionManager(USER_START, USER_END);
 }
 
 Process::~Process()

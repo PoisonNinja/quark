@@ -5,6 +5,7 @@
 #include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
+#include <proc/process.h>
 #include <proc/thread.h>
 
 status_t Thread::save_context(struct interrupt_ctx* ctx)
@@ -78,23 +79,23 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
     addr_t argv_zone;
     addr_t envp_zone;
     addr_t stack_zone;
-    if (sections->locate_range(argv_zone, USER_START, argv_size)) {
+    if (parent->sections->locate_range(argv_zone, USER_START, argv_size)) {
         Log::printk(Log::DEBUG, "argv located at %p\n", argv_zone);
-        sections->add_section(argv_zone, argv_size);
+        parent->sections->add_section(argv_zone, argv_size);
     } else {
         Log::printk(Log::ERROR, "Failed to locate argv\n");
         return false;
     }
-    if (sections->locate_range(envp_zone, USER_START, envp_size)) {
+    if (parent->sections->locate_range(envp_zone, USER_START, envp_size)) {
         Log::printk(Log::DEBUG, "envp located at %p\n", envp_zone);
-        sections->add_section(envp_zone, envp_size);
+        parent->sections->add_section(envp_zone, envp_size);
     } else {
         Log::printk(Log::ERROR, "Failed to locate envp\n");
         return false;
     }
-    if (sections->locate_range(stack_zone, USER_START, 0x1000)) {
+    if (parent->sections->locate_range(stack_zone, USER_START, 0x1000)) {
         Log::printk(Log::DEBUG, "Stack located at %p\n", stack_zone);
-        sections->add_section(stack_zone, 0x1000);
+        parent->sections->add_section(stack_zone, 0x1000);
     } else {
         Log::printk(Log::ERROR, "Failed to locate stack\n");
         return false;

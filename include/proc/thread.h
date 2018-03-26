@@ -26,7 +26,6 @@ public:
     addr_t kernel_stack;
     Node<Thread> process_node;
     Node<Thread> scheduler_node;
-    Memory::SectionManager *sections;
     Process *parent;
 };
 

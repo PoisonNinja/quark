@@ -1,4 +1,3 @@
-#include <arch/mm/layout.h>
 #include <proc/process.h>
 #include <proc/thread.h>
 
@@ -9,7 +8,6 @@ Thread::Thread(Process* p)
 {
     parent = p;
     parent->add_thread(this);
-    sections = new Memory::SectionManager(USER_START, USER_END);
 }
 
 Thread::~Thread()

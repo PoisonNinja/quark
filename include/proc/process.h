@@ -18,6 +18,7 @@ public:
     Ref<Filesystem::Descriptor> cwd;
     Ref<Filesystem::Descriptor> root;
     Filesystem::DTable fds;
+    Memory::SectionManager* sections;
 
 private:
     Process *parent, *children;

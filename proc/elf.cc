@@ -3,6 +3,7 @@
 #include <mm/physical.h>
 #include <mm/virtual.h>
 #include <proc/elf.h>
+#include <proc/process.h>
 
 namespace ELF
 {
@@ -27,7 +28,8 @@ addr_t load(addr_t binary, Thread* thread)
             Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
             Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
-            if (!thread->sections->add_section(phdr->p_vaddr, phdr->p_memsz)) {
+            if (!thread->parent->sections->add_section(phdr->p_vaddr,
+                                                       phdr->p_memsz)) {
                 Log::printk(Log::ERROR, "Failed to add section\n");
                 return 0;
             }

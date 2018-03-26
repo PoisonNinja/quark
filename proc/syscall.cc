@@ -1,6 +1,8 @@
+#include <arch/mm/layout.h>
 #include <cpu/interrupt.h>
 #include <errno.h>
 #include <kernel.h>
+#include <mm/virtual.h>
 #include <proc/sched.h>
 #include <proc/syscall.h>
 
@@ -85,6 +87,56 @@ static off_t sys_lseek(int fd, off_t offset, int whence)
     return Scheduler::get_current_process()->fds[fd]->lseek(offset, whence);
 }
 
+static void* sys_mmap(struct mmap_wrapper* mmap_data)
+{
+    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %llX, %u, %u, %d, %llX\n",
+                mmap_data, mmap_data->addr, mmap_data->length, mmap_data->prot,
+                mmap_data->flags, mmap_data->fd, mmap_data->offset);
+    if (mmap_data->flags & MAP_SHARED) {
+        Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested "
+                                  "MMAP_SHARED, you should probably implement "
+                                  "this\n");
+        return MAP_FAILED;
+    }
+    if (!(mmap_data->flags & MAP_ANONYMOUS)) {
+        Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested file "
+                                  "mapping, you should probably implement "
+                                  "this\n");
+        return MAP_FAILED;
+    }
+    if (!(mmap_data->flags & MAP_FIXED)) {
+        Log::printk(Log::DEBUG, "[sys_mmap] Kernel selecting mapping\n");
+        addr_t placement;
+        bool ret = false;
+        ret = Scheduler::get_current_process()->sections->locate_range(
+            placement,
+            (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr) :
+                                USER_START,
+            mmap_data->length);
+        if (!ret) {
+            Log::printk(Log::WARNING,
+                        "[sys_mmap] Failed to allocate area for mmap\n");
+            return MAP_FAILED;
+        }
+        Log::printk(Log::DEBUG, "[sys_mmap] Selected %p\n", placement);
+        Scheduler::get_current_process()->sections->add_section(
+            placement, mmap_data->length);
+        int flags = Memory::Virtual::prot_to_flags(
+            mmap_data->prot |
+            PROT_EXEC);  // Inject PROT_EXEC for now. TODO: Remove this
+        for (addr_t base = placement; base < placement + mmap_data->length;
+             base += Memory::Virtual::PAGE_SIZE) {
+            Memory::Virtual::map(base, flags);
+        }
+        return reinterpret_cast<void*>(placement);
+    } else {
+        Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested "
+                                  "MAP_FIXED, you should probably implement "
+                                  "it\n");
+        return MAP_FAILED;
+    }
+}
+
 static void sys_exit(int val)
 {
     Log::printk(Log::DEBUG, "[sys_exit] = %d\n", val);
@@ -124,6 +176,7 @@ void init()
     syscall_table[SYS_stat] = reinterpret_cast<void*>(sys_stat);
     syscall_table[SYS_fstat] = reinterpret_cast<void*>(sys_fstat);
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
+    syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
     Interrupt::register_handler(0x80, handler_data);
 }

@@ -15,12 +15,42 @@ namespace Virtual
 #define PAGE_COW 0x20
 #define PAGE_MMAP 0x40
 
+#define PROT_READ 0x1
+#define PROT_WRITE 0x2
+#define PROT_EXEC 0x4
+#define PROT_NONE 0x0
+
+#define MAP_SHARED 0x001
+#define MAP_PRIVATE 0x002
+#define MAP_FIXED 0x010
+#define MAP_FILE 0x000
+#define MAP_ANONYMOUS 0x020
+#define MAP_ANON MAP_ANONYMOUS
+
+#define MAP_FAILED (void *)-1
+
 bool map(addr_t v, addr_t p, int flags);
 bool map(addr_t v, addr_t p, size_t size, int flags);
 bool map(addr_t v, int flags);
 
 status_t update(addr_t v, int flags);
 addr_t fork();
+
+// Translate userspace protection flags to kernel flags
+inline int prot_to_flags(int prot)
+{
+    int flags = PAGE_NX;
+    if (prot & PROT_READ) {
+        flags |= PAGE_USER;
+    }
+    if (prot & PROT_WRITE) {
+        flags |= PAGE_WRITABLE;
+    }
+    if (prot & PROT_EXEC) {
+        flags &= ~PAGE_NX;
+    }
+    return flags;
+}
 
 addr_t get_address_space_root();
 void set_address_space_root(addr_t root);

@@ -47,7 +47,12 @@ ssize_t BaseInode::read(uint8_t*, size_t)
 
 int BaseInode::stat(struct stat* st)
 {
+    st->st_ino = ino;
+    st->st_dev = dev;
+    st->st_mode = mode;
     st->st_size = size;
+    st->st_uid = uid;
+    st->st_gid = gid;
     return 0;
 }
 

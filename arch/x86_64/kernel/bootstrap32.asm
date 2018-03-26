@@ -190,11 +190,6 @@ bootstrap32:
     cmp eax, 0
     je noCPUID
 
-    mov eax, 0x00000001                  ; Long mode CPUs should have SSE, but check just in case
-    cpuid
-    test edx, 0x4000000
-    jz noSSE2
-
     mov eax, 0x80000000
     cpuid
     cmp eax, 0x80000001                  ; Compare the A-register with 0x80000001.
@@ -204,6 +199,11 @@ bootstrap32:
     cpuid                                ; CPU identification.
     test edx, 1 << 29                    ; Test if the LM-bit, which is bit 29, is set in the D-register.
     jz noLongMode                        ; They aren't, there is no long mode.
+
+    mov eax, 0x00000001                  ; Long mode CPUs should have SSE, but check just in case
+    cpuid
+    test edx, 0x4000000
+    jz noSSE2
 
     ; enable 64-bit page translation table entries
     ; by setting CR4.PAE = 1.

@@ -1,6 +1,7 @@
 #include <arch/mm/mm.h>
 #include <kernel.h>
 #include <mm/mm.h>
+#include <mm/physical.h>
 #include <mm/virtual.h>
 
 namespace Memory
@@ -11,7 +12,7 @@ extern bool arch_map(addr_t v, addr_t p, int flags);
 
 bool map(addr_t v, addr_t p, int flags)
 {
-     v = Memory::Virtual::align_down(v);
+    v = Memory::Virtual::align_down(v);
     return Memory::Virtual::arch_map(v, p, flags);
 }
 
@@ -27,11 +28,17 @@ bool map(addr_t v, addr_t p, size_t size, int flags)
     return true;
 }
 
+bool map(addr_t v, int flags)
+{
+    v = Memory::Virtual::align_down(v);
+    return Memory::Virtual::arch_map(v, Memory::Physical::allocate(), flags);
+}
+
 extern status_t arch_update(addr_t v, int flags);
 
 status_t update(addr_t v, int flags)
 {
-     v = Memory::Virtual::align_down(v);
+    v = Memory::Virtual::align_down(v);
     return arch_update(v, flags);
 }
 

@@ -38,7 +38,8 @@ bool arch_map(addr_t v, addr_t p, int flags)
         RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
     int r = 0;
     r = __set_address(&pml4->pages[PML4_INDEX(v)]);
-    __set_flags(&pml4->pages[PML4_INDEX(v)], flags);
+    __set_flags(&pml4->pages[PML4_INDEX(v)],
+                PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     /*
      * __set_address returns whether it allocated memory or not.
      * If it did, we need to memset it ourselves to 0.
@@ -47,12 +48,14 @@ bool arch_map(addr_t v, addr_t p, int flags)
         String::memset(pdpt, 0, sizeof(struct page_table));
     }
     r = __set_address(&pdpt->pages[PDPT_INDEX(v)]);
-    __set_flags(&pdpt->pages[PDPT_INDEX(v)], flags);
+    __set_flags(&pdpt->pages[PDPT_INDEX(v)],
+                PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     if (r) {
         String::memset(pd, 0, sizeof(struct page_table));
     }
     r = __set_address(&pd->pages[PD_INDEX(v)]);
-    __set_flags(&pd->pages[PD_INDEX(v)], flags);
+    __set_flags(&pd->pages[PD_INDEX(v)],
+                PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     if (r) {
         String::memset(pt, 0, sizeof(struct page_table));
     }

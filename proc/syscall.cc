@@ -121,9 +121,7 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
         Log::printk(Log::DEBUG, "[sys_mmap] Selected %p\n", placement);
         Scheduler::get_current_process()->sections->add_section(
             placement, mmap_data->length);
-        int flags = Memory::Virtual::prot_to_flags(
-            mmap_data->prot |
-            PROT_EXEC);  // Inject PROT_EXEC for now. TODO: Remove this
+        int flags = Memory::Virtual::prot_to_flags(mmap_data->prot);
         for (addr_t base = placement; base < placement + mmap_data->length;
              base += Memory::Virtual::PAGE_SIZE) {
             Memory::Virtual::map(base, flags);

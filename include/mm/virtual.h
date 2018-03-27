@@ -33,6 +33,9 @@ bool map(addr_t v, addr_t p, int flags);
 bool map(addr_t v, addr_t p, size_t size, int flags);
 bool map(addr_t v, int flags);
 
+bool protect(addr_t v, int flags);
+bool protect(addr_t v, size_t size, int flags);
+
 status_t update(addr_t v, int flags);
 addr_t fork();
 

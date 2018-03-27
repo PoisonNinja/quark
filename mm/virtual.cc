@@ -34,6 +34,26 @@ bool map(addr_t v, int flags)
     return Memory::Virtual::arch_map(v, Memory::Physical::allocate(), flags);
 }
 
+extern bool arch_protect(addr_t v, int flags);
+
+bool protect(addr_t v, int flags)
+{
+    v = Memory::Virtual::align_down(v);
+    return Memory::Virtual::arch_protect(v, flags);
+}
+
+bool protect(addr_t v, size_t size, int flags)
+{
+    v = Memory::Virtual::align_down(v);
+    size = Memory::Virtual::align_up(size);
+    for (addr_t i = 0; i < size; i += PAGE_SIZE) {
+        if (!Memory::Virtual::arch_protect(v + i, flags)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 extern status_t arch_update(addr_t v, int flags);
 
 status_t update(addr_t v, int flags)

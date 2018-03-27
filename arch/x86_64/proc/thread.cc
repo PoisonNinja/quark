@@ -105,7 +105,7 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
     Memory::Virtual::map(envp_zone, Memory::Physical::allocate(),
                          PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map(stack_zone, Memory::Physical::allocate(),
-                         PAGE_USER | PAGE_WRITABLE);
+                         PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     char* target =
         reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
     char** target_argv = reinterpret_cast<char**>(argv_zone);
@@ -123,7 +123,7 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
         target += String::strlen(envp[i]) + 1;
     }
     target_envp[envc] = 0;
-    String::memset((void*)stack_zone, 0, 4096);
+    String::memset((void*)stack_zone, 0, 0x1000);
     String::memset(&cpu_ctx, 0, sizeof(cpu_ctx));
     cpu_ctx.rip = entry;
     cpu_ctx.rdi = argc;

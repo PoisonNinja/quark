@@ -146,7 +146,7 @@ static void sys_exit(int val)
 
 static void* syscall_table[256];
 
-static void handler(int, void*, struct interrupt_ctx* ctx)
+static void handler(int, void*, struct InterruptContext* ctx)
 {
     Log::printk(Log::DEBUG,
                 "Received system call %d, %llX %llX %llX %llX %llX\n", ctx->rax,

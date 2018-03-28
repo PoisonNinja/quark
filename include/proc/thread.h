@@ -5,7 +5,7 @@
 #include <mm/section.h>
 #include <types.h>
 
-struct interrupt_ctx;
+struct InterruptContext;
 
 class Process;
 
@@ -18,8 +18,8 @@ public:
     ~Thread();
     bool load(addr_t entry, int argc, const char *argv[], int envc,
               const char *envp[]);
-    status_t save_context(struct interrupt_ctx *ctx);
-    status_t load_context(struct interrupt_ctx *ctx);
+    status_t save_context(struct InterruptContext *ctx);
+    status_t load_context(struct InterruptContext *ctx);
     tid_t tid;
     ThreadState state;
     struct thread_ctx cpu_ctx;

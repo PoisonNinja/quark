@@ -10,7 +10,7 @@ status_t insert(Thread* thread);
 status_t remove(Thread* thread);
 
 void init();
-void tick(struct interrupt_ctx* ctx);
+void tick(struct InterruptContext* ctx);
 
 Process* get_current_process();
 Thread* get_current_thread();

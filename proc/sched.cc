@@ -46,7 +46,7 @@ status_t remove(Thread* thread)
     return FAILURE;
 }
 
-void tick(struct interrupt_ctx* ctx)
+void tick(struct InterruptContext* ctx)
 {
     if (current_thread) {
         current_thread->save_context(ctx);

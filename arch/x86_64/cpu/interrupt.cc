@@ -23,7 +23,7 @@ void arch_init(void)
     IrqChip::set_irqchip(*pic);
 }
 
-extern "C" void arch_handler(struct interrupt_ctx* ctx)
+extern "C" void arch_handler(struct InterruptContext* ctx)
 {
     Interrupt::dispatch(ctx->int_no, ctx);
 }

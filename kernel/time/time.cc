@@ -10,7 +10,7 @@ static Timer* current_timer = nullptr;
 
 extern void arch_init();
 
-void tick(struct interrupt_ctx* ctx)
+void tick(struct InterruptContext* ctx)
 {
     Scheduler::tick(ctx);
 }

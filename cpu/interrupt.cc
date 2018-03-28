@@ -28,7 +28,7 @@ int enable()
     return interrupt_depth;
 }
 
-void dispatch(int int_no, struct interrupt_ctx* ctx)
+void dispatch(int int_no, struct InterruptContext* ctx)
 {
     if (handlers[int_no].empty()) {
         if (int_no < 32) {

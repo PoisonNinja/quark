@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-struct interrupt_ctx {
+struct InterruptContext {
     uint64_t ds;
     uint64_t r15;
     uint64_t r14;

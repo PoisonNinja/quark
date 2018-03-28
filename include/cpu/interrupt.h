@@ -18,7 +18,7 @@ inline int irq_to_interrupt(int irq)
     return irq + 32;  // TODO: Make this architecture independant
 }
 
-typedef void (*interrupt_handler_t)(int, void *, struct interrupt_ctx *);
+typedef void (*interrupt_handler_t)(int, void *, struct InterruptContext *);
 
 struct Handler {
     Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
@@ -32,7 +32,7 @@ struct Handler {
 int disable();
 int enable();
 
-void dispatch(int int_no, struct interrupt_ctx *ctx);
+void dispatch(int int_no, struct InterruptContext *ctx);
 
 status_t register_handler(uint32_t int_no, Interrupt::Handler &handler);
 status_t unregister_handler(uint32_t int_no, const Interrupt::Handler &handler);

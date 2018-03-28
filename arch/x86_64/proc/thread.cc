@@ -8,7 +8,7 @@
 #include <proc/process.h>
 #include <proc/thread.h>
 
-status_t Thread::save_context(struct interrupt_ctx* ctx)
+status_t Thread::save_context(struct InterruptContext* ctx)
 {
     if (!ctx) {
         return FAILURE;
@@ -36,7 +36,7 @@ status_t Thread::save_context(struct interrupt_ctx* ctx)
     return SUCCESS;
 }
 
-status_t Thread::load_context(struct interrupt_ctx* ctx)
+status_t Thread::load_context(struct InterruptContext* ctx)
 {
     set_stack(kernel_stack);
     if (!ctx) {

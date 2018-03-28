@@ -14,7 +14,7 @@ const int COMMAND = 0x43;
 const char* NAME = "Intel 8253";
 
 static void interrupt_handler(int /* irq */, void* /* dev_id */,
-                              struct interrupt_ctx* ctx)
+                              struct InterruptContext* ctx)
 {
     Time::tick(ctx);
 }

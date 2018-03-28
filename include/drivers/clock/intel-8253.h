@@ -3,7 +3,7 @@
 #include <cpu/interrupt.h>
 #include <kernel/time/clock.h>
 
-struct interrupt_ctx;
+struct InterruptContext;
 
 namespace Time
 {

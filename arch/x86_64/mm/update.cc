@@ -1,3 +1,4 @@
+#include <arch/mm/virtual.h>
 #include <arch/mm/mm.h>
 #include <kernel.h>
 #include <lib/string.h>
@@ -27,7 +28,9 @@ status_t arch_update(addr_t v, int flags)
         RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v));
     struct page_table* pt = (struct page_table*)Memory::X64::decode_fractal(
         RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
-    if (!pml4->pages[PML4_INDEX(v)].present || !pdpt->pages[PML4_INDEX(v)].present || !pd->pages[PML4_INDEX(v)].present || !pt->pages[PML4_INDEX(v)].present)
+    if (!pml4->pages[PML4_INDEX(v)].present ||
+        !pdpt->pages[PML4_INDEX(v)].present ||
+        !pd->pages[PML4_INDEX(v)].present || !pt->pages[PML4_INDEX(v)].present)
         return FAILURE;
     __set_flags(&pml4->pages[PML4_INDEX(v)], flags);
     __set_flags(&pdpt->pages[PDPT_INDEX(v)], flags);

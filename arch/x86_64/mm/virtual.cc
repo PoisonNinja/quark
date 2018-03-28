@@ -1,4 +1,5 @@
 #include <arch/mm/mm.h>
+#include <arch/mm/virtual.h>
 #include <mm/virtual.h>
 
 namespace Memory

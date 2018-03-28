@@ -8,7 +8,13 @@ namespace Memory
 {
 namespace Virtual
 {
+// Architecture-dependent interface
 extern bool arch_map(addr_t v, addr_t p, int flags);
+extern bool arch_protect(addr_t v, int flags);
+extern status_t arch_update(addr_t v, int flags);
+extern status_t arch_fork();
+extern addr_t arch_get_address_space_root();
+extern void arch_set_address_space_root(addr_t root);
 
 bool map(addr_t v, addr_t p, int flags)
 {
@@ -34,8 +40,6 @@ bool map(addr_t v, int flags)
     return Memory::Virtual::arch_map(v, Memory::Physical::allocate(), flags);
 }
 
-extern bool arch_protect(addr_t v, int flags);
-
 bool protect(addr_t v, int flags)
 {
     v = Memory::Virtual::align_down(v);
@@ -54,29 +58,21 @@ bool protect(addr_t v, size_t size, int flags)
     return true;
 }
 
-extern status_t arch_update(addr_t v, int flags);
-
 status_t update(addr_t v, int flags)
 {
     v = Memory::Virtual::align_down(v);
     return arch_update(v, flags);
 }
 
-extern status_t arch_fork();
-
 addr_t fork()
 {
     return arch_fork();
 }
 
-extern addr_t arch_get_address_space_root();
-
 addr_t get_address_space_root()
 {
     return arch_get_address_space_root();
 }
-
-extern void arch_set_address_space_root(addr_t root);
 
 void set_address_space_root(addr_t root)
 {

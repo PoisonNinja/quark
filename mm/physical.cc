@@ -1,4 +1,4 @@
-#include <arch/mm/mm.h>
+#include <arch/mm/physical.h>
 #include <kernel.h>
 #include <mm/mm.h>
 #include <mm/physical.h>

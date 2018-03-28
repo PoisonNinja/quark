@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arch/mm/mm.h>
+#include <arch/mm/virtual.h>
 #include <types.h>
 
 namespace Memory

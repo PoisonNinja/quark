@@ -3,8 +3,6 @@
 #include <drivers/irqchip/intel-8259.h>
 #include <drivers/irqchip/irqchip.h>
 
-#include <kernel.h>
-
 namespace Interrupt
 {
 void arch_disable(void)

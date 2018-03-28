@@ -3,6 +3,7 @@
 #include <boot/info.h>
 #include <kernel.h>
 #include <mm/physical.h>
+#include <mm/virtual.h>
 
 namespace Memory
 {

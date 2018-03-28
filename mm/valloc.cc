@@ -1,6 +1,6 @@
-#include <arch/mm/mm.h>
 #include <kernel.h>
 #include <mm/valloc.h>
+#include <mm/virtual.h>
 
 namespace Memory
 {

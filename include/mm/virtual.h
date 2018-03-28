@@ -13,8 +13,8 @@ namespace Virtual
 #define PAGE_NX 0x8
 #define PAGE_HUGE 0x10
 #define PAGE_COW 0x20
-#define PAGE_MMAP 0x40
 
+// Userspace flags
 #define PROT_READ 0x1
 #define PROT_WRITE 0x2
 #define PROT_EXEC 0x4
@@ -28,6 +28,16 @@ namespace Virtual
 #define MAP_ANON MAP_ANONYMOUS
 
 #define MAP_FAILED (void *)-1
+
+inline addr_t align_up(addr_t address)
+{
+    return ((address + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
+}
+
+inline addr_t align_down(addr_t address)
+{
+    return ((address / PAGE_SIZE) * PAGE_SIZE);
+}
 
 bool map(addr_t v, addr_t p, int flags);
 bool map(addr_t v, addr_t p, size_t size, int flags);

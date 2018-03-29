@@ -213,13 +213,13 @@ bootstrap32:
     bts eax, 5
     mov cr4, eax
 
-    ; Enable SSE instructions. Without this, we would crash as soon as we used
-    ; them (e.g. memset, memcpy, strcpy)
+    ; Set control register flags
     mov eax, cr0
-    and ax, 0xFFFB
-    or ax, 0x2
+    and eax, 0xFFFFFFFB  ; Disable coprocessor emulation
+    bts eax, 2      ; Set coprocessor monitoring
+    bts eax, 16     ; Enable WP for Ring 0
     mov cr0, eax
-    mov eax, cr4
+    mov eax, cr4   ; Set OSFXSR and OSXMMEXCPT
     or ax, 3 << 9
     mov cr4, eax
 

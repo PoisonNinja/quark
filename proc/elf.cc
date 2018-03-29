@@ -33,12 +33,13 @@ addr_t load(addr_t binary, Thread* thread)
                 Log::printk(Log::ERROR, "Failed to add section\n");
                 return 0;
             }
-            int flags = PAGE_USER;
-            if (phdr->p_flags & PF_W) {
-                flags |= PAGE_WRITABLE;
-            }
+            int flags = PAGE_USER | PAGE_WRITABLE; /*
+                                                    * Writable by default so
+                                                    * kernel can access, we'll
+                                                    * update this later
+                                                    */
             if (!(phdr->p_flags & PF_X)) {
-                flags |= PAGE_NX;
+                flags |= PAGE_NX;  // Set NX bit if requested
             }
             for (size_t i = 0; i < Memory::Virtual::align_up(phdr->p_memsz);
                  i += Memory::Virtual::PAGE_SIZE) {
@@ -51,6 +52,11 @@ addr_t load(addr_t binary, Thread* thread)
                     (i - phdr->p_filesz >= Memory::Virtual::PAGE_SIZE) ?
                         Memory::Virtual::PAGE_SIZE :
                         phdr->p_filesz - i);
+                if (!(phdr->p_flags & PF_W)) {
+                    // Remove write access if requested
+                    Memory::Virtual::protect(i + phdr->p_vaddr,
+                                             flags & ~PAGE_WRITABLE);
+                }
             }
         }
     }

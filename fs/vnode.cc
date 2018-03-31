@@ -5,6 +5,9 @@ namespace Filesystem
 Vnode::Vnode(Ref<Inode> inode)
 {
     this->inode = inode;
+    this->ino = inode->ino;
+    this->dev = inode->dev;
+    this->mode = inode->mode;
 }
 
 int Vnode::link(const char* name, Ref<Vnode> node)

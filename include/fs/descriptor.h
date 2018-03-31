@@ -21,6 +21,7 @@ public:
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
     ssize_t read(uint8_t* buffer, size_t count);
+    bool seekable();
     int stat(struct stat* st);
     ssize_t write(uint8_t* buffer, size_t count);
 

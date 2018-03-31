@@ -68,6 +68,9 @@ char* basename(const char* path)
 Descriptor::Descriptor(Ref<Vnode> vnode)
 {
     this->vnode = vnode;
+    this->ino = vnode->ino;
+    this->dev = vnode->dev;
+    this->mode = vnode->mode;
     current_offset = 0;
 }
 
@@ -165,6 +168,14 @@ ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
     return vnode->pwrite(buffer, count, offset);
 }
 
+bool Descriptor::seekable()
+{
+    if (S_ISCHR(this->mode)) {
+        return false;
+    }
+    return true;
+}
+
 ssize_t Descriptor::read(uint8_t* buffer, size_t count)
 {
     ssize_t ret = pread(buffer, count, current_offset);
@@ -182,10 +193,15 @@ int Descriptor::stat(struct stat* st)
 
 ssize_t Descriptor::write(uint8_t* buffer, size_t count)
 {
-    ssize_t ret = pwrite(buffer, count, current_offset);
-    if (ret > 0) {
-        // TODO: Properly handle overflows
-        current_offset += ret;
+    ssize_t ret = 0;
+    if (this->seekable()) {
+        ret = pwrite(buffer, count, current_offset);
+        if (ret > 0) {
+            // TODO: Properly handle overflows
+            current_offset += ret;
+        }
+    } else {
+        ret = vnode->write(buffer, count);
     }
     return ret;
 }

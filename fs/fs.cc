@@ -6,8 +6,6 @@
 #include <kernel.h>
 #include <proc/sched.h>
 
-#include <lib/string.h>
-
 namespace Filesystem
 {
 void init()
@@ -17,6 +15,7 @@ void init()
     Ref<Descriptor> droot(new Descriptor(vroot));
     iroot->link(".", iroot);
     iroot->link("..", iroot);
+    droot->mkdir("dev", 0666);
     Scheduler::get_current_process()->cwd = droot;
     Scheduler::get_current_process()->root = droot;
 }

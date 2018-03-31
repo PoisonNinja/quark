@@ -34,7 +34,7 @@ class Directory : public BaseInode
 public:
     Directory(ino_t ino, dev_t dev, mode_t mode);
     virtual ~Directory();
-    virtual int link(const char* name, Ref<Inode> node);
+    virtual int link(const char* name, Ref<Inode> node) override;
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;
     virtual int mkdir(const char* name, mode_t mode) override;
 

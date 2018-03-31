@@ -41,11 +41,23 @@ addr_t load(addr_t binary, Thread* thread)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX;  // Set NX bit if requested
             }
+            if (phdr->p_vaddr > Memory::Virtual::align_down(phdr->p_vaddr)) {
+                Memory::Virtual::map(phdr->p_vaddr,
+                                     Memory::Physical::allocate(), flags);
+                String::memcpy(
+                    reinterpret_cast<void*>(phdr->p_vaddr),
+                    reinterpret_cast<void*>(binary + phdr->p_offset),
+                    Memory::Virtual::align_up(phdr->p_vaddr) - phdr->p_vaddr);
+                phdr->p_memsz -=
+                    Memory::Virtual::align_up(phdr->p_vaddr) - phdr->p_vaddr;
+                phdr->p_vaddr = Memory::Virtual::align_up(phdr->p_vaddr);
+            }
             for (size_t i = 0; i < Memory::Virtual::align_up(phdr->p_memsz);
                  i += Memory::Virtual::PAGE_SIZE) {
-                Log::printk(Log::DEBUG, "Mapping %p\n", i + phdr->p_vaddr);
                 Memory::Virtual::map(i + phdr->p_vaddr,
                                      Memory::Physical::allocate(), flags);
+                Log::printk(Log::DEBUG, "Copying from %p -> %p\n",
+                            binary + i + phdr->p_offset, i + phdr->p_vaddr);
                 String::memcpy(
                     reinterpret_cast<void*>(i + phdr->p_vaddr),
                     reinterpret_cast<void*>(binary + i + phdr->p_offset),

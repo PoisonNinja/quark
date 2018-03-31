@@ -1,5 +1,5 @@
-#include <arch/mm/virtual.h>
 #include <arch/mm/mm.h>
+#include <arch/mm/virtual.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/physical.h>

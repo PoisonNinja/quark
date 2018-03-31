@@ -1,5 +1,5 @@
-#include <arch/mm/virtual.h>
 #include <arch/mm/mm.h>
+#include <arch/mm/virtual.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/physical.h>
@@ -64,5 +64,5 @@ bool arch_map(addr_t v, addr_t p, int flags)
     pt->pages[PT_INDEX(v)].address = p / 0x1000;
     return SUCCESS;
 }
-}  // namespace Virtual
-}  // namespace Memory
+}
+}

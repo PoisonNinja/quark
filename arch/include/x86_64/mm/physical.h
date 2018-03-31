@@ -1,11 +1,12 @@
 #pragma once
 
+#include <arch/mm/layout.h>
 #include <types.h>
 
 namespace Memory
 {
 namespace Physical
 {
-addr_t* const STACK = reinterpret_cast<addr_t*>(0xFFFFFE8000000000);
+addr_t* const STACK = reinterpret_cast<addr_t*>(STACK_START);
 }
 }

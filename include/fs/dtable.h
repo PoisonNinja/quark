@@ -10,14 +10,14 @@ public:
     DTable(int s = 4);
     ~DTable();
 
-    size_t add(Ref<Descriptor> desc);
+    int add(Ref<Descriptor> desc);
     bool remove(int fd);
-    Ref<Descriptor> operator[](size_t index);
+    Ref<Descriptor> operator[](int index);
 
 private:
     void resize();
     Ref<Descriptor>* fds;
-    size_t size;
-    size_t step_size;
+    int size;
+    int step_size;
 };
 }

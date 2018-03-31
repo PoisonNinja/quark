@@ -16,15 +16,15 @@ DTable::~DTable()
 void DTable::resize()
 {
     Ref<Descriptor>* tmp = new Ref<Descriptor>[size + step_size];
-    for (size_t i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         tmp[i] = fds[i];
     }
     delete[] fds;
 }
 
-size_t DTable::add(Ref<Descriptor> desc)
+int DTable::add(Ref<Descriptor> desc)
 {
-    for (size_t i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         if (!fds[i]) {
             fds[i] = desc;
             return i;
@@ -45,7 +45,7 @@ bool DTable::remove(int fd)
     }
 }
 
-Ref<Descriptor> DTable::operator[](size_t index)
+Ref<Descriptor> DTable::operator[](int index)
 {
     if (index >= size) {
         return Ref<Descriptor>(nullptr);

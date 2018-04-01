@@ -13,6 +13,7 @@ namespace Virtual
 #define PAGE_NX 0x8
 #define PAGE_HUGE 0x10
 #define PAGE_COW 0x20
+#define PAGE_HARDWARE 0x40
 
 // Userspace flags
 #define PROT_READ 0x1

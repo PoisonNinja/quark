@@ -19,7 +19,8 @@ struct page {
     uint32_t huge_page : 1;
     uint32_t global : 1;
     uint32_t cow : 1;
-    uint32_t available_1 : 2;
+    uint32_t hardware : 1;
+    uint32_t available_1 : 1;
     uint64_t address : 40;
     uint32_t available_2 : 11;
     uint32_t nx : 1;

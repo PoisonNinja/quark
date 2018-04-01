@@ -25,6 +25,8 @@ static inline void __set_flags(struct page* page, uint8_t flags)
     page->user = (flags & PAGE_USER) ? 1 : 0;
     page->global = (flags & PAGE_GLOBAL) ? 1 : 0;
     page->nx = (flags & PAGE_NX) ? 1 : 0;
+    page->cow = (flags & PAGE_COW) ? 1 : 0;
+    page->hardware = (flags & PAGE_HARDWARE) ? 1 : 0;
 }
 
 bool arch_map(addr_t v, addr_t p, int flags)

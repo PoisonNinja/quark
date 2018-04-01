@@ -47,6 +47,9 @@ bool map(addr_t v, int flags);
 bool protect(addr_t v, int flags);
 bool protect(addr_t v, size_t size, int flags);
 
+bool unmap(addr_t v);
+bool unmap(addr_t v, size_t size);
+
 addr_t fork();
 
 // Translate userspace protection flags to kernel flags

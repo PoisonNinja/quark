@@ -26,24 +26,16 @@ bool arch_protect(addr_t v, int flags)
         RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v));
     struct page_table* pt = (struct page_table*)Memory::X64::decode_fractal(
         RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
-    if (!pml4->pages[PML4_INDEX(v)].present) {
+    if (!pml4->pages[PML4_INDEX(v)].present ||
+        !pdpt->pages[PDPT_INDEX(v)].present ||
+        !pd->pages[PD_INDEX(v)].present || !pt->pages[PT_INDEX(v)].present)
         return false;
-    }
     __set_flags(&pml4->pages[PML4_INDEX(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
-    if (!pdpt->pages[PDPT_INDEX(v)].present) {
-        return false;
-    }
     __set_flags(&pdpt->pages[PDPT_INDEX(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
-    if (!pd->pages[PD_INDEX(v)].present) {
-        return false;
-    }
     __set_flags(&pd->pages[PD_INDEX(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
-    if (!pt->pages[PT_INDEX(v)].present) {
-        return false;
-    }
     __set_flags(&pt->pages[PT_INDEX(v)], flags);
     return SUCCESS;
 }

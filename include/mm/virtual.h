@@ -46,7 +46,6 @@ bool map(addr_t v, int flags);
 bool protect(addr_t v, int flags);
 bool protect(addr_t v, size_t size, int flags);
 
-status_t update(addr_t v, int flags);
 addr_t fork();
 
 // Translate userspace protection flags to kernel flags

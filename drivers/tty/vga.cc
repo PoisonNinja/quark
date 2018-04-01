@@ -16,7 +16,7 @@ VGATTY::VGATTY()
 {
     addr_t virt = Memory::Valloc::allocate(VGA_BUFFER_SIZE);
     if (!Memory::Virtual::map(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
-                              PAGE_WRITABLE)) {
+                              PAGE_WRITABLE | PAGE_HARDWARE)) {
         Log::printk(Log::WARNING, "Failed to map VGA buffer\n");
         return;
     }

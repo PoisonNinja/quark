@@ -4,12 +4,12 @@
 namespace IrqChip
 {
 static IrqChip* current_chip = nullptr;
-static uint8_t interrupt_mask[Interrupt::interrupt_max] = {
+static uint8_t interrupt_mask[Interrupt::max] = {
     0};  // TODO: Convert to bitfield
 
 status_t mask(uint32_t irq)
 {
-    if (irq >= Interrupt::interrupt_max) {
+    if (irq >= Interrupt::max) {
         return FAILURE;
     }
     if (!interrupt_mask[irq]) {
@@ -22,7 +22,7 @@ status_t mask(uint32_t irq)
 
 status_t unmask(uint32_t irq)
 {
-    if (irq >= Interrupt::interrupt_max) {
+    if (irq >= Interrupt::max) {
         return FAILURE;
     }
     if (interrupt_mask[irq]) {
@@ -35,7 +35,7 @@ status_t unmask(uint32_t irq)
 
 status_t ack(uint32_t irq)
 {
-    if (irq >= Interrupt::interrupt_max) {
+    if (irq >= Interrupt::max) {
         return FAILURE;
     }
     return current_chip->ack(irq);
@@ -46,7 +46,7 @@ status_t set_irqchip(IrqChip& chip)
     if (current_chip) {
         current_chip->disable();
     }
-    for (uint32_t i = 0; i < Interrupt::interrupt_max; i++) {
+    for (uint32_t i = 0; i < Interrupt::max; i++) {
         if (interrupt_mask[i]) {
             chip.mask(i);
         } else {

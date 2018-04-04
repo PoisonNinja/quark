@@ -5,8 +5,7 @@
 
 namespace Interrupt
 {
-static List<Interrupt::Handler, &Interrupt::Handler::node>
-    handlers[interrupt_max];
+static List<Interrupt::Handler, &Interrupt::Handler::node> handlers[max];
 
 static std::atomic<int> interrupt_depth(1);
 
@@ -47,7 +46,7 @@ void dispatch(int int_no, struct InterruptContext* ctx)
 
 status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
 {
-    if (int_no > interrupt_max) {
+    if (int_no > max) {
         return FAILURE;
     }
     handlers[int_no].push_back(handler);
@@ -56,7 +55,7 @@ status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
 
 status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 {
-    if (int_no > interrupt_max) {
+    if (int_no > max) {
         return FAILURE;
     }
     for (auto it = handlers[int_no].begin(); it != handlers[int_no].end();

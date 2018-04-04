@@ -6,7 +6,7 @@
 
 namespace Interrupt
 {
-constexpr size_t interrupt_max = 256;  // TODO: Move this to architecture folder
+constexpr size_t max = 256;  // TODO: Move this to architecture folder
 
 inline int interrupt_to_irq(int interrupt_no)
 {

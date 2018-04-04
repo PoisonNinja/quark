@@ -42,7 +42,8 @@ bool arch_protect(addr_t v, int flags)
     __set_flags(&pd->pages[Memory::X64::pd_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     __set_flags(&pt->pages[Memory::X64::pt_index(v)], flags);
-    return SUCCESS;
+    Memory::X64::invlpg(v);
+    return true;
 }
 }  // namespace Virtual
 }  // namespace Memory

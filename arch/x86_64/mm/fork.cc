@@ -118,7 +118,7 @@ addr_t arch_fork()
     old_pml4->pages[Memory::X64::copy_entry].writable = 1;
     old_pml4->pages[Memory::X64::copy_entry].address = fork_pml4_phys / 0x1000;
 
-    Memory::X64::invlpg(old_pml4);
+    Memory::X64::invlpg(reinterpret_cast<addr_t>(old_pml4));
 
     // Copy only user pages
     for (int i = 0; i < 256; i++) {

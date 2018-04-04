@@ -38,7 +38,7 @@ static inline void write_cr3(uint64_t value)
     __asm__("mov %%rax, %%cr3" : : "a"(value));
 }
 
-static inline void invlpg(void* addr)
+static inline void invlpg(addr_t addr)
 {
     __asm__ __volatile__("invlpg (%0)" ::"r"(addr) : "memory");
 }

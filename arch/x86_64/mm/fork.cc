@@ -50,11 +50,12 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
                            sizeof(struct page));
             addr_t new_pt = Memory::Physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
-            __copy_pt_entry((struct page_table*)Memory::X64::decode_fractal(
-                                Memory::X64::copy_entry, pml4_index, pdpt_index, i),
-                            (struct page_table*)Memory::X64::decode_fractal(
-                                Memory::X64::recursive_entry, pml4_index, pdpt_index, i),
-                            pml4_index, pdpt_index, i);
+            __copy_pt_entry(
+                (struct page_table*)Memory::X64::decode_fractal(
+                    Memory::X64::copy_entry, pml4_index, pdpt_index, i),
+                (struct page_table*)Memory::X64::decode_fractal(
+                    Memory::X64::recursive_entry, pml4_index, pdpt_index, i),
+                pml4_index, pdpt_index, i);
         }
     }
 }
@@ -69,12 +70,13 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
                            sizeof(struct page));
             addr_t new_pd = Memory::Physical::allocate();
             new_pdpt->pages[i].address = new_pd / 0x1000;
-            __copy_pd_entry(
-                (struct page_table*)Memory::X64::decode_fractal(
-                    Memory::X64::copy_entry, Memory::X64::recursive_entry, pml4_index, i),
-                (struct page_table*)Memory::X64::decode_fractal(
-                    Memory::X64::recursive_entry, Memory::X64::recursive_entry, pml4_index, i),
-                pml4_index, i);
+            __copy_pd_entry((struct page_table*)Memory::X64::decode_fractal(
+                                Memory::X64::copy_entry,
+                                Memory::X64::recursive_entry, pml4_index, i),
+                            (struct page_table*)Memory::X64::decode_fractal(
+                                Memory::X64::recursive_entry,
+                                Memory::X64::recursive_entry, pml4_index, i),
+                            pml4_index, i);
         }
     }
 }
@@ -84,17 +86,20 @@ addr_t arch_fork()
     // Fractal mapping address of original PML4
     struct page_table* old_pml4 =
         (struct page_table*)Memory::X64::decode_fractal(
-            Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
+            Memory::X64::recursive_entry, Memory::X64::recursive_entry,
+            Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     /*
      * Fractal mapping address of original PML4
-     * Notice that the first parameter is Memory::X64::copy_entry, while the rest are
-     * Memory::X64::recursive_entry. This is because while the address of the new PML4
-     * is loaded into the Memory::X64::copy_entry slot of the current PML4, the new
-     * PML4 recursive mapping is still Memory::X64::recursive_entry in itself.
+     * Notice that the first parameter is Memory::X64::copy_entry, while the
+     * rest are Memory::X64::recursive_entry. This is because while the address
+     * of the new PML4 is loaded into the Memory::X64::copy_entry slot of the
+     * current PML4, the new PML4 recursive mapping is still
+     * Memory::X64::recursive_entry in itself.
      */
     struct page_table* new_pml4 =
         (struct page_table*)Memory::X64::decode_fractal(
-            Memory::X64::copy_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
+            Memory::X64::copy_entry, Memory::X64::recursive_entry,
+            Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     // Allocate a new page for the PML4
     addr_t fork_pml4_phys = Memory::Physical::allocate();
     /*
@@ -111,9 +116,11 @@ addr_t arch_fork()
     String::memcpy(fork_page_pointer, old_pml4, sizeof(struct page_table));
 
     // Set up fractal mapping for the new PML4
-    fork_page_pointer->pages[Memory::X64::recursive_entry].address = fork_pml4_phys / 0x1000;
+    fork_page_pointer->pages[Memory::X64::recursive_entry].address =
+        fork_pml4_phys / 0x1000;
 
-    // Load the new PML4 into the Memory::X64::copy_entry slot of the current PML4
+    // Load the new PML4 into the Memory::X64::copy_entry slot of the current
+    // PML4
     old_pml4->pages[Memory::X64::copy_entry].present = 1;
     old_pml4->pages[Memory::X64::copy_entry].writable = 1;
     old_pml4->pages[Memory::X64::copy_entry].address = fork_pml4_phys / 0x1000;
@@ -132,9 +139,11 @@ addr_t arch_fork()
             new_pml4->pages[i].address = new_pdpt / 0x1000;
             __copy_pdpt_entry(
                 (struct page_table*)Memory::X64::decode_fractal(
-                    Memory::X64::copy_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, i),
+                    Memory::X64::copy_entry, Memory::X64::recursive_entry,
+                    Memory::X64::recursive_entry, i),
                 (struct page_table*)Memory::X64::decode_fractal(
-                    Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, i),
+                    Memory::X64::recursive_entry, Memory::X64::recursive_entry,
+                    Memory::X64::recursive_entry, i),
                 i);
         }
     }

@@ -21,24 +21,27 @@ static inline void __set_flags(struct page* page, uint8_t flags)
 bool arch_protect(addr_t v, int flags)
 {
     struct page_table* pml4 = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     struct page_table* pdpt = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry,
+        Memory::X64::pml4_index(v));
     struct page_table* pd = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::pml4_index(v),
+        Memory::X64::pdpt_index(v));
     struct page_table* pt = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
-    if (!pml4->pages[PML4_INDEX(v)].present ||
-        !pdpt->pages[PDPT_INDEX(v)].present ||
-        !pd->pages[PD_INDEX(v)].present || !pt->pages[PT_INDEX(v)].present)
+        Memory::X64::recursive_entry, Memory::X64::pml4_index(v), Memory::X64::pdpt_index(v),
+        Memory::X64::pd_index(v));
+    if (!pml4->pages[Memory::X64::pml4_index(v)].present ||
+        !pdpt->pages[Memory::X64::pdpt_index(v)].present ||
+        !pd->pages[Memory::X64::pd_index(v)].present || !pt->pages[Memory::X64::pt_index(v)].present)
         return false;
-    __set_flags(&pml4->pages[PML4_INDEX(v)],
+    __set_flags(&pml4->pages[Memory::X64::pml4_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
-    __set_flags(&pdpt->pages[PDPT_INDEX(v)],
+    __set_flags(&pdpt->pages[Memory::X64::pdpt_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
-    __set_flags(&pd->pages[PD_INDEX(v)],
+    __set_flags(&pd->pages[Memory::X64::pd_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
-    __set_flags(&pt->pages[PT_INDEX(v)], flags);
+    __set_flags(&pt->pages[Memory::X64::pt_index(v)], flags);
     return SUCCESS;
 }
 }  // namespace Virtual

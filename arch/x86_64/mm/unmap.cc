@@ -18,31 +18,35 @@ static inline bool __table_is_empty(struct page_table* table)
 bool arch_unmap(addr_t v)
 {
     struct page_table* pml4 = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     struct page_table* pdpt = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry,
+        Memory::X64::pml4_index(v));
     struct page_table* pd = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::pml4_index(v),
+        Memory::X64::pdpt_index(v));
     struct page_table* pt = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
-    if (!pml4->pages[PML4_INDEX(v)].present ||
-        !pdpt->pages[PDPT_INDEX(v)].present ||
-        !pd->pages[PD_INDEX(v)].present || !pt->pages[PT_INDEX(v)].present)
+        Memory::X64::recursive_entry, Memory::X64::pml4_index(v), Memory::X64::pdpt_index(v),
+        Memory::X64::pd_index(v));
+    if (!pml4->pages[Memory::X64::pml4_index(v)].present ||
+        !pdpt->pages[Memory::X64::pdpt_index(v)].present ||
+        !pd->pages[Memory::X64::pd_index(v)].present || !pt->pages[Memory::X64::pt_index(v)].present)
         return false;
-    if (!pt->pages[PT_INDEX(v)].hardware) {
-        Memory::Physical::free(pt->pages[PT_INDEX(v)].address * 0x1000);
+    if (!pt->pages[Memory::X64::pt_index(v)].hardware) {
+        Memory::Physical::free(pt->pages[Memory::X64::pt_index(v)].address * 0x1000);
     }
-    pt->pages[PT_INDEX(v)].present = 0;
+    pt->pages[Memory::X64::pt_index(v)].present = 0;
     if (__table_is_empty(pt)) {
-        Memory::Physical::free(pd->pages[PD_INDEX(v)].address * 0x1000);
-        pd->pages[PD_INDEX(v)].present = 0;
+        Memory::Physical::free(pd->pages[Memory::X64::pd_index(v)].address * 0x1000);
+        pd->pages[Memory::X64::pd_index(v)].present = 0;
         if (__table_is_empty(pd)) {
-            Memory::Physical::free(pdpt->pages[PDPT_INDEX(v)].address * 0x1000);
-            pdpt->pages[PDPT_INDEX(v)].present = 0;
+            Memory::Physical::free(
+                pdpt->pages[Memory::X64::pdpt_index(v)].address * 0x1000);
+            pdpt->pages[Memory::X64::pdpt_index(v)].present = 0;
             if (__table_is_empty(pdpt)) {
-                Memory::Physical::free(pml4->pages[PML4_INDEX(v)].address *
-                                       0x1000);
-                pml4->pages[PML4_INDEX(v)].present = 0;
+                Memory::Physical::free(
+                    pml4->pages[Memory::X64::pml4_index(v)].address * 0x1000);
+                pml4->pages[Memory::X64::pml4_index(v)].present = 0;
             }
         }
     }

@@ -3,7 +3,7 @@
 
 namespace GDT
 {
-#define NUM_ENTRIES 7
+constexpr size_t num_entries = 7;
 
 #define ACCESS_PRESENT(x) ((x) << 7)
 #define ACCESS_PRIVL(x) ((x) << 5)

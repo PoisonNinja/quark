@@ -32,16 +32,19 @@ static inline void __set_flags(struct page* page, uint8_t flags)
 bool arch_map(addr_t v, addr_t p, int flags)
 {
     struct page_table* pml4 = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     struct page_table* pdpt = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry,
+        Memory::X64::pml4_index(v));
     struct page_table* pd = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::pml4_index(v),
+        Memory::X64::pdpt_index(v));
     struct page_table* pt = (struct page_table*)Memory::X64::decode_fractal(
-        RECURSIVE_ENTRY, PML4_INDEX(v), PDPT_INDEX(v), PD_INDEX(v));
+        Memory::X64::recursive_entry, Memory::X64::pml4_index(v), Memory::X64::pdpt_index(v),
+        Memory::X64::pd_index(v));
     int r = 0;
-    r = __set_address(&pml4->pages[PML4_INDEX(v)]);
-    __set_flags(&pml4->pages[PML4_INDEX(v)],
+    r = __set_address(&pml4->pages[Memory::X64::pml4_index(v)]);
+    __set_flags(&pml4->pages[Memory::X64::pml4_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     /*
      * __set_address returns whether it allocated memory or not.
@@ -50,20 +53,20 @@ bool arch_map(addr_t v, addr_t p, int flags)
     if (r) {
         String::memset(pdpt, 0, sizeof(struct page_table));
     }
-    r = __set_address(&pdpt->pages[PDPT_INDEX(v)]);
-    __set_flags(&pdpt->pages[PDPT_INDEX(v)],
+    r = __set_address(&pdpt->pages[Memory::X64::pdpt_index(v)]);
+    __set_flags(&pdpt->pages[Memory::X64::pdpt_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     if (r) {
         String::memset(pd, 0, sizeof(struct page_table));
     }
-    r = __set_address(&pd->pages[PD_INDEX(v)]);
-    __set_flags(&pd->pages[PD_INDEX(v)],
+    r = __set_address(&pd->pages[Memory::X64::pd_index(v)]);
+    __set_flags(&pd->pages[Memory::X64::pd_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     if (r) {
         String::memset(pt, 0, sizeof(struct page_table));
     }
-    __set_flags(&pt->pages[PT_INDEX(v)], flags);
-    pt->pages[PT_INDEX(v)].address = p / 0x1000;
+    __set_flags(&pt->pages[Memory::X64::pt_index(v)], flags);
+    pt->pages[Memory::X64::pt_index(v)].address = p / 0x1000;
     return SUCCESS;
 }
 }

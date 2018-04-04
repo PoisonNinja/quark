@@ -3,18 +3,18 @@
 #include <lib/string.h>
 #include <stdarg.h>
 
-#define PANIC_MAX 1024
-
-static char panic_buffer[PANIC_MAX];
-
 namespace Kernel
 {
+constexpr size_t panic_max = 1024;
+
+static char panic_buffer[Kernel::panic_max];
+
 void __attribute__((noreturn)) panic(const char* format, ...)
 {
-    String::memset(panic_buffer, 0, PANIC_MAX);
+    String::memset(panic_buffer, 0, Kernel::panic_max);
     va_list args;
     va_start(args, format);
-    vsnprintf(panic_buffer, PANIC_MAX, format, args);
+    vsnprintf(panic_buffer, Kernel::panic_max, format, args);
     va_end(args);
     Log::printk(Log::ERROR, "%s", panic_buffer);
     for (;;)

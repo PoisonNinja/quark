@@ -6,13 +6,25 @@ namespace Memory
 {
 namespace X64
 {
-#define PML4_INDEX(x) ((x >> 39) & 0x1FF)
-#define PDPT_INDEX(x) ((x >> 30) & 0x1FF)
-#define PD_INDEX(x) ((x >> 21) & 0x1FF)
-#define PT_INDEX(x) ((x >> 12) & 0x1FF)
+constexpr addr_t pml4_index(addr_t x)
+{
+    return ((x >> 39) & 0x1FF);
+}
+constexpr addr_t pdpt_index(addr_t x)
+{
+    return ((x >> 30) & 0x1FF);
+}
+constexpr addr_t pd_index(addr_t x)
+{
+    return ((x >> 21) & 0x1FF);
+}
+constexpr addr_t pt_index(addr_t x)
+{
+    return ((x >> 12) & 0x1FF);
+}
 
-#define RECURSIVE_ENTRY (510UL)
-#define COPY_ENTRY (508UL)
+constexpr addr_t recursive_entry = 510;
+constexpr addr_t copy_entry = 508;
 
 static inline uint64_t read_cr3(void)
 {

@@ -1,5 +1,5 @@
-#include <arch/mm/virtual.h>
 #include <arch/mm/mm.h>
+#include <arch/mm/virtual.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/physical.h>
@@ -51,9 +51,9 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
             addr_t new_pt = Memory::Physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
             __copy_pt_entry((struct page_table*)Memory::X64::decode_fractal(
-                                COPY_ENTRY, pml4_index, pdpt_index, i),
+                                Memory::X64::copy_entry, pml4_index, pdpt_index, i),
                             (struct page_table*)Memory::X64::decode_fractal(
-                                RECURSIVE_ENTRY, pml4_index, pdpt_index, i),
+                                Memory::X64::recursive_entry, pml4_index, pdpt_index, i),
                             pml4_index, pdpt_index, i);
         }
     }
@@ -71,9 +71,9 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
             new_pdpt->pages[i].address = new_pd / 0x1000;
             __copy_pd_entry(
                 (struct page_table*)Memory::X64::decode_fractal(
-                    COPY_ENTRY, RECURSIVE_ENTRY, pml4_index, i),
+                    Memory::X64::copy_entry, Memory::X64::recursive_entry, pml4_index, i),
                 (struct page_table*)Memory::X64::decode_fractal(
-                    RECURSIVE_ENTRY, RECURSIVE_ENTRY, pml4_index, i),
+                    Memory::X64::recursive_entry, Memory::X64::recursive_entry, pml4_index, i),
                 pml4_index, i);
         }
     }
@@ -84,17 +84,17 @@ addr_t arch_fork()
     // Fractal mapping address of original PML4
     struct page_table* old_pml4 =
         (struct page_table*)Memory::X64::decode_fractal(
-            RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+            Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     /*
      * Fractal mapping address of original PML4
-     * Notice that the first parameter is COPY_ENTRY, while the rest are
-     * RECURSIVE_ENTRY. This is because while the address of the new PML4
-     * is loaded into the COPY_ENTRY slot of the current PML4, the new
-     * PML4 recursive mapping is still RECURSIVE_ENTRY in itself.
+     * Notice that the first parameter is Memory::X64::copy_entry, while the rest are
+     * Memory::X64::recursive_entry. This is because while the address of the new PML4
+     * is loaded into the Memory::X64::copy_entry slot of the current PML4, the new
+     * PML4 recursive mapping is still Memory::X64::recursive_entry in itself.
      */
     struct page_table* new_pml4 =
         (struct page_table*)Memory::X64::decode_fractal(
-            COPY_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+            Memory::X64::copy_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry);
     // Allocate a new page for the PML4
     addr_t fork_pml4_phys = Memory::Physical::allocate();
     /*
@@ -106,18 +106,17 @@ addr_t arch_fork()
                          fork_pml4_phys, PAGE_WRITABLE);
     /*
      * Copy the entire PML4. However, only the kernel pages will remain
-     * (e.g. PML4_INDEX(x) >= 256), as we want to duplicate the user
-     * pages
+     * (e.g. pml4_index(x) >= 256), as we want to duplicate the user pages
      */
     String::memcpy(fork_page_pointer, old_pml4, sizeof(struct page_table));
 
     // Set up fractal mapping for the new PML4
-    fork_page_pointer->pages[RECURSIVE_ENTRY].address = fork_pml4_phys / 0x1000;
+    fork_page_pointer->pages[Memory::X64::recursive_entry].address = fork_pml4_phys / 0x1000;
 
-    // Load the new PML4 into the COPY_ENTRY slot of the current PML4
-    old_pml4->pages[COPY_ENTRY].present = 1;
-    old_pml4->pages[COPY_ENTRY].writable = 1;
-    old_pml4->pages[COPY_ENTRY].address = fork_pml4_phys / 0x1000;
+    // Load the new PML4 into the Memory::X64::copy_entry slot of the current PML4
+    old_pml4->pages[Memory::X64::copy_entry].present = 1;
+    old_pml4->pages[Memory::X64::copy_entry].writable = 1;
+    old_pml4->pages[Memory::X64::copy_entry].address = fork_pml4_phys / 0x1000;
 
     Memory::X64::invlpg(old_pml4);
 
@@ -133,9 +132,9 @@ addr_t arch_fork()
             new_pml4->pages[i].address = new_pdpt / 0x1000;
             __copy_pdpt_entry(
                 (struct page_table*)Memory::X64::decode_fractal(
-                    COPY_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, i),
+                    Memory::X64::copy_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, i),
                 (struct page_table*)Memory::X64::decode_fractal(
-                    RECURSIVE_ENTRY, RECURSIVE_ENTRY, RECURSIVE_ENTRY, i),
+                    Memory::X64::recursive_entry, Memory::X64::recursive_entry, Memory::X64::recursive_entry, i),
                 i);
         }
     }

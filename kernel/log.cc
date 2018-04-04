@@ -36,7 +36,7 @@
 
 namespace Log
 {
-#define PRINTK_MAX 1024
+constexpr size_t printk_max = 1024;
 
 static List<LogOutput, &LogOutput::node> output;
 
@@ -47,7 +47,7 @@ static const char* colors[] = {
     "\e[31m",  // Red for error
 };
 
-static char printk_buffer[PRINTK_MAX];
+static char printk_buffer[Log::printk_max];
 
 size_t printk(int level, const char* format, ...)
 {
@@ -56,20 +56,20 @@ size_t printk(int level, const char* format, ...)
 #endif
         size_t r = 0;
         if (level < Log::CONTINUE) {
-            String::memset(printk_buffer, 0, PRINTK_MAX);
+            String::memset(printk_buffer, 0, Log::printk_max);
             // time_t t = ktime_get();
             time_t sec = 0;   // t / NSEC_PER_SEC;
             time_t nsec = 0;  // t % NSEC_PER_SEC;
-            r = snprintf(printk_buffer, PRINTK_MAX, "%s[%05lu.%09lu]%s ",
+            r = snprintf(printk_buffer, Log::printk_max, "%s[%05lu.%09lu]%s ",
                          colors[level], sec, nsec, "\e[39m");
             for (auto& i : output) {
                 i.write(printk_buffer, r);
             }
         }
-        String::memset(printk_buffer, 0, PRINTK_MAX);
+        String::memset(printk_buffer, 0, Log::printk_max);
         va_list args;
         va_start(args, format);
-        r = vsnprintf(printk_buffer, PRINTK_MAX, format, args);
+        r = vsnprintf(printk_buffer, Log::printk_max, format, args);
         va_end(args);
         for (auto& i : output) {
             i.write(printk_buffer, r);

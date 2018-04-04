@@ -41,7 +41,8 @@ addr_t load(addr_t binary, Thread* thread)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX;  // Set NX bit if requested
             }
-            for (size_t i = 0; i < phdr->p_memsz;) {
+            size_t i;
+            for (i = 0; i < phdr->p_filesz;) {
                 Memory::Virtual::map(i + phdr->p_vaddr,
                                      Memory::Physical::allocate(), flags);
                 /*
@@ -52,8 +53,8 @@ addr_t load(addr_t binary, Thread* thread)
                  */
                 size_t size =
                     (Memory::Virtual::align_up(i + phdr->p_vaddr + 1) >
-                     phdr->p_vaddr + phdr->p_memsz) ?
-                        phdr->p_memsz - i :
+                     phdr->p_vaddr + phdr->p_filesz) ?
+                        phdr->p_filesz - i :
                         Memory::Virtual::align_up(i + phdr->p_vaddr + 1) -
                             (i + phdr->p_vaddr);
                 Log::printk(Log::DEBUG, "Copying from %p -> %p, size %X\n",
@@ -62,26 +63,40 @@ addr_t load(addr_t binary, Thread* thread)
                 String::memcpy(
                     reinterpret_cast<void*>(i + phdr->p_vaddr),
                     reinterpret_cast<void*>(binary + i + phdr->p_offset), size);
-                i += size;
                 if (!(phdr->p_flags & PF_W)) {
                     // Remove write access if requested
                     Memory::Virtual::protect(i + phdr->p_vaddr,
                                              flags & ~PAGE_WRITABLE);
                 }
+                i += size;
             }
-        }
-    }
-    for (int i = 0; i < header->e_shnum; i++) {
-        struct elf64_shdr* shdr = reinterpret_cast<struct elf64_shdr*>(
-            binary + header->e_shoff + (header->e_shentsize * i));
-        if (shdr->sh_type == SHT_NOBITS) {
-            if (!shdr->sh_size)
-                continue;
-            if (shdr->sh_flags & SHF_ALLOC) {
-                Log::printk(Log::DEBUG, "Found .bss section, asking for %p\n",
-                            shdr->sh_addr);
-                String::memset(reinterpret_cast<void*>(shdr->sh_addr), 0,
-                               shdr->sh_size);
+            if (i < phdr->p_memsz) {
+                Log::printk(Log::DEBUG, "Memory size is larger than file size, "
+                                        "zeroing...\n");
+                while (i < phdr->p_memsz) {
+                    if (Memory::Virtual::test(i + phdr->p_vaddr)) {
+                        Memory::Virtual::protect(i + phdr->p_vaddr, flags);
+                    } else {
+                        Memory::Virtual::map(i + phdr->p_vaddr,
+                                             Memory::Physical::allocate(),
+                                             flags);
+                    }
+                    size_t size =
+                        (Memory::Virtual::align_up(i + phdr->p_vaddr + 1) >
+                         phdr->p_vaddr + phdr->p_memsz) ?
+                            phdr->p_memsz - i :
+                            Memory::Virtual::align_up(i + phdr->p_vaddr + 1) -
+                                (i + phdr->p_vaddr);
+                    Log::printk(Log::DEBUG, "Zeroing %p, size 0x%X\n",
+                                i + phdr->p_vaddr, size);
+                    String::memset(reinterpret_cast<void*>(i + phdr->p_vaddr),
+                                   0, size);
+                    if (!(phdr->p_flags & PF_W)) {
+                        Memory::Virtual::protect(i + phdr->p_vaddr,
+                                                 flags & ~PAGE_WRITABLE);
+                    }
+                    i += size;
+                }
             }
         }
     }

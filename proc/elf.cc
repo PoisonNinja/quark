@@ -41,29 +41,28 @@ addr_t load(addr_t binary, Thread* thread)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX;  // Set NX bit if requested
             }
-            if (phdr->p_vaddr > Memory::Virtual::align_down(phdr->p_vaddr)) {
-                Memory::Virtual::map(phdr->p_vaddr,
-                                     Memory::Physical::allocate(), flags);
-                String::memcpy(
-                    reinterpret_cast<void*>(phdr->p_vaddr),
-                    reinterpret_cast<void*>(binary + phdr->p_offset),
-                    Memory::Virtual::align_up(phdr->p_vaddr) - phdr->p_vaddr);
-                phdr->p_memsz -=
-                    Memory::Virtual::align_up(phdr->p_vaddr) - phdr->p_vaddr;
-                phdr->p_vaddr = Memory::Virtual::align_up(phdr->p_vaddr);
-            }
-            for (size_t i = 0; i < Memory::Virtual::align_up(phdr->p_memsz);
-                 i += Memory::Virtual::PAGE_SIZE) {
+            for (size_t i = 0; i < phdr->p_memsz;) {
                 Memory::Virtual::map(i + phdr->p_vaddr,
                                      Memory::Physical::allocate(), flags);
-                Log::printk(Log::DEBUG, "Copying from %p -> %p\n",
-                            binary + i + phdr->p_offset, i + phdr->p_vaddr);
+                /*
+                 * Calculate how much to copy for this segment.
+                 *
+                 * Add one to i + phdr->p_vaddr to force it to round upwards if
+                 * i + phdr->p_vaddr is a multiple of 4096
+                 */
+                size_t size =
+                    (Memory::Virtual::align_up(i + phdr->p_vaddr + 1) >
+                     phdr->p_vaddr + phdr->p_memsz) ?
+                        phdr->p_memsz - i :
+                        Memory::Virtual::align_up(i + phdr->p_vaddr + 1) -
+                            (i + phdr->p_vaddr);
+                Log::printk(Log::DEBUG, "Copying from %p -> %p, size %X\n",
+                            binary + i + phdr->p_offset, i + phdr->p_vaddr,
+                            size);
                 String::memcpy(
                     reinterpret_cast<void*>(i + phdr->p_vaddr),
-                    reinterpret_cast<void*>(binary + i + phdr->p_offset),
-                    (i - phdr->p_filesz >= Memory::Virtual::PAGE_SIZE) ?
-                        Memory::Virtual::PAGE_SIZE :
-                        phdr->p_filesz - i);
+                    reinterpret_cast<void*>(binary + i + phdr->p_offset), size);
+                i += size;
                 if (!(phdr->p_flags & PF_W)) {
                     // Remove write access if requested
                     Memory::Virtual::protect(i + phdr->p_vaddr,

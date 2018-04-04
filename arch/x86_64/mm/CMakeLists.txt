@@ -4,6 +4,7 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/init.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/map.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/protect.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/test.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/unmap.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/virtual.cc
 )

@@ -6,7 +6,7 @@
 namespace Interrupt
 {
 static List<Interrupt::Handler, &Interrupt::Handler::node>
-    handlers[INTERRUPT_MAX];
+    handlers[interrupt_max];
 
 static std::atomic<int> interrupt_depth(1);
 
@@ -32,7 +32,8 @@ void dispatch(int int_no, struct InterruptContext* ctx)
 {
     if (handlers[int_no].empty()) {
         if (int_no < 32) {
-            Kernel::panic("Unhandled exception #%d, error code 0x%X\n", int_no, ctx->err_code);
+            Kernel::panic("Unhandled exception #%d, error code 0x%X\n", int_no,
+                          ctx->err_code);
         }
     } else {
         for (auto& handler : handlers[int_no]) {
@@ -46,7 +47,7 @@ void dispatch(int int_no, struct InterruptContext* ctx)
 
 status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
 {
-    if (int_no > INTERRUPT_MAX) {
+    if (int_no > interrupt_max) {
         return FAILURE;
     }
     handlers[int_no].push_back(handler);
@@ -55,7 +56,7 @@ status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
 
 status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 {
-    if (int_no > INTERRUPT_MAX) {
+    if (int_no > interrupt_max) {
         return FAILURE;
     }
     for (auto it = handlers[int_no].begin(); it != handlers[int_no].end();

@@ -48,7 +48,7 @@ status_t Intel8259::disable()
     return SUCCESS;
 }
 
-status_t Intel8259::mask(int irq)
+status_t Intel8259::mask(uint32_t irq)
 {
     uint16_t port;
     uint8_t value;
@@ -64,7 +64,7 @@ status_t Intel8259::mask(int irq)
     return SUCCESS;
 }
 
-status_t Intel8259::unmask(int irq)
+status_t Intel8259::unmask(uint32_t irq)
 {
     uint16_t port;
     uint8_t value;
@@ -80,7 +80,7 @@ status_t Intel8259::unmask(int irq)
     return SUCCESS;
 }
 
-status_t Intel8259::ack(int irq)
+status_t Intel8259::ack(uint32_t irq)
 {
     if (irq >= 8) {
         outb(PIC2_COMMAND, COMMAND_EOI);

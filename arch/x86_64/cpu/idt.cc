@@ -2,11 +2,11 @@
 
 namespace IDT
 {
-#define NUM_ENTRIES 256
+constexpr size_t num_entries = 256;
 
-static struct IDT::Entry entries[NUM_ENTRIES];
+static struct IDT::Entry entries[num_entries];
 static struct IDT::Descriptor descriptor = {
-    .limit = sizeof(struct IDT::Entry) * NUM_ENTRIES - 1,
+    .limit = sizeof(struct IDT::Entry) * num_entries - 1,
     .offset = reinterpret_cast<addr_t>(&entries),
 };
 

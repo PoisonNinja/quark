@@ -6,7 +6,7 @@ namespace Memory
 {
 namespace Virtual
 {
-const size_t PAGE_SIZE = 4096;
+constexpr size_t PAGE_SIZE = 4096;
 
 struct page {
     uint32_t present : 1;

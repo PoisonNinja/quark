@@ -5,22 +5,40 @@ namespace GDT
 {
 constexpr size_t num_entries = 7;
 
-#define ACCESS_PRESENT(x) ((x) << 7)
-#define ACCESS_PRIVL(x) ((x) << 5)
-#define ACCESS_MANDATORY(x) ((x) << 4)
-#define ACCESS_DATA(direction, write) \
-    ((0) << 3 | (direction) << 2 | (write) << 1)
-#define ACCESS_CODE(conform, read) ((1) << 3 | (conform) << 2 | (read) << 1)
+constexpr uint8_t access_present(uint8_t x)
+{
+    return ((x) << 7);
+}
 
-#define FLAG_LONG (1 << 1)
-#define FLAG_4KIB (1 << 3)
+constexpr uint8_t access_privilege(uint8_t x)
+{
+    return ((x) << 5);
+}
+
+constexpr uint8_t access_mandantory(uint8_t x)
+{
+    return ((x) << 4);
+}
+
+constexpr uint8_t access_data(uint8_t direction, uint8_t write)
+{
+    return ((0) << 3 | (direction) << 2 | (write) << 1);
+}
+
+constexpr uint8_t access_code(uint8_t conform, uint8_t read)
+{
+    return ((1) << 3 | (conform) << 2 | (read) << 1);
+}
+
+constexpr uint8_t flag_long = (1 << 1);
+constexpr uint8_t flag_4kib = (1 << 3);
 
 extern "C" void gdt_load(addr_t);
 extern "C" void tss_load();
 
-static struct GDT::Entry entries[NUM_ENTRIES];
+static struct GDT::Entry entries[num_entries];
 static struct GDT::Descriptor descriptor = {
-    .limit = sizeof(struct GDT::Entry) * NUM_ENTRIES - 1,
+    .limit = sizeof(struct GDT::Entry) * num_entries - 1,
     .offset = reinterpret_cast<addr_t>(&entries),
 };
 static struct TSS::Entry tss = {
@@ -35,7 +53,7 @@ static struct TSS::Entry tss = {
     .iomap_base = 0,
 };
 
-static void set_entry(struct GDT::Entry *entry, uint32_t base, uint32_t limit,
+static void set_entry(struct GDT::Entry* entry, uint32_t base, uint32_t limit,
                       uint8_t access, uint8_t flags)
 {
     entry->limit_low = limit & 0xFFFF;
@@ -47,8 +65,8 @@ static void set_entry(struct GDT::Entry *entry, uint32_t base, uint32_t limit,
     entry->base_high = (base >> 24) & 0xFF;
 }
 
-static void write_tss(struct GDT::Entry *gdt1, struct GDT::Entry *gdt2,
-                      struct TSS::Entry *tss)
+static void write_tss(struct GDT::Entry* gdt1, struct GDT::Entry* gdt2,
+                      struct TSS::Entry* tss)
 {
     uint64_t base = (uint64_t)tss;
     uint32_t limit = sizeof(struct TSS::Entry);
@@ -60,21 +78,21 @@ void init()
 {
     GDT::set_entry(&entries[0], 0, 0, 0, 0);
     GDT::set_entry(&entries[1], 0, 0xFFFFF,
-                   ACCESS_PRESENT(1) | ACCESS_PRIVL(0) | ACCESS_MANDATORY(1) |
-                       ACCESS_CODE(0, 1),
-                   FLAG_LONG | FLAG_4KIB);
+                   access_present(1) | access_privilege(0) |
+                       access_mandantory(1) | access_code(0, 1),
+                   flag_long | flag_4kib);
     GDT::set_entry(&entries[2], 0, 0xFFFFF,
-                   ACCESS_PRESENT(1) | ACCESS_PRIVL(0) | ACCESS_MANDATORY(1) |
-                       ACCESS_DATA(0, 1),
-                   FLAG_LONG | FLAG_4KIB);
+                   access_present(1) | access_privilege(0) |
+                       access_mandantory(1) | access_data(0, 1),
+                   flag_long | flag_4kib);
     GDT::set_entry(&entries[3], 0, 0xFFFFF,
-                   ACCESS_PRESENT(1) | ACCESS_PRIVL(3) | ACCESS_MANDATORY(1) |
-                       ACCESS_CODE(0, 1),
-                   FLAG_LONG | FLAG_4KIB);
+                   access_present(1) | access_privilege(3) |
+                       access_mandantory(1) | access_code(0, 1),
+                   flag_long | flag_4kib);
     GDT::set_entry(&entries[4], 0, 0xFFFFF,
-                   ACCESS_PRESENT(1) | ACCESS_PRIVL(3) | ACCESS_MANDATORY(1) |
-                       ACCESS_DATA(0, 1),
-                   FLAG_LONG | FLAG_4KIB);
+                   access_present(1) | access_privilege(3) |
+                       access_mandantory(1) | access_data(0, 1),
+                   flag_long | flag_4kib);
     GDT::write_tss(&entries[5], &entries[6], &tss);
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
     GDT::tss_load();

@@ -28,6 +28,8 @@ status_t Thread::save_context(struct InterruptContext* ctx)
     registers->r11 = ctx->r11;
     registers->r12 = ctx->r12;
     registers->r13 = ctx->r13;
+    registers->r14 = ctx->r14;
+    registers->r15 = ctx->r15;
     registers->rip = ctx->rip;
     registers->rflags = ctx->rflags;
     registers->ss = ctx->ss;
@@ -57,6 +59,8 @@ status_t Thread::load_context(struct InterruptContext* ctx)
     ctx->r11 = registers->r11;
     ctx->r12 = registers->r12;
     ctx->r13 = registers->r13;
+    ctx->r14 = registers->r14;
+    ctx->r15 = registers->r15;
     ctx->rip = registers->rip;
     ctx->rflags = registers->rflags;
     ctx->ss = registers->ss;

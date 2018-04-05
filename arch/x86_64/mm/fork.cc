@@ -35,7 +35,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
             uint64_t source = ((pml4_index << 39) | (pdpt_index << 30) |
                                (pd_index << 21) | (i << 12));
             String::memcpy(fork_page_pointer, reinterpret_cast<void*>(source),
-                           sizeof(struct page));
+                           0x1000);
         }
     }
 }
@@ -125,7 +125,7 @@ addr_t arch_fork()
     old_pml4->pages[Memory::X64::copy_entry].writable = 1;
     old_pml4->pages[Memory::X64::copy_entry].address = fork_pml4_phys / 0x1000;
 
-    Memory::X64::invlpg(reinterpret_cast<addr_t>(old_pml4));
+    Memory::X64::invlpg(reinterpret_cast<addr_t>(new_pml4));
 
     // Copy only user pages
     for (int i = 0; i < 256; i++) {

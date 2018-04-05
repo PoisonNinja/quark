@@ -68,6 +68,7 @@ bool arch_map(addr_t v, addr_t p, int flags)
     }
     __set_flags(&pt->pages[Memory::X64::pt_index(v)], flags);
     pt->pages[Memory::X64::pt_index(v)].address = p / 0x1000;
+    Memory::X64::invlpg(v);
     return true;
 }
 }

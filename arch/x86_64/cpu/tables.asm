@@ -42,18 +42,18 @@ tss_load:
     push r14      ;save current r14
     push r15      ;save current r15
 
-    mov ebp, ds
+    mov bp, ds
     push rbp
 
     mov bp, 0x10
-    mov ds, ebp
-    mov es, ebp
+    mov ds, bp
+    mov es, bp
 %endmacro
 
 %macro POPA 0
     pop rbp
-    mov ds, ebp
-    mov es, ebp
+    mov ds, bp
+    mov es, bp
 
     pop r15      ;restore current r15
     pop r14      ;restore current r14
@@ -158,7 +158,9 @@ interrupt_common_stub:
     call arch_handler
 
     POPA
+
     add rsp, 16
+
     iretq
 
 global idt_load

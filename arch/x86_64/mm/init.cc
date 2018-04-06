@@ -9,10 +9,15 @@ namespace Memory
 {
 void arch_init(struct Boot::info &info)
 {
-    Log::printk(Log::INFO, "Kernel: %p -> %p\n", info.kernel_start,
-                info.kernel_end);
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
+    addr_t multiboot_start = Memory::Virtual::align_down(
+        reinterpret_cast<addr_t>(multiboot) - 0xFFFFFFFF80000000);
+    addr_t multiboot_end =
+        Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
+    Log::printk(Log::INFO, "Kernel: %p -> %p\n", info.kernel_start,
+                info.kernel_end);
+    Log::printk(Log::INFO, "Multiboot at %p\n", multiboot);
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<addr_t>(multiboot) + 8);
@@ -45,7 +50,16 @@ void arch_init(struct Boot::info &info)
                                          info.kernel_start) &&
                                 i < Memory::Virtual::align_up(
                                         info.kernel_end)) {
-                                Log::printk(Log::DEBUG, "        Rejected %p\n",
+                                Log::printk(
+                                    Log::DEBUG,
+                                    "        Rejected %p because in kernel\n",
+                                    i);
+                            } else if (i >= multiboot_start &&
+                                       i < multiboot_end) {
+                                Log::printk(Log::DEBUG,
+                                            "        Rejected %p "
+                                            "because in "
+                                            "multiboot\n",
                                             i);
                             } else {
                                 Memory::Physical::free(i);

@@ -22,7 +22,6 @@ void init_go()
     initp->address_space = cloned;
     Memory::Virtual::set_address_space_root(cloned);
     Thread* thread = new Thread(initp);
-    initp->add_thread(thread);
     Ref<Filesystem::Descriptor> root = Scheduler::get_current_process()->root;
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {

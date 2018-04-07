@@ -13,6 +13,17 @@ DTable::~DTable()
     delete[] fds;
 }
 
+DTable& DTable::operator=(const DTable& d)
+{
+    size = d.size;
+    step_size = d.step_size;
+    fds = new Ref<Descriptor>[d.size];
+    for (int i = 0; i < size; i++) {
+        fds[i] = d.fds[i];
+    }
+    return *this;
+}
+
 void DTable::resize()
 {
     Ref<Descriptor>* tmp = new Ref<Descriptor>[size + step_size];
@@ -20,6 +31,7 @@ void DTable::resize()
         tmp[i] = fds[i];
     }
     delete[] fds;
+    fds = tmp;
 }
 
 int DTable::add(Ref<Descriptor> desc)

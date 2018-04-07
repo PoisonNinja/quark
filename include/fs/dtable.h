@@ -10,6 +10,8 @@ public:
     DTable(int s = 4);
     ~DTable();
 
+    DTable& operator=(const DTable& d);
+
     int add(Ref<Descriptor> desc);
     bool remove(int fd);
     Ref<Descriptor> operator[](int index);

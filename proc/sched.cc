@@ -71,6 +71,16 @@ void tick(struct InterruptContext* ctx)
     current_thread = &next;
 }
 
+extern "C" void load_registers(InterruptContext* ctx);
+
+void artifial_tick()
+{
+    struct InterruptContext ctx;
+    String::memset(&ctx, 0, sizeof(struct InterruptContext));
+    tick(&ctx);
+    load_registers(&ctx);
+}
+
 void init()
 {
     Log::printk(Log::INFO, "Initializing scheduler...\n");

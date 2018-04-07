@@ -148,9 +148,11 @@ static void* syscall_table[256];
 
 static void handler(int, void*, struct InterruptContext* ctx)
 {
-    Log::printk(Log::DEBUG,
-                "Received system call %d, %llX %llX %llX %llX %llX\n", ctx->rax,
-                ctx->rdi, ctx->rsi, ctx->rdx, ctx->rcx, ctx->r8);
+    Log::printk(
+        Log::DEBUG,
+        "Received system call %d from PID %d, %llX %llX %llX %llX %llX\n",
+        ctx->rax, Scheduler::get_current_thread()->tid, ctx->rdi, ctx->rsi,
+        ctx->rdx, ctx->rcx, ctx->r8);
     if (!syscall_table[ctx->rax]) {
         Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->rax);
         ctx->rax = -ENOSYS;

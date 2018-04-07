@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-struct thread_ctx {
+struct ThreadContext {
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;

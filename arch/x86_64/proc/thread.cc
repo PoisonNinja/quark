@@ -8,64 +8,76 @@
 #include <proc/process.h>
 #include <proc/thread.h>
 
-status_t Thread::save_context(struct InterruptContext* ctx)
+void save_context(struct InterruptContext* ctx,
+                  struct ThreadContext* thread_ctx)
+{
+    thread_ctx->rax = ctx->rax;
+    thread_ctx->rbx = ctx->rbx;
+    thread_ctx->rcx = ctx->rcx;
+    thread_ctx->rdx = ctx->rdx;
+    thread_ctx->rdi = ctx->rdi;
+    thread_ctx->rsi = ctx->rsi;
+    thread_ctx->rsp = ctx->rsp;
+    thread_ctx->rbp = ctx->rbp;
+    thread_ctx->r8 = ctx->r8;
+    thread_ctx->r9 = ctx->r9;
+    thread_ctx->r10 = ctx->r10;
+    thread_ctx->r11 = ctx->r11;
+    thread_ctx->r12 = ctx->r12;
+    thread_ctx->r13 = ctx->r13;
+    thread_ctx->r14 = ctx->r14;
+    thread_ctx->r15 = ctx->r15;
+    thread_ctx->rip = ctx->rip;
+    thread_ctx->rflags = ctx->rflags;
+    thread_ctx->ss = ctx->ss;
+    thread_ctx->cs = ctx->cs;
+    thread_ctx->ds = ctx->ds;
+}
+
+void load_context(struct InterruptContext* ctx,
+                  struct ThreadContext* thread_ctx)
+{
+    ctx->rax = thread_ctx->rax;
+    ctx->rbx = thread_ctx->rbx;
+    ctx->rcx = thread_ctx->rcx;
+    ctx->rdx = thread_ctx->rdx;
+    ctx->rdi = thread_ctx->rdi;
+    ctx->rsi = thread_ctx->rsi;
+    ctx->rsp = thread_ctx->rsp;
+    ctx->rbp = thread_ctx->rbp;
+    ctx->r8 = thread_ctx->r8;
+    ctx->r9 = thread_ctx->r9;
+    ctx->r10 = thread_ctx->r10;
+    ctx->r11 = thread_ctx->r11;
+    ctx->r12 = thread_ctx->r12;
+    ctx->r13 = thread_ctx->r13;
+    ctx->r14 = thread_ctx->r14;
+    ctx->r15 = thread_ctx->r15;
+    ctx->rip = thread_ctx->rip;
+    ctx->rflags = thread_ctx->rflags;
+    ctx->ss = thread_ctx->ss;
+    ctx->cs = thread_ctx->cs;
+    ctx->ds = thread_ctx->ds;
+}
+
+status_t Thread::save_state(struct InterruptContext* ctx)
 {
     if (!ctx) {
         return FAILURE;
     }
-    struct thread_ctx* registers = &cpu_ctx;
-    registers->rax = ctx->rax;
-    registers->rbx = ctx->rbx;
-    registers->rcx = ctx->rcx;
-    registers->rdx = ctx->rdx;
-    registers->rdi = ctx->rdi;
-    registers->rsi = ctx->rsi;
-    registers->rsp = ctx->rsp;
-    registers->rbp = ctx->rbp;
-    registers->r8 = ctx->r8;
-    registers->r9 = ctx->r9;
-    registers->r10 = ctx->r10;
-    registers->r11 = ctx->r11;
-    registers->r12 = ctx->r12;
-    registers->r13 = ctx->r13;
-    registers->r14 = ctx->r14;
-    registers->r15 = ctx->r15;
-    registers->rip = ctx->rip;
-    registers->rflags = ctx->rflags;
-    registers->ss = ctx->ss;
-    registers->cs = ctx->cs;
-    registers->ds = ctx->ds;
+    struct ThreadContext* registers = &cpu_ctx;
+    save_context(ctx, registers);
     return SUCCESS;
 }
 
-status_t Thread::load_context(struct InterruptContext* ctx)
+status_t Thread::load_state(struct InterruptContext* ctx)
 {
     set_stack(kernel_stack);
     if (!ctx) {
         return FAILURE;
     }
-    struct thread_ctx* registers = &cpu_ctx;
-    ctx->rax = registers->rax;
-    ctx->rbx = registers->rbx;
-    ctx->rcx = registers->rcx;
-    ctx->rdx = registers->rdx;
-    ctx->rdi = registers->rdi;
-    ctx->rsi = registers->rsi;
-    ctx->rsp = registers->rsp;
-    ctx->rbp = registers->rbp;
-    ctx->r8 = registers->r8;
-    ctx->r9 = registers->r9;
-    ctx->r10 = registers->r10;
-    ctx->r11 = registers->r11;
-    ctx->r12 = registers->r12;
-    ctx->r13 = registers->r13;
-    ctx->r14 = registers->r14;
-    ctx->r15 = registers->r15;
-    ctx->rip = registers->rip;
-    ctx->rflags = registers->rflags;
-    ctx->ss = registers->ss;
-    ctx->cs = registers->cs;
-    ctx->ds = registers->ds;
+    struct ThreadContext* registers = &cpu_ctx;
+    load_context(ctx, registers);
     return SUCCESS;
 }
 

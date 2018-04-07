@@ -57,7 +57,7 @@ bool DTable::remove(int fd)
     }
 }
 
-Ref<Descriptor> DTable::operator[](int index)
+Ref<Descriptor> DTable::get(int index)
 {
     if (index >= size) {
         return Ref<Descriptor>(nullptr);

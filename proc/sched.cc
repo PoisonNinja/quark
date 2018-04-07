@@ -84,7 +84,7 @@ void artifial_tick()
 void init()
 {
     Log::printk(Log::INFO, "Initializing scheduler...\n");
-    kernel_process = new Process(nullptr);
+    kernel_process = new Process();
     kernel_process->address_space = Memory::Virtual::get_address_space_root();
     // TODO: Move this to architecture specific
     Thread* kinit = new Thread(kernel_process);

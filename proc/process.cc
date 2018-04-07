@@ -2,17 +2,45 @@
 #include <proc/process.h>
 #include <proc/sched.h>
 
-Process::Process(Process* parent)
+Process::Process()
 {
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
-    this->cwd = Ref<Filesystem::Descriptor>(nullptr);
-    this->root = Ref<Filesystem::Descriptor>(nullptr);
     this->sections = new Memory::SectionManager(USER_START, USER_END);
 }
 
 Process::~Process()
 {
+}
+
+void Process::set_cwd(Ref<Filesystem::Descriptor> desc)
+{
+    cwd = desc;
+}
+
+void Process::set_root(Ref<Filesystem::Descriptor> desc)
+{
+    root = desc;
+}
+
+void Process::set_dtable(Ref<Filesystem::DTable> table)
+{
+    fds = table;
+}
+
+Ref<Filesystem::Descriptor> Process::get_cwd()
+{
+    return cwd;
+}
+
+Ref<Filesystem::Descriptor> Process::get_root()
+{
+    return root;
+}
+
+Ref<Filesystem::DTable> Process::get_dtable()
+{
+    return fds;
 }
 
 status_t Process::add_thread(Thread* thread)

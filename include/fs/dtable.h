@@ -4,7 +4,7 @@
 
 namespace Filesystem
 {
-class DTable
+class DTable : public RefcountBase
 {
 public:
     DTable(int s = 4);
@@ -13,8 +13,8 @@ public:
     DTable& operator=(const DTable& d);
 
     int add(Ref<Descriptor> desc);
+    Ref<Descriptor> get(int index);
     bool remove(int fd);
-    Ref<Descriptor> operator[](int index);
 
 private:
     void resize();

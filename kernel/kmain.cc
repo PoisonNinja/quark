@@ -16,13 +16,14 @@
 void init_go()
 {
     addr_t cloned = Memory::Virtual::fork();
-    Process* initp = new Process(nullptr);
-    initp->root = Scheduler::get_current_process()->root;
-    initp->cwd = Scheduler::get_current_process()->cwd;
+    Process* initp = new Process();
+    initp->set_root(Scheduler::get_current_process()->get_root());
+    initp->set_cwd(Scheduler::get_current_process()->get_cwd());
+    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
     initp->address_space = cloned;
     Memory::Virtual::set_address_space_root(cloned);
     Thread* thread = new Thread(initp);
-    Ref<Filesystem::Descriptor> root = Scheduler::get_current_process()->root;
+    Ref<Filesystem::Descriptor> root = initp->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {
         Log::printk(Log::ERROR, "Failed to open init\n");

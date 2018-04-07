@@ -23,7 +23,7 @@ size_t decode_octal(char size[12])
 void parse(addr_t initrd)
 {
     addr_t current = initrd;
-    Ref<Descriptor> root = Scheduler::get_current_process()->root;
+    Ref<Descriptor> root = Scheduler::get_current_process()->get_root();
     Ref<Descriptor> file;
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =

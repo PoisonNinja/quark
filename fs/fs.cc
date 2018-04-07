@@ -23,7 +23,7 @@ void init()
     droot->mkdir("dev", 0666);
     droot->link("dev/tty", dtty);
     // droot->link("dev/tty1", tty);
-    Scheduler::get_current_process()->cwd = droot;
-    Scheduler::get_current_process()->root = droot;
+    Scheduler::get_current_process()->set_cwd(droot);
+    Scheduler::get_current_process()->set_root(droot);
 }
 }

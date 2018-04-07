@@ -2,6 +2,7 @@
 #include <cpu/interrupt.h>
 #include <errno.h>
 #include <kernel.h>
+#include <lib/string.h>
 #include <mm/virtual.h>
 #include <proc/sched.h>
 #include <proc/syscall.h>
@@ -135,6 +136,23 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
     }
 }
 
+static pid_t sys_fork()
+{
+    addr_t cloned = Memory::Virtual::fork();
+    Process* child = new Process(Scheduler::get_current_process());
+    child->fds = Scheduler::get_current_process()->fds;
+    child->root = Scheduler::get_current_process()->root;
+    child->cwd = Scheduler::get_current_process()->cwd;
+    child->address_space = cloned;
+    Thread* thread = new Thread(child);
+    String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
+                   sizeof(thread->cpu_ctx));
+    thread->cpu_ctx.rax = 0;
+    thread->kernel_stack = (addr_t) new uint8_t[0x1000] + 0x1000;
+    Scheduler::insert(thread);
+    return child->pid;
+}
+
 static void sys_exit(int val)
 {
     Log::printk(Log::DEBUG, "[sys_exit] = %d\n", val);
@@ -179,6 +197,7 @@ void init()
     syscall_table[SYS_fstat] = reinterpret_cast<void*>(sys_fstat);
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
+    syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
     Interrupt::register_handler(0x80, handler_data);
 }

@@ -22,7 +22,7 @@ public:
     status_t load_context(struct InterruptContext *ctx);
     tid_t tid;
     ThreadState state;
-    struct thread_ctx cpu_ctx;
+    struct thread_ctx cpu_ctx;  // Thread execution state
     addr_t kernel_stack;
     Node<Thread> process_node;
     Node<Thread> scheduler_node;

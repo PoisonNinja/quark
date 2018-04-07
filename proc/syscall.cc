@@ -158,9 +158,10 @@ static void handler(int, void*, struct InterruptContext* ctx)
         ctx->rax = -ENOSYS;
         return;
     }
-    int (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e) =
-        (int (*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                 uint64_t e))syscall_table[ctx->rax];
+    uint64_t (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+                     uint64_t e) =
+        (uint64_t(*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+                     uint64_t e))syscall_table[ctx->rax];
     ctx->rax = func(ctx->rdi, ctx->rsi, ctx->rdx, ctx->rcx, ctx->r8);
 }
 

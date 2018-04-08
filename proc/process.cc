@@ -43,7 +43,7 @@ Ref<Filesystem::DTable> Process::get_dtable()
     return fds;
 }
 
-status_t Process::add_thread(Thread* thread)
+bool Process::add_thread(Thread* thread)
 {
     if (threads.empty()) {
         // First node shares same PID
@@ -53,17 +53,17 @@ status_t Process::add_thread(Thread* thread)
         thread->tid = Scheduler::get_free_pid();
     }
     threads.push_back(*thread);
-    return SUCCESS;
+    return true;
 }
 
-status_t Process::remove_thread(Thread* thread)
+bool Process::remove_thread(Thread* thread)
 {
     for (auto it = threads.begin(); it != threads.end(); ++it) {
         auto& value = *it;
         if (&value == thread) {
             threads.erase(it);
-            return SUCCESS;
+            return true;
         }
     }
-    return FAILURE;
+    return false;
 }

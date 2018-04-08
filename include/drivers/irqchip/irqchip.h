@@ -7,17 +7,17 @@ namespace IrqChip
 class IrqChip
 {
 public:
-    virtual status_t enable() = 0;
-    virtual status_t disable() = 0;
-    virtual status_t mask(uint32_t irq) = 0;
-    virtual status_t unmask(uint32_t irq) = 0;
-    virtual status_t ack(uint32_t irq) = 0;
+    virtual bool enable() = 0;
+    virtual bool disable() = 0;
+    virtual bool mask(uint32_t irq) = 0;
+    virtual bool unmask(uint32_t irq) = 0;
+    virtual bool ack(uint32_t irq) = 0;
     virtual bool spurious() = 0;
 };
 
-status_t mask(uint32_t irq);
-status_t unmask(uint32_t irq);
-status_t ack(uint32_t irq);
+bool mask(uint32_t irq);
+bool unmask(uint32_t irq);
+bool ack(uint32_t irq);
 
-status_t set_irqchip(IrqChip& chip);
+bool set_irqchip(IrqChip& chip);
 }

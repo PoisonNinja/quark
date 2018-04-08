@@ -21,6 +21,7 @@ void init_go()
     initp->set_cwd(Scheduler::get_current_process()->get_cwd());
     initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
     initp->address_space = cloned;
+    Log::printk(Log::INFO, "Hi\n");
     Memory::Virtual::set_address_space_root(cloned);
     Thread* thread = new Thread(initp);
     Ref<Filesystem::Descriptor> root = initp->get_root();

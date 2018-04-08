@@ -13,8 +13,8 @@ public:
     ~Process();
     pid_t pid;
     addr_t address_space;
-    status_t add_thread(Thread* thread);
-    status_t remove_thread(Thread* thread);
+    bool add_thread(Thread* thread);
+    bool remove_thread(Thread* thread);
 
     void set_cwd(Ref<Filesystem::Descriptor> desc);
     void set_root(Ref<Filesystem::Descriptor> desc);

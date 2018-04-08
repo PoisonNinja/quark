@@ -6,8 +6,8 @@
 
 namespace Scheduler
 {
-status_t insert(Thread* thread);
-status_t remove(Thread* thread);
+bool insert(Thread* thread);
+bool remove(Thread* thread);
 
 void init();
 void switch_next(struct InterruptContext* ctx);

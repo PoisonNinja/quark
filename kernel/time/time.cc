@@ -15,7 +15,7 @@ void tick(struct InterruptContext* ctx)
     Scheduler::switch_next(ctx);
 }
 
-status_t register_timer(Timer& timer)
+bool register_timer(Timer& timer)
 {
     timer_list.push_back(timer);
     Log::printk(Log::INFO, "Selecting %s as the system tick source\n",
@@ -25,7 +25,7 @@ status_t register_timer(Timer& timer)
     }
     current_timer = &timer;
     timer.periodic();
-    return SUCCESS;
+    return true;
 }
 
 void init()

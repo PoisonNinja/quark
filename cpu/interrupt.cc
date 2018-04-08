@@ -44,29 +44,29 @@ void dispatch(int int_no, struct InterruptContext* ctx)
     }
 }
 
-status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
+bool register_handler(uint32_t int_no, Interrupt::Handler& handler)
 {
     if (int_no > max) {
-        return FAILURE;
+        return false;
     }
     handlers[int_no].push_back(handler);
-    return SUCCESS;
+    return true;
 }
 
-status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
+bool unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 {
     if (int_no > max) {
-        return FAILURE;
+        return false;
     }
     for (auto it = handlers[int_no].begin(); it != handlers[int_no].end();
          ++it) {
         auto& value = *it;
         if (&value == &handler) {
             handlers[int_no].erase(it);
-            return SUCCESS;
+            return true;
         }
     }
-    return FAILURE;
+    return false;
 }
 
 void init()

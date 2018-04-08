@@ -28,22 +28,22 @@ pid_t get_free_pid()
     return next_pid++;
 }
 
-status_t insert(Thread* thread)
+bool insert(Thread* thread)
 {
     runnable.push_front(*thread);
-    return SUCCESS;
+    return true;
 }
 
-status_t remove(Thread* thread)
+bool remove(Thread* thread)
 {
     for (auto it = runnable.begin(); it != runnable.end(); ++it) {
         auto& value = *it;
         if (&value == thread) {
             runnable.erase(it);
-            return SUCCESS;
+            return true;
         }
     }
-    return FAILURE;
+    return false;
 }
 
 Thread* next()

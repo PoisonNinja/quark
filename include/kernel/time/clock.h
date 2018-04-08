@@ -10,20 +10,20 @@ class Clock
 public:
     virtual time_t read() = 0;
     virtual time_t frequency() = 0;
-    virtual status_t enable() = 0;
-    virtual status_t disable() = 0;
+    virtual bool enable() = 0;
+    virtual bool disable() = 0;
     Node<Clock> node;
 };
 
 class Timer
 {
 public:
-    virtual status_t schedule(time_t interval) = 0;
-    virtual status_t periodic() = 0;
-    virtual status_t disable() = 0;
+    virtual bool schedule(time_t interval) = 0;
+    virtual bool periodic() = 0;
+    virtual bool disable() = 0;
     virtual const char* name() = 0;
     Node<Timer> node;
 };
 
-status_t register_timer(Timer& timer);
+bool register_timer(Timer& timer);
 }  // namespace Time

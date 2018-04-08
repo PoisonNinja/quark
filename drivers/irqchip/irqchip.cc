@@ -7,41 +7,41 @@ static IrqChip* current_chip = nullptr;
 static uint8_t interrupt_mask[Interrupt::max] = {
     0};  // TODO: Convert to bitfield
 
-status_t mask(uint32_t irq)
+bool mask(uint32_t irq)
 {
     if (irq >= Interrupt::max) {
-        return FAILURE;
+        return false;
     }
     if (!interrupt_mask[irq]) {
         interrupt_mask[irq] = 1;
         return current_chip->mask(irq);
     } else {
-        return FAILURE;
+        return false;
     }
 }
 
-status_t unmask(uint32_t irq)
+bool unmask(uint32_t irq)
 {
     if (irq >= Interrupt::max) {
-        return FAILURE;
+        return false;
     }
     if (interrupt_mask[irq]) {
         interrupt_mask[irq] = 0;
         return current_chip->unmask(irq);
     } else {
-        return FAILURE;
+        return false;
     }
 }
 
-status_t ack(uint32_t irq)
+bool ack(uint32_t irq)
 {
     if (irq >= Interrupt::max) {
-        return FAILURE;
+        return false;
     }
     return current_chip->ack(irq);
 }
 
-status_t set_irqchip(IrqChip& chip)
+bool set_irqchip(IrqChip& chip)
 {
     if (current_chip) {
         current_chip->disable();
@@ -55,6 +55,6 @@ status_t set_irqchip(IrqChip& chip)
     }
     current_chip = &chip;
     current_chip->enable();
-    return SUCCESS;
+    return true;
 }
 }

@@ -10,6 +10,12 @@ Section::Section(addr_t start, size_t size)
     _size = size;
 }
 
+Section::Section(Section& other)
+{
+    _start = other._start;
+    _size = other._size;
+}
+
 addr_t Section::start()
 {
     return _start;
@@ -39,6 +45,16 @@ SectionManager::SectionManager(addr_t s, addr_t e)
 {
     start = s;
     end = e;
+}
+
+SectionManager::SectionManager(SectionManager& other)
+{
+    start = other.start;
+    end = other.end;
+    for (auto& section : other.sections) {
+        Section* s = new Section(section);
+        sections.push_back(*s);
+    }
 }
 
 SectionManager::~SectionManager()

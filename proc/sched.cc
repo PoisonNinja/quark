@@ -99,7 +99,7 @@ void init()
 {
     Log::printk(Log::INFO, "Initializing scheduler...\n");
     Interrupt::register_handler(0x81, yield_handler);
-    kernel_process = new Process();
+    kernel_process = new Process(nullptr);
     kernel_process->address_space = Memory::Virtual::get_address_space_root();
     // TODO: Move this to architecture specific
     Thread* kinit = new Thread(kernel_process);

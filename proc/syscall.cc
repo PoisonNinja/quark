@@ -140,12 +140,7 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
 
 static pid_t sys_fork()
 {
-    addr_t cloned = Memory::Virtual::fork();
-    Process* child = new Process();
-    child->set_dtable(Scheduler::get_current_process()->get_dtable());
-    child->set_root(Scheduler::get_current_process()->get_root());
-    child->set_cwd(Scheduler::get_current_process()->get_cwd());
-    child->address_space = cloned;
+    Process* child = Scheduler::get_current_process()->fork();
     Thread* thread = new Thread(child);
     String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
                    sizeof(thread->cpu_ctx));

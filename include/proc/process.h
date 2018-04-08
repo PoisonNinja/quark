@@ -9,7 +9,7 @@
 class Process
 {
 public:
-    Process();
+    Process(Process* p);
     ~Process();
     pid_t pid;
     addr_t address_space;
@@ -23,6 +23,8 @@ public:
     Ref<Filesystem::Descriptor> get_cwd();
     Ref<Filesystem::Descriptor> get_root();
     Ref<Filesystem::DTable> get_dtable();
+
+    Process* fork();
 
     Memory::SectionManager* sections;
 

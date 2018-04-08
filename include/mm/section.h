@@ -8,6 +8,7 @@ class Section
 {
 public:
     Section(addr_t start, size_t size);
+    Section(Section& other);
     Node<Section> node;
 
     bool operator==(const Section& b);
@@ -26,6 +27,7 @@ class SectionManager
 {
 public:
     SectionManager(addr_t s, addr_t e);
+    SectionManager(SectionManager& other);
     ~SectionManager();
 
     bool add_section(addr_t start, size_t size);

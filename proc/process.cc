@@ -1,8 +1,9 @@
 #include <arch/mm/layout.h>
+#include <mm/virtual.h>
 #include <proc/process.h>
 #include <proc/sched.h>
 
-Process::Process()
+Process::Process(Process* parent)
 {
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
@@ -66,4 +67,17 @@ bool Process::remove_thread(Thread* thread)
         }
     }
     return false;
+}
+
+Process* Process::fork()
+{
+    Process* child = new Process(this);
+    addr_t cloned = Memory::Virtual::fork();
+    child->set_dtable(
+        Ref<Filesystem::DTable>(new Filesystem::DTable(*this->fds)));
+    child->set_root(Scheduler::get_current_process()->get_root());
+    child->set_cwd(Scheduler::get_current_process()->get_cwd());
+    child->sections = new Memory::SectionManager(*this->sections);
+    child->address_space = cloned;
+    return child;
 }

@@ -166,7 +166,7 @@ static void* syscall_table[256];
 
 static void handler(int, void*, struct InterruptContext* ctx)
 {
-    Scheduler::get_current_thread()->save_state(ctx);
+    save_context(ctx, &Scheduler::get_current_thread()->cpu_ctx);
     Log::printk(
         Log::DEBUG,
         "Received system call %d from PID %d, %llX %llX %llX %llX %llX\n",

@@ -18,8 +18,6 @@ public:
     ~Thread();
     bool load(addr_t entry, int argc, const char *argv[], int envc,
               const char *envp[]);
-    status_t save_state(struct InterruptContext *ctx);
-    status_t load_state(struct InterruptContext *ctx);
     tid_t tid;
     ThreadState state;
     struct ThreadContext cpu_ctx;  // Thread execution state

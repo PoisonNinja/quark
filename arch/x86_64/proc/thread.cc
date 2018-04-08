@@ -60,26 +60,6 @@ void load_context(struct InterruptContext* ctx,
     ctx->ds = thread_ctx->ds;
 }
 
-status_t Thread::save_state(struct InterruptContext* ctx)
-{
-    if (!ctx) {
-        return FAILURE;
-    }
-    struct ThreadContext* registers = &cpu_ctx;
-    save_context(ctx, registers);
-    return SUCCESS;
-}
-
-status_t Thread::load_state(struct InterruptContext* ctx)
-{
-    if (!ctx) {
-        return FAILURE;
-    }
-    struct ThreadContext* registers = &cpu_ctx;
-    load_context(ctx, registers);
-    return SUCCESS;
-}
-
 bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
                   const char* envp[])
 {

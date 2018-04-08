@@ -43,6 +43,7 @@ extern "C" void isr29(void);
 extern "C" void isr30(void);
 extern "C" void isr31(void);
 extern "C" void isr128(void);
+extern "C" void isr129(void);
 extern "C" void irq0(void);
 extern "C" void irq1(void);
 extern "C" void irq2(void);
@@ -126,6 +127,8 @@ void init()
     IDT::set_entry(&entries[47], reinterpret_cast<uint64_t>(irq15), 0x08, 0x8E);
 
     IDT::set_entry(&entries[0x80], reinterpret_cast<uint64_t>(isr128), 0x08,
+                   0xEE);
+    IDT::set_entry(&entries[0x81], reinterpret_cast<uint64_t>(isr129), 0x08,
                    0xEE);
 
     IDT::idt_load(reinterpret_cast<addr_t>(&descriptor));

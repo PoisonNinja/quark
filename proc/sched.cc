@@ -20,12 +20,12 @@ static void idle()
     }
 }
 
-static pid_t next = 0;
+static pid_t next_pid = 0;
 
 pid_t get_free_pid()
 {
     // TODO: Get next __FREE__ slot, not just next slot
-    return next++;
+    return next_pid++;
 }
 
 status_t insert(Thread* thread)
@@ -46,6 +46,19 @@ status_t remove(Thread* thread)
     return FAILURE;
 }
 
+Thread* next()
+{
+    Thread* next = nullptr;
+    if (runnable.empty()) {
+        next = kidle;
+    } else {
+        next = &runnable.front();
+        remove(next);
+        runnable.push_back(*next);
+    }
+    return next;
+}
+
 void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
 {
     save_context(ctx, &current->cpu_ctx);
@@ -61,33 +74,31 @@ void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
     load_context(ctx, &next->cpu_ctx);
 }
 
-void tick(struct InterruptContext* ctx)
+void switch_next(struct InterruptContext* ctx)
 {
-    Thread* next = nullptr;
-    if (runnable.empty()) {
-        next = kidle;
-    } else {
-        next = &runnable.front();
-        remove(next);
-        runnable.push_back(*next);
-    }
-    switch_context(ctx, current_thread, next);
-    current_thread = next;
+    Thread* next_thread = next();
+    switch_context(ctx, current_thread, next_thread);
+    current_thread = next_thread;
 }
 
-extern "C" void load_registers(InterruptContext* ctx);
-
-void artifial_tick()
+void yield()
 {
-    struct InterruptContext ctx;
-    String::memset(&ctx, 0, sizeof(struct InterruptContext));
-    tick(&ctx);
-    load_registers(&ctx);
+    __asm__ __volatile__("int $0x81");
 }
+
+void yield_switch(int, void*, struct InterruptContext* ctx)
+{
+    Thread* next_thread = next();
+    switch_context(ctx, current_thread, next_thread);
+    current_thread = next_thread;
+}
+
+Interrupt::Handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
     Log::printk(Log::INFO, "Initializing scheduler...\n");
+    Interrupt::register_handler(0x81, yield_handler);
     kernel_process = new Process();
     kernel_process->address_space = Memory::Virtual::get_address_space_root();
     // TODO: Move this to architecture specific

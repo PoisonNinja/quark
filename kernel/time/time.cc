@@ -12,7 +12,7 @@ extern void arch_init();
 
 void tick(struct InterruptContext* ctx)
 {
-    Scheduler::tick(ctx);
+    Scheduler::switch_next(ctx);
 }
 
 status_t register_timer(Timer& timer)

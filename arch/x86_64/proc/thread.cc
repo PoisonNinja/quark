@@ -5,6 +5,7 @@
 #include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
+#include <proc/elf.h>
 #include <proc/process.h>
 #include <proc/thread.h>
 
@@ -60,9 +61,10 @@ void load_context(struct InterruptContext* ctx,
     ctx->ds = thread_ctx->ds;
 }
 
-bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
-                  const char* envp[])
+bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
+                  const char* envp[], struct ThreadContext& ctx)
 {
+    addr_t entry = ELF::load(binary);
     size_t argv_size = sizeof(char*) * (argc + 1);  // argv is null terminated
     size_t envp_size = sizeof(char*) * (envc + 1);  // envp is null terminated
     for (int i = 0; i < argc; i++) {
@@ -122,17 +124,16 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
     target_envp[envc] = 0;
     String::memset((void*)stack_zone, 0, 0x1000);
     String::memset(&cpu_ctx, 0, sizeof(cpu_ctx));
-    cpu_ctx.rip = entry;
-    cpu_ctx.rdi = argc;
-    cpu_ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
-    cpu_ctx.rdx = envc;
-    cpu_ctx.rcx = reinterpret_cast<uint64_t>(target_envp);
-    cpu_ctx.cs = 0x18 | 3;
-    cpu_ctx.ds = 0x20 | 3;
-    cpu_ctx.ss = 0x20 | 3;
-    cpu_ctx.rsp = cpu_ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
-    cpu_ctx.rflags = 0x200;
-    kernel_stack = reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
+    ctx.rip = entry;
+    ctx.rdi = argc;
+    ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
+    ctx.rdx = envc;
+    ctx.rcx = reinterpret_cast<uint64_t>(target_envp);
+    ctx.cs = 0x18 | 3;
+    ctx.ds = 0x20 | 3;
+    ctx.ss = 0x20 | 3;
+    ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
+    ctx.rflags = 0x200;
     return true;
 }
 
@@ -158,5 +159,16 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
     thread->cpu_ctx.cs = 0x8;
     thread->cpu_ctx.ds = 0x10;
     thread->cpu_ctx.rflags = 0x200;
+    thread->kernel_stack =
+        reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
     return thread;
+}
+
+extern "C" void load_register_state(struct InterruptContext* ctx);
+
+void load_registers(struct ThreadContext& cpu_ctx)
+{
+    struct InterruptContext ctx;
+    load_context(&ctx, &cpu_ctx);
+    load_register_state(&ctx);
 }

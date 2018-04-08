@@ -16,8 +16,8 @@ class Thread
 public:
     Thread(Process *p);
     ~Thread();
-    bool load(addr_t entry, int argc, const char *argv[], int envc,
-              const char *envp[]);
+    bool load(addr_t binary, int argc, const char *argv[], int envc,
+              const char *envp[], struct ThreadContext &ctx);
     tid_t tid;
     ThreadState state;
     struct ThreadContext cpu_ctx;  // Thread execution state
@@ -37,3 +37,5 @@ Thread *create_kernel_thread(Process *p, void (*entry_point)(void *),
 
 void set_stack(addr_t stack);
 addr_t get_stack();
+
+void load_registers(struct ThreadContext &cpu_ctx);

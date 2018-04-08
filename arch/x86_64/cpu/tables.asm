@@ -158,6 +158,7 @@ interrupt_common_stub:
     mov rdi, rsp
     call arch_handler
 
+interrupt_return:
     POPA
 
     add rsp, 16
@@ -168,4 +169,9 @@ global idt_load
 idt_load:
     lidt [rdi]
     ret
+
+global load_register_state
+load_register_state:
+    mov rsp, rdi
+    jmp interrupt_return
 

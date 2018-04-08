@@ -9,14 +9,12 @@
 #include <lib/string.h>
 #include <mm/mm.h>
 #include <mm/virtual.h>
-#include <proc/elf.h>
 #include <proc/sched.h>
 #include <proc/syscall.h>
 
 void init_stage2(void*)
 {
     Process* parent = Scheduler::get_current_process();
-    Thread* thread = new Thread(parent);
     Ref<Filesystem::Descriptor> root = parent->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {
@@ -29,7 +27,6 @@ void init_stage2(void*)
     Log::printk(Log::DEBUG, "init binary has size of %llu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
-    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw));
     int argc = 2;
     const char* argv[] = {
         "/sbin/init",
@@ -39,15 +36,14 @@ void init_stage2(void*)
     const char* envp[] = {
         "hello=world",
     };
-    if (!thread->load(entry, argc, argv, envc, envp)) {
+    struct ThreadContext ctx;
+    if (!Scheduler::get_current_thread()->load(
+            reinterpret_cast<addr_t>(init_raw), argc, argv, envc, envp, ctx)) {
         Log::printk(Log::ERROR, "Failed to load thread state\n");
     } else {
         Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
-        Scheduler::insert(thread);
     }
-    for (;;) {
-        asm("hlt");
-    }
+    load_registers(ctx);
 }
 
 void init_stage1()

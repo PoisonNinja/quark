@@ -43,6 +43,7 @@ void init_stage2(void*)
     } else {
         Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
     }
+    delete[] init_raw;
     load_registers(ctx);
 }
 

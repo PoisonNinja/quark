@@ -46,29 +46,33 @@ status_t remove(Thread* thread)
     return FAILURE;
 }
 
-void tick(struct InterruptContext* ctx)
+void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
 {
-    if (current_thread) {
-        current_thread->save_state(ctx);
-    }
-    if (runnable.empty()) {
-        kidle->load_state(ctx);
-        current_thread = kidle;
-        return;
-    }
-    Thread& next = runnable.front();
-    remove(&next);
-    runnable.push_back(next);
-    if (current_thread) {
-        if (current_thread->parent->address_space !=
-            next.parent->address_space) {
-            Memory::Virtual::set_address_space_root(next.parent->address_space);
+    save_context(ctx, &current->cpu_ctx);
+    set_stack(next->kernel_stack);
+    if (current) {
+        if (current->parent->address_space != next->parent->address_space) {
+            Memory::Virtual::set_address_space_root(
+                next->parent->address_space);
         }
     } else {
-        Memory::Virtual::set_address_space_root(next.parent->address_space);
+        Memory::Virtual::set_address_space_root(next->parent->address_space);
     }
-    next.load_state(ctx);
-    current_thread = &next;
+    load_context(ctx, &next->cpu_ctx);
+}
+
+void tick(struct InterruptContext* ctx)
+{
+    Thread* next = nullptr;
+    if (runnable.empty()) {
+        next = kidle;
+    } else {
+        next = &runnable.front();
+        remove(next);
+        runnable.push_back(*next);
+    }
+    switch_context(ctx, current_thread, next);
+    current_thread = next;
 }
 
 extern "C" void load_registers(InterruptContext* ctx);

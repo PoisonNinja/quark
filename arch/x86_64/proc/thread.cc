@@ -72,7 +72,6 @@ status_t Thread::save_state(struct InterruptContext* ctx)
 
 status_t Thread::load_state(struct InterruptContext* ctx)
 {
-    set_stack(kernel_stack);
     if (!ctx) {
         return FAILURE;
     }

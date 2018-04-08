@@ -95,6 +95,8 @@ bool Thread::load(addr_t entry, int argc, const char* argv[], int envc,
         Log::printk(Log::ERROR, "Failed to locate stack\n");
         return false;
     }
+    // TODO: Make this actually map the correct amount. It only maps one page
+    // currently
     Memory::Virtual::map(argv_zone, Memory::Physical::allocate(),
                          PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map(envp_zone, Memory::Physical::allocate(),
@@ -142,4 +144,19 @@ void arch_set_stack(addr_t stack)
 addr_t arch_get_stack()
 {
     return TSS::get_stack();
+}
+
+Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
+{
+    Thread* thread = new Thread(p);
+    String::memset(&thread->cpu_ctx, 0, sizeof(thread->cpu_ctx));
+    uint64_t* stack = reinterpret_cast<uint64_t*>(new uint8_t[0x1000] + 0x1000);
+    thread->cpu_ctx.rdi = reinterpret_cast<uint64_t>(data);
+    thread->cpu_ctx.rip = reinterpret_cast<uint64_t>(entry_point);
+    thread->cpu_ctx.rbp = reinterpret_cast<uint64_t>(stack);
+    thread->cpu_ctx.rsp = reinterpret_cast<uint64_t>(stack - 1);
+    thread->cpu_ctx.cs = 0x8;
+    thread->cpu_ctx.ds = 0x10;
+    thread->cpu_ctx.rflags = 0x200;
+    return thread;
 }

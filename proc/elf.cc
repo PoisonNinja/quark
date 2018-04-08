@@ -4,11 +4,13 @@
 #include <mm/virtual.h>
 #include <proc/elf.h>
 #include <proc/process.h>
+#include <proc/sched.h>
 
 namespace ELF
 {
-addr_t load(addr_t binary, Thread* thread)
+addr_t load(addr_t binary)
 {
+    Process* process = Scheduler::get_current_process();
     struct elf64_hdr* header = reinterpret_cast<struct elf64_hdr*>(binary);
     if (String::memcmp(header->e_ident, ELFMAG, 4)) {
         Log::printk(Log::ERROR, "Binary passed in is not an ELF file!\n");
@@ -28,8 +30,7 @@ addr_t load(addr_t binary, Thread* thread)
             Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
             Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
-            if (!thread->parent->sections->add_section(phdr->p_vaddr,
-                                                       phdr->p_memsz)) {
+            if (!process->sections->add_section(phdr->p_vaddr, phdr->p_memsz)) {
                 Log::printk(Log::ERROR, "Failed to add section\n");
                 return 0;
             }

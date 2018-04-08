@@ -13,18 +13,11 @@
 #include <proc/sched.h>
 #include <proc/syscall.h>
 
-void init_go()
+void init_stage2(void*)
 {
-    addr_t cloned = Memory::Virtual::fork();
-    Process* initp = new Process();
-    initp->set_root(Scheduler::get_current_process()->get_root());
-    initp->set_cwd(Scheduler::get_current_process()->get_cwd());
-    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
-    initp->address_space = cloned;
-    Log::printk(Log::INFO, "Hi\n");
-    Memory::Virtual::set_address_space_root(cloned);
-    Thread* thread = new Thread(initp);
-    Ref<Filesystem::Descriptor> root = initp->get_root();
+    Process* parent = Scheduler::get_current_process();
+    Thread* thread = new Thread(parent);
+    Ref<Filesystem::Descriptor> root = parent->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {
         Log::printk(Log::ERROR, "Failed to open init\n");
@@ -36,7 +29,7 @@ void init_go()
     Log::printk(Log::DEBUG, "init binary has size of %llu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
-    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw), thread);
+    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw));
     int argc = 2;
     const char* argv[] = {
         "/sbin/init",
@@ -52,14 +45,27 @@ void init_go()
         Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
         Scheduler::insert(thread);
     }
+    for (;;) {
+        asm("hlt");
+    }
+}
+
+void init_stage1()
+{
+    addr_t cloned = Memory::Virtual::fork();
+    Process* initp = new Process();
+    initp->set_root(Scheduler::get_current_process()->get_root());
+    initp->set_cwd(Scheduler::get_current_process()->get_cwd());
+    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
+    initp->address_space = cloned;
+
+    Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
+    Scheduler::insert(stage2);
     // Commit suicide
     if (!Scheduler::remove(Scheduler::get_current_thread())) {
         Log::printk(Log::WARNING, "Failed to deschedule kinit\n");
     }
-    for (;;) {
-        // Loop until we're descheduled
-        asm("hlt");
-    }
+    Scheduler::yield();
 }
 
 void kmain(struct Boot::info& info)
@@ -74,5 +80,5 @@ void kmain(struct Boot::info& info)
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();
-    init_go();
+    init_stage1();
 }

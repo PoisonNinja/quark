@@ -32,5 +32,8 @@ void save_context(struct InterruptContext *ctx,
 void load_context(struct InterruptContext *ctx,
                   struct ThreadContext *thread_ctx);
 
+Thread *create_kernel_thread(Process *p, void (*entry_point)(void *),
+                             void *data);
+
 void set_stack(addr_t stack);
 addr_t get_stack();

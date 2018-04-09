@@ -88,4 +88,8 @@ Process* Process::fork()
 
 void Process::exit()
 {
+    for (auto section : *sections) {
+        Memory::Virtual::unmap(section.start(), section.end());
+    }
+    Log::printk(Log::INFO, "Memory freed\n");
 }

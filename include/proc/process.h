@@ -13,8 +13,8 @@ public:
     ~Process();
     pid_t pid;
     addr_t address_space;
-    bool add_thread(Thread* thread);
-    bool remove_thread(Thread* thread);
+    void add_thread(Thread* thread);
+    void remove_thread(Thread* thread);
 
     void set_cwd(Ref<Filesystem::Descriptor> desc);
     void set_root(Ref<Filesystem::Descriptor> desc);
@@ -23,6 +23,8 @@ public:
     Ref<Filesystem::Descriptor> get_cwd();
     Ref<Filesystem::Descriptor> get_root();
     Ref<Filesystem::DTable> get_dtable();
+
+    void exit();
 
     Process* fork();
 

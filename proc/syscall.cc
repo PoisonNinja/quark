@@ -150,11 +150,10 @@ static pid_t sys_fork()
     return child->pid;
 }
 
-static void sys_exit(int val)
+static void __attribute__((noreturn)) sys_exit(int val)
 {
     Log::printk(Log::DEBUG, "[sys_exit] = %d\n", val);
-    Scheduler::remove(Scheduler::get_current_thread());
-    Scheduler::yield();
+    Scheduler::get_current_thread()->exit();
 }
 
 static void* syscall_table[256];

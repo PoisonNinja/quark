@@ -1,4 +1,5 @@
 #include <arch/mm/layout.h>
+#include <kernel.h>
 #include <mm/virtual.h>
 #include <proc/process.h>
 #include <proc/sched.h>
@@ -44,7 +45,7 @@ Ref<Filesystem::DTable> Process::get_dtable()
     return fds;
 }
 
-bool Process::add_thread(Thread* thread)
+void Process::add_thread(Thread* thread)
 {
     if (threads.empty()) {
         // First node shares same PID
@@ -54,19 +55,22 @@ bool Process::add_thread(Thread* thread)
         thread->tid = Scheduler::get_free_pid();
     }
     threads.push_back(*thread);
-    return true;
 }
 
-bool Process::remove_thread(Thread* thread)
+void Process::remove_thread(Thread* thread)
 {
     for (auto it = threads.begin(); it != threads.end(); ++it) {
         auto& value = *it;
         if (&value == thread) {
             threads.erase(it);
-            return true;
+            break;
         }
     }
-    return false;
+    if (threads.empty()) {
+        Log::printk(Log::DEBUG, "Last thread exiting, process %d terminating\n",
+                    this->pid);
+        this->exit();
+    }
 }
 
 Process* Process::fork()
@@ -80,4 +84,8 @@ Process* Process::fork()
     child->sections = new Memory::SectionManager(*this->sections);
     child->address_space = cloned;
     return child;
+}
+
+void Process::exit()
+{
 }

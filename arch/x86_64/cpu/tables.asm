@@ -186,9 +186,6 @@ load_register_state:
 
 extern syscall_sysret_handler
 
-scratch_rsp:
-    dq 0
-
 halt:
     hlt
     jmp halt
@@ -198,7 +195,6 @@ syscall_sysret_wrapper:
     swapgs
     mov [gs:12], rsp
     mov rsp, [gs:4]
-    push rax
     push rdi
     push rsi
     push rdx
@@ -207,6 +203,7 @@ syscall_sysret_wrapper:
     push r9
     push r10
     push r11
+    mov r9, rax
     call syscall_sysret_handler
     pop r11
     pop r10
@@ -216,7 +213,6 @@ syscall_sysret_wrapper:
     pop rdx
     pop rsi
     pop rdi
-    pop rax
     mov rsp, [gs:12]
     swapgs
     sysret

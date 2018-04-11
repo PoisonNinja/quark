@@ -156,7 +156,7 @@ static void sys_exit(int val)
     Scheduler::get_current_thread()->exit();
 }
 
-static void* syscall_table[256];
+void* syscall_table[256];
 
 static void handler(int, void*, struct InterruptContext* ctx)
 {
@@ -179,18 +179,19 @@ static void handler(int, void*, struct InterruptContext* ctx)
 }
 
 extern "C" uint64_t syscall_sysret_handler(uint64_t a, uint64_t b, uint64_t c,
-                                           uint64_t d, uint64_t e)
+                                           uint64_t d, uint64_t e,
+                                           uint64_t number)
 {
     Log::printk(Log::INFO, "Received syscall using new interface\n");
-    // Log::printk(
-    //     Log::DEBUG,
-    //     "Received system call %d from PID %d, %llX %llX %llX %llX %llX\n",
-    //     number, Scheduler::get_current_thread()->tid, a, b, c, d, e);
-    // uint64_t (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-    //                  uint64_t e) =
-    //     (uint64_t(*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-    //                  uint64_t e))syscall_table[number];
-    return 0;
+    Log::printk(
+        Log::DEBUG,
+        "Received system call %d from PID %d, %llX %llX %llX %llX %llX\n",
+        number, Scheduler::get_current_thread()->tid, a, b, c, d, e);
+    uint64_t (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+                     uint64_t e) =
+        (uint64_t(*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+                     uint64_t e))syscall_table[number];
+    return func(a, b, c, d, e);
 }
 
 static struct Interrupt::Handler handler_data(handler, "syscall",

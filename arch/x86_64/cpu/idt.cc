@@ -63,6 +63,8 @@ extern "C" void irq15(void);
 
 extern "C" void idt_load(uint64_t);
 
+extern "C" void syscall_init();
+
 static void set_entry(struct IDT::Entry* entry, uint64_t offset,
                       uint16_t selector, uint8_t attributes)
 {
@@ -132,5 +134,7 @@ void init()
                    0xEE);
 
     IDT::idt_load(reinterpret_cast<addr_t>(&descriptor));
+
+    syscall_init();
 }
 }  // namespace IDT

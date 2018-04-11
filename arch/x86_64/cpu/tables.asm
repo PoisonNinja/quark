@@ -25,6 +25,15 @@ tss_load:
     ltr ax
     ret
 
+global gs_load
+gs_load:
+    mov ecx, 0xC0000102
+    mov rax, rdi
+    mov rdx, rdi
+    shr rdx, 32
+    wrmsr
+    ret
+
 %macro PUSHA 0
     push rax      ;save current rax
     push rbx      ;save current rbx
@@ -175,3 +184,60 @@ load_register_state:
     mov rsp, rdi
     jmp interrupt_return
 
+extern syscall_sysret_handler
+
+scratch_rsp:
+    dq 0
+
+halt:
+    hlt
+    jmp halt
+
+global syscall_sysret_wrapper
+syscall_sysret_wrapper:
+    swapgs
+    mov [gs:12], rsp
+    mov rsp, [gs:4]
+    push rax
+    push rdi
+    push rsi
+    push rdx
+    push rcx
+    push r8
+    push r9
+    push r10
+    push r11
+    call syscall_sysret_handler
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rcx
+    pop rdx
+    pop rsi
+    pop rdi
+    pop rax
+    mov rsp, [gs:12]
+    swapgs
+    sysret
+
+global syscall_init
+syscall_init:
+    ; Set CS and SS
+    mov ecx, 0xC0000081
+    mov edx, 0x001B0008
+    xor eax, eax
+    wrmsr
+
+    ; Set address of LSTAR passed in as first parameter
+    mov ecx, 0xC0000082
+    mov rdx, syscall_sysret_wrapper
+    mov rax, rdx
+    shr rdx, 32
+    wrmsr
+
+    ; Set RFLAGS mask
+    mov ecx, 0xC0000084
+    mov eax, 0x200 ; Clear IF
+    wrmsr
+    ret

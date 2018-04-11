@@ -178,6 +178,21 @@ static void handler(int, void*, struct InterruptContext* ctx)
     ctx->rax = func(ctx->rdi, ctx->rsi, ctx->rdx, ctx->rcx, ctx->r8);
 }
 
+extern "C" uint64_t syscall_sysret_handler(uint64_t a, uint64_t b, uint64_t c,
+                                           uint64_t d, uint64_t e)
+{
+    Log::printk(Log::INFO, "Received syscall using new interface\n");
+    // Log::printk(
+    //     Log::DEBUG,
+    //     "Received system call %d from PID %d, %llX %llX %llX %llX %llX\n",
+    //     number, Scheduler::get_current_thread()->tid, a, b, c, d, e);
+    // uint64_t (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+    //                  uint64_t e) =
+    //     (uint64_t(*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+    //                  uint64_t e))syscall_table[number];
+    return 0;
+}
+
 static struct Interrupt::Handler handler_data(handler, "syscall",
                                               &handler_data);
 

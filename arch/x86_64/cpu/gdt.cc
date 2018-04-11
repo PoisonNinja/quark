@@ -88,11 +88,11 @@ void init()
                    flag_long | flag_4kib);
     GDT::set_entry(&entries[3], 0, 0xFFFFF,
                    access_present(1) | access_privilege(3) |
-                       access_mandantory(1) | access_code(0, 1),
+                       access_mandantory(1) | access_data(0, 1),
                    flag_long | flag_4kib);
     GDT::set_entry(&entries[4], 0, 0xFFFFF,
                    access_present(1) | access_privilege(3) |
-                       access_mandantory(1) | access_data(0, 1),
+                       access_mandantory(1) | access_code(0, 1),
                    flag_long | flag_4kib);
     GDT::write_tss(&entries[5], &entries[6], &tss);
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));

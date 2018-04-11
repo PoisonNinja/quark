@@ -123,15 +123,15 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     }
     target_envp[envc] = 0;
     String::memset((void*)stack_zone, 0, 0x1000);
-    String::memset(&cpu_ctx, 0, sizeof(cpu_ctx));
+    String::memset(&ctx, 0, sizeof(ctx));
     ctx.rip = entry;
     ctx.rdi = argc;
     ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
     ctx.rdx = envc;
     ctx.rcx = reinterpret_cast<uint64_t>(target_envp);
-    ctx.cs = 0x18 | 3;
-    ctx.ds = 0x20 | 3;
-    ctx.ss = 0x20 | 3;
+    ctx.cs = 0x20 | 3;
+    ctx.ds = 0x18 | 3;
+    ctx.ss = 0x18 | 3;
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     ctx.rflags = 0x200;
     return true;

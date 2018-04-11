@@ -1,5 +1,6 @@
 #include <arch/mm/layout.h>
 #include <kernel.h>
+#include <mm/physical.h>
 #include <mm/virtual.h>
 #include <proc/process.h>
 #include <proc/sched.h>
@@ -91,5 +92,6 @@ void Process::exit()
     for (auto section : *sections) {
         Memory::Virtual::unmap(section.start(), section.end());
     }
-    Log::printk(Log::INFO, "Memory freed\n");
+    Memory::Physical::free(this->address_space);
+    delete this->sections;
 }

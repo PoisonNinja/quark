@@ -59,10 +59,7 @@ void init_stage1()
     Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
     Scheduler::insert(stage2);
     // Commit suicide
-    if (!Scheduler::remove(Scheduler::get_current_thread())) {
-        Log::printk(Log::WARNING, "Failed to deschedule kinit\n");
-    }
-    Scheduler::yield();
+    Scheduler::get_current_thread()->exit();
 }
 
 void kmain(struct Boot::info& info)

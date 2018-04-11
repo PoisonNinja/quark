@@ -51,6 +51,7 @@ gs_load:
     push r14      ;save current r14
     push r15      ;save current r15
 
+    xor rbp, rbp
     mov bp, ds
     push rbp
 
@@ -195,6 +196,8 @@ syscall_sysret_wrapper:
     swapgs
     mov [gs:12], rsp
     mov rsp, [gs:4]
+    push qword [gs:12]
+    swapgs
     push rdi
     push rsi
     push rdx
@@ -213,15 +216,14 @@ syscall_sysret_wrapper:
     pop rdx
     pop rsi
     pop rdi
-    mov rsp, [gs:12]
-    swapgs
-    sysret
+    pop qword rsp
+    o64 sysret
 
 global syscall_init
 syscall_init:
     ; Set CS and SS
     mov ecx, 0xC0000081
-    mov edx, 0x001B0008
+    mov edx, 0x00130008
     xor eax, eax
     wrmsr
 

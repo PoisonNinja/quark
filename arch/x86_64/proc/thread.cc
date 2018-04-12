@@ -1,3 +1,4 @@
+#include <arch/cpu/cpu.h>
 #include <arch/cpu/gdt.h>
 #include <arch/mm/layout.h>
 #include <cpu/interrupt.h>
@@ -145,6 +146,12 @@ void arch_set_stack(addr_t stack)
 addr_t arch_get_stack()
 {
     return TSS::get_stack();
+}
+
+void set_thread_base(Thread* thread)
+{
+    CPU::X64::wrmsr(CPU::X64::msr_kernel_gs_base,
+                    reinterpret_cast<uint64_t>(thread));
 }
 
 Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)

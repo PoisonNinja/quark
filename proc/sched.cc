@@ -63,6 +63,7 @@ void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
 {
     save_context(ctx, &current->cpu_ctx);
     set_stack(next->kernel_stack);
+    set_thread_base(next);
     if (current) {
         if (current->parent->address_space != next->parent->address_space) {
             Memory::Virtual::set_address_space_root(

@@ -35,7 +35,6 @@ constexpr uint8_t flag_4kib = (1 << 3);
 
 extern "C" void gdt_load(addr_t);
 extern "C" void tss_load();
-extern "C" void gs_load(addr_t);
 
 static struct GDT::Entry entries[num_entries];
 static struct GDT::Descriptor descriptor = {
@@ -97,7 +96,6 @@ void init()
     GDT::write_tss(&entries[5], &entries[6], &tss);
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
     GDT::tss_load();
-    GDT::gs_load(reinterpret_cast<addr_t>(&tss));
 }
 }  // namespace GDT
 

@@ -159,29 +159,6 @@ static void sys_exit(int val)
     Scheduler::get_current_thread()->exit();
 }
 
-static void handler(int, void*, struct InterruptContext* ctx)
-{
-    save_context(ctx, &Scheduler::get_current_thread()->cpu_ctx);
-    Log::printk(Log::DEBUG,
-                "Received legacy system call %d from PID %d, %llX %llX %llX "
-                "%llX %llX\n",
-                ctx->rax, Scheduler::get_current_thread()->tid, ctx->rdi,
-                ctx->rsi, ctx->rdx, ctx->rcx, ctx->r8);
-    if (!syscall_table[ctx->rax]) {
-        Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->rax);
-        ctx->rax = -ENOSYS;
-        return;
-    }
-    uint64_t (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                     uint64_t e) =
-        (uint64_t(*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                     uint64_t e))syscall_table[ctx->rax];
-    ctx->rax = func(ctx->rdi, ctx->rsi, ctx->rdx, ctx->rcx, ctx->r8);
-}
-
-static struct Interrupt::Handler handler_data(handler, "syscall",
-                                              &handler_data);
-
 void init()
 {
     syscall_table[SYS_read] = reinterpret_cast<void*>(sys_read);
@@ -194,6 +171,5 @@ void init()
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
-    Interrupt::register_handler(0x80, handler_data);
 }
 }

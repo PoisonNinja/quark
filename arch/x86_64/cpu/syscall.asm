@@ -3,10 +3,20 @@ extern syscall_table
 
 global syscall_sysret_wrapper
 syscall_sysret_wrapper:
-    swapgs              ; TSS is saved in KernelGSBase, swap it into GS
-    mov [gs:88], rsp    ; Save user RSP into TSS.rsp1
-    mov rsp, [gs:176]   ; Load kernel RSP from TSS.rsp0. The cool thing is
-                        ; that each thread gets its own thanks to existing code
+    swapgs              ; Thread struct is saved in KernelGSBase, swap it into GS
+    mov [gs:88], rsp    ; Save user RSP into thread->cpu_ctx.rsp
+    cmp rax, 57         ; Fork needs special handling, but this is expensive
+                        ; so try to avoid doing this
+    jne continue        ; Not fork, so we can skip these steps
+    mov [gs:8], r15     ; Load these registers into thread state so we can copy
+    mov [gs:16], r14
+    mov [gs:24], r13
+    mov [gs:32], r12
+    mov [gs:96], rbp
+    mov [gs:120], rbx
+    mov [gs:136], rcx   ; RIP
+continue:
+    mov rsp, [gs:176]   ; Load kernel RSP from thread->kernel_stack.
     push qword [gs:88]  ; Push the user RSP onto the stack
     swapgs              ; Swap back GS values. This is important because
                         ; we may not reach the end of this function, especially

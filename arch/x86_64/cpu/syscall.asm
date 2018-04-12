@@ -31,7 +31,10 @@ continue:
     push r9
     push r10
     push r11
+    cmp qword [syscall_table + rax * 8], 0
+    je invalid_syscall
     call [syscall_table + rax * 8] ; Call the system call
+return:
     pop r11             ; Restore the registers
     pop r10
     pop r9
@@ -42,3 +45,6 @@ continue:
     pop rdi
     pop rsp             ; Pop user stack back into RSP
     o64 sysret          ; Return
+invalid_syscall:
+    mov rax, -38        ; -ENOSYS
+    jmp return

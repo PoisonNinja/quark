@@ -191,6 +191,8 @@ halt:
     hlt
     jmp halt
 
+extern syscall_table
+
 global syscall_sysret_wrapper
 syscall_sysret_wrapper:
     swapgs
@@ -206,8 +208,7 @@ syscall_sysret_wrapper:
     push r9
     push r10
     push r11
-    mov r9, rax
-    call syscall_sysret_handler
+    call [syscall_table + rax * 8]
     pop r11
     pop r10
     pop r9

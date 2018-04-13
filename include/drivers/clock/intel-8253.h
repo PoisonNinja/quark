@@ -11,6 +11,7 @@ class Intel8253 : public Clock
 {
 public:
     Intel8253(){};
+    int features() override;
     time_t read() override;
     time_t frequency() override;
     bool enable() override;

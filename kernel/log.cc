@@ -31,6 +31,7 @@
 
 #include <kernel.h>
 #include <kernel/log.h>
+#include <kernel/time/time.h>
 #include <lib/printf.h>
 #include <lib/string.h>
 
@@ -57,11 +58,9 @@ size_t printk(int level, const char* format, ...)
         size_t r = 0;
         if (level < Log::CONTINUE) {
             String::memset(printk_buffer, 0, Log::printk_max);
-            // time_t t = ktime_get();
-            time_t sec = 0;   // t / NSEC_PER_SEC;
-            time_t nsec = 0;  // t % NSEC_PER_SEC;
+            struct Time::timespec spec = Time::now();
             r = snprintf(printk_buffer, Log::printk_max, "%s[%05lu.%09lu]%s ",
-                         colors[level], sec, nsec, "\e[39m");
+                         colors[level], spec.tv_sec, spec.tv_nsec, "\e[39m");
             for (auto& i : output) {
                 i.write(printk_buffer, r);
             }

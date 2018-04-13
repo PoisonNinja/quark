@@ -15,7 +15,7 @@ const char* NAME = "Intel 8253";
 
 static time_t ticks;
 
-static void interrupt_handler(int /* irq */, void* clock,
+static void interrupt_handler(int /* irq */, void* /*clock*/,
                               struct InterruptContext* ctx)
 {
     ticks++;
@@ -24,16 +24,25 @@ static void interrupt_handler(int /* irq */, void* clock,
 
 static struct Interrupt::Handler handler(interrupt_handler, NAME, &handler);
 
+int Intel8253::features()
+{
+    return feature_clock | feature_timer;
+}
+
 time_t Intel8253::read()
 {
+    // Ticks emulated using variable since the PIT itself is useless
+    return ticks;
 }
 
 time_t Intel8253::frequency()
 {
+    return HZ;
 }
 
 bool Intel8253::enable()
 {
+    return true;
 }
 
 bool Intel8253::disable()

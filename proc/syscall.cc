@@ -127,10 +127,7 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
         Scheduler::get_current_process()->sections->add_section(
             placement, mmap_data->length);
         int flags = Memory::Virtual::prot_to_flags(mmap_data->prot);
-        for (addr_t base = placement; base < placement + mmap_data->length;
-             base += Memory::Virtual::PAGE_SIZE) {
-            Memory::Virtual::map(base, flags);
-        }
+        Memory::Virtual::map_range(placement, mmap_data->length, flags);
         return reinterpret_cast<void*>(placement);
     } else {
         Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested "

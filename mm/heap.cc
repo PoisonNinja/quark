@@ -10,10 +10,7 @@ static uint64_t heap_end = HEAP_START;
 static void *map_heap(size_t size)
 {
     size *= Memory::Virtual::PAGE_SIZE;
-    for (size_t i = 0; i < size; i += Memory::Virtual::PAGE_SIZE) {
-        Memory::Virtual::map(heap_end + i, Memory::Physical::allocate(),
-                             PAGE_WRITABLE);
-    }
+    Memory::Virtual::map_range(heap_end, size, PAGE_WRITABLE);
     heap_end += size;
     return reinterpret_cast<void *>(heap_end - size);
 }

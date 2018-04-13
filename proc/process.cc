@@ -90,7 +90,7 @@ Process* Process::fork()
 void Process::exit()
 {
     for (auto section : *sections) {
-        Memory::Virtual::unmap(section.start(), section.end());
+        Memory::Virtual::unmap_range(section.start(), section.end());
     }
     Memory::Physical::free(this->address_space);
     delete this->sections;

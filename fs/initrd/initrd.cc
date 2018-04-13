@@ -57,7 +57,8 @@ void init(struct Boot::info& info)
     Log::printk(Log::INFO, "Initrd located at %p - %p, size %llX\n",
                 info.initrd_start, info.initrd_end, size);
     addr_t virt = Memory::Valloc::allocate(size);
-    if (!Memory::Virtual::map(virt, info.initrd_start, size, PAGE_WRITABLE)) {
+    if (!Memory::Virtual::map_range(virt, info.initrd_start, size,
+                                    PAGE_WRITABLE)) {
         Log::printk(Log::ERROR, "Failed to map initrd into memory\n");
         return;
     }

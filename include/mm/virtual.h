@@ -41,14 +41,15 @@ inline addr_t align_down(addr_t address)
 }
 
 bool map(addr_t v, addr_t p, int flags);
-bool map(addr_t v, addr_t p, size_t size, int flags);
 bool map(addr_t v, int flags);
+bool map_range(addr_t v, addr_t p, size_t size, int flags);
+bool map_range(addr_t v, size_t size, int flags);
 
 bool protect(addr_t v, int flags);
-bool protect(addr_t v, size_t size, int flags);
+bool protect_range(addr_t v, size_t size, int flags);
 
 bool unmap(addr_t v);
-bool unmap(addr_t v, size_t size);
+bool unmap_range(addr_t v, size_t size);
 
 bool test(addr_t v);
 

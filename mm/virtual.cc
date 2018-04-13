@@ -23,7 +23,13 @@ bool map(addr_t v, addr_t p, int flags)
     return Memory::Virtual::arch_map(v, p, flags);
 }
 
-bool map(addr_t v, addr_t p, size_t size, int flags)
+bool map(addr_t v, int flags)
+{
+    v = Memory::Virtual::align_down(v);
+    return Memory::Virtual::arch_map(v, Memory::Physical::allocate(), flags);
+}
+
+bool map_range(addr_t v, addr_t p, size_t size, int flags)
 {
     v = Memory::Virtual::align_down(v);
     size = Memory::Virtual::align_up(size);
@@ -35,10 +41,16 @@ bool map(addr_t v, addr_t p, size_t size, int flags)
     return true;
 }
 
-bool map(addr_t v, int flags)
+bool map_range(addr_t v, size_t size, int flags)
 {
     v = Memory::Virtual::align_down(v);
-    return Memory::Virtual::arch_map(v, Memory::Physical::allocate(), flags);
+    size = Memory::Virtual::align_up(size);
+    for (addr_t i = 0; i < size; i += PAGE_SIZE) {
+        if (!map(v + i, flags)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool protect(addr_t v, int flags)
@@ -47,7 +59,7 @@ bool protect(addr_t v, int flags)
     return Memory::Virtual::arch_protect(v, flags);
 }
 
-bool protect(addr_t v, size_t size, int flags)
+bool protect_range(addr_t v, size_t size, int flags)
 {
     v = Memory::Virtual::align_down(v);
     size = Memory::Virtual::align_up(size);
@@ -65,7 +77,7 @@ bool unmap(addr_t v)
     return Memory::Virtual::arch_unmap(v);
 }
 
-bool unmap(addr_t v, size_t size)
+bool unmap_range(addr_t v, size_t size)
 {
     v = Memory::Virtual::align_down(v);
     size = Memory::Virtual::align_up(size);

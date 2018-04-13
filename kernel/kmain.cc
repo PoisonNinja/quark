@@ -58,8 +58,7 @@ void init_stage1()
 
     Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
     Scheduler::insert(stage2);
-    // Commit suicide
-    Scheduler::get_current_thread()->exit();
+    Scheduler::idle();
 }
 
 void kmain(struct Boot::info& info)

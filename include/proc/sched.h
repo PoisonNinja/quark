@@ -6,6 +6,8 @@
 
 namespace Scheduler
 {
+void idle();
+
 bool insert(Thread* thread);
 bool remove(Thread* thread);
 

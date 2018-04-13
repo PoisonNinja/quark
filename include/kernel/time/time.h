@@ -5,6 +5,8 @@
 
 namespace Time
 {
+constexpr time_t nsec_per_sec = 1000000000;
+
 class Clock;
 
 struct timespec {

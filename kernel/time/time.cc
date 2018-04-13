@@ -55,11 +55,11 @@ void update()
     time_t current = current_clock->read();
     time_t offset = current - last;
     last = current;
-    time_t nsec = offset * 1000000000 / current_clock->frequency();
+    time_t nsec = offset * nsec_per_sec / current_clock->frequency();
     current_time.tv_nsec += nsec;
     // Coalesce nanoseconds into seconds
-    while (current_time.tv_nsec >= 1000000000) {
-        current_time.tv_nsec -= 1000000000;
+    while (current_time.tv_nsec >= nsec_per_sec) {
+        current_time.tv_nsec -= nsec_per_sec;
         current_time.tv_sec++;
     }
 }

@@ -29,6 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <arch/cpu/cpu.h>
 #include <arch/cpu/gdt.h>
 #include <arch/cpu/idt.h>
 #include <arch/drivers/serial_console.h>
@@ -149,6 +150,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
     }
     GDT::init();
     IDT::init();
+    CPU::X64::init();
     kmain(info);
 }
 

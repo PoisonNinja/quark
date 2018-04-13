@@ -7,6 +7,8 @@
 #include <proc/sched.h>
 #include <proc/syscall.h>
 
+void* syscall_table[256];
+
 namespace Syscall
 {
 static ssize_t sys_read(int fd, const void* buffer, size_t count)
@@ -140,12 +142,8 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
 
 static pid_t sys_fork()
 {
-    addr_t cloned = Memory::Virtual::fork();
-    Process* child = new Process();
-    child->set_dtable(Scheduler::get_current_process()->get_dtable());
-    child->set_root(Scheduler::get_current_process()->get_root());
-    child->set_cwd(Scheduler::get_current_process()->get_cwd());
-    child->address_space = cloned;
+    Log::printk(Log::DEBUG, "[sys_fork]\n");
+    Process* child = Scheduler::get_current_process()->fork();
     Thread* thread = new Thread(child);
     String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
                    sizeof(thread->cpu_ctx));
@@ -158,34 +156,8 @@ static pid_t sys_fork()
 static void sys_exit(int val)
 {
     Log::printk(Log::DEBUG, "[sys_exit] = %d\n", val);
-    Scheduler::remove(Scheduler::get_current_thread());
-    Scheduler::artifial_tick();
+    Scheduler::get_current_thread()->exit();
 }
-
-static void* syscall_table[256];
-
-static void handler(int, void*, struct InterruptContext* ctx)
-{
-    Scheduler::get_current_thread()->save_context(ctx);
-    Log::printk(
-        Log::DEBUG,
-        "Received system call %d from PID %d, %llX %llX %llX %llX %llX\n",
-        ctx->rax, Scheduler::get_current_thread()->tid, ctx->rdi, ctx->rsi,
-        ctx->rdx, ctx->rcx, ctx->r8);
-    if (!syscall_table[ctx->rax]) {
-        Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->rax);
-        ctx->rax = -ENOSYS;
-        return;
-    }
-    uint64_t (*func)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                     uint64_t e) =
-        (uint64_t(*)(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                     uint64_t e))syscall_table[ctx->rax];
-    ctx->rax = func(ctx->rdi, ctx->rsi, ctx->rdx, ctx->rcx, ctx->r8);
-}
-
-static struct Interrupt::Handler handler_data(handler, "syscall",
-                                              &handler_data);
 
 void init()
 {
@@ -199,6 +171,5 @@ void init()
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
-    Interrupt::register_handler(0x80, handler_data);
 }
 }

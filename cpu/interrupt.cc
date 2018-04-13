@@ -31,6 +31,16 @@ void dispatch(int int_no, struct InterruptContext* ctx)
 {
     if (handlers[int_no].empty()) {
         if (int_no < 32) {
+            Log::printk(Log::ERROR, "RAX = %p RBX = %p RCX = %p RDX = %p\n",
+                        ctx->rax, ctx->rbx, ctx->rcx, ctx->rdx);
+            Log::printk(Log::ERROR, "RSI = %p RDI = %p RBP = %p RSP = %p\n",
+                        ctx->rsi, ctx->rdi, ctx->rbp, ctx->rsp);
+            Log::printk(Log::ERROR, "R8  = %p R9  = %p R10 = %p R11 = %p\n",
+                        ctx->r8, ctx->r9, ctx->r10, ctx->r11);
+            Log::printk(Log::ERROR, "R12 = %p R13 = %p R14 = %p R15 = %p\n",
+                        ctx->r12, ctx->r13, ctx->r14, ctx->r15);
+            Log::printk(Log::ERROR, "RIP = %p CS  = %p DS  = %p RFLAGS = %p\n",
+                        ctx->rip, ctx->cs, ctx->ds, ctx->rflags);
             Kernel::panic("Unhandled exception #%d, error code 0x%X\n", int_no,
                           ctx->err_code);
         }
@@ -44,29 +54,29 @@ void dispatch(int int_no, struct InterruptContext* ctx)
     }
 }
 
-status_t register_handler(uint32_t int_no, Interrupt::Handler& handler)
+bool register_handler(uint32_t int_no, Interrupt::Handler& handler)
 {
     if (int_no > max) {
-        return FAILURE;
+        return false;
     }
     handlers[int_no].push_back(handler);
-    return SUCCESS;
+    return true;
 }
 
-status_t unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
+bool unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 {
     if (int_no > max) {
-        return FAILURE;
+        return false;
     }
     for (auto it = handlers[int_no].begin(); it != handlers[int_no].end();
          ++it) {
         auto& value = *it;
         if (&value == &handler) {
             handlers[int_no].erase(it);
-            return SUCCESS;
+            return true;
         }
     }
-    return FAILURE;
+    return false;
 }
 
 void init()

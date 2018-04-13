@@ -1,8 +1,11 @@
 #include <arch/mm/layout.h>
+#include <kernel.h>
+#include <mm/physical.h>
+#include <mm/virtual.h>
 #include <proc/process.h>
 #include <proc/sched.h>
 
-Process::Process()
+Process::Process(Process* parent)
 {
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
@@ -43,7 +46,7 @@ Ref<Filesystem::DTable> Process::get_dtable()
     return fds;
 }
 
-status_t Process::add_thread(Thread* thread)
+void Process::add_thread(Thread* thread)
 {
     if (threads.empty()) {
         // First node shares same PID
@@ -53,17 +56,42 @@ status_t Process::add_thread(Thread* thread)
         thread->tid = Scheduler::get_free_pid();
     }
     threads.push_back(*thread);
-    return SUCCESS;
 }
 
-status_t Process::remove_thread(Thread* thread)
+void Process::remove_thread(Thread* thread)
 {
     for (auto it = threads.begin(); it != threads.end(); ++it) {
         auto& value = *it;
         if (&value == thread) {
             threads.erase(it);
-            return SUCCESS;
+            break;
         }
     }
-    return FAILURE;
+    if (threads.empty()) {
+        Log::printk(Log::DEBUG, "Last thread exiting, process %d terminating\n",
+                    this->pid);
+        this->exit();
+    }
+}
+
+Process* Process::fork()
+{
+    Process* child = new Process(this);
+    addr_t cloned = Memory::Virtual::fork();
+    child->set_dtable(
+        Ref<Filesystem::DTable>(new Filesystem::DTable(*this->fds)));
+    child->set_root(Scheduler::get_current_process()->get_root());
+    child->set_cwd(Scheduler::get_current_process()->get_cwd());
+    child->sections = new Memory::SectionManager(*this->sections);
+    child->address_space = cloned;
+    return child;
+}
+
+void Process::exit()
+{
+    for (auto section : *sections) {
+        Memory::Virtual::unmap(section.start(), section.end());
+    }
+    Memory::Physical::free(this->address_space);
+    delete this->sections;
 }

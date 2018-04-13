@@ -1,4 +1,5 @@
 #include <fs/dtable.h>
+#include <kernel.h>
 
 namespace Filesystem
 {
@@ -8,20 +9,19 @@ DTable::DTable(int s)
     size = step_size = s;
 }
 
+DTable::DTable(const DTable& other)
+{
+    size = other.size;
+    step_size = other.step_size;
+    fds = new Ref<Descriptor>[other.size];
+    for (int i = 0; i < size; i++) {
+        fds[i] = other.fds[i];
+    }
+}
+
 DTable::~DTable()
 {
     delete[] fds;
-}
-
-DTable& DTable::operator=(const DTable& d)
-{
-    size = d.size;
-    step_size = d.step_size;
-    fds = new Ref<Descriptor>[d.size];
-    for (int i = 0; i < size; i++) {
-        fds[i] = d.fds[i];
-    }
-    return *this;
 }
 
 void DTable::resize()

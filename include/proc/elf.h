@@ -437,5 +437,5 @@ typedef struct elf64_note {
     Elf64_Word n_type;   /* Content type */
 } Elf64_Nhdr;
 
-addr_t load(addr_t binary, Thread* thread);
+addr_t load(addr_t binary);
 }

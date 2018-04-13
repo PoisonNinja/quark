@@ -25,6 +25,16 @@ tss_load:
     ltr ax
     ret
 
+global gs_load
+gs_load:
+    ; KernelGSBase - The MSR that swapgs loads from
+    mov ecx, 0xC0000102
+    mov rax, rdi        ; EAX stores lower 32 bits
+    mov rdx, rdi        ; EDX stores upper 32 bits
+    shr rdx, 32
+    wrmsr
+    ret
+
 %macro PUSHA 0
     push rax      ;save current rax
     push rbx      ;save current rbx
@@ -42,6 +52,7 @@ tss_load:
     push r14      ;save current r14
     push r15      ;save current r15
 
+    xor rbp, rbp
     mov bp, ds
     push rbp
 
@@ -129,6 +140,7 @@ ISR_ERROR_CODE 30
 ISR_NOERROR_CODE 31
 
 ISR_NOERROR_CODE 128 ; System call vector
+ISR_NOERROR_CODE 129 ; Yield
 
 ; IRQs
 IRQ 0, 32
@@ -169,10 +181,7 @@ idt_load:
     lidt [rdi]
     ret
 
-global load_registers
-load_registers:
-    mov rsp, rdi ; Let interrupt context become new stack
-
+global load_register_state
+load_register_state:
+    mov rsp, rdi
     jmp interrupt_return
-
-    iretq

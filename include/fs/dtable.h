@@ -8,9 +8,8 @@ class DTable : public RefcountBase
 {
 public:
     DTable(int s = 4);
+    DTable(const DTable& other);
     ~DTable();
-
-    DTable& operator=(const DTable& d);
 
     int add(Ref<Descriptor> desc);
     Ref<Descriptor> get(int index);

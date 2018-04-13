@@ -10,6 +10,12 @@ Section::Section(addr_t start, size_t size)
     _size = size;
 }
 
+Section::Section(Section& other)
+{
+    _start = other._start;
+    _size = other._size;
+}
+
 addr_t Section::start()
 {
     return _start;
@@ -38,7 +44,17 @@ bool Section::operator!=(const Section& b)
 SectionManager::SectionManager(addr_t s, addr_t e)
 {
     start = s;
-    end = e;
+    _end = e;
+}
+
+SectionManager::SectionManager(SectionManager& other)
+{
+    start = other.start;
+    _end = other._end;
+    for (auto& section : other.sections) {
+        Section* s = new Section(section);
+        sections.push_back(*s);
+    }
 }
 
 SectionManager::~SectionManager()
@@ -160,7 +176,7 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
              * end of the entire zone
              */
             zone_start = i.end();
-            zone_end = end;
+            zone_end = _end;
         }
         // Calculate the zone size
         size_t zone_size = zone_end - zone_start;
@@ -197,5 +213,15 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
         }
     }
     return found;
+}
+
+iterator<Section, &Section::node> SectionManager::begin()
+{
+    return sections.begin();
+}
+
+iterator<Section, &Section::node> SectionManager::end()
+{
+    return sections.end();
 }
 }

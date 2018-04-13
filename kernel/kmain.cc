@@ -9,21 +9,13 @@
 #include <lib/string.h>
 #include <mm/mm.h>
 #include <mm/virtual.h>
-#include <proc/elf.h>
 #include <proc/sched.h>
 #include <proc/syscall.h>
 
-void init_go()
+void init_stage2(void*)
 {
-    addr_t cloned = Memory::Virtual::fork();
-    Process* initp = new Process();
-    initp->set_root(Scheduler::get_current_process()->get_root());
-    initp->set_cwd(Scheduler::get_current_process()->get_cwd());
-    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
-    initp->address_space = cloned;
-    Memory::Virtual::set_address_space_root(cloned);
-    Thread* thread = new Thread(initp);
-    Ref<Filesystem::Descriptor> root = initp->get_root();
+    Process* parent = Scheduler::get_current_process();
+    Ref<Filesystem::Descriptor> root = parent->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {
         Log::printk(Log::ERROR, "Failed to open init\n");
@@ -35,7 +27,6 @@ void init_go()
     Log::printk(Log::DEBUG, "init binary has size of %llu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
-    addr_t entry = ELF::load(reinterpret_cast<addr_t>(init_raw), thread);
     int argc = 2;
     const char* argv[] = {
         "/sbin/init",
@@ -45,20 +36,29 @@ void init_go()
     const char* envp[] = {
         "hello=world",
     };
-    if (!thread->load(entry, argc, argv, envc, envp)) {
+    struct ThreadContext ctx;
+    if (!Scheduler::get_current_thread()->load(
+            reinterpret_cast<addr_t>(init_raw), argc, argv, envc, envp, ctx)) {
         Log::printk(Log::ERROR, "Failed to load thread state\n");
     } else {
         Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
-        Scheduler::insert(thread);
     }
-    // Commit suicide
-    if (!Scheduler::remove(Scheduler::get_current_thread())) {
-        Log::printk(Log::WARNING, "Failed to deschedule kinit\n");
-    }
-    for (;;) {
-        // Loop until we're descheduled
-        asm("hlt");
-    }
+    delete[] init_raw;
+    load_registers(ctx);
+}
+
+void init_stage1()
+{
+    addr_t cloned = Memory::Virtual::fork();
+    Process* initp = new Process(nullptr);
+    initp->set_root(Scheduler::get_current_process()->get_root());
+    initp->set_cwd(Scheduler::get_current_process()->get_cwd());
+    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
+    initp->address_space = cloned;
+
+    Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
+    Scheduler::insert(stage2);
+    Scheduler::idle();
 }
 
 void kmain(struct Boot::info& info)
@@ -73,5 +73,5 @@ void kmain(struct Boot::info& info)
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();
-    init_go();
+    init_stage1();
 }

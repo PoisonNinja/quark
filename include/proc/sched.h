@@ -19,4 +19,6 @@ Process* get_current_process();
 Thread* get_current_thread();
 
 pid_t get_free_pid();
+
+bool online();
 };

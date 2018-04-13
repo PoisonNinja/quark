@@ -12,6 +12,8 @@ static Thread* current_thread;
 static Process* kernel_process;
 static Thread* kidle;
 
+static bool _online = false;
+
 void idle()
 {
     while (1) {
@@ -115,6 +117,7 @@ void init()
      * the kernel just became a thread.
      */
     current_thread = kinit;
+    _online = true;
     Log::printk(Log::INFO, "Scheduler initialized\n");
 }
 
@@ -126,5 +129,10 @@ Process* get_current_process()
 Thread* get_current_thread()
 {
     return current_thread;
+}
+
+bool online()
+{
+    return _online;
 }
 }

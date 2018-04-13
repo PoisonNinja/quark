@@ -44,7 +44,8 @@ bool register_clock(Clock& clock)
 void tick(struct InterruptContext* ctx)
 {
     update();
-    Scheduler::switch_next(ctx);
+    if (Scheduler::online())
+        Scheduler::switch_next(ctx);
 }
 
 void update()

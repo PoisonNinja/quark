@@ -67,9 +67,9 @@ void kmain(struct Boot::info& info)
     Log::printk(Log::INFO, "Command line: %s\n", info.cmdline);
     Memory::init(info);
     Interrupt::init();
+    Interrupt::enable();
     Time::init();
     Scheduler::init();
-    Interrupt::enable();
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();

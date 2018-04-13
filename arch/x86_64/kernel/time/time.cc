@@ -5,7 +5,7 @@ namespace Time
 {
 void arch_init()
 {
-    Intel8253* pit = new Intel8253;
-    register_timer(*pit);
+    Intel8253* pit = new Intel8253();
+    register_clock(*pit);
 }
 }

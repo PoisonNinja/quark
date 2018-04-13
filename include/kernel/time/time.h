@@ -6,7 +6,6 @@
 namespace Time
 {
 class Clock;
-class Timer;
 
 struct timespec {
     time_t tv_sec;

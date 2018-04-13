@@ -12,18 +12,11 @@ public:
     virtual time_t frequency() = 0;
     virtual bool enable() = 0;
     virtual bool disable() = 0;
+    virtual bool schedule(time_t interval) = 0;
+    virtual bool periodic() = 0;
+    virtual const char* name() = 0;
     Node<Clock> node;
 };
 
-class Timer
-{
-public:
-    virtual bool schedule(time_t interval) = 0;
-    virtual bool periodic() = 0;
-    virtual bool disable() = 0;
-    virtual const char* name() = 0;
-    Node<Timer> node;
-};
-
-bool register_timer(Timer& timer);
+bool register_clock(Clock& clock);
 }  // namespace Time

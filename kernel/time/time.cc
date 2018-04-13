@@ -5,8 +5,8 @@
 
 namespace Time
 {
-static List<Timer, &Timer::node> timer_list;
-static Timer* current_timer = nullptr;
+static List<Clock, &Clock::node> clock_list;
+static Clock* current_ticker = nullptr;
 
 extern void arch_init();
 
@@ -15,16 +15,16 @@ void tick(struct InterruptContext* ctx)
     Scheduler::switch_next(ctx);
 }
 
-bool register_timer(Timer& timer)
+bool register_clock(Clock& clock)
 {
-    timer_list.push_back(timer);
+    clock_list.push_back(clock);
     Log::printk(Log::INFO, "Selecting %s as the system tick source\n",
-                timer.name());
-    if (current_timer) {
-        current_timer->disable();
+                clock.name());
+    if (current_ticker) {
+        current_ticker->disable();
     }
-    current_timer = &timer;
-    timer.periodic();
+    current_ticker = &clock;
+    clock.periodic();
     return true;
 }
 

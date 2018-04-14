@@ -89,7 +89,7 @@ void *memmove(void *dest, const void *src, size_t n)
     }
 }
 
-void *memset(void *str, int c, size_t n)
+void *__attribute__((weak)) memset(void *str, int c, size_t n)
 {
     uint8_t *a = (uint8_t *)str;
     while (n--) {

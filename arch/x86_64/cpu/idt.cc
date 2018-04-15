@@ -1,5 +1,9 @@
 #include <arch/cpu/idt.h>
 
+namespace CPU
+{
+namespace X64
+{
 namespace IDT
 {
 constexpr size_t num_entries = 256;
@@ -131,3 +135,5 @@ void init()
     IDT::idt_load(reinterpret_cast<addr_t>(&descriptor));
 }
 }  // namespace IDT
+}
+}

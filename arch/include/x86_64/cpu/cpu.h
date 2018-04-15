@@ -15,24 +15,6 @@ constexpr uint64_t msr_fmask = 0xC0000084;
 
 constexpr uint64_t msr_kernel_gs_base = 0xC0000102;
 
-void init();
-
-class CPUID
-{
-public:
-};
-
-class CPUTables
-{
-public:
-    struct IDT::Descriptor* idt;
-};
-
-class CPUState
-{
-public:
-};
-
 static inline void wrmsr(uint64_t msr, uint64_t value)
 {
     uint32_t low = value & 0xFFFFFFFF;
@@ -46,5 +28,7 @@ static inline uint64_t rdmsr(uint64_t msr)
     asm volatile("rdmsr" : "=a"(low), "=d"(high) : "c"(msr));
     return ((uint64_t)high << 32) | low;
 }
+
+void init();
 }
 }

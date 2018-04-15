@@ -2,6 +2,10 @@
 
 #include <types.h>
 
+namespace CPU
+{
+namespace X64
+{
 namespace GDT
 {
 struct Descriptor {
@@ -38,4 +42,6 @@ struct Entry {
 
 void set_stack(addr_t stack);
 addr_t get_stack();
+}
+}
 }

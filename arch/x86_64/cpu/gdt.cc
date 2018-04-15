@@ -1,6 +1,10 @@
 #include <arch/cpu/gdt.h>
 #include <lib/string.h>
 
+namespace CPU
+{
+namespace X64
+{
 namespace GDT
 {
 constexpr size_t num_entries = 7;
@@ -109,5 +113,7 @@ void set_stack(addr_t stack)
 addr_t get_stack()
 {
     return GDT::tss.stack0;
+}
+}
 }
 }

@@ -1,4 +1,7 @@
 #include <arch/cpu/cpu.h>
+#include <arch/cpu/feature.h>
+#include <arch/cpu/gdt.h>
+#include <arch/cpu/idt.h>
 #include <kernel.h>
 #include <proc/sched.h>
 
@@ -10,6 +13,9 @@ extern "C" void syscall_sysret_wrapper();
 
 void init()
 {
+    CPU::X64::detect();
+    GDT::init();
+    IDT::init();
     /*
      * RPL=3 CS=0x23, RPL=0 CS=0x8
      *

@@ -141,12 +141,12 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
 
 void arch_set_stack(addr_t stack)
 {
-    TSS::set_stack(stack);
+    CPU::X64::TSS::set_stack(stack);
 }
 
 addr_t arch_get_stack()
 {
-    return TSS::get_stack();
+    return CPU::X64::TSS::get_stack();
 }
 
 void set_thread_base(Thread* thread)

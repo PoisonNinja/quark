@@ -2,6 +2,10 @@
 
 #include <types.h>
 
+namespace CPU
+{
+namespace X64
+{
 namespace IDT
 {
 struct Descriptor {
@@ -21,3 +25,5 @@ struct Entry {
 
 void init();
 }  // namespace IDT
+}
+}

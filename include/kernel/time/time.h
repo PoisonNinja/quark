@@ -17,8 +17,13 @@ struct timespec {
 void update_clock(Clock* new_clock);
 bool register_clock(Clock& clock);
 
-void update();
+void ndelay(time_t nsecs);
+void ndelay(time_t usecs);
+void mdelay(time_t msecs);
+
 struct timespec now();
+
+void update();
 void tick(struct InterruptContext* ctx);
 void init();
 }  // namespace Time

@@ -9,7 +9,7 @@ static List<Clock, &Clock::node> clock_list;
 static Clock* current_ticker = nullptr;
 static Clock* current_clock = nullptr;
 static struct timespec current_time;
-static time_t last;
+static time_t last = 0;
 
 extern void arch_init();
 
@@ -41,11 +41,44 @@ bool register_clock(Clock& clock)
     return true;
 }
 
+void ndelay(time_t nsec)
+{
+    update();
+    time_t current = current_time.tv_nsec + current_time.tv_sec * nsec_per_sec;
+    time_t target = current + nsec;
+    while (current < target) {
+        current = current_time.tv_nsec + current_time.tv_sec * nsec_per_sec;
+    }
+}
+
+void udelay(time_t usec)
+{
+    if (usec > UINT64_MAX / 1000) {
+        Log::printk(
+            Log::WARNING,
+            "udelay received argument that is too large "
+            "to safely pass to ndelay, unexpected behavior may occur\n");
+    }
+    ndelay(usec * 1000);
+}
+
+void mdelay(time_t msec)
+{
+    if (msec > UINT64_MAX / 1000 / 1000) {
+        Log::printk(
+            Log::WARNING,
+            "mdelay received argument that is too large "
+            "to safely pass to ndelay, unexpected behavior may occur\n");
+    }
+    ndelay(msec * 1000 * 1000);
+}
+
 void tick(struct InterruptContext* ctx)
 {
     update();
-    if (Scheduler::online())
+    if (Scheduler::online()) {
         Scheduler::switch_next(ctx);
+    }
 }
 
 void update()
@@ -54,8 +87,11 @@ void update()
         return;
     }
     time_t current = current_clock->read();
-    time_t offset = current - last;
-    last = current;
+    int64_t offset = current - last;
+    if (offset < 0) {
+        Kernel::panic("Going back in time? Last: %llu, New: %llu\n", last,
+                      current);
+    }
     time_t nsec = offset * nsec_per_sec / current_clock->frequency();
     current_time.tv_nsec += nsec;
     // Coalesce nanoseconds into seconds
@@ -63,6 +99,7 @@ void update()
         current_time.tv_nsec -= nsec_per_sec;
         current_time.tv_sec++;
     }
+    last = current;
 }
 
 struct timespec now()

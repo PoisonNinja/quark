@@ -13,7 +13,7 @@ constexpr int CHANNEL0 = 0x40;
 constexpr int COMMAND = 0x43;
 const char* NAME = "Intel 8253";
 
-static time_t ticks;
+static time_t ticks = 0;
 
 static void interrupt_handler(int /* irq */, void* /*clock*/,
                               struct InterruptContext* ctx)

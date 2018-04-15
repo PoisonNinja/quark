@@ -20,6 +20,7 @@ public:
     static uint64_t rdtsc();
 
 private:
+    uint64_t calibrate();
     time_t calibrated_frequency;
 };
 }  // namespace Time

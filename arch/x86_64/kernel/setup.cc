@@ -30,8 +30,6 @@
  */
 
 #include <arch/cpu/cpu.h>
-#include <arch/cpu/gdt.h>
-#include <arch/cpu/idt.h>
 #include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/info.h>
@@ -148,8 +146,6 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 //     Log::printk(Log::INFO, "    Unknown/unhandled\n");
         }
     }
-    GDT::init();
-    IDT::init();
     CPU::X64::init();
     kmain(info);
 }

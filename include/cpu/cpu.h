@@ -1,17 +1,24 @@
 #pragma once
 
 #include <arch/cpu/cpu.h>
+#include <proc/thread.h>
 #include <types.h>
-
-typedef uint32_t cpu_id_t;
-typedef uint8_t cpu_status_t;
 
 namespace CPU
 {
-class CPU
+class Core
 {
 public:
-    cpu_id_t id;
-    cpu_status_t status;
+    uint32_t id;
+    Thread* idle;
+
+    // CPU info
+    uint32_t stepping;
+    uint32_t type;
+    uint32_t family;
+    uint32_t model;
+    char vendor[13];
+    char name[48];
+    uint32_t features[18];
 };
 }

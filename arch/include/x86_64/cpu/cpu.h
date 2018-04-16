@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arch/cpu/idt.h>
+#include <types.h>
 
 namespace CPU
 {

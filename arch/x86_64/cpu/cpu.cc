@@ -11,9 +11,12 @@ namespace X64
 {
 extern "C" void syscall_sysret_wrapper();
 
+Core bsp;
+
 void init()
 {
-    CPU::X64::detect();
+    CPU::X64::detect(bsp);
+    CPU::X64::print(bsp);
     GDT::init();
     IDT::init();
     /*

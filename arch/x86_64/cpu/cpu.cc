@@ -16,6 +16,7 @@ Core bsp;
 void init()
 {
     CPU::X64::detect(bsp);
+    CPU::add_core(&bsp);
     CPU::X64::print(bsp);
     GDT::init();
     IDT::init();

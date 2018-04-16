@@ -1,3 +1,5 @@
+#include <arch/cpu/feature.h>
+#include <cpu/cpu.h>
 #include <drivers/clock/tsc.h>
 #include <kernel.h>
 #include <kernel/time/time.h>
@@ -13,6 +15,12 @@ uint64_t TSC::rdtsc()
 
 TSC::TSC()
 {
+    CPU::Core* cpu = CPU::get_current_core();
+    if (!CPU::X64::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
+        Log::printk(
+            Log::WARNING,
+            "tsc: CPU doesn't support constant TSC, timing will be unstable\n");
+    }
     // Automatic calibration
     Log::printk(Log::INFO, "tsc: Preparing to calibrate\n");
     calibrated_frequency = calibrate() * 1000;

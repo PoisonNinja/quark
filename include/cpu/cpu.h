@@ -21,4 +21,7 @@ public:
     char name[48];
     uint32_t features[18];
 };
+
+Core* get_current_core();
+void add_core(Core* core);
 }

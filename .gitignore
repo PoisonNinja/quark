@@ -47,6 +47,7 @@
 build/
 include/arch
 include/kernel/version.h
+include/config.h
 
 # CMake
 CMakeCache.txt

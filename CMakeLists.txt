@@ -98,3 +98,5 @@ add_subdirectory(mm)
 add_subdirectory(proc)
 
 install(TARGETS quark.kernel DESTINATION "${SYSROOT}/boot")
+
+configure_file(config.h.in ${CMAKE_SOURCE_DIR}/include/config.h @ONLY)

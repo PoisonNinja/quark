@@ -29,6 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <config.h>
 #include <kernel.h>
 #include <kernel/log.h>
 #include <kernel/time/time.h>
@@ -37,7 +38,7 @@
 
 namespace Log
 {
-constexpr size_t printk_max = 1024;
+constexpr size_t printk_max = CONFIG_KERNEL_LIB_LOG_PRINTK_MAX;
 
 static List<LogOutput, &LogOutput::node> output;
 

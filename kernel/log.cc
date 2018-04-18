@@ -38,7 +38,7 @@
 
 namespace Log
 {
-constexpr size_t printk_max = CONFIG_KERNEL_LIB_LOG_PRINTK_MAX;
+constexpr size_t printk_max = CONFIG_PRINTK_MAX;
 
 static List<LogOutput, &LogOutput::node> output;
 

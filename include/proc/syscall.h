@@ -15,6 +15,7 @@ namespace Syscall
 #define SYS_mprotect 10
 #define SYS_munmap 11
 #define SYS_fork 57
+#define SYS_execve 59
 #define SYS_exit 60
 
 /*

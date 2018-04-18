@@ -1,6 +1,7 @@
 #include <arch/mm/layout.h>
 #include <cpu/interrupt.h>
 #include <errno.h>
+#include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/virtual.h>
@@ -150,6 +151,38 @@ static pid_t sys_fork()
     return child->pid;
 }
 
+static int sys_execve(const char* path, const char* argv[], const char* envp[])
+{
+    size_t argc = 0, envc = 0;
+    while (argv[argc]) {
+        argc++;
+    }
+    while (envp[envc]) {
+        envc++;
+    }
+    Log::printk(Log::DEBUG, "[sys_execve]: %s %p %p\n", path, argv, envp);
+    Ref<Filesystem::Descriptor> start(nullptr);
+    if (*path == '/') {
+        start = Scheduler::get_current_process()->get_root();
+    } else {
+        start = start = Scheduler::get_current_process()->get_cwd();
+    }
+    Ref<Filesystem::Descriptor> file = start->open(path, 0, 0);
+    struct Filesystem::stat st;
+    file->stat(&st);
+    Log::printk(Log::DEBUG, "[sys_execve] binary has size of %llu bytes\n",
+                st.st_size);
+    uint8_t* raw = new uint8_t[st.st_size];
+    file->read(raw, st.st_size);
+    struct ThreadContext ctx;
+    if (!Scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
+                                               argc, argv, envc, envp, ctx)) {
+        Log::printk(Log::ERROR, "Failed to load thread state\n");
+    }
+    delete[] raw;
+    load_registers(ctx);
+}
+
 static void sys_exit(int val)
 {
     Log::printk(Log::DEBUG, "[sys_exit] = %d\n", val);
@@ -167,6 +200,7 @@ void init()
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
+    syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
 }
 }

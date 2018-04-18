@@ -84,67 +84,65 @@ void detect(Core& cpu)
         Log::printk(
             Log::WARNING,
             "CPU does not support extended feature set past 0x80000001\n");
-        return;
-    }
-    regs.eax = 0x80000001;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    cpu.features[cpuid_8000_0001_edx] = regs.edx;
-    cpu.features[cpuid_8000_0001_ecx] = regs.ecx;
+    } else {
+        regs.eax = 0x80000001;
+        cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+        cpu.features[cpuid_8000_0001_edx] = regs.edx;
+        cpu.features[cpuid_8000_0001_ecx] = regs.ecx;
 
-    if (highest_function < 0x80000004) {
-        Log::printk(
-            Log::WARNING,
-            "CPU does not support extended feature set past 0x80000004\n");
-        return;
-    }
-    regs.eax = 0x80000002;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    *(uint32_t*)&cpu.name[0] = regs.eax;
-    *(uint32_t*)&cpu.name[4] = regs.ebx;
-    *(uint32_t*)&cpu.name[8] = regs.ecx;
-    *(uint32_t*)&cpu.name[12] = regs.edx;
-    regs.eax = 0x80000003;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    *(uint32_t*)&cpu.name[16] = regs.eax;
-    *(uint32_t*)&cpu.name[20] = regs.ebx;
-    *(uint32_t*)&cpu.name[24] = regs.ecx;
-    *(uint32_t*)&cpu.name[28] = regs.edx;
-    regs.eax = 0x80000004;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    *(uint32_t*)&cpu.name[32] = regs.eax;
-    *(uint32_t*)&cpu.name[36] = regs.ebx;
-    *(uint32_t*)&cpu.name[40] = regs.ecx;
-    *(uint32_t*)&cpu.name[44] = regs.edx;
+        if (highest_function < 0x80000004) {
+            Log::printk(
+                Log::WARNING,
+                "CPU does not support extended feature set past 0x80000004\n");
+        } else {
+            regs.eax = 0x80000002;
+            cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+            *(uint32_t*)&cpu.name[0] = regs.eax;
+            *(uint32_t*)&cpu.name[4] = regs.ebx;
+            *(uint32_t*)&cpu.name[8] = regs.ecx;
+            *(uint32_t*)&cpu.name[12] = regs.edx;
+            regs.eax = 0x80000003;
+            cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+            *(uint32_t*)&cpu.name[16] = regs.eax;
+            *(uint32_t*)&cpu.name[20] = regs.ebx;
+            *(uint32_t*)&cpu.name[24] = regs.ecx;
+            *(uint32_t*)&cpu.name[28] = regs.edx;
+            regs.eax = 0x80000004;
+            cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+            *(uint32_t*)&cpu.name[32] = regs.eax;
+            *(uint32_t*)&cpu.name[36] = regs.ebx;
+            *(uint32_t*)&cpu.name[40] = regs.ecx;
+            *(uint32_t*)&cpu.name[44] = regs.edx;
 
-    if (highest_function < 0x80000007) {
-        Log::printk(
-            Log::WARNING,
-            "CPU does not support extended feature set past 0x80000007\n");
-        return;
-    }
-    regs.eax = 0x80000007;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    cpu.features[cpuid_8000_0007_ebx] = regs.ebx;
+            if (highest_function < 0x80000007) {
+                Log::printk(Log::WARNING, "CPU does not support extended "
+                                          "feature set past 0x80000007\n");
+            } else {
+                regs.eax = 0x80000007;
+                cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+                cpu.features[cpuid_8000_0007_ebx] = regs.ebx;
 
-    if (highest_function < 0x80000008) {
-        Log::printk(
-            Log::WARNING,
-            "CPU does not support extended feature set past 0x80000008\n");
-        return;
-    }
-    regs.eax = 0x80000008;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    cpu.features[cpuid_8000_0008_ebx] = regs.ebx;
+                if (highest_function < 0x80000008) {
+                    Log::printk(Log::WARNING, "CPU does not support extended "
+                                              "feature set past 0x80000008\n");
+                } else {
+                    regs.eax = 0x80000008;
+                    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+                    cpu.features[cpuid_8000_0008_ebx] = regs.ebx;
 
-    if (highest_function < 0x8000000A) {
-        Log::printk(
-            Log::WARNING,
-            "CPU does not support extended feature set past 0x8000000A\n");
-        return;
+                    if (highest_function < 0x8000000A) {
+                        Log::printk(Log::WARNING,
+                                    "CPU does not support extended "
+                                    "feature set past 0x8000000A\n");
+                    } else {
+                        regs.eax = 0x8000000A;
+                        cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
+                        cpu.features[cpuid_8000_000A_edx] = regs.edx;
+                    }
+                }
+            }
+        }
     }
-    regs.eax = 0x8000000A;
-    cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    cpu.features[cpuid_8000_000A_edx] = regs.edx;
 
     if (!String::strncmp("GenuineIntel", cpu.vendor, 13)) {
         detect_intel(cpu);

@@ -138,6 +138,12 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
     }
 }
 
+static pid_t sys_getpid()
+{
+    // Return process ID not thread ID
+    return Scheduler::get_current_process()->pid;
+}
+
 static pid_t sys_fork()
 {
     Log::printk(Log::DEBUG, "[sys_fork]\n");
@@ -213,6 +219,7 @@ void init()
     syscall_table[SYS_fstat] = reinterpret_cast<void*>(sys_fstat);
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
+    syscall_table[SYS_getpid] = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);

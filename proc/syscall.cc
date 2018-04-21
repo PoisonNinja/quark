@@ -151,16 +151,28 @@ static pid_t sys_fork()
     return child->pid;
 }
 
-static int sys_execve(const char* path, const char* argv[], const char* envp[])
+static int sys_execve(const char* path, const char* old_argv[],
+                      const char* old_envp[])
 {
+    Log::printk(Log::DEBUG, "[sys_execve]: %s %p %p\n", path, old_argv,
+                old_envp);
     size_t argc = 0, envc = 0;
-    while (argv[argc]) {
+    while (old_argv[argc]) {
         argc++;
     }
-    while (envp[envc]) {
+    while (old_envp[envc]) {
         envc++;
     }
-    Log::printk(Log::DEBUG, "[sys_execve]: %s %p %p\n", path, argv, envp);
+    const char** argv = new const char*[argc];
+    for (size_t i = 0; i < argc; i++) {
+        argv[i] = new char[String::strlen(old_argv[i])];
+        String::strcpy(const_cast<char*>(argv[i]), old_argv[i]);
+    }
+    const char** envp = new const char*[envc];
+    for (size_t i = 0; i < envc; i++) {
+        envp[i] = new char[String::strlen(old_envp[i])];
+        String::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
+    }
     Ref<Filesystem::Descriptor> start(nullptr);
     if (*path == '/') {
         start = Scheduler::get_current_process()->get_root();
@@ -174,6 +186,7 @@ static int sys_execve(const char* path, const char* argv[], const char* envp[])
                 st.st_size);
     uint8_t* raw = new uint8_t[st.st_size];
     file->read(raw, st.st_size);
+    Scheduler::get_current_process()->sections->reset();
     struct ThreadContext ctx;
     if (!Scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
                                                argc, argv, envc, envp, ctx)) {
@@ -181,6 +194,7 @@ static int sys_execve(const char* path, const char* argv[], const char* envp[])
     }
     delete[] raw;
     load_registers(ctx);
+    __builtin_unreachable();
 }
 
 static void sys_exit(int val)

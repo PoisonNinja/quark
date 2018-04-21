@@ -215,6 +215,14 @@ bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
     return found;
 }
 
+void SectionManager::reset()
+{
+    for (auto& i : sections) {
+        delete &i;
+    }
+    sections.reset();
+}
+
 iterator<Section, &Section::node> SectionManager::begin()
 {
     return sections.begin();

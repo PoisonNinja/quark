@@ -33,6 +33,8 @@ public:
     bool add_section(addr_t start, size_t size);
     bool locate_range(addr_t& start, addr_t hint, size_t size);
 
+    void reset();
+
     iterator<Section, &Section::node> begin();
     iterator<Section, &Section::node> end();
 

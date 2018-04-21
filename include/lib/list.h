@@ -56,14 +56,16 @@ class Node
     Node<T>* prev;
 
 public:
-    Node() : next(), prev()
+    Node() : next(nullptr), prev(nullptr)
     {
     }
     Node(Node const&)
     {
     }
-    void operator=(Node const&)
+    void operator=(Node const& n)
     {
+        this->next = n.next;
+        this->prev = n.prev;
     }
 };
 
@@ -171,5 +173,10 @@ public:
         (it.current->next ? (it.current->next->*Link).prev :
                             this->content.prev) = it.current;
         return iterator<T, Link>(&(it.current->next->*Link));
+    }
+    void reset()
+    {
+        this->content = Node<T>();
+        this->content.prev = &this->content;
     }
 };

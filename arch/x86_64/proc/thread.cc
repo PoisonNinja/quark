@@ -98,9 +98,6 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
         Log::printk(Log::ERROR, "Failed to locate stack\n");
         return false;
     }
-    // TODO: Make this actually map the correct amount. It only maps one page
-    // currently
-
     Memory::Virtual::map_range(argv_zone, argv_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map_range(envp_zone, envp_size,

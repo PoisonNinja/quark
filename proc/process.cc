@@ -80,8 +80,8 @@ Process* Process::fork()
     addr_t cloned = Memory::Virtual::fork();
     child->set_dtable(
         Ref<Filesystem::DTable>(new Filesystem::DTable(*this->fds)));
-    child->set_root(Scheduler::get_current_process()->get_root());
-    child->set_cwd(Scheduler::get_current_process()->get_cwd());
+    child->set_root(this->get_root());
+    child->set_cwd(this->get_cwd());
     child->sections = new Memory::SectionManager(*this->sections);
     child->address_space = cloned;
     return child;

@@ -77,6 +77,7 @@ void Process::remove_thread(Thread* thread)
 Process* Process::fork()
 {
     Process* child = new Process(this);
+    this->children.push_back(*child);
     addr_t cloned = Memory::Virtual::fork();
     child->set_dtable(
         Ref<Filesystem::DTable>(new Filesystem::DTable(*this->fds)));

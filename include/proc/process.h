@@ -30,11 +30,14 @@ public:
 
     Memory::SectionManager* sections;
 
+    Node<Process> child_node;
+
 private:
     Ref<Filesystem::Descriptor> cwd;
     Ref<Filesystem::Descriptor> root;
     Ref<Filesystem::DTable> fds;
 
-    Process *parent, *children;
+    Process* parent;
+    List<Process, &Process::child_node> children;
     List<Thread, &Thread::process_node> threads;
 };

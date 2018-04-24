@@ -81,7 +81,7 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
     }
 }
 
-addr_t arch_fork()
+addr_t fork()
 {
     // Fractal mapping address of original PML4
     struct page_table* old_pml4 =

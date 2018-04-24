@@ -7,7 +7,7 @@ namespace Memory
 {
 namespace Virtual
 {
-bool arch_test(addr_t v)
+bool test(addr_t v)
 {
     struct page_table* pml4 = (struct page_table*)Memory::X64::decode_fractal(
         Memory::X64::recursive_entry, Memory::X64::recursive_entry,

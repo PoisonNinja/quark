@@ -145,6 +145,7 @@ void detect(Core& cpu)
     }
 
     if (!String::strncmp("GenuineIntel", cpu.vendor, 13)) {
+        Log::printk(Log::INFO, "Found supported CPU vendor\n");
         detect_intel(cpu);
     } else {
         Log::printk(

@@ -29,7 +29,7 @@ static inline void __set_flags(struct page* page, uint8_t flags)
     page->hardware = (flags & PAGE_HARDWARE) ? 1 : 0;
 }
 
-bool arch_map(addr_t v, addr_t p, int flags)
+bool map(addr_t v, addr_t p, int flags)
 {
     struct page_table* pml4 = (struct page_table*)Memory::X64::decode_fractal(
         Memory::X64::recursive_entry, Memory::X64::recursive_entry,

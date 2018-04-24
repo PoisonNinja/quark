@@ -87,9 +87,7 @@ void switch_next(struct InterruptContext* ctx)
 void __attribute__((noreturn)) yield()
 {
     __asm__ __volatile__("int $0x81");
-    // Shut up GCC
-    for (;;)
-        __asm__("hlt");
+    __builtin_unreachable();
 }
 
 void yield_switch(int, void*, struct InterruptContext* ctx)

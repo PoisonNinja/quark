@@ -86,6 +86,9 @@ void update()
     if (!current_clock) {
         return;
     }
+    int flags;
+    Interrupt::save(flags);
+    Interrupt::disable();
     time_t current = current_clock->read();
     int64_t offset = current - last;
     if (offset < 0) {
@@ -100,6 +103,7 @@ void update()
         current_time.tv_sec++;
     }
     last = current;
+    Interrupt::restore(flags);
 }
 
 struct timespec now()

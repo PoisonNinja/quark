@@ -32,6 +32,9 @@ struct Handler {
 int disable();
 int enable();
 
+void save(int &store);
+void restore(int &store);
+
 void dispatch(int int_no, struct InterruptContext *ctx);
 
 bool register_handler(uint32_t int_no, Interrupt::Handler &handler);

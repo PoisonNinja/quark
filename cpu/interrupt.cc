@@ -12,6 +12,7 @@ static std::atomic<int> interrupt_depth(1);
 extern void arch_disable();
 extern void arch_enable();
 extern void arch_init();
+extern bool arch_interrupt_enabled();
 
 int disable()
 {
@@ -26,6 +27,20 @@ int enable()
         Interrupt::arch_enable();
     return interrupt_depth;
 }
+
+void save(int& store)
+{
+    store = arch_interrupt_enabled();
+}
+
+void restore(int& store)
+{
+    if (store) {
+        enable();
+    } else {
+        disable();
+    }
+ }
 
 void dispatch(int int_no, struct InterruptContext* ctx)
 {

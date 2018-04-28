@@ -29,8 +29,8 @@ struct Handler {
     Node<Handler> node;
 };
 
-int disable();
-int enable();
+void disable();
+void enable();
 
 void save(int &store);
 void restore(int &store);

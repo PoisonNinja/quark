@@ -14,18 +14,14 @@ extern void arch_enable();
 extern void arch_init();
 extern bool arch_interrupt_enabled();
 
-int disable()
+void disable()
 {
-    if (!atomic_fetch_add(&interrupt_depth, 1))
-        Interrupt::arch_disable();
-    return interrupt_depth;
+    Interrupt::arch_disable();
 }
 
-int enable()
+void enable()
 {
-    if (atomic_fetch_sub(&interrupt_depth, 1) == 1)
-        Interrupt::arch_enable();
-    return interrupt_depth;
+    Interrupt::arch_enable();
 }
 
 void save(int& store)
@@ -40,7 +36,7 @@ void restore(int& store)
     } else {
         disable();
     }
- }
+}
 
 void dispatch(int int_no, struct InterruptContext* ctx)
 {

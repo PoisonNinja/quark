@@ -63,6 +63,7 @@ void init(struct Boot::info& info)
         return;
     }
     parse(virt);
+    Memory::Virtual::unmap_range(virt, size);
     Log::printk(Log::INFO, "Initrd loaded\n");
 }
 }

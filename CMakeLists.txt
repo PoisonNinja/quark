@@ -99,4 +99,6 @@ add_subdirectory(proc)
 
 install(TARGETS quark.kernel DESTINATION "${SYSROOT}/boot")
 
+target_link_libraries(quark.kernel gcc)
+
 configure_file(config.h.in ${CMAKE_SOURCE_DIR}/include/config.h @ONLY)

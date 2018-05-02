@@ -99,16 +99,14 @@ IRQ 15, 47
 extern arch_handler
 interrupt_common_stub:
     cld
-
     pusha
-
+    push esp
     call arch_handler
 
 interrupt_return:
+    add esp, 4
     popa
-
     add esp, 8
-
     iret
 
 global idt_load

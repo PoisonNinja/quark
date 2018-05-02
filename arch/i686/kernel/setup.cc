@@ -30,7 +30,7 @@
  */
 
 #include <arch/cpu/cpu.h>
-// #include <arch/drivers/serial_console.h>
+#include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/info.h>
 #include <cpu/interrupt.h>
@@ -49,15 +49,16 @@ void *__kernel_start;
 void *__kernel_end;
 }
 
-// static X86Serial serial_console;
+static X86Serial serial_console;
 static struct Boot::info info;
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    // Log::register_log_output(serial_console);
+    Log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");
+        Kernel::panic("Multiboot magic number does not match!\n");
     }
+    Log::printk(Log::INFO, "Hello i686 world!\n");
     info.architecture_data = multiboot;
     info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
     info.kernel_end = reinterpret_cast<addr_t>(&__kernel_end);

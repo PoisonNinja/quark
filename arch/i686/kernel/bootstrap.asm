@@ -140,6 +140,10 @@ bootstrap:
     ; Allocate a stack
     mov esp, stack + 0x4000
 
+    add esi, 0xC0000000
+    push esi
+    push edi
+
     call asm_to_cxx_trampoline
 
     jmp halt

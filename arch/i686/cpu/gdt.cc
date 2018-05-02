@@ -34,8 +34,8 @@ constexpr uint8_t access_code(uint8_t conform, uint8_t read)
     return ((1) << 3 | (conform) << 2 | (read) << 1);
 }
 
-constexpr uint8_t flag_protected = (1 << 2);
 constexpr uint8_t flag_long = (1 << 1);
+constexpr uint8_t flag_protected = (1 << 2);
 constexpr uint8_t flag_4kib = (1 << 3);
 
 extern "C" void gdt_load(addr_t);
@@ -46,6 +46,7 @@ static struct GDT::Descriptor descriptor = {
     .limit = sizeof(struct GDT::Entry) * num_entries - 1,
     .offset = reinterpret_cast<addr_t>(&entries),
 };
+
 static struct TSS::Entry tss = {
     // .reserved0 = 0,
     // .stack0 = 0,
@@ -65,6 +66,7 @@ static void set_entry(struct GDT::Entry* entry, uint32_t base, uint32_t limit,
     entry->base_low = base & 0xFFFF;
     entry->base_middle = (base >> 16) & 0xFF;
     entry->access = access;
+    entry->limit_high = (limit >> 16) & 0xF;
     entry->flags = flags & 0xF;
     entry->base_high = (base >> 24) & 0xFF;
 }
@@ -113,6 +115,7 @@ void set_stack(addr_t stack)
 addr_t get_stack()
 {
     // return GDT::tss.stack0;
+    return 0;
 }
 }
 }

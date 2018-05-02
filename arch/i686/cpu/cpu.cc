@@ -3,7 +3,6 @@
 #include <arch/cpu/gdt.h>
 #include <arch/cpu/idt.h>
 #include <kernel.h>
-#include <proc/sched.h>
 
 namespace CPU
 {

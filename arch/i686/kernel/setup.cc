@@ -147,7 +147,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 //     Log::printk(Log::INFO, "    Unknown/unhandled\n");
         }
     }
-    // CPU::X64::init();
+    CPU::X86::init();
     kmain(info);
 }
 

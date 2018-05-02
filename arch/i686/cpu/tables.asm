@@ -1,13 +1,15 @@
 global gdt_load
 gdt_load:
-    lgdt [esp]
+    mov eax, [esp + 4]
+    lgdt [eax]
     mov ax, 0x10      ; 0x10 is the offset in the GDT to our data segment
     mov ds, ax        ; Load all data segment selectors
     mov es, ax
     mov fs, ax
     mov ss, ax
-    
+
     jmp 0x8:.reloadcs
+
 .reloadcs:
     ret
 
@@ -111,7 +113,8 @@ interrupt_return:
 
 global idt_load
 idt_load:
-    lidt [esp]
+    mov eax, [esp + 4]
+    lidt [eax]
     ret
 
 global load_register_state

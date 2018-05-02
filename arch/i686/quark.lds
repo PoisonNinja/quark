@@ -1,5 +1,5 @@
-ENTRY(bootstrap32)
-OUTPUT_FORMAT("elf64-x86-64")
+ENTRY(bootstrap)
+OUTPUT_FORMAT("elf32-i386")
 SECTIONS
 {
 	. = 0x100000;
@@ -10,16 +10,16 @@ SECTIONS
 		*(.trampoline)
 	}
 
-	. += 0xFFFFFFFF80000000;
+	. += 0xC0000000;
 
-    __kernel_start = . - 0xFFFFFFFF80000000;
+    __kernel_start = . - 0xC0000000;
 
-    .text ALIGN (0x1000) : AT(ADDR(.text) - 0xFFFFFFFF80000000)
+    .text ALIGN (0x1000) : AT(ADDR(.text) - 0xC0000000)
     {
     	*(.text)
 	}
 
-    .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - 0xFFFFFFFF80000000)
+    .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - 0xC0000000)
     {
         __constructors_start = .;
         *(SORT(.ctors*))
@@ -27,17 +27,17 @@ SECTIONS
         *(.rodata)
     }
 
-    .data ALIGN (0x1000) : AT(ADDR(.data) - 0xFFFFFFFF80000000)
+    .data ALIGN (0x1000) : AT(ADDR(.data) - 0xC0000000)
     {
         *(.data)
     }
 
-	.eh_frame ALIGN(0x1000) : AT(ADDR(.eh_frame) - 0xFFFFFFFF80000000)
+	.eh_frame ALIGN(0x1000) : AT(ADDR(.eh_frame) - 0xC0000000)
    	{
    	    *(.eh_frame)
    	}
 
-    .bss ALIGN(0x1000) : AT(ADDR(.bss) - 0xFFFFFFFF80000000)
+    .bss ALIGN(0x1000) : AT(ADDR(.bss) - 0xC0000000)
     {
         *(.bss)
         *(COMMON)
@@ -48,5 +48,5 @@ SECTIONS
        	*(.comment)
     }
 
-    __kernel_end = . - 0xFFFFFFFF80000000;
+    __kernel_end = . - 0xC0000000;
 }

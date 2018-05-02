@@ -5,7 +5,7 @@
 
 namespace CPU
 {
-namespace X64
+namespace X86
 {
 enum feature_index {
     cpuid_1_edx = 0,

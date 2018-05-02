@@ -4,7 +4,7 @@
 
 namespace CPU
 {
-namespace X64
+namespace X86
 {
 constexpr uint64_t msr_efer = 0xC0000080;
 

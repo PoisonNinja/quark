@@ -26,5 +26,12 @@ static inline void invlpg(addr_t addr)
     __asm__ __volatile__("invlpg (%0)" ::"r"(addr) : "memory");
 }
 
+static inline void* decode_fractal(uint32_t pd, uint32_t pt)
+{
+    uint32_t address = (pd << 22);
+    address |= (pt << 12);
+    return (void*)address;
+}
+
 }  // namespace X64
 }  // namespace Memory

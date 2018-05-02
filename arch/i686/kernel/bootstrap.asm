@@ -22,8 +22,10 @@ align 4096
 page_directory:
     dd (page_table + 0x7)              ; Identity map
     times 767 dd 0
-    dd (page_table + 0x7)              ; -2GB mapping
-    times 255 dd 0
+    dd (page_table + 0x7)              ; Higher half mapping
+    times 253 dd 0
+    dd (page_table_phys + 0x7)         ; Phys
+    dd (page_directory + 0x7)          ; Fractal
 
 align 4096
 page_table:
@@ -32,6 +34,13 @@ page_table:
     dd (i << 12) | 0x083
     %assign i i+1
     %endrep
+
+page_table_phys:
+    dd (page_phys + 0x083)
+    times 1023 dd 0
+
+page_phys:
+    times 1024 dd 0
 
 NO_CPUID_STRING: db "No CPUID support!", 0
 
@@ -117,7 +126,9 @@ bootstrap:
     bts eax, 16     ; Enable WP for Ring 0
     mov cr0, eax
     mov eax, cr4   ; Set OSFXSR and OSXMMEXCPT
-    or ax, 3 << 9
+    bts eax, 10
+    bts eax, 9
+    bts eax, 4
     mov cr4, eax
 
     ; Create long mode page table and init CR3 to

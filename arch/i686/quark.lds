@@ -7,7 +7,6 @@ SECTIONS
 	.bootstrap :
 	{
 		*(.bootstrap)
-		*(.trampoline)
 	}
 
 	. += 0xC0000000;

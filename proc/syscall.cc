@@ -151,7 +151,11 @@ static pid_t sys_fork()
     Thread* thread = new Thread(child);
     String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
                    sizeof(thread->cpu_ctx));
+#ifdef X64
     thread->cpu_ctx.rax = 0;
+#else
+    thread->cpu_ctx.eax = 0;
+#endif
     thread->kernel_stack = (addr_t) new uint8_t[0x1000] + 0x1000;
     Scheduler::insert(thread);
     return child->pid;

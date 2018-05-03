@@ -190,7 +190,7 @@ static void printf_format(struct printf_data *data, const char *format,
     struct parameters params;
     String::memset(&params, 0, sizeof(struct parameters));
     const char *pos = format;
-    while (*pos != '\0') {
+    while (*pos) {
         if (*pos == '%') {
             // 22 chars for max value of long long in octal + 1 for null
             char buffer[23];
@@ -205,6 +205,7 @@ static void printf_format(struct printf_data *data, const char *format,
             if (*pos >= '0' && *pos <= '9') {
                 int i = 0;
                 char padding[5];
+                String::memset(padding, 0, 5);
                 while (*pos >= '0' && *pos <= '9') {
                     padding[i++] = *pos++;
                 }

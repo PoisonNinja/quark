@@ -60,7 +60,7 @@ size_t printk(int level, const char* format, ...)
         if (level < Log::CONTINUE) {
             String::memset(printk_buffer, 0, Log::printk_max);
             struct Time::timespec spec = Time::now();
-            r = snprintf(printk_buffer, Log::printk_max, "%s[%05lu.%09lu]%s ",
+            r = snprintf(printk_buffer, Log::printk_max, "%s[%05llu.%09llu]%s ",
                          colors[level], spec.tv_sec, spec.tv_nsec, "\e[39m");
             for (auto& i : output) {
                 i.write(printk_buffer, r);

@@ -131,10 +131,28 @@ bootstrap:
     bts eax, 4
     mov cr4, eax
 
-    ; Create long mode page table and init CR3 to
-    ; point to the base of the PML4 page table
+    ; Set CR3 to point to the base of the page table
     mov eax, page_directory
     mov cr3, eax
+
+    ; enable paging to activate long mode
+    mov eax, cr0
+    bts eax, 31
+    mov cr0, eax
+
+    jmp higher_half
+
+section .text
+higher_half:
+    ; Allocate a stack
+    mov esp, stack + 0x4000
+
+    mov [page_directory], dword 0
+
+    ; Fixup multiboot
+    add esi, 0xC0000000
+    push esi
+    push edi
 
     ; Enable Long mode, SYSCALL / SYSRET instructions, and NX bit
     mov ecx, 0xC0000080
@@ -142,18 +160,6 @@ bootstrap:
     bts eax, 11
     bts eax, 0
     wrmsr
-
-    ; enable paging to activate long mode
-    mov eax, cr0
-    bts eax, 31
-    mov cr0, eax
-
-    ; Allocate a stack
-    mov esp, stack + 0x4000
-
-    add esi, 0xC0000000
-    push esi
-    push edi
 
     call asm_to_cxx_trampoline
 

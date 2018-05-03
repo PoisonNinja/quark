@@ -21,13 +21,11 @@ struct page {
     uint32_t cow : 1;
     uint32_t hardware : 1;
     uint32_t available_1 : 1;
-    uint64_t address : 40;
-    uint32_t available_2 : 11;
-    uint32_t nx : 1;
-};
+    uint32_t address : 20;
+} __attribute__((packed));
 
 struct page_table {
-    struct page pages[512];
-};
+    struct page pages[1024];
+} __attribute__((packed));
 }
 }

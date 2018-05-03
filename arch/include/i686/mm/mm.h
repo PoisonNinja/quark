@@ -6,8 +6,17 @@ namespace Memory
 {
 namespace X86
 {
-constexpr addr_t recursive_entry = 510;
+constexpr addr_t recursive_entry = 1023;
 constexpr addr_t copy_entry = 508;
+
+constexpr addr_t pd_index(addr_t x)
+{
+    return ((x >> 22) & 0x3FF);
+}
+constexpr addr_t pt_index(addr_t x)
+{
+    return ((x >> 12) & 0x3FF);
+}
 
 static inline addr_t read_cr3(void)
 {

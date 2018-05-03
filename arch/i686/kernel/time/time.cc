@@ -9,8 +9,8 @@ void arch_init()
     Intel8253* pit = new Intel8253();
     register_clock(*pit);
 
-    // // This must be initialized after TSC
-    // TSC* tsc = new TSC();
-    // register_clock(*tsc);
+    // This must be initialized after TSC
+    TSC* tsc = new TSC();
+    register_clock(*tsc);
 }
 }

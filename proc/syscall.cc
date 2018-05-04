@@ -215,6 +215,7 @@ static void sys_exit(int val)
 
 static void syscall_handler(int, void*, struct InterruptContext* ctx)
 {
+    save_context(ctx, &Scheduler::get_current_thread()->cpu_ctx);
     Log::printk(Log::DEBUG,
                 "Received legacy system call %d from PID %d, %lX %lX %lX "
                 "%lX %lX\n",

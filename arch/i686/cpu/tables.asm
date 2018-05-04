@@ -100,11 +100,20 @@ extern arch_handler
 interrupt_common_stub:
     cld
     pusha
+    mov ax, ds
+    push eax
+
+    mov ax, 0x10
+    mov ds, ax
+    mov ss, ax
+
     push esp
     call arch_handler
     add esp, 4
 
 interrupt_return:
+    pop eax
+    mov ds, ax
     popa
     add esp, 8
     iret

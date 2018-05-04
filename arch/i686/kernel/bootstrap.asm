@@ -24,7 +24,7 @@ page_directory:
     times 767 dd 0
     dd (page_table + 0x7)              ; Higher half mapping
     times 253 dd 0
-    dd (page_table_phys + 0x7)         ; Phys
+    dd (page_table_phys + 0x7)         ; Physical
     dd (page_directory + 0x7)          ; Fractal
 
 align 4096

@@ -5,7 +5,7 @@
 #include <mm/physical.h>
 #include <mm/virtual.h>
 
-static uint64_t heap_end = HEAP_START;
+static addr_t heap_end = HEAP_START;
 
 static void *map_heap(size_t size)
 {

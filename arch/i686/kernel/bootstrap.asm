@@ -122,7 +122,7 @@ bootstrap:
     ; Set control register flags
     mov eax, cr0
     and eax, 0xFFFFFFFB  ; Disable coprocessor emulation
-    bts eax, 2      ; Set coprocessor monitoring
+    bts eax, 1      ; Set coprocessor monitoring
     bts eax, 16     ; Enable WP for Ring 0
     mov cr0, eax
     mov eax, cr4   ; Set OSFXSR and OSXMMEXCPT
@@ -153,13 +153,6 @@ higher_half:
     add esi, 0xC0000000
     push esi
     push edi
-
-    ; Enable Long mode, SYSCALL / SYSRET instructions, and NX bit
-    mov ecx, 0xC0000080
-    rdmsr
-    bts eax, 11
-    bts eax, 0
-    wrmsr
 
     call asm_to_cxx_trampoline
 

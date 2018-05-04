@@ -7,7 +7,7 @@ namespace Memory
 namespace X86
 {
 constexpr addr_t recursive_entry = 1023;
-constexpr addr_t copy_entry = 508;
+constexpr addr_t copy_entry = 1020;
 
 constexpr addr_t pd_index(addr_t x)
 {

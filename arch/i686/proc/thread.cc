@@ -108,16 +108,16 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     String::memset((void*)stack_zone, 0, 0x1000);
     String::memset(&ctx, 0, sizeof(ctx));
     ctx.eip = entry;
-    ctx.cs = 0x20 | 3;
-    ctx.ds = 0x18 | 3;
-    ctx.ss = 0x18 | 3;
-    ctx.esp = ctx.ebp = reinterpret_cast<addr_t>(stack_zone) + 0x1000;
+    ctx.cs = 0x18 | 3;
+    ctx.ds = 0x20 | 3;
+    ctx.ss = 0x20 | 3;
+    ctx.esp = ctx.ebp = (reinterpret_cast<addr_t>(stack_zone) + 0x1000);
     // Load in arguments
     uint32_t* stack = reinterpret_cast<uint32_t*>(ctx.esp);
     stack[-2] = argc;
-    stack[-3] = reinterpret_cast<uint64_t>(target_argv);
+    stack[-3] = reinterpret_cast<uint32_t>(target_argv);
     stack[-4] = envc;
-    stack[-5] = reinterpret_cast<uint64_t>(target_envp);
+    stack[-5] = reinterpret_cast<uint32_t>(target_envp);
     ctx.esp -= 20;
     ctx.eflags = 0x200;
     return true;

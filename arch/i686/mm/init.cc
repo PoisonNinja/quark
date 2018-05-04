@@ -15,9 +15,13 @@ void arch_init(struct Boot::info &info)
         reinterpret_cast<addr_t>(multiboot) - 0xC0000000);
     addr_t multiboot_end =
         Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
+    Log::printk(Log::INFO, "Restricted memory areas:\n");
     Log::printk(Log::INFO, "Kernel: %p -> %p\n", info.kernel_start,
                 info.kernel_end);
-    Log::printk(Log::INFO, "Multiboot at %p\n", multiboot);
+    Log::printk(Log::INFO, "Multiboot: %p -> %p\n", multiboot_start,
+                multiboot_end);
+    Log::printk(Log::INFO, "initrd: %p -> %p\n", info.initrd_start,
+                info.initrd_end);
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<addr_t>(multiboot) + 8);
@@ -60,6 +64,14 @@ void arch_init(struct Boot::info &info)
                                             "        Rejected %p "
                                             "because in "
                                             "multiboot\n",
+                                            i);
+                            } else if (i >= Memory::Virtual::align_down(
+                                                info.initrd_start) &&
+                                       i < Memory::Virtual::align_up(
+                                               info.initrd_end)) {
+                                Log::printk(Log::DEBUG,
+                                            "        Rejected %p because "
+                                            "in initrd\n",
                                             i);
                             } else {
                                 Memory::Physical::free(i);

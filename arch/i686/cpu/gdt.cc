@@ -47,17 +47,7 @@ static struct GDT::Descriptor descriptor = {
     .offset = reinterpret_cast<addr_t>(&entries),
 };
 
-static struct TSS::Entry tss = {
-    // .reserved0 = 0,
-    // .stack0 = 0,
-    // .stack1 = 0,
-    // .stack2 = 0,
-    // .reserved1 = 0,
-    // .ist = {0, 0, 0, 0, 0, 0, 0},
-    // .reserved2 = 0,
-    // .reserved3 = 0,
-    // .iomap_base = 0,
-};
+static struct TSS::Entry tss = {0};
 
 static void set_entry(struct GDT::Entry* entry, uint32_t base, uint32_t limit,
                       uint8_t access, uint8_t flags)
@@ -109,13 +99,13 @@ namespace TSS
 {
 void set_stack(addr_t stack)
 {
-    // GDT::tss.stack0 = stack;
+    GDT::tss.ss = 0x10;
+    GDT::tss.esp0 = stack;
 }
 
 addr_t get_stack()
 {
-    // return GDT::tss.stack0;
-    return 0;
+    return GDT::tss.esp0;
 }
 }
 }

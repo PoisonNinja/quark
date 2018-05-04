@@ -102,9 +102,9 @@ interrupt_common_stub:
     pusha
     push esp
     call arch_handler
+    add esp, 4
 
 interrupt_return:
-    add esp, 4
     popa
     add esp, 8
     iret
@@ -117,5 +117,5 @@ idt_load:
 
 global load_register_state
 load_register_state:
-    ; mov rsp, rdi
+    mov esp, [esp + 4]
     jmp interrupt_return

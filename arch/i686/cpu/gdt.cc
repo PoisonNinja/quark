@@ -7,7 +7,7 @@ namespace X86
 {
 namespace GDT
 {
-constexpr size_t num_entries = 7;
+constexpr size_t num_entries = 6;
 
 constexpr uint8_t access_present(uint8_t x)
 {
@@ -61,13 +61,11 @@ static void set_entry(struct GDT::Entry* entry, uint32_t base, uint32_t limit,
     entry->base_high = (base >> 24) & 0xFF;
 }
 
-static void write_tss(struct GDT::Entry* gdt1, struct GDT::Entry* gdt2,
-                      struct TSS::Entry* tss)
+static void write_tss(struct GDT::Entry* gdt, struct TSS::Entry* tss)
 {
-    uint64_t base = (uint64_t)tss;
-    uint32_t limit = sizeof(struct TSS::Entry);
-    GDT::set_entry(gdt1, base, limit, 0xE9, 0);
-    GDT::set_entry(gdt2, (base >> 48) & 0xFFFF, (base >> 32) & 0xFFFF, 0, 0);
+    uint32_t base = (uint32_t)tss;
+    uint16_t limit = sizeof(struct TSS::Entry) - 1;
+    GDT::set_entry(gdt, base, limit, 0xE9, 0);
 }
 
 void init()
@@ -83,13 +81,14 @@ void init()
                    flag_protected | flag_4kib);
     GDT::set_entry(&entries[3], 0, 0xFFFFF,
                    access_present(1) | access_privilege(3) |
-                       access_mandantory(1) | access_data(0, 1),
+                       access_mandantory(1) | access_code(0, 1),
                    flag_protected | flag_4kib);
     GDT::set_entry(&entries[4], 0, 0xFFFFF,
                    access_present(1) | access_privilege(3) |
-                       access_mandantory(1) | access_code(0, 1),
+                       access_mandantory(1) | access_data(0, 1),
                    flag_protected | flag_4kib);
-    GDT::write_tss(&entries[5], &entries[6], &tss);
+    GDT::write_tss(&entries[5], &tss);
+    tss.ss0 = 0x10;
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
     GDT::tss_load();
 }
@@ -99,7 +98,6 @@ namespace TSS
 {
 void set_stack(addr_t stack)
 {
-    GDT::tss.ss = 0x10;
     GDT::tss.esp0 = stack;
 }
 

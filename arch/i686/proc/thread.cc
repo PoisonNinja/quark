@@ -114,10 +114,10 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.esp = ctx.ebp = (reinterpret_cast<addr_t>(stack_zone) + 0x1000) & ~15UL;
     // Load in arguments
     uint32_t* stack = reinterpret_cast<uint32_t*>(ctx.esp);
-    stack[-2] = argc;
+    stack[-1] = reinterpret_cast<uint32_t>(target_envp);
+    stack[-2] = envc;
     stack[-3] = reinterpret_cast<uint32_t>(target_argv);
-    stack[-4] = envc;
-    stack[-5] = reinterpret_cast<uint32_t>(target_envp);
+    stack[-4] = argc;
     ctx.esp -= 20;
     ctx.eflags = 0x200;
     return true;

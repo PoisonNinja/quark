@@ -67,7 +67,18 @@ void set_thread_base(Thread* thread)
 
 Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
 {
-    return nullptr;
+    Thread* thread = new Thread(p);
+    String::memset(&thread->cpu_ctx, 0, sizeof(thread->cpu_ctx));
+    addr_t* stack = reinterpret_cast<addr_t*>(new uint8_t[0x1000] + 0x1000);
+    thread->cpu_ctx.eip = reinterpret_cast<addr_t>(entry_point);
+    thread->cpu_ctx.ebp = reinterpret_cast<addr_t>(stack);
+    thread->cpu_ctx.esp = reinterpret_cast<addr_t>(stack - 1);
+    thread->cpu_ctx.cs = 0x8;
+    thread->cpu_ctx.ds = 0x10;
+    thread->cpu_ctx.eflags = 0x200;
+    thread->kernel_stack =
+        reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
+    return thread;
 }
 
 extern "C" void load_register_state(struct InterruptContext* ctx);

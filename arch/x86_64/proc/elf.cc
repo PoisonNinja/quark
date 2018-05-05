@@ -27,8 +27,8 @@ addr_t load(addr_t binary)
             Log::printk(Log::DEBUG, "Offset:           %p\n", phdr->p_offset);
             Log::printk(Log::DEBUG, "Virtual address:  %p\n", phdr->p_vaddr);
             Log::printk(Log::DEBUG, "Physical address: %p\n", phdr->p_paddr);
-            Log::printk(Log::DEBUG, "File size:        %llX\n", phdr->p_filesz);
-            Log::printk(Log::DEBUG, "Memory size:      %llX\n", phdr->p_memsz);
+            Log::printk(Log::DEBUG, "File size:        %pX\n", phdr->p_filesz);
+            Log::printk(Log::DEBUG, "Memory size:      %pX\n", phdr->p_memsz);
             Log::printk(Log::DEBUG, "Align:            %p\n", phdr->p_align);
             if (!process->sections->add_section(phdr->p_vaddr, phdr->p_memsz)) {
                 Log::printk(Log::ERROR, "Failed to add section\n");

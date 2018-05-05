@@ -32,7 +32,7 @@ void parse(addr_t initrd)
             return;
         }
         size_t size = decode_octal(header->size);
-        Log::printk(Log::INFO, "Name: %s, Size: %llu, Type: %u\n", header->name,
+        Log::printk(Log::INFO, "Name: %s, Size: %zu, Type: %u\n", header->name,
                     size, header->typeflag);
         switch (header->typeflag) {
             case '0':
@@ -54,7 +54,7 @@ void parse(addr_t initrd)
 void init(struct Boot::info& info)
 {
     size_t size = info.initrd_end - info.initrd_start;
-    Log::printk(Log::INFO, "Initrd located at %p - %p, size %llX\n",
+    Log::printk(Log::INFO, "Initrd located at %p - %p, size %p\n",
                 info.initrd_start, info.initrd_end, size);
     addr_t virt = Memory::Valloc::allocate(size);
     if (!Memory::Virtual::map_range(virt, info.initrd_start, size,

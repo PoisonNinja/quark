@@ -14,7 +14,7 @@ namespace Syscall
 {
 static ssize_t sys_read(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::DEBUG, "[sys_read] = %d, %p, %llX\n", fd, buffer, count);
+    Log::printk(Log::DEBUG, "[sys_read] = %d, %p, %pX\n", fd, buffer, count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -24,7 +24,7 @@ static ssize_t sys_read(int fd, const void* buffer, size_t count)
 
 static ssize_t sys_write(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::DEBUG, "[sys_write] = %d, %p, %llX\n", fd, buffer, count);
+    Log::printk(Log::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer, count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -95,7 +95,7 @@ static off_t sys_lseek(int fd, off_t offset, int whence)
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
 {
-    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %llX, %u, %u, %d, %llX\n",
+    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %pX, %u, %u, %d, %pX\n",
                 mmap_data, mmap_data->addr, mmap_data->length, mmap_data->prot,
                 mmap_data->flags, mmap_data->fd, mmap_data->offset);
     if (mmap_data->flags & MAP_SHARED) {
@@ -192,7 +192,7 @@ static int sys_execve(const char* path, const char* old_argv[],
     Ref<Filesystem::Descriptor> file = start->open(path, 0, 0);
     struct Filesystem::stat st;
     file->stat(&st);
-    Log::printk(Log::DEBUG, "[sys_execve] binary has size of %llu bytes\n",
+    Log::printk(Log::DEBUG, "[sys_execve] binary has size of %zu bytes\n",
                 st.st_size);
     uint8_t* raw = new uint8_t[st.st_size];
     file->read(raw, st.st_size);

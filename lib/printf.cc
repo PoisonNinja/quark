@@ -219,6 +219,16 @@ static void printf_format(struct printf_data *data, const char *format,
                     pos++;
                 }
             }
+            if (*pos == 'z') {
+                if (sizeof(size_t) == sizeof(long long)) {
+                    lng = 2;
+                } else if (sizeof(size_t) == sizeof(long)) {
+                    lng = 1;
+                } else {
+                    lng = 0;
+                }
+                pos++;
+            }
             switch (*pos++) {
                 case 'c':
                     data->putcf(data, (char)va_arg(arg, int));

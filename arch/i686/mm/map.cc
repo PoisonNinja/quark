@@ -34,7 +34,6 @@ bool map(addr_t v, addr_t p, int flags)
         Memory::X86::recursive_entry, Memory::X86::recursive_entry);
     struct page_table* pt = (struct page_table*)Memory::X86::decode_fractal(
         Memory::X86::recursive_entry, Memory::X86::pd_index(v));
-    sizeof(struct page);
     int r = 0;
     r = __set_address(&pd->pages[Memory::X86::pd_index(v)]);
     __set_flags(&pd->pages[Memory::X86::pd_index(v)],

@@ -95,7 +95,7 @@ static off_t sys_lseek(int fd, off_t offset, int whence)
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
 {
-    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %pX, %u, %u, %d, %pX\n",
+    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %zX, %u, %u, %d, %zX\n",
                 mmap_data, mmap_data->addr, mmap_data->length, mmap_data->prot,
                 mmap_data->flags, mmap_data->fd, mmap_data->offset);
     if (mmap_data->flags & MAP_SHARED) {

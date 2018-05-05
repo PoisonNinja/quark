@@ -1,4 +1,4 @@
-; Based on LInux memcpy but converted to AT&T syntax
+; Based on Linux memcpy but converted to AT&T syntax
 
 global _ZN6String6memcpyEPvPKvm
 _ZN6String6memcpyEPvPKvm:

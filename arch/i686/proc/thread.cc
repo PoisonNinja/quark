@@ -112,7 +112,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.ds = 0x20 | 3;
     ctx.ss = 0x20 | 3;
     ctx.esp = ctx.ebp = (reinterpret_cast<addr_t>(stack_zone) + 0x1000) & ~15UL;
-    // Load in arguments
+    // Arguments are passed on the stack
     uint32_t* stack = reinterpret_cast<uint32_t*>(ctx.esp);
     stack[-1] = reinterpret_cast<uint32_t>(target_envp);
     stack[-2] = envc;
@@ -141,15 +141,19 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
 {
     Thread* thread = new Thread(p);
     String::memset(&thread->cpu_ctx, 0, sizeof(thread->cpu_ctx));
-    addr_t* stack = reinterpret_cast<addr_t*>(new uint8_t[0x1000] + 0x1000);
+    addr_t stack =
+        (reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000) & ~15UL;
     thread->cpu_ctx.eip = reinterpret_cast<addr_t>(entry_point);
     thread->cpu_ctx.ebp = reinterpret_cast<addr_t>(stack);
-    thread->cpu_ctx.esp = reinterpret_cast<addr_t>(stack - 1);
+    thread->cpu_ctx.esp = reinterpret_cast<addr_t>(stack);
     thread->cpu_ctx.cs = 0x8;
     thread->cpu_ctx.ds = 0x10;
+    thread->cpu_ctx.ss = 0x10;
     thread->cpu_ctx.eflags = 0x200;
-    thread->kernel_stack =
-        reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
+    thread->kernel_stack = stack;
+    uint32_t* stack_ptr = reinterpret_cast<uint32_t*>(thread->cpu_ctx.esp);
+    stack_ptr[-1] = reinterpret_cast<uint32_t>(data);
+    thread->cpu_ctx.esp -= 8;
     return thread;
 }
 

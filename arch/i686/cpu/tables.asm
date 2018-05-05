@@ -96,9 +96,22 @@ IRQ 13, 45
 IRQ 14, 46
 IRQ 15, 47
 
+; Portions of the following code are taken from Sortix by Jonas 'Sortie' Termansen
+;
+; Sortix is licensed under the ISC license, and a copy can be found online
+; at https://gitlab.com/sortix/sortix/blob/master/LICENSE
+;
+; The code taken from Sortix is mostly about the intrapriv_* stuff, and is
+; nearly verbatim copied except that it is translated from AT&T to Intel
+; syntax
+
 extern arch_handler
 interrupt_common_stub:
     cld
+    test dword [esp + 12], 0x3
+    jz intrapriv_entry
+
+intrapriv_entry_ret:
     pusha
     mov ax, ds
     push eax
@@ -116,7 +129,59 @@ interrupt_return:
     mov ds, ax
     popa
     add esp, 8
+
+    test dword [esp + 4], 0x3
+    jz intrapriv_exit
+
+intrapriv_exit_ret:
     iret
+
+intrapriv_entry:
+    mov [esp - 0xC], eax
+    mov eax, [esp]
+    mov [esp - 0x8], eax
+    mov eax, [esp + 0x4]
+    mov [esp - 0x4], eax
+    mov eax, [esp + 0x8]
+    mov [esp], eax
+    mov eax, [esp + 0xc]
+    mov [esp + 0x4], eax
+    mov eax, [esp + 0x10]
+    mov [esp + 0x8], eax
+    mov eax, esp
+    add eax, 0x14
+    mov [esp + 0xC], eax
+    mov eax, ss
+    mov [esp + 0x10], eax
+    mov eax, [esp - 0xC]
+    sub esp, 0x8
+    jmp intrapriv_entry_ret
+
+intrapriv_exit:
+    mov [esp - 0x4],eax
+    mov [esp - 0x8],ebx
+    mov [esp - 0xC],ecx
+    mov ebx, [esp + 0xC]
+    sub ebx, 0xC
+    mov cx, [esp + 0x10]
+    mov eax, [esp - 0x4]
+    mov [ebx - 0xc],eax
+    mov eax, [esp - 0x8]
+    mov [ebx - 0x10],eax
+    mov eax, [esp - 0xc]
+    mov [ebx - 0x14],eax
+    mov eax, [esp + 0x8]
+    mov [ebx + 0x8],eax
+    mov eax, [esp + 0x4]
+    mov [ebx + 0x4],eax
+    mov eax, [esp]
+    mov [ebx],eax
+    mov ss,ecx
+    mov esp,ebx
+    mov eax, [esp - 0xC]
+    mov ebx, [esp - 0x10]
+    mov ecx, [esp - 0x14]
+    jmp  intrapriv_exit_ret
 
 global idt_load
 idt_load:

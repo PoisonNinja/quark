@@ -16,7 +16,7 @@ uint64_t TSC::rdtsc()
 TSC::TSC()
 {
     CPU::Core* cpu = CPU::get_current_core();
-#ifdef X64
+#ifdef X86_64
     if (!CPU::X64::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
 #else
     if (!CPU::X86::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {

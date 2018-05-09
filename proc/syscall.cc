@@ -151,7 +151,7 @@ static pid_t sys_fork()
     Thread* thread = new Thread(child);
     String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
                    sizeof(thread->cpu_ctx));
-#ifdef X64
+#ifdef X86_64
     thread->cpu_ctx.rax = 0;
 #else
     thread->cpu_ctx.eax = 0;
@@ -213,6 +213,7 @@ static void sys_exit(int val)
     Scheduler::get_current_thread()->exit();
 }
 
+#ifndef X86_64
 static void syscall_handler(int, void*, struct InterruptContext* ctx)
 {
     save_context(ctx, &Scheduler::get_current_thread()->cpu_ctx);
@@ -236,10 +237,13 @@ static void syscall_handler(int, void*, struct InterruptContext* ctx)
 static struct Interrupt::Handler syscall_handler_data(syscall_handler,
                                                       "syscall",
                                                       &syscall_handler_data);
+#endif
 
 void init()
 {
+#ifndef X86_64
     Interrupt::register_handler(0x80, syscall_handler_data);
+#endif
     syscall_table[SYS_read] = reinterpret_cast<void*>(sys_read);
     syscall_table[SYS_write] = reinterpret_cast<void*>(sys_write);
     syscall_table[SYS_open] = reinterpret_cast<void*>(sys_open);

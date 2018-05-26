@@ -11,7 +11,7 @@ namespace ELF
 addr_t load(addr_t binary)
 {
     Process* process = Scheduler::get_current_process();
-    struct elf64_hdr* header = reinterpret_cast<struct elf64_hdr*>(binary);
+    Elf_Ehdr* header = reinterpret_cast<Elf_Ehdr*>(binary);
     if (String::memcmp(header->e_ident, ELFMAG, 4)) {
         Log::printk(Log::ERROR, "Binary passed in is not an ELF file!\n");
         return 0;
@@ -19,8 +19,8 @@ addr_t load(addr_t binary)
     Log::printk(Log::DEBUG, "Section header offset: %p\n", header->e_shoff);
     Log::printk(Log::DEBUG, "Program header offset: %p\n", header->e_phoff);
     for (int i = 0; i < header->e_phnum; i++) {
-        struct elf64_phdr* phdr = reinterpret_cast<struct elf64_phdr*>(
-            binary + header->e_phoff + (header->e_phentsize * i));
+        Elf_Phdr* phdr = reinterpret_cast<Elf_Phdr*>(binary + header->e_phoff +
+                                                     (header->e_phentsize * i));
         Log::printk(Log::DEBUG, "Header type: %X\n", phdr->p_type);
         if (phdr->p_type == PT_LOAD) {
             Log::printk(Log::DEBUG, "Flags:            %X\n", phdr->p_flags);
@@ -105,4 +105,4 @@ addr_t load(addr_t binary)
     // TODO: More sanity checks
     return header->e_entry;
 }
-}
+}  // namespace ELF

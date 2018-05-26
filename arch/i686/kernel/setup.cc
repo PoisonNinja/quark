@@ -30,10 +30,10 @@
  */
 
 #include <arch/cpu/cpu.h>
-#include <arch/drivers/serial_console.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/info.h>
 #include <cpu/interrupt.h>
+#include <drivers/tty/serial.h>
 #include <kernel.h>
 #include <lib/libcxx.h>
 
@@ -49,7 +49,7 @@ void *__kernel_start;
 void *__kernel_end;
 }
 
-static X86Serial serial_console;
+static Serial serial_console;
 static struct Boot::info info;
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
@@ -158,4 +158,4 @@ void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
     X86::init(magic, multiboot);
 }
 }
-}  // namespace X64
+}  // namespace X86

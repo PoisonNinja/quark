@@ -1,3 +1,4 @@
+#include <cpu/cpu.h>
 #include <cpu/interrupt.h>
 #include <kernel.h>
 #include <lib/list.h>
@@ -18,7 +19,7 @@ void idle()
 {
     while (1) {
         // TODO: Get rid of hlt
-        __asm__("hlt");
+        CPU::halt();
     }
 }
 

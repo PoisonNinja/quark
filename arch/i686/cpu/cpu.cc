@@ -18,5 +18,10 @@ void init()
     GDT::init();
     IDT::init();
 }
+}  // namespace X86
+
+void halt()
+{
+    __asm__("hlt");
 }
-}
+}  // namespace CPU

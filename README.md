@@ -1,5 +1,5 @@
 # Quark
-Quark is an experimental kernel written in C++ that's mainly for me to play around with. It serves as the kernel for the [Pepper](https://github.com/PoisonNinja/Pepper).
+Quark is an experimental kernel written in C++ that's mainly for me to play around with. It serves as the kernel for the [Pepper](https://github.com/PoisonNinja/Pepper). It currently has support for both x86_64 and i686.
 
 # Getting Started
 ## Prerequisites
@@ -20,7 +20,3 @@ If you wish to build with debug support and logging, append `-DCMAKE_BUILD_TYPE=
 ## Using the build system
 Quark is primarily designed to interface with the Pepper build system. Therefore, you should use that most of the time. However, you can always use Quark's own build files.
 
-# Other notes
-Quark was intended to be architecture portable, but recent efforts have shown that this is harder than previously thought. While I have not abandoned this goal, I have, in some cases, integrated architecture-specific code with generic code for the sake of clarity. This is especially apparent in the thread switching code and the asm("hlt")'s littered around the kernel.
-
-As the design of the kernel slowly takes shape, I will start moving things into the proper places. The eventual goal is to undertake a port to another architecture (perhaps Aarch64) to ensure that the kernel is truly seperated between architecture dependant and independant code.

@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include <stdarg.h>
 #include <types.h>
+#include <cstdarg>
 
 extern int vsnprintf(char* s, size_t size, const char* format, va_list arg);
 extern int snprintf(char* s, size_t size, const char* format, ...);

@@ -41,5 +41,10 @@ void init()
      */
     CPU::X64::wrmsr(msr_fmask, 0x200);
 }
+}  // namespace X64
+
+void halt()
+{
+    __asm__("hlt");
 }
-}
+}  // namespace CPU

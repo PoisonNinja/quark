@@ -1,3 +1,4 @@
+#include <cpu/cpu.h>
 #include <kernel.h>
 #include <lib/printf.h>
 #include <lib/string.h>
@@ -18,6 +19,6 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     va_end(args);
     Log::printk(Log::ERROR, "%s", panic_buffer);
     for (;;)
-        asm("hlt");
+        CPU::halt();
 }
 }  // namespace Kernel

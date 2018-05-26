@@ -216,7 +216,7 @@ bootstrap32:
     ; Set control register flags
     mov eax, cr0
     and eax, 0xFFFFFFFB  ; Disable coprocessor emulation
-    bts eax, 2      ; Set coprocessor monitoring
+    bts eax, 1      ; Set coprocessor monitoring
     bts eax, 16     ; Enable WP for Ring 0
     mov cr0, eax
     mov eax, cr4   ; Set OSFXSR and OSXMMEXCPT

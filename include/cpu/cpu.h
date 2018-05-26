@@ -24,4 +24,6 @@ public:
 
 Core* get_current_core();
 void add_core(Core* core);
-}
+
+void halt();
+}  // namespace CPU

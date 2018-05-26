@@ -14,7 +14,7 @@ namespace Syscall
 {
 static ssize_t sys_read(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::DEBUG, "[sys_read] = %d, %p, %llX\n", fd, buffer, count);
+    Log::printk(Log::DEBUG, "[sys_read] = %d, %p, %pX\n", fd, buffer, count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -24,7 +24,7 @@ static ssize_t sys_read(int fd, const void* buffer, size_t count)
 
 static ssize_t sys_write(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::DEBUG, "[sys_write] = %d, %p, %llX\n", fd, buffer, count);
+    Log::printk(Log::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer, count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -95,7 +95,7 @@ static off_t sys_lseek(int fd, off_t offset, int whence)
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
 {
-    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %llX, %u, %u, %d, %llX\n",
+    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %zX, %u, %u, %d, %zX\n",
                 mmap_data, mmap_data->addr, mmap_data->length, mmap_data->prot,
                 mmap_data->flags, mmap_data->fd, mmap_data->offset);
     if (mmap_data->flags & MAP_SHARED) {
@@ -151,7 +151,11 @@ static pid_t sys_fork()
     Thread* thread = new Thread(child);
     String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
                    sizeof(thread->cpu_ctx));
+#ifdef X86_64
     thread->cpu_ctx.rax = 0;
+#else
+    thread->cpu_ctx.eax = 0;
+#endif
     thread->kernel_stack = (addr_t) new uint8_t[0x1000] + 0x1000;
     Scheduler::insert(thread);
     return child->pid;
@@ -188,7 +192,7 @@ static int sys_execve(const char* path, const char* old_argv[],
     Ref<Filesystem::Descriptor> file = start->open(path, 0, 0);
     struct Filesystem::stat st;
     file->stat(&st);
-    Log::printk(Log::DEBUG, "[sys_execve] binary has size of %llu bytes\n",
+    Log::printk(Log::DEBUG, "[sys_execve] binary has size of %zu bytes\n",
                 st.st_size);
     uint8_t* raw = new uint8_t[st.st_size];
     file->read(raw, st.st_size);
@@ -209,8 +213,37 @@ static void sys_exit(int val)
     Scheduler::get_current_thread()->exit();
 }
 
+#ifndef X86_64
+static void syscall_handler(int, void*, struct InterruptContext* ctx)
+{
+    save_context(ctx, &Scheduler::get_current_thread()->cpu_ctx);
+    Log::printk(Log::DEBUG,
+                "Received legacy system call %d from PID %d, %lX %lX %lX "
+                "%lX %lX\n",
+                ctx->eax, Scheduler::get_current_thread()->tid, ctx->ebx,
+                ctx->ecx, ctx->edx, ctx->edi, ctx->esi);
+    if (ctx->eax > 256 || !syscall_table[ctx->eax]) {
+        Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->eax);
+        ctx->eax = -ENOSYS;
+        return;
+    }
+    uint32_t (*func)(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+                     uint32_t e) =
+        (uint32_t(*)(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+                     uint32_t e))syscall_table[ctx->eax];
+    ctx->eax = func(ctx->ebx, ctx->ecx, ctx->edx, ctx->edi, ctx->esi);
+}
+
+static struct Interrupt::Handler syscall_handler_data(syscall_handler,
+                                                      "syscall",
+                                                      &syscall_handler_data);
+#endif
+
 void init()
 {
+#ifndef X86_64
+    Interrupt::register_handler(0x80, syscall_handler_data);
+#endif
     syscall_table[SYS_read] = reinterpret_cast<void*>(sys_read);
     syscall_table[SYS_write] = reinterpret_cast<void*>(sys_write);
     syscall_table[SYS_open] = reinterpret_cast<void*>(sys_open);

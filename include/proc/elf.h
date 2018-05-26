@@ -2,6 +2,7 @@
 
 #include <proc/thread.h>
 #include <types.h>
+#include <climits>
 
 namespace ELF
 {
@@ -438,4 +439,14 @@ typedef struct elf64_note {
 } Elf64_Nhdr;
 
 addr_t load(addr_t binary);
-}
+
+#if WORD_SIZE == 8
+typedef Elf64_Phdr Elf_Phdr;
+typedef Elf64_Ehdr Elf_Ehdr;
+#elif WORD_SIZE == 4
+typedef Elf32_Phdr Elf_Phdr;
+typedef Elf32_Ehdr Elf_Ehdr;
+#else
+#error "Unsupported processor word size. Add support for it here"
+#endif
+}  // namespace ELF

@@ -86,12 +86,11 @@ void update()
     if (!current_clock) {
         return;
     }
+    int flags;
+    Interrupt::save(flags);
+    Interrupt::disable();
     time_t current = current_clock->read();
-    int64_t offset = current - last;
-    if (offset < 0) {
-        Kernel::panic("Going back in time? Last: %llu, New: %llu\n", last,
-                      current);
-    }
+    time_t offset = current - last;
     time_t nsec = offset * nsec_per_sec / current_clock->frequency();
     current_time.tv_nsec += nsec;
     // Coalesce nanoseconds into seconds
@@ -100,6 +99,7 @@ void update()
         current_time.tv_sec++;
     }
     last = current;
+    Interrupt::restore(flags);
 }
 
 struct timespec now()

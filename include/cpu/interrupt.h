@@ -29,10 +29,18 @@ struct Handler {
     Node<Handler> node;
 };
 
-int disable();
-int enable();
+void disable();
+void enable();
+
+void save(int &store);
+void restore(int &store);
 
 void dispatch(int int_no, struct InterruptContext *ctx);
+
+void dump(struct InterruptContext *ctx);
+
+bool interrupts_enabled();
+bool is_exception(int int_no);
 
 bool register_handler(uint32_t int_no, Interrupt::Handler &handler);
 bool unregister_handler(uint32_t int_no, const Interrupt::Handler &handler);

@@ -1,3 +1,4 @@
+#include <arch/mm/layout.h>
 #include <kernel.h>
 #include <mm/valloc.h>
 #include <mm/virtual.h>
@@ -6,7 +7,7 @@ namespace Memory
 {
 namespace Valloc
 {
-static addr_t valloc_current = 0xFFFFFC0000000000;
+static addr_t valloc_current = VALLOC_START;
 
 /*
  * Keep track of how many free requests we receive. If this becomes large
@@ -25,11 +26,10 @@ addr_t allocate(size_t size)
 void free(addr_t address)
 {
     valloc_free_requests++;
-    Log::printk(
-        Log::WARNING,
-        "valloc memory free was requested, but this "
-        "function is not implemented! Request #%llu wanted to free %p\n",
-        valloc_free_requests, address);
+    Log::printk(Log::WARNING,
+                "valloc memory free was requested, but this "
+                "function is not implemented! Request #%zu wanted to free %p\n",
+                valloc_free_requests, address);
 }
 }
 }

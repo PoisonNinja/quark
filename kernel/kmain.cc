@@ -1,4 +1,5 @@
 #include <boot/info.h>
+#include <cpu/cpu.h>
 #include <cpu/interrupt.h>
 #include <fs/fs.h>
 #include <fs/initrd/initrd.h>
@@ -20,11 +21,11 @@ void init_stage2(void*)
     if (!init) {
         Log::printk(Log::ERROR, "Failed to open init\n");
         for (;;)
-            __asm__("hlt");
+            CPU::halt();
     }
     struct Filesystem::stat st;
     init->stat(&st);
-    Log::printk(Log::DEBUG, "init binary has size of %llu bytes\n", st.st_size);
+    Log::printk(Log::DEBUG, "init binary has size of %zu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
     int argc = 2;

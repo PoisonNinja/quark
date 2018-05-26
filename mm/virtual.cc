@@ -9,24 +9,13 @@ namespace Memory
 namespace Virtual
 {
 // Architecture-dependent interface
-extern bool arch_map(addr_t v, addr_t p, int flags);
-extern bool arch_protect(addr_t v, int flags);
-extern bool arch_unmap(addr_t v);
-extern bool arch_test(addr_t v);
-extern addr_t arch_fork();
 extern addr_t arch_get_address_space_root();
 extern void arch_set_address_space_root(addr_t root);
-
-bool map(addr_t v, addr_t p, int flags)
-{
-    v = Memory::Virtual::align_down(v);
-    return Memory::Virtual::arch_map(v, p, flags);
-}
 
 bool map(addr_t v, int flags)
 {
     v = Memory::Virtual::align_down(v);
-    return Memory::Virtual::arch_map(v, Memory::Physical::allocate(), flags);
+    return Memory::Virtual::map(v, Memory::Physical::allocate(), flags);
 }
 
 bool map_range(addr_t v, addr_t p, size_t size, int flags)
@@ -53,28 +42,16 @@ bool map_range(addr_t v, size_t size, int flags)
     return true;
 }
 
-bool protect(addr_t v, int flags)
-{
-    v = Memory::Virtual::align_down(v);
-    return Memory::Virtual::arch_protect(v, flags);
-}
-
 bool protect_range(addr_t v, size_t size, int flags)
 {
     v = Memory::Virtual::align_down(v);
     size = Memory::Virtual::align_up(size);
     for (addr_t i = 0; i < size; i += PAGE_SIZE) {
-        if (!Memory::Virtual::arch_protect(v + i, flags)) {
+        if (!Memory::Virtual::protect(v + i, flags)) {
             return false;
         }
     }
     return true;
-}
-
-bool unmap(addr_t v)
-{
-    v = Memory::Virtual::align_down(v);
-    return Memory::Virtual::arch_unmap(v);
 }
 
 bool unmap_range(addr_t v, size_t size)
@@ -82,22 +59,11 @@ bool unmap_range(addr_t v, size_t size)
     v = Memory::Virtual::align_down(v);
     size = Memory::Virtual::align_up(size);
     for (addr_t i = 0; i < size; i += PAGE_SIZE) {
-        if (!Memory::Virtual::arch_unmap(v + i)) {
+        if (!Memory::Virtual::unmap(v + i)) {
             return false;
         }
     }
     return true;
-}
-
-bool test(addr_t v)
-{
-    v = Memory::Virtual::align_down(v);
-    return Memory::Virtual::arch_test(v);
-}
-
-addr_t fork()
-{
-    return arch_fork();
 }
 
 addr_t get_address_space_root()

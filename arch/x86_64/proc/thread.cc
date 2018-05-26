@@ -126,8 +126,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.rip = entry;
     ctx.rdi = argc;
     ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
-    ctx.rdx = envc;
-    ctx.rcx = reinterpret_cast<uint64_t>(target_envp);
+    ctx.rdx = reinterpret_cast<uint64_t>(target_envp);
     ctx.cs = 0x20 | 3;
     ctx.ds = 0x18 | 3;
     ctx.ss = 0x18 | 3;
@@ -136,12 +135,12 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     return true;
 }
 
-void arch_set_stack(addr_t stack)
+void set_stack(addr_t stack)
 {
     CPU::X64::TSS::set_stack(stack);
 }
 
-addr_t arch_get_stack()
+addr_t get_stack()
 {
     return CPU::X64::TSS::get_stack();
 }

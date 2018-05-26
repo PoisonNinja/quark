@@ -74,13 +74,12 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                     reinterpret_cast<struct multiboot_tag_string *>(tag)
                         ->string;
                 break;
-            // case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-            //     Log::printk(
-            //         Log::INFO, "    Boot loader name = %s\n",
-            //         (reinterpret_cast<struct multiboot_tag_string
-            //         *>(tag))
-            //             ->string);
-            //     break;
+            case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
+                Log::printk(
+                    Log::INFO, "Booted by %s\n",
+                    (reinterpret_cast<struct multiboot_tag_string *>(tag))
+                        ->string);
+                break;
             case MULTIBOOT_TAG_TYPE_MODULE:
                 info.initrd_start =
                     (reinterpret_cast<struct multiboot_tag_module *>(tag))
@@ -89,61 +88,6 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                     (reinterpret_cast<struct multiboot_tag_module *>(tag))
                         ->mod_end;
                 break;
-                // case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-                //     Log::printk(
-                //         Log::INFO, "    Lower memory = %uKB, Upper memory
-                //         = %uKB\n", (reinterpret_cast<struct
-                //         multiboot_tag_basic_meminfo *>(
-                //              tag))
-                //             ->mem_lower,
-                //         (reinterpret_cast<struct
-                //         multiboot_tag_basic_meminfo
-                //         *>(
-                //              tag))
-                //             ->mem_upper);
-                //     break;
-                // case MULTIBOOT_TAG_TYPE_BOOTDEV:
-                //     Log::printk(
-                //         Log::INFO, "    Boot device 0x%x,%u,%u\n",
-                //         (reinterpret_cast<struct multiboot_tag_bootdev
-                //         *>(tag))
-                //             ->biosdev,
-                //         (reinterpret_cast<struct multiboot_tag_bootdev
-                //         *>(tag))
-                //             ->slice,
-                //         (reinterpret_cast<struct multiboot_tag_bootdev
-                //         *>(tag))
-                //             ->part);
-                //     break;
-                // case MULTIBOOT_TAG_TYPE_MMAP: {
-                //     multiboot_memory_map_t *mmap;
-                //     Log::printk(Log::INFO, "    Memory map:\n");
-                //     for (mmap = (reinterpret_cast<struct
-                //     multiboot_tag_mmap
-                //     *>(tag))
-                //                     ->entries;
-                //          reinterpret_cast<multiboot_uint8_t *>(mmap) <
-                //          reinterpret_cast<multiboot_uint8_t *>(tag) +
-                //          tag->size; mmap =
-                //          reinterpret_cast<multiboot_memory_map_t *>(
-                //              reinterpret_cast<addr_t>(mmap) +
-                //              (reinterpret_cast<struct multiboot_tag_mmap
-                //              *>(tag))
-                //                  ->entry_size))
-                //         Log::printk(Log::INFO,
-                //                     "        Base = 0x%08x%08x,"
-                //                     " Length = 0x%08x%08x, Type =
-                //                     0x%x\n",
-                //                     static_cast<addr_t>(mmap->addr >>
-                //                     32), static_cast<addr_t>(mmap->addr &
-                //                     0xffffffff),
-                //                     static_cast<addr_t>(mmap->len >> 32),
-                //                     static_cast<addr_t>(mmap->len &
-                //                     0xffffffff),
-                //                     static_cast<addr_t>(mmap->type));
-                // } break;
-                // default:
-                //     Log::printk(Log::INFO, "    Unknown/unhandled\n");
         }
     }
     CPU::X64::init();

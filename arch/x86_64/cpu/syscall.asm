@@ -31,7 +31,10 @@ continue:
     push r9
     push r10
     push r11
-    cmp qword [syscall_table + rax * 8], 0
+    cmp rax, 256                           ; Check if syscall # is valid index
+                                           ; TODO: Get 256 from header file
+    jge invalid_syscall
+    cmp qword [syscall_table + rax * 8], 0 ; Check if syscall exists
     je invalid_syscall
     call [syscall_table + rax * 8] ; Call the system call
 return:

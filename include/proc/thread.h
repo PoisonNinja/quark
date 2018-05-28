@@ -19,7 +19,6 @@ public:
     ~Thread();
     bool load(addr_t binary, int argc, const char *argv[], int envc,
               const char *envp[], struct ThreadContext &ctx);
-    void handle_signal(struct InterruptContext *ctx);
     void __attribute__((noreturn)) exit();
 
     tid_t tid;
@@ -31,7 +30,14 @@ public:
     Process *parent;
 
     // Signals
-    size_t sig_count;
+    size_t signal_count;
+    bool signal_required;
+    sigset_t signal_mask;
+    sigset_t signal_pending;
+
+    void handle_signal(struct InterruptContext *ctx);
+    bool send_signal(int signal);
+    void refresh_signal();
 };
 
 void save_context(struct InterruptContext *ctx,

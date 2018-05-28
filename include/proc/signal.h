@@ -1,5 +1,7 @@
 #pragma once
 
+#define NSIGS 32
+
 // Same as Linux
 #define SIGHUP 1
 #define SIGINT 2
@@ -33,15 +35,24 @@
 #define SIGIO 29
 #define SIGPWR 30
 #define SIGSYS 31
-#define SIGUNUSED 31
 
 #define SIG_ERR ((void (*)(int)) - 1)
 #define SIG_DFL ((void (*)(int))0)
 #define SIG_IGN ((void (*)(int))1)
+
+typedef struct {
+    uint8_t sigs[(NSIGS + 7) / 8];
+} sigset_t;
 
 struct InterruptContext;
 
 namespace Signal
 {
 void handle(struct InterruptContext* ctx);
-}
+
+int sigemptyset(sigset_t* set);
+int sigfillset(sigset_t* set);
+int sigaddset(sigset_t* set, int signum);
+int sigdelset(sigset_t* set, int signum);
+int sigismember(const sigset_t* set, int signum);
+}  // namespace Signal

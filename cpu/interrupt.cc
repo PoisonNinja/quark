@@ -2,13 +2,12 @@
 #include <drivers/irqchip/irqchip.h>
 #include <kernel.h>
 #include <proc/sched.h>
-#include <atomic>
+#include <proc/signal.h>
+#include <proc/thread.h>
 
 namespace Interrupt
 {
 static List<Interrupt::Handler, &Interrupt::Handler::node> handlers[max];
-
-static std::atomic<int> interrupt_depth(1);
 
 extern void arch_init();
 
@@ -32,9 +31,11 @@ void dispatch(int int_no, struct InterruptContext* ctx)
         if (is_exception(int_no)) {
             if (is_userspace(ctx)) {
                 Log::printk(Log::WARNING, "Exception from userspace\n");
+                Signal::handle(ctx);
+            } else {
+                dump(ctx);
+                Kernel::panic("Unhandled exception, system halted\n");
             }
-            dump(ctx);
-            Kernel::panic("Unhandled exception, system halted\n");
         }
     } else {
         for (auto& handler : handlers[int_no]) {

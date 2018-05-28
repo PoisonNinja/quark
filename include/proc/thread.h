@@ -3,6 +3,7 @@
 #include <arch/proc/registers.h>
 #include <lib/list.h>
 #include <mm/section.h>
+#include <proc/signal.h>
 #include <types.h>
 
 struct InterruptContext;
@@ -18,7 +19,9 @@ public:
     ~Thread();
     bool load(addr_t binary, int argc, const char *argv[], int envc,
               const char *envp[], struct ThreadContext &ctx);
+    void handle_signal(struct InterruptContext *ctx);
     void __attribute__((noreturn)) exit();
+
     tid_t tid;
     ThreadState state;
     struct ThreadContext cpu_ctx;  // Thread execution state
@@ -26,6 +29,9 @@ public:
     Node<Thread> process_node;
     Node<Thread> scheduler_node;
     Process *parent;
+
+    // Signals
+    size_t sig_count;
 };
 
 void save_context(struct InterruptContext *ctx,

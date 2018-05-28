@@ -34,3 +34,14 @@
 #define SIGPWR 30
 #define SIGSYS 31
 #define SIGUNUSED 31
+
+#define SIG_ERR ((void (*)(int)) - 1)
+#define SIG_DFL ((void (*)(int))0)
+#define SIG_IGN ((void (*)(int))1)
+
+struct InterruptContext;
+
+namespace Signal
+{
+void handle(struct InterruptContext* ctx);
+}

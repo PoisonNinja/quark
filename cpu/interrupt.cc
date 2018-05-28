@@ -1,6 +1,7 @@
 #include <cpu/interrupt.h>
 #include <drivers/irqchip/irqchip.h>
 #include <kernel.h>
+#include <proc/sched.h>
 #include <atomic>
 
 namespace Interrupt
@@ -29,6 +30,9 @@ void dispatch(int int_no, struct InterruptContext* ctx)
 {
     if (handlers[int_no].empty()) {
         if (is_exception(int_no)) {
+            if (is_userspace(ctx)) {
+                Log::printk(Log::WARNING, "Exception from userspace\n");
+            }
             dump(ctx);
             Kernel::panic("Unhandled exception, system halted\n");
         }

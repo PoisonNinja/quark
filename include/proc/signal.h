@@ -44,11 +44,38 @@ typedef struct {
     uint8_t sigs[(NSIGS + 7) / 8];
 } sigset_t;
 
+union sigval {       /* Data passed with notification */
+    int sival_int;   /* Integer value */
+    void* sival_ptr; /* Pointer value */
+};
+
+typedef struct {
+    union sigval si_value;
+    void* si_addr;
+    pid_t si_pid;
+    uid_t si_uid;
+    int si_signo;
+    int si_code;
+    int si_errno;
+    int si_status;
+} siginfo_t;
+
+struct sigaction {
+    union {
+        void (*sa_handler)(int);
+        void (*sa_sigaction)(int, siginfo_t*, void*);
+    };
+    sigset_t sa_mask;
+    int sa_flags;
+};
+
 struct InterruptContext;
 
 namespace Signal
 {
 void handle(struct InterruptContext* ctx);
+
+int select_signal(sigset_t* set);
 
 int sigemptyset(sigset_t* set);
 int sigfillset(sigset_t* set);

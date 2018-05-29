@@ -32,6 +32,8 @@ public:
 
     Node<Process> child_node;
 
+    struct sigaction signal_actions[NSIGS];
+
 private:
     Ref<Filesystem::Descriptor> cwd;
     Ref<Filesystem::Descriptor> root;

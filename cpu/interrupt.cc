@@ -31,7 +31,8 @@ void dispatch(int int_no, struct InterruptContext* ctx)
         if (is_exception(int_no)) {
             if (is_userspace(ctx)) {
                 Log::printk(Log::WARNING, "Exception from userspace\n");
-                Signal::handle(ctx);
+                Scheduler::get_current_thread()->send_signal(SIGSEGV);
+                return Scheduler::get_current_thread()->handle_signal(ctx);
             } else {
                 dump(ctx);
                 Kernel::panic("Unhandled exception, system halted\n");

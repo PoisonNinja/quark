@@ -9,6 +9,7 @@ Thread::Thread(Process* p)
     parent->add_thread(this);
     this->signal_count = 0;
     this->signal_required = false;
+    Signal::sigemptyset(&this->signal_pending);
 }
 
 Thread::~Thread()

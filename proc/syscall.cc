@@ -138,6 +138,19 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
     }
 }
 
+static int sys_sigaction(int signum, struct sigaction* act,
+                         struct sigaction* oldact)
+{
+    Log::printk(Log::DEBUG, "[sys_sigaction]: %d %p %p\n", signum, act, oldact);
+    Process* current = Scheduler::get_current_process();
+    if (oldact) {
+        String::memcpy(oldact, &current->signal_actions[signum],
+                       sizeof(*oldact));
+    }
+    String::memcpy(&current->signal_actions[signum], act, sizeof(*act));
+    return 0;
+}
+
 static pid_t sys_getpid()
 {
     // Return process ID not thread ID
@@ -252,9 +265,10 @@ void init()
     syscall_table[SYS_fstat] = reinterpret_cast<void*>(sys_fstat);
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
+    syscall_table[SYS_sigaction] = reinterpret_cast<void*>(sys_sigaction);
     syscall_table[SYS_getpid] = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
 }
-}
+}  // namespace Syscall

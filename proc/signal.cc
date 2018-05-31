@@ -7,14 +7,23 @@
 void Thread::handle_signal(struct InterruptContext* ctx)
 {
     int signum = Signal::select_signal(&this->signal_pending);
+    Log::printk(Log::DEBUG, "[signal]: Selecting signal %d\n", signum);
+
     // The signal is handled
     Signal::sigdelset(&this->signal_pending, signum);
-    if (signum == SIGKILL) {
-        this->exit();
-    }
+
     struct ThreadContext temp_state;
     save_context(ctx, &temp_state);
-    temp_state.rip = 0x1000;
+
+    struct sigaction* action = &this->parent->signal_actions[signum];
+
+    // Figure out what our action is
+    // TODO: Handle SIGSTOP, SIGCONT
+    if (action->sa_handler == SIG_DFL) {
+        Log::printk(Log::DEBUG, "[signal]: SIG_DFL, killing\n");
+        this->exit();
+    }
+
     load_context(ctx, &temp_state);
     return;
 }

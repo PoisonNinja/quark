@@ -10,6 +10,10 @@ Process::Process(Process* parent)
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
     this->sections = new Memory::SectionManager(USER_START, USER_END);
+    for (int i = 1; i < NSIGS; i++) {
+        this->signal_actions[i].sa_handler = SIG_DFL;
+        this->signal_actions[i].sa_flags = 0;
+    }
 }
 
 Process::~Process()

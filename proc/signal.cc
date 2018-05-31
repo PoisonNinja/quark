@@ -1,8 +1,14 @@
+#include <arch/cpu/registers.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <proc/sched.h>
 #include <proc/signal.h>
 #include <proc/thread.h>
+
+struct stack_frame {
+    uint64_t ret_location;
+    InterruptContext ctx;
+};
 
 void Thread::handle_signal(struct InterruptContext* ctx)
 {
@@ -12,9 +18,6 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     // The signal is handled
     Signal::sigdelset(&this->signal_pending, signum);
 
-    struct ThreadContext temp_state;
-    save_context(ctx, &temp_state);
-
     struct sigaction* action = &this->parent->signal_actions[signum];
 
     // Figure out what our action is
@@ -23,6 +26,35 @@ void Thread::handle_signal(struct InterruptContext* ctx)
         Log::printk(Log::DEBUG, "[signal]: SIG_DFL, killing\n");
         this->exit();
     }
+
+    Log::printk(Log::DEBUG, "[signal] Has a sa_handler, calling\n");
+
+    struct ThreadContext temp_state, original_state;
+    save_context(ctx, &temp_state);
+    save_context(ctx, &original_state);
+
+    // KLUDGE! TODO: Make this architecture independent
+    // Construct a stack return frame
+
+    temp_state.rsp -= 128;
+    temp_state.rsp -= sizeof(struct stack_frame);
+    temp_state.rsp &= ~(16UL - 1UL);
+    struct stack_frame* frame = (struct stack_frame*)temp_state.rsp;
+
+    // KLUDGE! TODO: Remove this
+    // Skip the broken instruction
+    ctx->rip += 2;
+    String::memcpy(&frame->ctx, ctx, sizeof(*ctx));
+    frame->ret_location = this->parent->sigreturn;
+
+    Log::printk(Log::INFO, "Going to return to gadget at %p\n",
+                frame->ret_location);
+    Log::printk(Log::INFO, "Frame at %p\n", frame);
+
+    temp_state.rip = (uint64_t)action->sa_handler;
+    temp_state.rdi = signum;
+    temp_state.rsi = 0;
+    temp_state.rsp = (uint64_t)frame;
 
     load_context(ctx, &temp_state);
     return;

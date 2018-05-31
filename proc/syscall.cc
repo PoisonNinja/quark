@@ -151,6 +151,14 @@ static int sys_sigaction(int signum, struct sigaction* act,
     return 0;
 }
 
+static void sys_sigreturn(InterruptContext* ctx)
+{
+    Log::printk(Log::DEBUG, "[sys_return] %p\n", ctx);
+    struct ThreadContext tctx;
+    save_context(ctx, &tctx);
+    load_registers(tctx);
+}
+
 static pid_t sys_getpid()
 {
     // Return process ID not thread ID
@@ -266,6 +274,7 @@ void init()
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_sigaction] = reinterpret_cast<void*>(sys_sigaction);
+    syscall_table[SYS_sigreturn] = reinterpret_cast<void*>(sys_sigreturn);
     syscall_table[SYS_getpid] = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);

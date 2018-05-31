@@ -81,7 +81,7 @@ int sigaddset(sigset_t* set, int signum)
     if (signum <= 0 || signum > NSIGS) {
         return -1;
     }
-    set->sigs[signum % 8] |= (1 << signum & 8);
+    set->sigs[signum / 8] |= (1 << signum % 8);
     return 0;
 }
 
@@ -90,7 +90,7 @@ int sigdelset(sigset_t* set, int signum)
     if (signum <= 0 || signum > NSIGS) {
         return -1;
     }
-    set->sigs[signum % 8] &= ~(1 << signum & 8);
+    set->sigs[signum / 8] &= ~(1 << signum % 8);
     return 0;
 }
 
@@ -99,6 +99,6 @@ int sigismember(const sigset_t* set, int signum)
     if (signum <= 0 || signum > NSIGS) {
         return -1;
     }
-    return (set->sigs[signum % 8] & (1 << signum & 8)) ? 1 : 0;
+    return (set->sigs[signum / 8] & (1 << signum % 8)) ? 1 : 0;
 }
 }  // namespace Signal

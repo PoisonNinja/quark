@@ -34,6 +34,8 @@ public:
 
     struct sigaction signal_actions[NSIGS];
 
+    addr_t sigreturn;
+
 private:
     Ref<Filesystem::Descriptor> cwd;
     Ref<Filesystem::Descriptor> root;

@@ -40,9 +40,7 @@
 #define SIG_DFL ((void (*)(int))0)
 #define SIG_IGN ((void (*)(int))1)
 
-typedef struct {
-    uint8_t sigs[(NSIGS + 7) / 8];
-} sigset_t;
+typedef uint32_t sigset_t;
 
 union sigval {       /* Data passed with notification */
     int sival_int;   /* Integer value */

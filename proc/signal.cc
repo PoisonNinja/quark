@@ -66,13 +66,13 @@ int select_signal(sigset_t* set)
 
 int sigemptyset(sigset_t* set)
 {
-    String::memset(set, 0, sizeof(*set));
+    *set = 0;
     return 0;
 }
 
 int sigfillset(sigset_t* set)
 {
-    String::memset(set, 0xFFFF, sizeof(*set));
+    *set = 0xFFFFFFFF;
     return 0;
 }
 
@@ -81,7 +81,7 @@ int sigaddset(sigset_t* set, int signum)
     if (signum <= 0 || signum > NSIGS) {
         return -1;
     }
-    set->sigs[signum / 8] |= (1 << signum % 8);
+    *set |= (1 << signum);
     return 0;
 }
 
@@ -90,7 +90,7 @@ int sigdelset(sigset_t* set, int signum)
     if (signum <= 0 || signum > NSIGS) {
         return -1;
     }
-    set->sigs[signum / 8] &= ~(1 << signum % 8);
+    *set &= ~(1 << signum);
     return 0;
 }
 
@@ -99,6 +99,6 @@ int sigismember(const sigset_t* set, int signum)
     if (signum <= 0 || signum > NSIGS) {
         return -1;
     }
-    return (set->sigs[signum / 8] & (1 << signum % 8)) ? 1 : 0;
+    return (*set & (1 << signum)) ? 1 : 0;
 }
 }  // namespace Signal

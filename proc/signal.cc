@@ -41,9 +41,6 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     temp_state.rsp &= ~(16UL - 1UL);
     struct stack_frame* frame = (struct stack_frame*)temp_state.rsp;
 
-    // KLUDGE! TODO: Remove this
-    // Skip the broken instruction
-    ctx->rip += 2;
     String::memcpy(&frame->ctx, ctx, sizeof(*ctx));
     frame->ret_location = this->parent->sigreturn;
 

@@ -234,6 +234,18 @@ static void sys_exit(int val)
     Scheduler::get_current_thread()->exit();
 }
 
+static int sys_kill(pid_t pid, int signum)
+{
+    Log::printk(Log::DEBUG, "[sys_kill] %u %d\n", pid, signum);
+    Process* process = Scheduler::find_process(pid);
+    if (!process) {
+        return -ESRCH;
+    }
+    Log::printk(Log::DEBUG, "Found process at %p\n", process);
+    process->send_signal(signum);
+    return 0;
+}
+
 #ifndef X86_64
 static void syscall_handler(int, void*, struct InterruptContext* ctx)
 {
@@ -279,5 +291,6 @@ void init()
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
+    syscall_table[SYS_kill] = reinterpret_cast<void*>(sys_kill);
 }
 }  // namespace Syscall

@@ -32,6 +32,7 @@ public:
 
     Node<Process> child_node;
 
+    void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];
 
     addr_t sigreturn;

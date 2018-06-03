@@ -102,3 +102,11 @@ void Process::exit()
     Scheduler::remove_process(this->pid);
     delete this->sections;
 }
+
+void Process::send_signal(int signum)
+{
+    // TODO: Broadcast SIGSTOP, SIGCONT, certain signals to all threads
+    // TODO: Randomly select a thread instead of the default (or maybe a
+    // heuristic?)
+    this->threads.front().send_signal(signum);
+}

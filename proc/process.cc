@@ -81,6 +81,7 @@ void Process::remove_thread(Thread* thread)
 Process* Process::fork()
 {
     Process* child = new Process(this);
+    Scheduler::add_process(child);
     this->children.push_back(*child);
     addr_t cloned = Memory::Virtual::fork();
     child->set_dtable(
@@ -98,5 +99,6 @@ void Process::exit()
         Memory::Virtual::unmap_range(section.start(), section.end());
     }
     Memory::Physical::free(this->address_space);
+    Scheduler::remove_process(this->pid);
     delete this->sections;
 }

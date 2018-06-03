@@ -19,7 +19,7 @@ public:
     ~Thread();
     bool load(addr_t binary, int argc, const char *argv[], int envc,
               const char *envp[], struct ThreadContext &ctx);
-    void __attribute__((noreturn)) exit();
+    void exit();
 
     tid_t tid;
     ThreadState state;

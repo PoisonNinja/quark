@@ -31,6 +31,7 @@ continue:
     push r9
     push r10
     push r11
+    mov rcx, r10
     cmp rax, 256                           ; Check if syscall # is valid index
                                            ; TODO: Get 256 from header file
     jge invalid_syscall

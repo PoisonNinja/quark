@@ -13,10 +13,14 @@ struct stack_frame {
 void Thread::handle_signal(struct InterruptContext* ctx)
 {
     int signum = Signal::select_signal(&this->signal_pending);
+    if (!signum) {
+        return;
+    }
     Log::printk(Log::DEBUG, "[signal]: Selecting signal %d\n", signum);
 
     // The signal is handled
     Signal::sigdelset(&this->signal_pending, signum);
+    this->refresh_signal();
 
     struct sigaction* action = &this->parent->signal_actions[signum];
 

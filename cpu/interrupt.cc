@@ -29,13 +29,13 @@ void dispatch(int int_no, struct InterruptContext* ctx)
 {
     if (handlers[int_no].empty()) {
         if (is_exception(int_no)) {
+            dump(ctx);
             if (is_userspace(ctx)) {
                 Log::printk(Log::WARNING, "Exception from userspace, %p %d\n",
                             ctx->rip, ctx->int_no);
                 Scheduler::get_current_thread()->send_signal(SIGSEGV);
                 return Scheduler::get_current_thread()->handle_signal(ctx);
             } else {
-                dump(ctx);
                 Kernel::panic("Unhandled exception, system halted\n");
             }
         }

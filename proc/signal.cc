@@ -66,12 +66,13 @@ bool Thread::send_signal(int signum)
     // TODO: Check if signal is pending already and return ESIGPENDING
     Signal::sigaddset(&this->signal_pending, signum);
     this->refresh_signal();
+    return true;
 }
 
 void Thread::refresh_signal()
 {
     // TODO: Actually check status of signals
-    this->signal_required = true;
+    this->signal_required = !Signal::sigisemptyset(&this->signal_pending);
 }
 
 namespace Signal
@@ -133,5 +134,20 @@ int sigismember(const sigset_t* set, int signum)
         return -1;
     }
     return (*set & (1 << signum)) ? 1 : 0;
+}
+
+bool sigisemptyset(sigset_t* set)
+{
+    return (*set) ? false : true;
+}
+
+bool sigandset(sigset_t* dest, sigset_t* source)
+{
+    *dest &= *source;
+}
+
+bool sigorset(sigset_t* dest, sigset_t* source)
+{
+    *dest |= *source;
 }
 }  // namespace Signal

@@ -75,9 +75,17 @@ void handle(struct InterruptContext* ctx);
 
 int select_signal(sigset_t* set);
 
+// Standard functions
 int sigemptyset(sigset_t* set);
 int sigfillset(sigset_t* set);
 int sigaddset(sigset_t* set, int signum);
 int sigdelset(sigset_t* set, int signum);
 int sigismember(const sigset_t* set, int signum);
+
+// Extensions
+bool sigisemptyset(sigset_t* set);
+// These two functions follow x86 assembly semantics where dest is modified
+bool sigandset(sigset_t* dest, sigset_t* source);
+bool sigorset(sigset_t* dest, sigset_t* source);
+
 }  // namespace Signal

@@ -151,6 +151,11 @@ static int sys_sigaction(int signum, struct sigaction* act,
     return 0;
 }
 
+static int sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
+{
+    Log::printk(Log::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set, oldset);
+}
+
 static void sys_sigreturn(InterruptContext* ctx)
 {
     Log::printk(Log::DEBUG, "[sys_return] %p\n", ctx);
@@ -286,6 +291,7 @@ void init()
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_sigaction] = reinterpret_cast<void*>(sys_sigaction);
+    syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
     syscall_table[SYS_sigreturn] = reinterpret_cast<void*>(sys_sigreturn);
     syscall_table[SYS_getpid] = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);

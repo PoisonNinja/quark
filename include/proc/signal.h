@@ -40,6 +40,10 @@
 #define SIG_DFL ((void (*)(int))0)
 #define SIG_IGN ((void (*)(int))1)
 
+#define SIG_SETMASK 0
+#define SIG_BLOCK 1
+#define SIG_UNBLOCK 2
+
 typedef uint32_t sigset_t;
 
 union sigval {       /* Data passed with notification */
@@ -85,7 +89,8 @@ int sigismember(const sigset_t* set, int signum);
 // Extensions
 bool sigisemptyset(sigset_t* set);
 // These two functions follow x86 assembly semantics where dest is modified
-bool sigandset(sigset_t* dest, sigset_t* source);
-bool sigorset(sigset_t* dest, sigset_t* source);
+void sigandset(sigset_t* dest, const sigset_t* source);
+void sigorset(sigset_t* dest, const sigset_t* source);
+void signotset(sigset_t* set);
 
 }  // namespace Signal

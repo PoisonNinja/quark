@@ -141,13 +141,18 @@ bool sigisemptyset(sigset_t* set)
     return (*set) ? false : true;
 }
 
-bool sigandset(sigset_t* dest, sigset_t* source)
+void sigandset(sigset_t* dest, const sigset_t* source)
 {
     *dest &= *source;
 }
 
-bool sigorset(sigset_t* dest, sigset_t* source)
+void sigorset(sigset_t* dest, const sigset_t* source)
 {
     *dest |= *source;
+}
+
+void signotset(sigset_t* set)
+{
+    *set = ~*set;
 }
 }  // namespace Signal

@@ -154,6 +154,21 @@ static int sys_sigaction(int signum, struct sigaction* act,
 static int sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
 {
     Log::printk(Log::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set, oldset);
+    if (oldset) {
+        *oldset = Scheduler::get_current_thread()->signal_mask;
+    }
+    if (how == SIG_SETMASK) {
+        Scheduler::get_current_thread()->signal_mask = *set;
+    } else if (how == SIG_BLOCK) {
+        Signal::sigorset(&Scheduler::get_current_thread()->signal_mask, set);
+    } else if (how == SIG_UNBLOCK) {
+        sigset_t dup = *set;
+        Signal::signotset(&dup);
+        Signal::sigandset(&Scheduler::get_current_thread()->signal_mask, &dup);
+    } else {
+        return -EINVAL;
+    }
+    return 0;
 }
 
 static void sys_sigreturn(InterruptContext* ctx)

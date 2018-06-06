@@ -22,6 +22,7 @@ namespace Syscall
 #define SYS_execve 59
 #define SYS_exit 60
 #define SYS_kill 62
+#define SYS_sigpending 127
 
 /*
  * Certain architectures (x86_64) only support passing up to 5 arguments, while

@@ -266,6 +266,50 @@ static int sys_kill(pid_t pid, int signum)
     return 0;
 }
 
+static int sys_sigpending(sigset_t* set)
+{
+    if (!set) {
+        return -EFAULT;
+    }
+    sigset_t pending = Scheduler::get_current_thread()->signal_pending;
+    /*
+     * Signals that are both blocked and ignored are NOT added to the mask
+     * of pending signals.
+     *
+     * However, signals that are merely blocked will be added
+     */
+    sigset_t blocked_and_ignored;
+    // Get the list of blocked signals
+    Signal::sigorset(&blocked_and_ignored,
+                     &Scheduler::get_current_thread()->signal_mask);
+    // Remove signals that are NOT ignored
+    for (int i = 1; i < NSIGS; i++) {
+        // TODO: Also check if SIG_DFL is set but the default action is to
+        // ignore
+        if (Scheduler::get_current_process()->signal_actions[i].sa_handler !=
+            SIG_IGN) {
+            Signal::sigdelset(&blocked_and_ignored, i);
+        }
+    }
+    // Invert the set so that signals that are both blocked and ignored are
+    // unset
+    Signal::signotset(&blocked_and_ignored, &blocked_and_ignored);
+    // AND the two sets together to basically unset blocked and ignored
+    Signal::sigandset(&pending, &blocked_and_ignored);
+
+    *set = Scheduler::get_current_thread()->signal_pending;
+
+    /*
+     * TODO: Figure out what happens if a signal is handled right after this
+     * system call returns.
+     *
+     * System calls will check for pending signals before returning and will
+     * handle them before returning so it's possible that the set returned
+     * still has the bit set even though the signal is already handled.
+     */
+    return 0;
+}
+
 #ifndef X86_64
 static void syscall_handler(int, void*, struct InterruptContext* ctx)
 {
@@ -313,5 +357,6 @@ void init()
     syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
     syscall_table[SYS_kill] = reinterpret_cast<void*>(sys_kill);
+    syscall_table[SYS_sigpending] = reinterpret_cast<void*>(sys_sigpending);
 }
 }  // namespace Syscall

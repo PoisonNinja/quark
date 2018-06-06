@@ -10,9 +10,23 @@ struct stack_frame {
     InterruptContext ctx;
 };
 
+static sigset_t ignored_signals;
+static sigset_t stop_signals;
+static sigset_t unblockable_signals;
+
 void Thread::handle_signal(struct InterruptContext* ctx)
 {
-    int signum = Signal::select_signal(&this->signal_pending);
+    sigset_t unblocked_signals;
+    Signal::signotset(&unblocked_signals, &this->signal_mask);
+    // Ensure that SIGKILL and SIGSTOP are always unblocked
+    Signal::sigorset(&unblocked_signals, &unblockable_signals);
+
+    sigset_t deliverable_signals;
+    Signal::sigemptyset(&deliverable_signals);
+    Signal::sigorset(&deliverable_signals, &unblocked_signals);
+    Signal::sigandset(&deliverable_signals, &this->signal_pending);
+
+    int signum = Signal::select_signal(&deliverable_signals);
     if (!signum) {
         return;
     }
@@ -22,12 +36,38 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     Signal::sigdelset(&this->signal_pending, signum);
     this->refresh_signal();
 
+    if (signum == SIGKILL) {
+        Log::printk(Log::DEBUG, "[signal]: SIGKILL, killing\n");
+        this->exit();
+    }
+
     struct sigaction* action = &this->parent->signal_actions[signum];
 
-    // Figure out what our action is
-    // TODO: Handle SIGSTOP, SIGCONT
+    if (action->sa_handler == SIG_IGN) {
+        Log::printk(Log::DEBUG, "[signal]: SIG_IGN, returning\n");
+        return;
+    }
+
+    if ((Signal::sigismember(&stop_signals, signum) &&
+         action->sa_handler == SIG_DFL) ||
+        signum == SIGSTOP) {
+        Log::printk(Log::WARNING,
+                    "[signal]: SIG_DFL with SIGSTOP, you "
+                    "should probably implement it. Killing for now\n");
+        this->exit();
+    }
+
+    if (signum == SIGCONT) {
+        Log::printk(Log::WARNING,
+                    "[signal]: SIGCONT, you "
+                    "should probably implement it. Killing for now\n");
+        this->exit();
+    }
+
     if (action->sa_handler == SIG_DFL) {
-        Log::printk(Log::DEBUG, "[signal]: SIG_DFL, killing\n");
+        Log::printk(
+            Log::DEBUG,
+            "[signal]: SIG_DFL with default action of SIGKILl, killing\n");
         this->exit();
     }
 
@@ -63,6 +103,13 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
 bool Thread::send_signal(int signum)
 {
+    if (signum == 0) {
+        return false;
+    }
+
+    if (signum < 0 || signum >= NSIGS) {
+        return false;
+    }
     // TODO: Check if signal is pending already and return ESIGPENDING
     Signal::sigaddset(&this->signal_pending, signum);
     this->refresh_signal();
@@ -72,7 +119,20 @@ bool Thread::send_signal(int signum)
 void Thread::refresh_signal()
 {
     // TODO: Actually check status of signals
-    this->signal_required = !Signal::sigisemptyset(&this->signal_pending);
+    sigset_t possible;
+    Signal::sigemptyset(&possible);
+    Signal::sigorset(&possible, &signal_pending);
+
+    sigset_t unblocked_signals;
+    Signal::signotset(&unblocked_signals, &this->signal_mask);
+    // Ensure that SIGKILL and SIGSTOP are always unblocked
+    Signal::sigorset(&unblocked_signals, &unblockable_signals);
+
+    Signal::sigandset(&possible, &unblocked_signals);
+
+    // TODO: Extend heuristics to ignore actions that would result in the
+    // signal being ignored (e.g. SIG_DFL with default ignored or SIG_IGN)
+    this->signal_required = !Signal::sigisemptyset(&possible);
 }
 
 namespace Signal
@@ -112,7 +172,7 @@ int sigfillset(sigset_t* set)
 
 int sigaddset(sigset_t* set, int signum)
 {
-    if (signum <= 0 || signum > NSIGS) {
+    if (signum <= 0 || signum >= NSIGS) {
         return -1;
     }
     *set |= (1 << signum);
@@ -121,7 +181,7 @@ int sigaddset(sigset_t* set, int signum)
 
 int sigdelset(sigset_t* set, int signum)
 {
-    if (signum <= 0 || signum > NSIGS) {
+    if (signum <= 0 || signum >= NSIGS) {
         return -1;
     }
     *set &= ~(1 << signum);
@@ -130,7 +190,7 @@ int sigdelset(sigset_t* set, int signum)
 
 int sigismember(const sigset_t* set, int signum)
 {
-    if (signum <= 0 || signum > NSIGS) {
+    if (signum <= 0 || signum >= NSIGS) {
         return -1;
     }
     return (*set & (1 << signum)) ? 1 : 0;
@@ -151,8 +211,24 @@ void sigorset(sigset_t* dest, const sigset_t* source)
     *dest |= *source;
 }
 
-void signotset(sigset_t* set)
+void signotset(sigset_t* dest, const sigset_t* source)
 {
-    *set = ~*set;
+    *dest = ~*source;
+}
+
+void init()
+{
+    sigemptyset(&ignored_signals);
+    sigaddset(&ignored_signals, SIGCHLD);
+    sigaddset(&ignored_signals, SIGURG);
+    sigaddset(&ignored_signals, SIGPWR);
+    sigaddset(&ignored_signals, SIGWINCH);
+    sigemptyset(&stop_signals);
+    sigaddset(&stop_signals, SIGTSTP);
+    sigaddset(&stop_signals, SIGTTIN);
+    sigaddset(&stop_signals, SIGTTOU);
+    sigemptyset(&unblockable_signals);
+    sigaddset(&unblockable_signals, SIGKILL);
+    sigaddset(&unblockable_signals, SIGSTOP);
 }
 }  // namespace Signal

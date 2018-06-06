@@ -72,6 +72,7 @@ void kmain(struct Boot::info& info)
     Interrupt::enable();
     Time::init();
     Scheduler::init();
+    Signal::init();
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();

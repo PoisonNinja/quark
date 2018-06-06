@@ -91,6 +91,7 @@ bool sigisemptyset(sigset_t* set);
 // These two functions follow x86 assembly semantics where dest is modified
 void sigandset(sigset_t* dest, const sigset_t* source);
 void sigorset(sigset_t* dest, const sigset_t* source);
-void signotset(sigset_t* set);
+void signotset(sigset_t* dest, const sigset_t* source);
 
+void init();
 }  // namespace Signal

@@ -163,7 +163,7 @@ static int sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
         Signal::sigorset(&Scheduler::get_current_thread()->signal_mask, set);
     } else if (how == SIG_UNBLOCK) {
         sigset_t dup = *set;
-        Signal::signotset(&dup);
+        Signal::signotset(&dup, &dup);
         Signal::sigandset(&Scheduler::get_current_thread()->signal_mask, &dup);
     } else {
         return -EINVAL;

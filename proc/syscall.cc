@@ -297,7 +297,7 @@ static int sys_sigpending(sigset_t* set)
     // AND the two sets together to basically unset blocked and ignored
     Signal::sigandset(&pending, &blocked_and_ignored);
 
-    *set = Scheduler::get_current_thread()->signal_pending;
+    *set = pending;
 
     /*
      * TODO: Figure out what happens if a signal is handled right after this

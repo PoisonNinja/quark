@@ -1,14 +1,8 @@
-#include <arch/cpu/registers.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <proc/sched.h>
 #include <proc/signal.h>
 #include <proc/thread.h>
-
-struct stack_frame {
-    uint64_t ret_location;
-    InterruptContext ctx;
-};
 
 static sigset_t ignored_signals;
 static sigset_t stop_signals;
@@ -78,44 +72,24 @@ void Thread::handle_signal(struct InterruptContext* ctx)
         !(this->signal_stack.ss_flags & (SS_ONSTACK | SS_DISABLE));
     bool use_altstack = requested_altstack && usable_altstack;
 
-    addr_t stack_location;
-
     if (use_altstack) {
         Log::printk(Log::DEBUG, "[signal] Signal handler requests and has a "
                                 "valid alternate stack, using...\n");
         this->signal_stack.ss_flags |= SS_ONSTACK;
-        stack_location = reinterpret_cast<addr_t>(this->signal_stack.ss_sp) +
-                         this->signal_stack.ss_size;
-    } else {
-        stack_location = ctx->rsp;
     }
 
-    struct ThreadContext temp_state, original_state;
-    save_context(ctx, &temp_state);
+    struct ThreadContext new_state, original_state;
     save_context(ctx, &original_state);
 
-    // KLUDGE! TODO: Make this architecture independent
-    // Construct a stack return frame
+    struct ksignal ksig = {
+        .signum = signum,
+        .use_altstack = use_altstack,
+        .sa = action,
+    };
 
-    temp_state.rsp = stack_location;
-    temp_state.rsp -= 128;
-    temp_state.rsp -= sizeof(struct stack_frame);
-    temp_state.rsp &= ~(16UL - 1UL);
-    struct stack_frame* frame = (struct stack_frame*)temp_state.rsp;
+    this->setup_signal(&ksig, &original_state, &new_state);
 
-    String::memcpy(&frame->ctx, ctx, sizeof(*ctx));
-    frame->ret_location = this->parent->sigreturn;
-
-    Log::printk(Log::DEBUG, "Going to return to gadget at %p\n",
-                frame->ret_location);
-    Log::printk(Log::DEBUG, "Frame at %p\n", frame);
-
-    temp_state.rip = (uint64_t)action->sa_handler;
-    temp_state.rdi = signum;
-    temp_state.rsi = 0;
-    temp_state.rsp = (uint64_t)frame;
-
-    load_context(ctx, &temp_state);
+    load_context(ctx, &new_state);
     return;
 }
 

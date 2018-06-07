@@ -85,6 +85,12 @@ typedef struct {
     size_t ss_size; /* Number of bytes in stack */
 } stack_t;
 
+struct ksignal {
+    int signum;
+    bool use_altstack;
+    struct sigaction* sa;
+};
+
 struct InterruptContext;
 
 namespace Signal

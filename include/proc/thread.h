@@ -38,6 +38,11 @@ public:
 
     void handle_signal(struct InterruptContext *ctx);
     bool send_signal(int signal);
+
+private:
+    void setup_signal(struct ksignal *ksig,
+                      struct ThreadContext *original_state,
+                      struct ThreadContext *new_state);
     void refresh_signal();
 };
 

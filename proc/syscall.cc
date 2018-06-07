@@ -171,12 +171,10 @@ static int sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
     return 0;
 }
 
-static void sys_sigreturn(InterruptContext* ctx)
+static void sys_sigreturn(struct ThreadContext* ctx)
 {
     Log::printk(Log::DEBUG, "[sys_return] %p\n", ctx);
-    struct ThreadContext tctx;
-    save_context(ctx, &tctx);
-    load_registers(tctx);
+    load_registers(*ctx);
 }
 
 static pid_t sys_getpid()

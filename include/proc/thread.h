@@ -34,6 +34,7 @@ public:
     bool signal_required;
     sigset_t signal_mask;
     sigset_t signal_pending;
+    stack_t signal_stack;
 
     void handle_signal(struct InterruptContext *ctx);
     bool send_signal(int signal);

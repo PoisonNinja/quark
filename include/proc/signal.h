@@ -44,6 +44,14 @@
 #define SIG_BLOCK 1
 #define SIG_UNBLOCK 2
 
+#define SA_NOCLDSTOP 1
+#define SA_ONSTACK 8
+#define SA_RESETHAND 16
+#define SA_SIGINFO 128
+
+#define SS_ONSTACK 1
+#define SS_DISABLE 2
+
 typedef uint32_t sigset_t;
 
 union sigval {       /* Data passed with notification */
@@ -70,6 +78,12 @@ struct sigaction {
     sigset_t sa_mask;
     int sa_flags;
 };
+
+typedef struct {
+    void* ss_sp;    /* Base address of stack */
+    int ss_flags;   /* Flags */
+    size_t ss_size; /* Number of bytes in stack */
+} stack_t;
 
 struct InterruptContext;
 

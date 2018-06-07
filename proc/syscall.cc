@@ -310,6 +310,20 @@ static int sys_sigpending(sigset_t* set)
     return 0;
 }
 
+int sys_sigaltstack(const stack_t* ss, stack_t* oldss)
+{
+    Log::printk(Log::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
+    if (oldss) {
+        String::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
+                       sizeof(*oldss));
+    }
+    if (ss) {
+        String::memcpy(&Scheduler::get_current_thread()->signal_stack, ss,
+                       sizeof(*ss));
+    }
+    return 0;
+}
+
 #ifndef X86_64
 static void syscall_handler(int, void*, struct InterruptContext* ctx)
 {
@@ -358,5 +372,6 @@ void init()
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
     syscall_table[SYS_kill] = reinterpret_cast<void*>(sys_kill);
     syscall_table[SYS_sigpending] = reinterpret_cast<void*>(sys_sigpending);
+    syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
 }
 }  // namespace Syscall

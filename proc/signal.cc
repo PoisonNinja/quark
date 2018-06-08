@@ -81,10 +81,20 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     struct ThreadContext new_state, original_state;
     save_context(ctx, &original_state);
 
+    ucontext_t ucontext = {
+        .uc_link = nullptr,
+        .uc_sigmask = this->signal_mask,
+    };
+
+    String::memcpy(&ucontext.uc_stack, &this->signal_stack,
+                   sizeof(this->signal_stack));
+    Signal::encode_mcontext(&ucontext.uc_mcontext, &original_state);
+
     struct ksignal ksig = {
         .signum = signum,
         .use_altstack = use_altstack,
         .sa = action,
+        .ucontext = &ucontext,
     };
 
     this->setup_signal(&ksig, &original_state, &new_state);

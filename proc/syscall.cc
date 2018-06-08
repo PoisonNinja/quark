@@ -171,10 +171,19 @@ static int sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
     return 0;
 }
 
-static void sys_sigreturn(struct ThreadContext* ctx)
+static void sys_sigreturn(ucontext_t* uctx)
 {
-    Log::printk(Log::DEBUG, "[sys_return] %p\n", ctx);
-    load_registers(*ctx);
+    Log::printk(Log::DEBUG, "[sys_return] %p\n", uctx);
+    ThreadContext tctx;
+    /*
+     * The syscall handler saves the userspace context, so we copy it into
+     * tctx to get certain registers (DS, ES, SS) preloaded for us. The
+     * rest of the state will get overriden by the stored mcontext
+     */
+    String::memcpy(&tctx, &Scheduler::get_current_thread()->cpu_ctx,
+                   sizeof(tctx));
+    Signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
+    load_registers(tctx);
 }
 
 static pid_t sys_getpid()

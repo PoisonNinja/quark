@@ -1,5 +1,7 @@
 #pragma once
 
+#include <arch/proc/registers.h>
+
 #define NSIGS 32
 
 // Same as Linux
@@ -85,16 +87,31 @@ typedef struct {
     size_t ss_size; /* Number of bytes in stack */
 } stack_t;
 
+typedef struct {
+    gregset_t gregs;
+} mcontext_t;
+
+typedef struct ucontext {
+    struct ucontext* uc_link;
+    sigset_t uc_sigmask;
+    stack_t uc_stack;
+    mcontext_t uc_mcontext;
+} ucontext_t;
+
 struct ksignal {
     int signum;
     bool use_altstack;
     struct sigaction* sa;
+    ucontext_t* ucontext;
 };
 
 struct InterruptContext;
 
 namespace Signal
 {
+void encode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx);
+void decode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx);
+
 void handle(struct InterruptContext* ctx);
 
 int select_signal(sigset_t* set);

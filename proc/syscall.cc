@@ -350,6 +350,9 @@ static void syscall_handler(int, void*, struct InterruptContext* ctx)
         (uint32_t(*)(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
                      uint32_t e))syscall_table[ctx->eax];
     ctx->eax = func(ctx->ebx, ctx->ecx, ctx->edx, ctx->edi, ctx->esi);
+    if (Scheduler::get_current_thread()->signal_required) {
+        Scheduler::get_current_thread()->handle_signal(ctx);
+    }
 }
 
 static struct Interrupt::Handler syscall_handler_data(syscall_handler,

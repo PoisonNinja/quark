@@ -102,6 +102,7 @@ struct ksignal {
     int signum;
     bool use_altstack;
     struct sigaction* sa;
+    siginfo_t* siginfo;
     ucontext_t* ucontext;
 };
 

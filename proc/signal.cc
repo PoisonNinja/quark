@@ -81,6 +81,9 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     struct ThreadContext new_state, original_state;
     save_context(ctx, &original_state);
 
+    siginfo_t siginfo;
+    siginfo.si_signo = signum;
+
     ucontext_t ucontext = {
         .uc_link = nullptr,
         .uc_sigmask = this->signal_mask,
@@ -94,6 +97,7 @@ void Thread::handle_signal(struct InterruptContext* ctx)
         .signum = signum,
         .use_altstack = use_altstack,
         .sa = action,
+        .siginfo = &siginfo,
         .ucontext = &ucontext,
     };
 

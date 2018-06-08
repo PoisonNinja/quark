@@ -8,6 +8,7 @@
 struct stack_frame {
     uint64_t ret_location;
     ucontext_t ucontext;
+    siginfo_t siginfo;
 };
 
 void Thread::setup_signal(struct ksignal* ksig,
@@ -29,6 +30,7 @@ void Thread::setup_signal(struct ksignal* ksig,
     new_state->rsp &= ~(16UL - 1UL);
     struct stack_frame* frame = (struct stack_frame*)new_state->rsp;
 
+    String::memcpy(&frame->siginfo, ksig->siginfo, sizeof(frame->siginfo));
     String::memcpy(&frame->ucontext, ksig->ucontext, sizeof(frame->ucontext));
     frame->ret_location = this->parent->sigreturn;
 
@@ -38,7 +40,14 @@ void Thread::setup_signal(struct ksignal* ksig,
 
     new_state->rip = (uint64_t)ksig->sa->sa_handler;
     new_state->rdi = ksig->signum;
-    new_state->rsi = 0;
+
+    /*
+     * Technically SA_SIGINFO specifies this, but programmers make mistakes. To
+     * prevent them from getting segmentation faults we still pass these in
+     * as arguments regardless of whether SA_SIGINFO is used. Not POSIX
+     * compliant, but meh
+     */
+    new_state->rsi = (uint64_t)&frame->siginfo;
     new_state->rdx = (uint64_t)&frame->ucontext;
     new_state->rsp = (uint64_t)frame;
 }

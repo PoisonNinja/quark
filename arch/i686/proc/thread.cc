@@ -10,6 +10,9 @@
 #include <proc/process.h>
 #include <proc/thread.h>
 
+extern "C" void signal_return();
+void* signal_return_location = (void*)&signal_return;
+
 void save_context(struct InterruptContext* ctx,
                   struct ThreadContext* thread_ctx)
 {
@@ -61,6 +64,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     addr_t argv_zone;
     addr_t envp_zone;
     addr_t stack_zone;
+    addr_t sigreturn_zone;
     if (parent->sections->locate_range(argv_zone, USER_START, argv_size)) {
         Log::printk(Log::DEBUG, "argv located at %p\n", argv_zone);
         parent->sections->add_section(argv_zone, argv_size);
@@ -82,12 +86,31 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
         Log::printk(Log::ERROR, "Failed to locate stack\n");
         return false;
     }
+    if (parent->sections->locate_range(sigreturn_zone, USER_START, 0x1000)) {
+        Log::printk(Log::DEBUG, "Sigreturn page located at %p\n",
+                    sigreturn_zone);
+        parent->sections->add_section(sigreturn_zone, 0x1000);
+    } else {
+        Log::printk(Log::ERROR, "Failed to locate sigreturn page\n");
+        return false;
+    }
     Memory::Virtual::map_range(argv_zone, argv_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map_range(envp_zone, envp_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map_range(stack_zone, 0x1000,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
+    Memory::Virtual::map_range(sigreturn_zone, 0x1000,
+                               PAGE_USER | PAGE_WRITABLE);
+
+    this->parent->sigreturn = sigreturn_zone;
+
+    // Copy in sigreturn trampoline code
+    String::memcpy((void*)sigreturn_zone, signal_return_location, 0x1000);
+
+    // Make it unwritable
+    Memory::Virtual::protect(sigreturn_zone, PAGE_USER);
+
     char* target =
         reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
     char** target_argv = reinterpret_cast<char**>(argv_zone);

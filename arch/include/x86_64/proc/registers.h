@@ -27,7 +27,7 @@ struct ThreadContext {
 };
 
 typedef uint64_t greg_t;
-#define NGREG 23
+#define NGREG 20
 typedef greg_t gregset_t[NGREG];
 
 enum {

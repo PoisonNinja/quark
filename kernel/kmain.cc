@@ -52,6 +52,7 @@ void init_stage1()
 {
     addr_t cloned = Memory::Virtual::fork();
     Process* initp = new Process(nullptr);
+    Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());
     initp->set_cwd(Scheduler::get_current_process()->get_cwd());
     initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
@@ -71,6 +72,7 @@ void kmain(struct Boot::info& info)
     Interrupt::enable();
     Time::init();
     Scheduler::init();
+    Signal::init();
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();

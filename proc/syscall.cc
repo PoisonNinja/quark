@@ -1,5 +1,4 @@
 #include <arch/mm/layout.h>
-#include <cpu/interrupt.h>
 #include <errno.h>
 #include <fs/stat.h>
 #include <kernel.h>
@@ -138,6 +137,56 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
     }
 }
 
+static int sys_sigaction(int signum, struct sigaction* act,
+                         struct sigaction* oldact)
+{
+    Log::printk(Log::DEBUG, "[sys_sigaction]: %d %p %p\n", signum, act, oldact);
+    Process* current = Scheduler::get_current_process();
+    if (oldact) {
+        String::memcpy(oldact, &current->signal_actions[signum],
+                       sizeof(*oldact));
+    }
+    String::memcpy(&current->signal_actions[signum], act, sizeof(*act));
+    return 0;
+}
+
+static int sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
+{
+    Log::printk(Log::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set, oldset);
+    if (oldset) {
+        *oldset = Scheduler::get_current_thread()->signal_mask;
+    }
+    if (how == SIG_SETMASK) {
+        Scheduler::get_current_thread()->signal_mask = *set;
+    } else if (how == SIG_BLOCK) {
+        Signal::sigorset(&Scheduler::get_current_thread()->signal_mask, set);
+    } else if (how == SIG_UNBLOCK) {
+        sigset_t dup = *set;
+        Signal::signotset(&dup, &dup);
+        Signal::sigandset(&Scheduler::get_current_thread()->signal_mask, &dup);
+    } else {
+        return -EINVAL;
+    }
+    return 0;
+}
+
+static void sys_sigreturn(ucontext_t* uctx)
+{
+    Log::printk(Log::DEBUG, "[sys_return] %p\n", uctx);
+    ThreadContext tctx;
+    /*
+     * The syscall handler saves the userspace context, so we copy it into
+     * tctx to get certain registers (DS, ES, SS) preloaded for us. The
+     * rest of the state will get overriden by the stored mcontext
+     */
+    String::memcpy(&tctx, &Scheduler::get_current_thread()->cpu_ctx,
+                   sizeof(tctx));
+    // Restore signal mask
+    Scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
+    Signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
+    load_registers(tctx);
+}
+
 static pid_t sys_getpid()
 {
     // Return process ID not thread ID
@@ -213,37 +262,78 @@ static void sys_exit(int val)
     Scheduler::get_current_thread()->exit();
 }
 
-#ifndef X86_64
-static void syscall_handler(int, void*, struct InterruptContext* ctx)
+static int sys_kill(pid_t pid, int signum)
 {
-    save_context(ctx, &Scheduler::get_current_thread()->cpu_ctx);
-    Log::printk(Log::DEBUG,
-                "Received legacy system call %d from PID %d, %lX %lX %lX "
-                "%lX %lX\n",
-                ctx->eax, Scheduler::get_current_thread()->tid, ctx->ebx,
-                ctx->ecx, ctx->edx, ctx->edi, ctx->esi);
-    if (ctx->eax > 256 || !syscall_table[ctx->eax]) {
-        Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->eax);
-        ctx->eax = -ENOSYS;
-        return;
+    Log::printk(Log::DEBUG, "[sys_kill] %u %d\n", pid, signum);
+    Process* process = Scheduler::find_process(pid);
+    if (!process) {
+        return -ESRCH;
     }
-    uint32_t (*func)(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
-                     uint32_t e) =
-        (uint32_t(*)(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
-                     uint32_t e))syscall_table[ctx->eax];
-    ctx->eax = func(ctx->ebx, ctx->ecx, ctx->edx, ctx->edi, ctx->esi);
+    Log::printk(Log::DEBUG, "Found process at %p\n", process);
+    process->send_signal(signum);
+    return 0;
 }
 
-static struct Interrupt::Handler syscall_handler_data(syscall_handler,
-                                                      "syscall",
-                                                      &syscall_handler_data);
-#endif
+static int sys_sigpending(sigset_t* set)
+{
+    if (!set) {
+        return -EFAULT;
+    }
+    sigset_t pending = Scheduler::get_current_thread()->signal_pending;
+    /*
+     * Signals that are both blocked and ignored are NOT added to the mask
+     * of pending signals.
+     *
+     * However, signals that are merely blocked will be added
+     */
+    sigset_t blocked_and_ignored;
+    // Get the list of blocked signals
+    Signal::sigorset(&blocked_and_ignored,
+                     &Scheduler::get_current_thread()->signal_mask);
+    // Remove signals that are NOT ignored
+    for (int i = 1; i < NSIGS; i++) {
+        // TODO: Also check if SIG_DFL is set but the default action is to
+        // ignore
+        if (Scheduler::get_current_process()->signal_actions[i].sa_handler !=
+            SIG_IGN) {
+            Signal::sigdelset(&blocked_and_ignored, i);
+        }
+    }
+    // Invert the set so that signals that are both blocked and ignored are
+    // unset
+    Signal::signotset(&blocked_and_ignored, &blocked_and_ignored);
+    // AND the two sets together to basically unset blocked and ignored
+    Signal::sigandset(&pending, &blocked_and_ignored);
+
+    *set = pending;
+
+    /*
+     * TODO: Figure out what happens if a signal is handled right after this
+     * system call returns.
+     *
+     * System calls will check for pending signals before returning and will
+     * handle them before returning so it's possible that the set returned
+     * still has the bit set even though the signal is already handled.
+     */
+    return 0;
+}
+
+int sys_sigaltstack(const stack_t* ss, stack_t* oldss)
+{
+    Log::printk(Log::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
+    if (oldss) {
+        String::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
+                       sizeof(*oldss));
+    }
+    if (ss) {
+        String::memcpy(&Scheduler::get_current_thread()->signal_stack, ss,
+                       sizeof(*ss));
+    }
+    return 0;
+}
 
 void init()
 {
-#ifndef X86_64
-    Interrupt::register_handler(0x80, syscall_handler_data);
-#endif
     syscall_table[SYS_read] = reinterpret_cast<void*>(sys_read);
     syscall_table[SYS_write] = reinterpret_cast<void*>(sys_write);
     syscall_table[SYS_open] = reinterpret_cast<void*>(sys_open);
@@ -252,9 +342,15 @@ void init()
     syscall_table[SYS_fstat] = reinterpret_cast<void*>(sys_fstat);
     syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
+    syscall_table[SYS_sigaction] = reinterpret_cast<void*>(sys_sigaction);
+    syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
+    syscall_table[SYS_sigreturn] = reinterpret_cast<void*>(sys_sigreturn);
     syscall_table[SYS_getpid] = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
+    syscall_table[SYS_kill] = reinterpret_cast<void*>(sys_kill);
+    syscall_table[SYS_sigpending] = reinterpret_cast<void*>(sys_sigpending);
+    syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
 }
-}
+}  // namespace Syscall

@@ -4,6 +4,7 @@
 #include <lib/list.h>
 #include <lib/string.h>
 #include <mm/virtual.h>
+#include <proc/ptable.h>
 #include <proc/sched.h>
 
 namespace Scheduler
@@ -12,6 +13,8 @@ static class List<Thread, &Thread::scheduler_node> runnable;
 static Thread* current_thread;
 static Process* kernel_process;
 static Thread* kidle;
+
+static PTable ptable;
 
 static bool _online = false;
 
@@ -127,5 +130,20 @@ Thread* get_current_thread()
 bool online()
 {
     return _online;
+}
+
+bool add_process(Process* process)
+{
+    return ptable.add(process);
+}
+
+Process* find_process(pid_t pid)
+{
+    return ptable.get(pid);
+}
+
+bool remove_process(pid_t pid)
+{
+    return ptable.remove(pid);
 }
 }  // namespace Scheduler

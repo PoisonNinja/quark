@@ -14,10 +14,16 @@ namespace Syscall
 #define SYS_mmap 9
 #define SYS_mprotect 10
 #define SYS_munmap 11
+#define SYS_sigaction 13
+#define SYS_sigprocmask 14
+#define SYS_sigreturn 15
 #define SYS_getpid 39
 #define SYS_fork 57
 #define SYS_execve 59
 #define SYS_exit 60
+#define SYS_kill 62
+#define SYS_sigpending 127
+#define SYS_sigaltstack 131
 
 /*
  * Certain architectures (x86_64) only support passing up to 5 arguments, while
@@ -36,4 +42,4 @@ struct mmap_wrapper {
 void syscall_sysret_handler(int number, uint64_t a, uint64_t b, uint64_t c,
                             uint64_t d, uint64_t e);
 void init();
-}
+}  // namespace Syscall

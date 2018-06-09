@@ -1,13 +1,13 @@
 #include <cpu/interrupt.h>
 #include <drivers/irqchip/irqchip.h>
 #include <kernel.h>
-#include <atomic>
+#include <proc/sched.h>
+#include <proc/signal.h>
+#include <proc/thread.h>
 
 namespace Interrupt
 {
 static List<Interrupt::Handler, &Interrupt::Handler::node> handlers[max];
-
-static std::atomic<int> interrupt_depth(1);
 
 extern void arch_init();
 
@@ -30,7 +30,12 @@ void dispatch(int int_no, struct InterruptContext* ctx)
     if (handlers[int_no].empty()) {
         if (is_exception(int_no)) {
             dump(ctx);
-            Kernel::panic("Unhandled exception, system halted\n");
+            if (is_userspace(ctx)) {
+                Scheduler::get_current_thread()->send_signal(SIGSEGV);
+                return Scheduler::get_current_thread()->handle_signal(ctx);
+            } else {
+                Kernel::panic("Unhandled exception, system halted\n");
+            }
         }
     } else {
         for (auto& handler : handlers[int_no]) {
@@ -39,6 +44,11 @@ void dispatch(int int_no, struct InterruptContext* ctx)
     }
     if (!is_exception(int_no)) {
         IrqChip::ack(Interrupt::interrupt_to_irq(int_no));
+    }
+    if (Scheduler::online()) {
+        if (Scheduler::get_current_thread()->signal_required) {
+            Scheduler::get_current_thread()->handle_signal(ctx);
+        }
     }
 }
 

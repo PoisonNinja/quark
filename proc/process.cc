@@ -10,6 +10,10 @@ Process::Process(Process* parent)
     this->parent = parent;
     this->pid = Scheduler::get_free_pid();
     this->sections = new Memory::SectionManager(USER_START, USER_END);
+    for (int i = 1; i < NSIGS; i++) {
+        this->signal_actions[i].sa_handler = SIG_DFL;
+        this->signal_actions[i].sa_flags = 0;
+    }
 }
 
 Process::~Process()
@@ -77,6 +81,7 @@ void Process::remove_thread(Thread* thread)
 Process* Process::fork()
 {
     Process* child = new Process(this);
+    Scheduler::add_process(child);
     this->children.push_back(*child);
     addr_t cloned = Memory::Virtual::fork();
     child->set_dtable(
@@ -94,5 +99,14 @@ void Process::exit()
         Memory::Virtual::unmap_range(section.start(), section.end());
     }
     Memory::Physical::free(this->address_space);
+    Scheduler::remove_process(this->pid);
     delete this->sections;
+}
+
+void Process::send_signal(int signum)
+{
+    // TODO: Broadcast SIGSTOP, SIGCONT, certain signals to all threads
+    // TODO: Randomly select a thread instead of the default (or maybe a
+    // heuristic?)
+    this->threads.front().send_signal(signum);
 }

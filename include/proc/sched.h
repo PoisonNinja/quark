@@ -21,4 +21,8 @@ Thread* get_current_thread();
 pid_t get_free_pid();
 
 bool online();
-};
+
+bool add_process(Process* process);
+Process* find_process(pid_t pid);
+bool remove_process(pid_t pid);
+};  // namespace Scheduler

@@ -43,6 +43,11 @@ bool interrupts_enabled(void)
     return eflags & (1 << 9);
 }
 
+bool is_userspace(struct InterruptContext* ctx)
+{
+    return (ctx->cs == 0x23);
+}
+
 bool is_exception(int int_no)
 {
     if (int_no < 32) {

@@ -2,6 +2,7 @@
 #include <arch/cpu/feature.h>
 #include <arch/cpu/gdt.h>
 #include <arch/cpu/idt.h>
+#include <arch/cpu/syscall.h>
 #include <kernel.h>
 
 namespace CPU
@@ -17,6 +18,7 @@ void init()
     CPU::X86::print(bsp);
     GDT::init();
     IDT::init();
+    CPU::X86::init_syscalls();
 }
 }  // namespace X86
 

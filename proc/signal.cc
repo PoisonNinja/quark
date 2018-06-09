@@ -101,6 +101,11 @@ void Thread::handle_signal(struct InterruptContext* ctx)
         .ucontext = &ucontext,
     };
 
+    // Mask out current signal if SA_NODEFER is not passed in
+    if (!(action->sa_flags & SA_NODEFER)) {
+        Signal::sigaddset(&this->signal_mask, signum);
+    }
+
     this->setup_signal(&ksig, &original_state, &new_state);
 
     load_context(ctx, &new_state);

@@ -182,6 +182,8 @@ static void sys_sigreturn(ucontext_t* uctx)
      */
     String::memcpy(&tctx, &Scheduler::get_current_thread()->cpu_ctx,
                    sizeof(tctx));
+    // Restore signal mask
+    Scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
     Signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
     load_registers(tctx);
 }

@@ -155,7 +155,7 @@ addr_t get_stack()
     return CPU::X86::TSS::get_stack();
 }
 
-void set_thread_base(Thread* thread)
+void set_thread_base(Thread* /**/)
 {
 }
 

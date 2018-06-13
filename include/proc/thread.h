@@ -17,8 +17,6 @@ class Thread
 public:
     Thread(Process *p);
     ~Thread();
-    bool load(addr_t binary, int argc, const char *argv[], int envc,
-              const char *envp[], struct ThreadContext &ctx);
     void exit();
 
     tid_t tid;

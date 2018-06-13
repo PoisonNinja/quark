@@ -247,8 +247,8 @@ static int sys_execve(const char* path, const char* old_argv[],
     file->read(raw, st.st_size);
     Scheduler::get_current_process()->sections->reset();
     struct ThreadContext ctx;
-    if (!Scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
-                                               argc, argv, envc, envp, ctx)) {
+    if (!Scheduler::get_current_process()->load(reinterpret_cast<addr_t>(raw),
+                                                argc, argv, envc, envp, ctx)) {
         Log::printk(Log::ERROR, "Failed to load thread state\n");
     }
     delete[] raw;

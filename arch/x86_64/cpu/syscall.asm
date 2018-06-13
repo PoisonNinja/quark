@@ -4,12 +4,12 @@ extern syscall_trampoline
 global syscall_sysret_wrapper
 syscall_sysret_wrapper:
     swapgs              ; Thread struct is saved in KernelGSBase, swap it into GS
-    mov [gs:88], rsp    ; Save user RSP into thread->cpu_ctx.rsp
-    mov rsp, [gs:176]   ; Load kernel RSP from thread->kernel_stack.
+    mov [gs:104], rsp    ; Save user RSP into thread->cpu_ctx.rsp
+    mov rsp, [gs:192]   ; Load kernel RSP from thread->kernel_stack.
 
     ; Build a simulated interrupt frame
     push qword 0x1B ; SS
-    push qword [gs:88] ; User RSP
+    push qword [gs:104] ; User RSP
     push r11  ; RFLAGS
     push qword 0x23 ; CS
     push rcx  ; RIP

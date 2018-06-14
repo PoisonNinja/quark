@@ -24,9 +24,6 @@ public:
     Ref<Filesystem::Descriptor> get_root();
     Ref<Filesystem::DTable> get_dtable();
 
-    bool load(addr_t binary, int argc, const char* argv[], int envc,
-              const char* envp[], struct ThreadContext& ctx);
-
     void exit();
 
     Process* fork();

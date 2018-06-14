@@ -1,3 +1,4 @@
+%include "common.inc"
 
 extern syscall_trampoline
 
@@ -17,21 +18,7 @@ syscall_sysret_wrapper:
     push qword 0 ; Error code
     push qword 0 ; Interrupt number
 
-    push rax
-    push rbx
-    push rcx
-    push rdx
-    push rbp
-    push rdi
-    push rsi
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
+    PUSHA
 
     push qword 0x1B ; DS
 
@@ -46,21 +33,7 @@ syscall_sysret_wrapper:
 
     pop r15 ; DS
 
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop rax ; Skip R11 (RFLAGS)
-    pop r10
-    pop r9
-    pop r8
-    pop rsi
-    pop rdi
-    pop rbp
-    pop rdx
-    pop rax ; Skip RCX (Return RIP)
-    pop rbx
-    pop rax
+    POPA
 
     add rsp, 16 ; Skip the rest of the IRET frame
     pop rcx     ; RIP

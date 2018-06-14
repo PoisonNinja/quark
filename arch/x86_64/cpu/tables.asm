@@ -52,19 +52,19 @@ gs_load:
     push r14      ;save current r14
     push r15      ;save current r15
 
-    xor rbp, rbp
-    mov bp, ds
-    push rbp
+    xor rax, rax
+    mov ax, ds
+    push rax
 
-    mov bp, 0x10
-    mov ds, bp
-    mov es, bp
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
 %endmacro
 
 %macro POPA 0
-    pop rbp
-    mov ds, bp
-    mov es, bp
+    pop rax
+    mov ds, ax
+    mov es, ax
 
     pop r15      ;restore current r15
     pop r14      ;restore current r14

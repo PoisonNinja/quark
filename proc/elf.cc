@@ -1,3 +1,4 @@
+#include <arch/mm/layout.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/physical.h>
@@ -22,7 +23,17 @@ addr_t load(addr_t binary)
         Elf_Phdr* phdr = reinterpret_cast<Elf_Phdr*>(binary + header->e_phoff +
                                                      (header->e_phentsize * i));
         Log::printk(Log::DEBUG, "Header type: %X\n", phdr->p_type);
-        if (phdr->p_type == PT_LOAD) {
+        if (phdr->p_type == PT_LOAD || phdr->p_type == PT_TLS) {
+            if (phdr->p_type == PT_TLS) {
+                Log::printk(Log::DEBUG, "Found TLS section\n");
+                if (!process->sections->locate_range(phdr->p_vaddr, USER_START,
+                                                     phdr->p_memsz)) {
+                    Log::printk(Log::ERROR, "Failed to locate section\n");
+                    return 0;
+                }
+                Log::printk(Log::DEBUG, "TLS section will be at %p\n",
+                            phdr->p_vaddr);
+            }
             Log::printk(Log::DEBUG, "Flags:            %X\n", phdr->p_flags);
             Log::printk(Log::DEBUG, "Offset:           %p\n", phdr->p_offset);
             Log::printk(Log::DEBUG, "Virtual address:  %p\n", phdr->p_vaddr);

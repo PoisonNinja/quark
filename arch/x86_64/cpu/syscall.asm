@@ -21,6 +21,8 @@ syscall_sysret_wrapper:
     PUSHA
 
     push qword 0x1B ; DS
+    push qword 0
+    push qword 0
 
     swapgs              ; Swap back GS values. This is important because
                         ; we may not reach the end of this function, especially
@@ -31,6 +33,8 @@ syscall_sysret_wrapper:
     mov rdi, rsp
     call syscall_trampoline
 
+    pop r15
+    pop r15
     pop r15 ; DS
 
     POPA

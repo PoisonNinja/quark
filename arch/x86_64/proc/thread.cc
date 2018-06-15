@@ -37,6 +37,8 @@ void save_context(struct InterruptContext* ctx,
     thread_ctx->ss = ctx->ss;
     thread_ctx->cs = ctx->cs;
     thread_ctx->ds = ctx->ds;
+    thread_ctx->fs = ctx->fs;
+    thread_ctx->gs = ctx->gs;
 }
 
 void load_context(struct InterruptContext* ctx,
@@ -63,6 +65,8 @@ void load_context(struct InterruptContext* ctx,
     ctx->ss = thread_ctx->ss;
     ctx->cs = thread_ctx->cs;
     ctx->ds = thread_ctx->ds;
+    ctx->fs = thread_ctx->fs;
+    ctx->gs = thread_ctx->gs;
 }
 
 bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
@@ -153,6 +157,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.cs = 0x20 | 3;
     ctx.ds = 0x18 | 3;
     ctx.ss = 0x18 | 3;
+    ctx.fs = 0xDEADBEEF;
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     ctx.rflags = 0x200;
     return true;
@@ -185,6 +190,7 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
     thread->cpu_ctx.rsp = reinterpret_cast<uint64_t>(stack - 1);
     thread->cpu_ctx.cs = 0x8;
     thread->cpu_ctx.ds = 0x10;
+    thread->cpu_ctx.fs = 0xABCD;
     thread->cpu_ctx.rflags = 0x200;
     thread->kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;

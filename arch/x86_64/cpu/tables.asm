@@ -126,6 +126,7 @@ interrupt_common_stub:
 
     PUSHA
 
+    ; Store DS
     xor rax, rax
     mov ax, ds
     push rax
@@ -134,10 +135,36 @@ interrupt_common_stub:
     mov ds, ax
     mov es, ax
 
+    ; Store FS
+    mov rcx, 0xC0000100
+    rdmsr
+    shl rdx, 32
+    or rdx, rax
+    push rdx
+
+    ; Store GS
+    mov rcx, 0xC0000101
+    rdmsr
+    shl rdx, 32
+    or rdx, rax
+    push rdx
+
     mov rdi, rsp
     call arch_handler
 
 interrupt_return:
+    pop rdx
+    mov eax, edx
+    shr rdx, 32
+    mov rcx, 0xC0000101
+    wrmsr
+
+    pop rdx
+    mov eax, edx
+    shr rdx, 32
+    mov rcx, 0xC0000100
+    wrmsr
+
     pop rax
     mov ds, ax
     mov es, ax

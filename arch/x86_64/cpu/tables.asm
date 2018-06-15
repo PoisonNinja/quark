@@ -6,8 +6,8 @@ gdt_load:
     mov ax, 0x10      ; 0x10 is the offset in the GDT to our data segment
     mov ds, ax        ; Load all data segment selectors
     mov es, ax
-    mov fs, ax
     mov ss, ax
+
     ; flush the CS segment with iretq
     mov rcx, qword .reloadcs
     mov rsi, rsp
@@ -25,6 +25,12 @@ global tss_load
 tss_load:
     mov ax, (0x28 | 3)
     ltr ax
+
+    ; Set FS and GS to enable writing to them using MSRs
+    mov ax, 0x1B
+    mov fs, ax
+    mov gs, ax
+
     ret
 
 global gs_load

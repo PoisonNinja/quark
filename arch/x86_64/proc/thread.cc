@@ -9,9 +9,12 @@
 #include <proc/elf.h>
 #include <proc/process.h>
 #include <proc/thread.h>
+#include <proc/uthread.h>
 
 extern "C" void signal_return();
 void* signal_return_location = (void*)&signal_return;
+
+#define ROUND_UP(x, y) ((((x) + ((y)-1)) / y) * y)
 
 void save_context(struct InterruptContext* ctx,
                   struct ThreadContext* thread_ctx)
@@ -73,6 +76,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
                   const char* envp[], struct ThreadContext& ctx)
 {
     addr_t entry = ELF::load(binary);
+
     size_t argv_size = sizeof(char*) * (argc + 1);  // argv is null terminated
     size_t envp_size = sizeof(char*) * (envc + 1);  // envp is null terminated
     for (int i = 0; i < argc; i++) {
@@ -85,6 +89,12 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     addr_t envp_zone;
     addr_t stack_zone;
     addr_t sigreturn_zone;
+    addr_t tls_zone;
+
+    size_t tls_raw_size = ROUND_UP(parent->tls_memsz, parent->tls_alignment);
+    size_t tls_size = tls_raw_size + sizeof(struct uthread);
+    tls_size = ROUND_UP(tls_size, parent->tls_alignment);
+
     if (parent->sections->locate_range(argv_zone, USER_START, argv_size)) {
         Log::printk(Log::DEBUG, "argv located at %p\n", argv_zone);
         parent->sections->add_section(argv_zone, argv_size);
@@ -114,6 +124,13 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
         Log::printk(Log::ERROR, "Failed to locate sigreturn page\n");
         return false;
     }
+    if (parent->sections->locate_range(tls_zone, USER_START, tls_size)) {
+        Log::printk(Log::DEBUG, "TLS copy located at %p\n", tls_zone);
+        parent->sections->add_section(tls_zone, tls_size);
+    } else {
+        Log::printk(Log::ERROR, "Failed to locate TLS copy\n");
+        return false;
+    }
     Memory::Virtual::map_range(argv_zone, argv_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map_range(envp_zone, envp_size,
@@ -122,14 +139,26 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     Memory::Virtual::map_range(sigreturn_zone, 0x1000,
                                PAGE_USER | PAGE_WRITABLE);
+    Memory::Virtual::map_range(tls_zone, tls_size,
+                               PAGE_USER | PAGE_NX | PAGE_WRITABLE);
 
-    this->parent->sigreturn = sigreturn_zone;
+    parent->sigreturn = sigreturn_zone;
 
     // Copy in sigreturn trampoline code
     String::memcpy((void*)sigreturn_zone, signal_return_location, 0x1000);
 
     // Make it unwritable
     Memory::Virtual::protect(sigreturn_zone, PAGE_USER);
+
+    // Copy TLS data into thread specific data
+    String::memcpy((void*)tls_zone, (void*)parent->tls_base,
+                   parent->tls_filesz);
+    String::memset((void*)(tls_zone + parent->tls_filesz), 0,
+                   parent->tls_memsz - parent->tls_filesz);
+
+    struct uthread* uthread =
+        reinterpret_cast<struct uthread*>(tls_zone + tls_raw_size);
+    uthread->self = uthread;
 
     char* target =
         reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
@@ -157,7 +186,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.cs = 0x20 | 3;
     ctx.ds = 0x18 | 3;
     ctx.ss = 0x18 | 3;
-    ctx.fs = 0xDEADBEEF;
+    ctx.fs = reinterpret_cast<uint64_t>(uthread);
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     ctx.rflags = 0x200;
     return true;
@@ -190,7 +219,6 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
     thread->cpu_ctx.rsp = reinterpret_cast<uint64_t>(stack - 1);
     thread->cpu_ctx.cs = 0x8;
     thread->cpu_ctx.ds = 0x10;
-    thread->cpu_ctx.fs = 0xABCD;
     thread->cpu_ctx.rflags = 0x200;
     thread->kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;

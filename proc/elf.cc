@@ -33,6 +33,10 @@ addr_t load(addr_t binary)
                 }
                 Log::printk(Log::DEBUG, "TLS section will be at %p\n",
                             phdr->p_vaddr);
+                process->tls_base = phdr->p_vaddr;
+                process->tls_filesz = phdr->p_filesz;
+                process->tls_memsz = phdr->p_memsz;
+                process->tls_alignment = phdr->p_align;
             }
             Log::printk(Log::DEBUG, "Flags:            %X\n", phdr->p_flags);
             Log::printk(Log::DEBUG, "Offset:           %p\n", phdr->p_offset);
@@ -80,5 +84,5 @@ addr_t load(addr_t binary)
     Log::printk(Log::DEBUG, "Entry point: %p\n", header->e_entry);
     // TODO: More sanity checks
     return header->e_entry;
-}  // namespace ELF
+}
 }  // namespace ELF

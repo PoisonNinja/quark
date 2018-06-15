@@ -53,67 +53,32 @@ addr_t load(addr_t binary)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX;  // Set NX bit if requested
             }
-            size_t i;
-            for (i = 0; i < phdr->p_filesz;) {
-                Memory::Virtual::map(i + phdr->p_vaddr,
-                                     Memory::Physical::allocate(), flags);
-                /*
-                 * Calculate how much to copy for this segment.
-                 *
-                 * Add one to i + phdr->p_vaddr to force it to round upwards if
-                 * i + phdr->p_vaddr is a multiple of 4096
-                 */
-                size_t size =
-                    (Memory::Virtual::align_up(i + phdr->p_vaddr + 1) >
-                     phdr->p_vaddr + phdr->p_filesz) ?
-                        phdr->p_filesz - i :
-                        Memory::Virtual::align_up(i + phdr->p_vaddr + 1) -
-                            (i + phdr->p_vaddr);
-                Log::printk(Log::DEBUG, "Copying from %p -> %p, size %X\n",
-                            binary + i + phdr->p_offset, i + phdr->p_vaddr,
-                            size);
-                String::memcpy(
-                    reinterpret_cast<void*>(i + phdr->p_vaddr),
-                    reinterpret_cast<void*>(binary + i + phdr->p_offset), size);
-                if (!(phdr->p_flags & PF_W)) {
-                    // Remove write access if requested
-                    Memory::Virtual::protect(i + phdr->p_vaddr,
-                                             flags & ~PAGE_WRITABLE);
-                }
-                i += size;
-            }
-            if (i < phdr->p_memsz) {
+            Memory::Virtual::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
+
+            Log::printk(Log::DEBUG, "Copying from %p -> %p, size %X\n",
+                        binary + phdr->p_offset, phdr->p_vaddr, phdr->p_filesz);
+            String::memcpy(reinterpret_cast<void*>(phdr->p_vaddr),
+                           reinterpret_cast<void*>(binary + phdr->p_offset),
+                           phdr->p_filesz);
+            if (phdr->p_filesz < phdr->p_memsz) {
                 Log::printk(Log::DEBUG, "Memory size is larger than file size, "
-                                        "zeroing...\n");
-                while (i < phdr->p_memsz) {
-                    if (Memory::Virtual::test(i + phdr->p_vaddr)) {
-                        Memory::Virtual::protect(i + phdr->p_vaddr, flags);
-                    } else {
-                        Memory::Virtual::map(i + phdr->p_vaddr,
-                                             Memory::Physical::allocate(),
-                                             flags);
-                    }
-                    size_t size =
-                        (Memory::Virtual::align_up(i + phdr->p_vaddr + 1) >
-                         phdr->p_vaddr + phdr->p_memsz) ?
-                            phdr->p_memsz - i :
-                            Memory::Virtual::align_up(i + phdr->p_vaddr + 1) -
-                                (i + phdr->p_vaddr);
-                    Log::printk(Log::DEBUG, "Zeroing %p, size 0x%X\n",
-                                i + phdr->p_vaddr, size);
-                    String::memset(reinterpret_cast<void*>(i + phdr->p_vaddr),
-                                   0, size);
-                    if (!(phdr->p_flags & PF_W)) {
-                        Memory::Virtual::protect(i + phdr->p_vaddr,
-                                                 flags & ~PAGE_WRITABLE);
-                    }
-                    i += size;
-                }
+                                        "zeroing rest of segment...\n");
+                Log::printk(Log::DEBUG, "Zeroing %p, size 0x%X\n",
+                            phdr->p_filesz + phdr->p_vaddr,
+                            phdr->p_memsz - phdr->p_filesz);
+                String::memset(
+                    reinterpret_cast<void*>(phdr->p_filesz + phdr->p_vaddr), 0,
+                    phdr->p_memsz - phdr->p_filesz);
+            }
+            if (!(phdr->p_flags & PF_W)) {
+                // Remove write access if requested
+                Memory::Virtual::protect_range(phdr->p_vaddr, phdr->p_memsz,
+                                               flags & ~PAGE_WRITABLE);
             }
         }
     }
     Log::printk(Log::DEBUG, "Entry point: %p\n", header->e_entry);
     // TODO: More sanity checks
     return header->e_entry;
-}
+}  // namespace ELF
 }  // namespace ELF

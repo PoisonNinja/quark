@@ -21,8 +21,20 @@ syscall_sysret_wrapper:
     PUSHA
 
     push qword 0x1B ; DS
-    push qword 0
-    push qword 0
+
+    ; Store FS
+    mov rcx, 0xC0000100
+    rdmsr
+    shl rdx, 32
+    or rdx, rax
+    push rdx
+
+    ; Store GS
+    mov rcx, 0xC0000101
+    rdmsr
+    shl rdx, 32
+    or rdx, rax
+    push rdx
 
     swapgs              ; Swap back GS values. This is important because
                         ; we may not reach the end of this function, especially
@@ -33,8 +45,10 @@ syscall_sysret_wrapper:
     mov rdi, rsp
     call syscall_trampoline
 
+    ; There isn't really a reason for system calls to be modifying FS and GS
     pop r15
     pop r15
+
     pop r15 ; DS
 
     POPA

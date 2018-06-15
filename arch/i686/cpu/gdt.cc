@@ -61,11 +61,16 @@ static void set_entry(struct GDT::Entry* entry, uint32_t base, uint32_t limit,
     entry->base_high = (base >> 24) & 0xFF;
 }
 
-static void update_entry_base(struct GDT::Entry* entry, uint32_t base)
+static void set_entry_base(struct GDT::Entry* entry, uint32_t base)
 {
     entry->base_low = base & 0xFFFF;
     entry->base_middle = (base >> 16) & 0xFF;
     entry->base_high = (base >> 24) & 0xFF;
+}
+
+static uint32_t get_entry_base(struct GDT::Entry* entry)
+{
+    return entry->base_low | entry->base_middle << 16 | entry->base_high << 24;
 }
 
 static void write_tss(struct GDT::Entry* gdt, struct TSS::Entry* tss)
@@ -108,6 +113,26 @@ void init()
     tss.ss0 = 0x10;
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
     GDT::tss_load();
+}
+
+addr_t get_fs()
+{
+    return get_entry_base(&entries[6]);
+}
+
+addr_t get_gs()
+{
+    return get_entry_base(&entries[7]);
+}
+
+void set_fs(addr_t base)
+{
+    set_entry_base(&entries[6], base);
+}
+
+void set_gs(addr_t base)
+{
+    set_entry_base(&entries[7], base);
 }
 }  // namespace GDT
 

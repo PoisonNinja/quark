@@ -7,7 +7,7 @@ namespace X86
 {
 namespace GDT
 {
-constexpr size_t num_entries = 6;
+constexpr size_t num_entries = 8;
 
 constexpr uint8_t access_present(uint8_t x)
 {
@@ -61,6 +61,13 @@ static void set_entry(struct GDT::Entry* entry, uint32_t base, uint32_t limit,
     entry->base_high = (base >> 24) & 0xFF;
 }
 
+static void update_entry_base(struct GDT::Entry* entry, uint32_t base)
+{
+    entry->base_low = base & 0xFFFF;
+    entry->base_middle = (base >> 16) & 0xFF;
+    entry->base_high = (base >> 24) & 0xFF;
+}
+
 static void write_tss(struct GDT::Entry* gdt, struct TSS::Entry* tss)
 {
     uint32_t base = (uint32_t)tss;
@@ -88,6 +95,16 @@ void init()
                        access_mandantory(1) | access_data(0, 1),
                    flag_protected | flag_4kib);
     GDT::write_tss(&entries[5], &tss);
+    // F segment
+    GDT::set_entry(&entries[6], 0, 0xFFFFF,
+                   access_present(1) | access_privilege(3) |
+                       access_mandantory(1) | access_data(0, 1),
+                   flag_protected | flag_4kib);
+    // G segment
+    GDT::set_entry(&entries[7], 0, 0xFFFFF,
+                   access_present(1) | access_privilege(3) |
+                       access_mandantory(1) | access_data(0, 1),
+                   flag_protected | flag_4kib);
     tss.ss0 = 0x10;
     GDT::gdt_load(reinterpret_cast<addr_t>(&descriptor));
     GDT::tss_load();
@@ -105,6 +122,6 @@ addr_t get_stack()
 {
     return GDT::tss.esp0;
 }
-}
-}
-}
+}  // namespace TSS
+}  // namespace X86
+}  // namespace CPU

@@ -227,6 +227,6 @@ extern "C" void load_register_state(struct InterruptContext* ctx);
 void load_registers(struct ThreadContext& tcontext)
 {
     struct InterruptContext ctx;
-    decode_tcontext(&ctx, &tcontext);
+    load_context(&ctx, &tcontext);
     load_register_state(&ctx);
 }

@@ -23,6 +23,12 @@ struct Entry {
     uint8_t base_high;
 } __attribute__((packed));
 
+addr_t get_fs();
+addr_t get_gs();
+
+void set_fs(addr_t base);
+void set_gs(addr_t base);
+
 void init();
 }  // namespace GDT
 
@@ -60,6 +66,6 @@ struct Entry {
 
 void set_stack(addr_t stack);
 addr_t get_stack();
-}
-}
-}
+}  // namespace TSS
+}  // namespace X86
+}  // namespace CPU

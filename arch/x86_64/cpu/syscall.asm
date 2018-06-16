@@ -1,15 +1,16 @@
+%include "common.inc"
 
 extern syscall_trampoline
 
 global syscall_sysret_wrapper
 syscall_sysret_wrapper:
     swapgs              ; Thread struct is saved in KernelGSBase, swap it into GS
-    mov [gs:88], rsp    ; Save user RSP into thread->cpu_ctx.rsp
-    mov rsp, [gs:176]   ; Load kernel RSP from thread->kernel_stack.
+    mov [gs:80], rsp    ; Save user RSP into thread->tcontext.rsp
+    mov rsp, [gs:184]   ; Load kernel RSP from thread->kernel_stack.
 
     ; Build a simulated interrupt frame
     push qword 0x1B ; SS
-    push qword [gs:88] ; User RSP
+    push qword [gs:80] ; User RSP
     push r11  ; RFLAGS
     push qword 0x23 ; CS
     push rcx  ; RIP
@@ -17,23 +18,23 @@ syscall_sysret_wrapper:
     push qword 0 ; Error code
     push qword 0 ; Interrupt number
 
-    push rax
-    push rbx
-    push rcx
-    push rdx
-    push rbp
-    push rdi
-    push rsi
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
+    PUSHA
 
     push qword 0x1B ; DS
+
+    ; Store FS
+    mov rcx, 0xC0000100
+    rdmsr
+    shl rdx, 32
+    or rdx, rax
+    push rdx
+
+    ; Store GS
+    mov rcx, 0xC0000101
+    rdmsr
+    shl rdx, 32
+    or rdx, rax
+    push rdx
 
     swapgs              ; Swap back GS values. This is important because
                         ; we may not reach the end of this function, especially
@@ -44,23 +45,13 @@ syscall_sysret_wrapper:
     mov rdi, rsp
     call syscall_trampoline
 
+    ; There isn't really a reason for system calls to be modifying FS and GS
+    pop r15
+    pop r15
+
     pop r15 ; DS
 
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop rax ; Skip R11 (RFLAGS)
-    pop r10
-    pop r9
-    pop r8
-    pop rsi
-    pop rdi
-    pop rbp
-    pop rdx
-    pop rax ; Skip RCX (Return RIP)
-    pop rbx
-    pop rax
+    POPA
 
     add rsp, 16 ; Skip the rest of the IRET frame
     pop rcx     ; RIP

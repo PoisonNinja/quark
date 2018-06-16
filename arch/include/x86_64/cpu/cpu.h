@@ -13,6 +13,8 @@ constexpr uint64_t msr_lstar = 0xC0000082;
 constexpr uint64_t msr_cstar = 0xC0000083;
 constexpr uint64_t msr_fmask = 0xC0000084;
 
+constexpr uint64_t msr_fs_base = 0xC0000100;
+constexpr uint64_t msr_gs_base = 0xC0000101;
 constexpr uint64_t msr_kernel_gs_base = 0xC0000102;
 
 static inline void wrmsr(uint64_t msr, uint64_t value)
@@ -30,5 +32,5 @@ static inline uint64_t rdmsr(uint64_t msr)
 }
 
 void init();
-}
-}
+}  // namespace X64
+}  // namespace CPU

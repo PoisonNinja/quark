@@ -3,6 +3,8 @@
 #include <types.h>
 
 struct InterruptContext {
+    uint64_t gs;
+    uint64_t fs;
     uint64_t ds;
     uint64_t r15;
     uint64_t r14;

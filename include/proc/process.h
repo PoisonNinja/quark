@@ -24,6 +24,12 @@ public:
     Ref<Filesystem::Descriptor> get_root();
     Ref<Filesystem::DTable> get_dtable();
 
+    // TLS stuff
+    addr_t tls_base;
+    addr_t tls_filesz;
+    addr_t tls_memsz;
+    addr_t tls_alignment;
+
     void exit();
 
     Process* fork();

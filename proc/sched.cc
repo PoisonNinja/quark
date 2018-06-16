@@ -67,7 +67,7 @@ Thread* next()
 
 void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
 {
-    current->save_context(ctx);
+    save_context(ctx, &current->tcontext);
     if (current) {
         if (current->parent->address_space != next->parent->address_space) {
             Memory::Virtual::set_address_space_root(
@@ -76,7 +76,7 @@ void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
     } else {
         Memory::Virtual::set_address_space_root(next->parent->address_space);
     }
-    next->load_context(ctx);
+    load_context(ctx, &next->tcontext);
 }
 
 void switch_next(struct InterruptContext* ctx)

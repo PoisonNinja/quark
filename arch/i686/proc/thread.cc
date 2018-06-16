@@ -52,19 +52,19 @@ void decode_tcontext(struct InterruptContext* ctx,
     ctx->ss = thread_ctx->ss;
 }
 
-void Thread::save_context(InterruptContext* ctx)
+void save_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 {
-    encode_tcontext(ctx, &this->tcontext);
-    this->tcontext.fs = CPU::X86::GDT::get_fs();
-    this->tcontext.gs = CPU::X86::GDT::get_gs();
+    encode_tcontext(ctx, tcontext);
+    tcontext->fs = CPU::X86::GDT::get_fs();
+    tcontext->gs = CPU::X86::GDT::get_gs();
 }
 
-void Thread::load_context(InterruptContext* ctx)
+void load_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 {
-    decode_tcontext(ctx, &this->tcontext);
-    set_stack(this->tcontext.kernel_stack);
-    CPU::X86::GDT::set_fs(this->tcontext.fs);
-    CPU::X86::GDT::set_gs(this->tcontext.gs);
+    decode_tcontext(ctx, tcontext);
+    set_stack(tcontext->kernel_stack);
+    CPU::X86::GDT::set_fs(tcontext->fs);
+    CPU::X86::GDT::set_gs(tcontext->gs);
 }
 
 bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,

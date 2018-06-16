@@ -21,9 +21,6 @@ public:
               const char *envp[], struct ThreadContext &ctx);
     void exit();
 
-    void save_context(struct InterruptContext *ctx);
-    void load_context(struct InterruptContext *ctx);
-
     tid_t tid;
     ThreadState state;
     struct ThreadContext tcontext;  // Thread execution state
@@ -52,6 +49,9 @@ void encode_tcontext(struct InterruptContext *ctx,
                      struct ThreadContext *thread_ctx);
 void decode_tcontext(struct InterruptContext *ctx,
                      struct ThreadContext *thread_ctx);
+
+void save_context(struct InterruptContext *ctx, struct ThreadContext *tcontext);
+void load_context(struct InterruptContext *ctx, struct ThreadContext *tcontext);
 
 Thread *create_kernel_thread(Process *p, void (*entry_point)(void *),
                              void *data);

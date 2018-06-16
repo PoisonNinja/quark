@@ -21,6 +21,9 @@ public:
               const char *envp[], struct ThreadContext &ctx);
     void exit();
 
+    void save_context(struct InterruptContext *ctx);
+    void load_context(struct InterruptContext *ctx);
+
     tid_t tid;
     ThreadState state;
     struct ThreadContext cpu_ctx;  // Thread execution state

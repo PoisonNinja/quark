@@ -52,6 +52,18 @@ void decode_tcontext(struct InterruptContext* ctx,
     ctx->ss = thread_ctx->ss;
 }
 
+void Thread::save_context(InterruptContext* ctx)
+{
+    encode_tcontext(ctx, &this->cpu_ctx);
+}
+
+void Thread::load_context(InterruptContext* ctx)
+{
+    decode_tcontext(ctx, &this->cpu_ctx);
+    set_stack(this->kernel_stack);
+    set_thread_base(this);
+}
+
 bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
                   const char* envp[], struct ThreadContext& ctx)
 {

@@ -55,7 +55,7 @@ endif()
 set(CMAKE_CXX_COMPILER ${CXX})
 message(STATUS "CXX Compiler: " ${CXX})
 
-project(Quark CXX)
+project(Quark ASM CXX)
 
 include(${PLATFORM_FILE})
 

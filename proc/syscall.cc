@@ -179,7 +179,7 @@ static void sys_sigreturn(ucontext_t* uctx)
      * tctx to get certain registers (DS, ES, SS) preloaded for us. The
      * rest of the state will get overriden by the stored mcontext
      */
-    String::memcpy(&tctx, &Scheduler::get_current_thread()->cpu_ctx,
+    String::memcpy(&tctx, &Scheduler::get_current_thread()->tcontext,
                    sizeof(tctx));
     // Restore signal mask
     Scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
@@ -198,14 +198,15 @@ static pid_t sys_fork()
     Log::printk(Log::DEBUG, "[sys_fork]\n");
     Process* child = Scheduler::get_current_process()->fork();
     Thread* thread = new Thread(child);
-    String::memcpy(&thread->cpu_ctx, &Scheduler::get_current_thread()->cpu_ctx,
-                   sizeof(thread->cpu_ctx));
+    String::memcpy(&thread->tcontext,
+                   &Scheduler::get_current_thread()->tcontext,
+                   sizeof(thread->tcontext));
 #ifdef X86_64
-    thread->cpu_ctx.rax = 0;
+    thread->tcontext.rax = 0;
 #else
-    thread->cpu_ctx.eax = 0;
+    thread->tcontext.eax = 0;
 #endif
-    thread->kernel_stack = (addr_t) new uint8_t[0x1000] + 0x1000;
+    thread->tcontext.kernel_stack = (addr_t) new uint8_t[0x1000] + 0x1000;
     Scheduler::insert(thread);
     return child->pid;
 }

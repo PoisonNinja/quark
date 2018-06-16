@@ -8,7 +8,7 @@ extern void* syscall_table[];
 
 extern "C" void syscall_trampoline(struct InterruptContext* ctx)
 {
-    encode_tcontext(ctx, &Scheduler::get_current_thread()->cpu_ctx);
+    encode_tcontext(ctx, &Scheduler::get_current_thread()->tcontext);
     Log::printk(Log::DEBUG,
                 "Received fast system call %d from PID %d, %lX %lX %lX "
                 "%lX %lX\n",

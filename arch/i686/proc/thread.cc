@@ -206,28 +206,28 @@ void set_thread_base(Thread* thread)
 Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
 {
     Thread* thread = new Thread(p);
-    String::memset(&thread->cpu_ctx, 0, sizeof(thread->cpu_ctx));
+    String::memset(&thread->tcontext, 0, sizeof(thread->tcontext));
     addr_t stack =
         (reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000) & ~15UL;
-    thread->cpu_ctx.eip = reinterpret_cast<addr_t>(entry_point);
-    thread->cpu_ctx.ebp = reinterpret_cast<addr_t>(stack);
-    thread->cpu_ctx.esp = reinterpret_cast<addr_t>(stack);
-    thread->cpu_ctx.cs = 0x8;
-    thread->cpu_ctx.ds = 0x10;
-    thread->cpu_ctx.ss = 0x10;
-    thread->cpu_ctx.eflags = 0x200;
-    thread->kernel_stack = stack;
-    uint32_t* stack_ptr = reinterpret_cast<uint32_t*>(thread->cpu_ctx.esp);
+    thread->tcontext.eip = reinterpret_cast<addr_t>(entry_point);
+    thread->tcontext.ebp = reinterpret_cast<addr_t>(stack);
+    thread->tcontext.esp = reinterpret_cast<addr_t>(stack);
+    thread->tcontext.cs = 0x8;
+    thread->tcontext.ds = 0x10;
+    thread->tcontext.ss = 0x10;
+    thread->tcontext.eflags = 0x200;
+    thread->tcontext.kernel_stack = stack;
+    uint32_t* stack_ptr = reinterpret_cast<uint32_t*>(thread->tcontext.esp);
     stack_ptr[-1] = reinterpret_cast<uint32_t>(data);
-    thread->cpu_ctx.esp -= 8;
+    thread->tcontext.esp -= 8;
     return thread;
 }
 
 extern "C" void load_register_state(struct InterruptContext* ctx);
 
-void load_registers(struct ThreadContext& cpu_ctx)
+void load_registers(struct ThreadContext& tcontext)
 {
     struct InterruptContext ctx;
-    decode_tcontext(&ctx, &cpu_ctx);
+    decode_tcontext(&ctx, &tcontext);
     load_register_state(&ctx);
 }

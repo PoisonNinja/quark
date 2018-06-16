@@ -16,8 +16,8 @@ void* signal_return_location = (void*)&signal_return;
 
 #define ROUND_UP(x, y) ((((x) + ((y)-1)) / y) * y)
 
-void save_context(struct InterruptContext* ctx,
-                  struct ThreadContext* thread_ctx)
+void encode_tcontext(struct InterruptContext* ctx,
+                     struct ThreadContext* thread_ctx)
 {
     thread_ctx->rax = ctx->rax;
     thread_ctx->rbx = ctx->rbx;
@@ -44,8 +44,8 @@ void save_context(struct InterruptContext* ctx,
     thread_ctx->gs = ctx->gs;
 }
 
-void load_context(struct InterruptContext* ctx,
-                  struct ThreadContext* thread_ctx)
+void decode_tcontext(struct InterruptContext* ctx,
+                     struct ThreadContext* thread_ctx)
 {
     ctx->rax = thread_ctx->rax;
     ctx->rbx = thread_ctx->rbx;
@@ -230,6 +230,6 @@ extern "C" void load_register_state(struct InterruptContext* ctx);
 void load_registers(struct ThreadContext& cpu_ctx)
 {
     struct InterruptContext ctx;
-    load_context(&ctx, &cpu_ctx);
+    decode_tcontext(&ctx, &cpu_ctx);
     load_register_state(&ctx);
 }

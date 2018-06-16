@@ -46,10 +46,10 @@ private:
     void refresh_signal();
 };
 
-void save_context(struct InterruptContext *ctx,
-                  struct ThreadContext *thread_ctx);
-void load_context(struct InterruptContext *ctx,
-                  struct ThreadContext *thread_ctx);
+void encode_tcontext(struct InterruptContext *ctx,
+                     struct ThreadContext *thread_ctx);
+void decode_tcontext(struct InterruptContext *ctx,
+                     struct ThreadContext *thread_ctx);
 
 Thread *create_kernel_thread(Process *p, void (*entry_point)(void *),
                              void *data);

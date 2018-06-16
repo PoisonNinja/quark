@@ -79,7 +79,7 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     }
 
     struct ThreadContext new_state, original_state;
-    save_context(ctx, &original_state);
+    encode_tcontext(ctx, &original_state);
 
     siginfo_t siginfo;
     siginfo.si_signo = signum;
@@ -108,7 +108,7 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
     this->setup_signal(&ksig, &original_state, &new_state);
 
-    load_context(ctx, &new_state);
+    decode_tcontext(ctx, &new_state);
     return;
 }
 

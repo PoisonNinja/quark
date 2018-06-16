@@ -5,8 +5,12 @@ gdt_load:
     mov ax, 0x10      ; 0x10 is the offset in the GDT to our data segment
     mov ds, ax        ; Load all data segment selectors
     mov es, ax
-    mov fs, ax
     mov ss, ax
+
+    mov ax, 0x33
+    mov fs, ax
+    mov ax, 0x3B
+    mov gs, ax
 
     jmp 0x8:.reloadcs
 

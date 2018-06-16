@@ -128,11 +128,13 @@ addr_t get_gs()
 void set_fs(addr_t base)
 {
     set_entry_base(&entries[6], base);
+    asm volatile("mov %0, %%fs" : : "r"(0x33));
 }
 
 void set_gs(addr_t base)
 {
     set_entry_base(&entries[7], base);
+    asm volatile("mov %0, %%gs" : : "r"(0x3B));
 }
 }  // namespace GDT
 

@@ -18,6 +18,7 @@ struct ThreadContext {
     uint32_t cs;
     uint32_t esp;
     uint32_t ss;
+    uint32_t kernel_stack;
 };
 
 typedef uint32_t greg_t;

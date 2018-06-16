@@ -173,6 +173,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     }
     target_envp[envc] = 0;
     String::memset((void*)stack_zone, 0, 0x1000);
+
     String::memset(&ctx, 0, sizeof(ctx));
     ctx.eip = entry;
     ctx.cs = 0x18 | 3;
@@ -180,6 +181,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.ss = 0x20 | 3;
     ctx.gs = reinterpret_cast<uint32_t>(uthread);
     ctx.esp = ctx.ebp = (reinterpret_cast<addr_t>(stack_zone) + 0x1000) & ~15UL;
+    ctx.kernel_stack = CPU::X86::TSS::get_stack();
     // Arguments are passed on the stack
     uint32_t* stack = reinterpret_cast<uint32_t*>(ctx.esp);
     stack[-1] = reinterpret_cast<uint32_t>(target_envp);

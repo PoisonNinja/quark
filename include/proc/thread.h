@@ -59,6 +59,4 @@ Thread *create_kernel_thread(Process *p, void (*entry_point)(void *),
 void set_stack(addr_t stack);
 addr_t get_stack();
 
-void set_thread_base(Thread *thread);
-
 void load_registers(struct ThreadContext &tcontext);

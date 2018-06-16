@@ -16,6 +16,12 @@ void* signal_return_location = (void*)&signal_return;
 
 #define ROUND_UP(x, y) ((((x) + ((y)-1)) / y) * y)
 
+void set_thread_base(ThreadContext* thread)
+{
+    CPU::X64::wrmsr(CPU::X64::msr_kernel_gs_base,
+                    reinterpret_cast<uint64_t>(thread));
+}
+
 void encode_tcontext(struct InterruptContext* ctx,
                      struct ThreadContext* thread_ctx)
 {
@@ -70,6 +76,18 @@ void decode_tcontext(struct InterruptContext* ctx,
     ctx->ds = thread_ctx->ds;
     ctx->fs = thread_ctx->fs;
     ctx->gs = thread_ctx->gs;
+}
+
+void save_context(InterruptContext* ctx, struct ThreadContext* tcontext)
+{
+    encode_tcontext(ctx, tcontext);
+}
+
+void load_context(InterruptContext* ctx, struct ThreadContext* tcontext)
+{
+    decode_tcontext(ctx, tcontext);
+    set_stack(tcontext->kernel_stack);
+    set_thread_base(tcontext);
 }
 
 bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
@@ -178,6 +196,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     }
     target_envp[envc] = 0;
     String::memset((void*)stack_zone, 0, 0x1000);
+
     String::memset(&ctx, 0, sizeof(ctx));
     ctx.rip = entry;
     ctx.rdi = argc;
@@ -188,6 +207,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.ss = 0x18 | 3;
     ctx.fs = reinterpret_cast<uint64_t>(uthread);
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
+    ctx.kernel_stack = CPU::X64::TSS::get_stack();
     ctx.rflags = 0x200;
     return true;
 }
@@ -202,12 +222,6 @@ addr_t get_stack()
     return CPU::X64::TSS::get_stack();
 }
 
-void set_thread_base(Thread* thread)
-{
-    CPU::X64::wrmsr(CPU::X64::msr_kernel_gs_base,
-                    reinterpret_cast<uint64_t>(thread));
-}
-
 Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
 {
     Thread* thread = new Thread(p);
@@ -220,7 +234,7 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
     thread->tcontext.cs = 0x8;
     thread->tcontext.ds = 0x10;
     thread->tcontext.rflags = 0x200;
-    thread->kernel_stack =
+    thread->tcontext.kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
     return thread;
 }
@@ -230,6 +244,6 @@ extern "C" void load_register_state(struct InterruptContext* ctx);
 void load_registers(struct ThreadContext& tcontext)
 {
     struct InterruptContext ctx;
-    decode_tcontext(&ctx, &tcontext);
+    load_context(&ctx, &tcontext);
     load_register_state(&ctx);
 }

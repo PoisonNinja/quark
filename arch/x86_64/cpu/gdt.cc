@@ -1,8 +1,6 @@
 #include <arch/cpu/gdt.h>
 #include <lib/string.h>
 
-#include <kernel.h>
-
 namespace CPU
 {
 namespace X64
@@ -116,6 +114,6 @@ addr_t get_stack()
 {
     return GDT::tss.stack0;
 }
-}  // namespace TSS
-}  // namespace X64
-}  // namespace CPU
+}
+}
+}

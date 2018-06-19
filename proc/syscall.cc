@@ -171,7 +171,7 @@ static long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
     return 0;
 }
 
-static long sys_sigreturn(ucontext_t* uctx)
+static void sys_sigreturn(ucontext_t* uctx)
 {
     Log::printk(Log::DEBUG, "[sys_return] %p\n", uctx);
     ThreadContext tctx;

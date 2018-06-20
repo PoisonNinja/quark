@@ -12,7 +12,7 @@ Vnode::Vnode(Ref<Inode> inode)
 
 int Vnode::link(const char* name, Ref<Vnode> node)
 {
-    return this->inode->link(name, node->inode);
+    return inode->link(name, node->inode);
 }
 
 int Vnode::mkdir(const char* name, mode_t mode)
@@ -53,4 +53,4 @@ ssize_t Vnode::write(uint8_t* buffer, size_t count)
 {
     return inode->write(buffer, count);
 }
-}
+}  // namespace Filesystem

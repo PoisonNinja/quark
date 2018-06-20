@@ -3,6 +3,7 @@
 #include <fs/fs.h>
 #include <fs/initfs/initfs.h>
 #include <fs/inode.h>
+#include <fs/pty.h>
 #include <fs/tty.h>
 #include <fs/vnode.h>
 #include <kernel.h>
@@ -26,4 +27,4 @@ void init()
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);
 }
-}
+}  // namespace Filesystem

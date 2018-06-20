@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fs/vnode.h>
 
 namespace Filesystem
@@ -5,6 +6,7 @@ namespace Filesystem
 Vnode::Vnode(Ref<Inode> inode)
 {
     this->inode = inode;
+    this->mounted = Ref<Inode>(nullptr);
     this->ino = inode->ino;
     this->dev = inode->dev;
     this->mode = inode->mode;
@@ -20,8 +22,18 @@ int Vnode::mkdir(const char* name, mode_t mode)
     return inode->mkdir(name, mode);
 }
 
+int Vnode::mount(Ref<Inode> target)
+{
+    // TODO: Perhaps we shouldn't clobber this mountpoint...
+    this->mounted = target;
+    return 0;
+}
+
 Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 {
+    if (this->mounted) {
+        return Ref<Vnode>(new Vnode(this->mounted));
+    }
     Ref<Inode> retinode = inode->open(name, flags, mode);
     if (!retinode) {
         return Ref<Vnode>(nullptr);

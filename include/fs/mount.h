@@ -8,7 +8,7 @@ namespace Filesystem
 class Vnode;
 
 struct Mount {
-    Ref<Vnode> target;
+    Ref<Inode> target;
     Node<Mount> node;
 };
 }  // namespace Filesystem

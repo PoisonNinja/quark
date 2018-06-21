@@ -23,7 +23,7 @@ int Vnode::mkdir(const char* name, mode_t mode)
 Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 {
     if (!mounts.empty()) {
-        return mounts.front().target;
+        return Ref<Vnode>(new Vnode(mounts.front().target));
     }
     Ref<Inode> retinode = inode->open(name, flags, mode);
     if (!retinode) {

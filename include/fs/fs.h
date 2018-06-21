@@ -20,4 +20,4 @@ namespace Filesystem
 #define SEEK_END 2
 
 void init();
-}
+}  // namespace Filesystem

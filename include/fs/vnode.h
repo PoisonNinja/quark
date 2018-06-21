@@ -1,6 +1,8 @@
 #pragma once
 
 #include <fs/inode.h>
+#include <fs/mount.h>
+#include <lib/list.h>
 #include <lib/refcount.h>
 
 namespace Filesystem
@@ -23,6 +25,7 @@ public:
     ssize_t write(uint8_t* buffer, size_t count);
 
 private:
+    List<Mount, &Mount::node> mounts;
     Ref<Inode> inode;
 };
-}
+}  // namespace Filesystem

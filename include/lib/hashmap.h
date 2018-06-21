@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * https://github.com/aozturk/HashMap
+ * Borrowed from https://github.com/aozturk/HashMap
+ *
  */
 
 #pragma once
@@ -97,7 +98,7 @@ public:
         }
     }
 
-    bool allocate(const K &key, V &value)
+    bool get(const K &key, V &value)
     {
         unsigned long hashValue = hash(key);
         HashNode<K, V> *entry = table[hashValue];
@@ -114,7 +115,7 @@ public:
         return false;
     }
 
-    void free(const K &key, const V &value)
+    void put(const K &key, const V &value)
     {
         unsigned long hashValue = hash(key);
         HashNode<K, V> *prev = NULL;

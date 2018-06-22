@@ -131,19 +131,24 @@ int Descriptor::mkdir(const char* name, mode_t mode)
 int Descriptor::mount(const char* source, const char* target, const char* type,
                       unsigned long flags)
 {
+    /*
+     * Retrieve the driver first so we can check if the driver actually wants
+     * a real block device or doesn't care (e.g. procfs)
+     */
+    Driver* driver = FTable::get(type);
+    if (!driver) {
+        return -EINVAL;
+    }
     Ref<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
     if (!target_desc) {
         return -ENOENT;
     }
     Ref<Descriptor> source_desc = this->open(source, O_RDONLY, 0);
-    if (!source_desc) {
+    if (!source_desc && !(driver->flags() & driver_pseudo)) {
         return -ENOENT;
     }
-    Driver* driver = FTable::get(type);
-    if (!driver) {
-        return -EINVAL;
-    }
     Superblock* sb = new Superblock();
+    sb->path = source;
     sb->source = source_desc->vnode;
     driver->mount(sb);
     Mount* mt = new Mount();

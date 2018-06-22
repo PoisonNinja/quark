@@ -1,22 +1,30 @@
 #include <fs/ftable.h>
+#include <lib/hashmap.h>
+#include <lib/murmur.h>
+#include <lib/string.h>
 
 namespace Filesystem
 {
-FTable::FTable()
+namespace FTable
 {
-}
+constexpr size_t ftable_size = 1024;
 
-FTable::~FTable()
-{
-}
+struct FTableHash {
+    unsigned long operator()(const char* name)
+    {
+        return Murmur::hash(name, String::strlen(name)) % ftable_size;
+    }
+};
 
-bool FTable::add(const char* name, Driver* driver)
+static Hashmap<const char*, Driver*, ftable_size, FTableHash> ftable_hash;
+
+bool add(const char* name, Driver* driver)
 {
     ftable_hash.put(name, driver);
     return true;
 }
 
-Driver* FTable::get(const char* name)
+Driver* get(const char* name)
 {
     Driver* driver;
     if (!ftable_hash.get(name, driver)) {
@@ -25,4 +33,5 @@ Driver* FTable::get(const char* name)
         return driver;
     }
 }
+}  // namespace FTable
 }  // namespace Filesystem

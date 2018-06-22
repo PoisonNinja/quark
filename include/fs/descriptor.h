@@ -17,6 +17,8 @@ public:
     int link(const char* name, Ref<Descriptor> node);
     off_t lseek(off_t offset, int whence);
     int mkdir(const char* name, mode_t mode);
+    int mount(const char* source, const char* target, const char* type,
+              unsigned long flags);
     Ref<Descriptor> open(const char* name, int flags, mode_t mode);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
@@ -29,4 +31,4 @@ private:
     Ref<Vnode> vnode;
     off_t current_offset;
 };
-}
+}  // namespace Filesystem

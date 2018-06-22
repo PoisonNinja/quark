@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fs/descriptor.h>
-#include <fs/inode.h>
 #include <lib/list.h>
 #include <types.h>
 
@@ -20,11 +18,6 @@ namespace Filesystem
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
-
-struct Superblock {
-    Ref<Descriptor> target;
-    Ref<Inode> root;
-};
 
 void init();
 }  // namespace Filesystem

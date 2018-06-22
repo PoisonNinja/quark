@@ -127,6 +127,19 @@ int Descriptor::mkdir(const char* name, mode_t mode)
     return ret;
 }
 
+int Descriptor::mount(const char* source, const char* target, const char* type,
+                      unsigned long flags)
+{
+    Ref<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
+    if (!target_desc) {
+        return -ENOENT;
+    }
+    Ref<Descriptor> source_desc = this->open(source, O_RDONLY, 0);
+    if (!source_desc) {
+        return -ENOENT;
+    }
+}
+
 Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 {
     char* path = String::strdup(name);
@@ -205,4 +218,4 @@ ssize_t Descriptor::write(uint8_t* buffer, size_t count)
     }
     return ret;
 }
-}
+}  // namespace Filesystem

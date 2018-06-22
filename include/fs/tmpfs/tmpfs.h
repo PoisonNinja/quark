@@ -1,10 +1,20 @@
 #pragma once
 
+#include <fs/driver.h>
 #include <fs/inode.h>
 #include <lib/list.h>
 
 namespace Filesystem
 {
+class TmpFS : public Driver
+{
+public:
+    TmpFS();
+    ~TmpFS();
+    bool mount(Superblock* sb) override;
+    uint32_t flags() override;
+};
+
 namespace InitFS
 {
 struct InitFSNode {
@@ -42,5 +52,5 @@ private:
     Ref<Inode> find_child(const char* name);
     List<InitFSNode, &InitFSNode::node> children;
 };
-}
-}
+}  // namespace InitFS
+}  // namespace Filesystem

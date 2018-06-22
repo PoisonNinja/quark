@@ -1,12 +1,31 @@
 #include <errno.h>
 #include <fs/fs.h>
-#include <fs/initfs/initfs.h>
 #include <fs/stat.h>
+#include <fs/tmpfs/tmpfs.h>
 #include <kernel.h>
 #include <lib/string.h>
 
 namespace Filesystem
 {
+TmpFS::TmpFS()
+{
+}
+
+TmpFS::~TmpFS()
+{
+}
+
+bool TmpFS::mount(Superblock* sb)
+{
+    sb->root = Ref<Inode>(new InitFS::Directory(0, 0, 0755));
+    return true;
+}
+
+uint32_t TmpFS::flags()
+{
+    return driver_pseudo;
+}
+
 namespace InitFS
 {
 InitFSNode::InitFSNode(Ref<Inode> inode, const char* name)
@@ -129,5 +148,5 @@ Ref<Inode> Directory::find_child(const char* name)
     }
     return Ref<Inode>(nullptr);
 }
-}
-}
+}  // namespace InitFS
+}  // namespace Filesystem

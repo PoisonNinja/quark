@@ -11,5 +11,6 @@ target_sources(quark.kernel
 )
 
 add_subdirectory(pty)
-add_subdirectory(initfs)
 add_subdirectory(initrd)
+add_subdirectory(tmpfs)
+

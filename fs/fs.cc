@@ -1,9 +1,9 @@
 #include <drivers/tty/vga.h>
 #include <fs/descriptor.h>
 #include <fs/fs.h>
-#include <fs/initfs/initfs.h>
 #include <fs/inode.h>
 #include <fs/pty.h>
+#include <fs/tmpfs/tmpfs.h>
 #include <fs/tty.h>
 #include <fs/vnode.h>
 #include <kernel.h>

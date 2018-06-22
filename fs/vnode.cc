@@ -20,6 +20,12 @@ int Vnode::mkdir(const char* name, mode_t mode)
     return inode->mkdir(name, mode);
 }
 
+int Vnode::mount(Mount* mt)
+{
+    this->mounts.push_front(*mt);
+    return 0;
+}
+
 Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 {
     if (!mounts.empty()) {

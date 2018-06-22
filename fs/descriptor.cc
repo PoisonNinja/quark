@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fs/descriptor.h>
 #include <fs/fs.h>
+#include <fs/ftable.h>
 #include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
@@ -138,6 +139,17 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
     if (!source_desc) {
         return -ENOENT;
     }
+    Driver* driver = FTable::get(type);
+    if (!driver) {
+        return -EINVAL;
+    }
+    Superblock* sb = new Superblock();
+    sb->source = source_desc->vnode;
+    driver->mount(sb);
+    Mount* mt = new Mount();
+    mt->target = sb->root;
+    target_desc->vnode->mount(mt);
+    return 0;
 }
 
 Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)

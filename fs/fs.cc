@@ -1,6 +1,7 @@
 #include <drivers/tty/vga.h>
 #include <fs/descriptor.h>
 #include <fs/fs.h>
+#include <fs/ftable.h>
 #include <fs/inode.h>
 #include <fs/pty.h>
 #include <fs/tmpfs/tmpfs.h>
@@ -13,6 +14,7 @@ namespace Filesystem
 {
 void init()
 {
+    FTable::add("tmpfs", new TmpFS());
     Ref<Inode> iroot(new InitFS::Directory(0, 0, 0755));
     Ref<Vnode> vroot(new Vnode(iroot));
     Ref<Descriptor> droot(new Descriptor(vroot));
@@ -22,7 +24,13 @@ void init()
     iroot->link(".", iroot);
     iroot->link("..", iroot);
     droot->mkdir("dev", 0666);
+    droot->mkdir("tmp", 0666);
     droot->link("dev/tty", dtty);
+    droot->mount("tmpfs", "dev", "tmpfs", 0);
+    droot->mkdir("tmp/a", 0666);
+    droot->open("tmp/a/b", O_CREAT, 0755);
+    for (;;)
+        asm("hlt");
     // droot->link("dev/tty1", tty);
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);

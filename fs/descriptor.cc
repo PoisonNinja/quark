@@ -137,6 +137,7 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
      */
     Driver* driver = FTable::get(type);
     if (!driver) {
+        Log::printk(Log::WARNING, "Failed to locate driver for %s\n", type);
         return -EINVAL;
     }
     Ref<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
@@ -149,7 +150,8 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
     }
     Superblock* sb = new Superblock();
     sb->path = source;
-    sb->source = source_desc->vnode;
+    if (source_desc)
+        sb->source = source_desc->vnode;
     driver->mount(sb);
     Mount* mt = new Mount();
     mt->target = sb->root;

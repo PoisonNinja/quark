@@ -29,8 +29,7 @@ void init()
     droot->mount("tmpfs", "dev", "tmpfs", 0);
     droot->mkdir("tmp/a", 0666);
     droot->open("tmp/a/b", O_CREAT, 0755);
-    for (;;)
-        asm("hlt");
+
     // droot->link("dev/tty1", tty);
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);

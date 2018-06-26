@@ -22,7 +22,7 @@ public:
         return !(*this == k);
     }
 
-    // private:
+private:
     ino_t ino;
     dev_t dev;
 };

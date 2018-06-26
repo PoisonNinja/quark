@@ -54,6 +54,9 @@ File::File(ino_t ino, dev_t dev, mode_t mode)
 
 File::~File()
 {
+    if (this->data) {
+        delete[] data;
+    }
 }
 
 ssize_t File::pread(uint8_t* buffer, size_t count, off_t offset)

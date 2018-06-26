@@ -31,8 +31,8 @@ public:
     };
     void decrement_refcount()
     {
-        count--;
-        if (!count) {
+        bool need_delete = !count || !--count;
+        if (need_delete) {
             delete this;
         }
     };

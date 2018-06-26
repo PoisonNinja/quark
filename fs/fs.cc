@@ -3,7 +3,7 @@
 #include <fs/fs.h>
 #include <fs/ftable.h>
 #include <fs/inode.h>
-#include <fs/pty.h>
+#include <fs/pty/pts.h>
 #include <fs/tmpfs/tmpfs.h>
 #include <fs/tty.h>
 #include <fs/vnode.h>
@@ -15,6 +15,8 @@ namespace Filesystem
 void init()
 {
     FTable::add("tmpfs", new TmpFS());
+    FTable::add("pts", new PTS());
+
     Ref<Inode> iroot(new InitFS::Directory(0, 0, 0755));
     Ref<Vnode> vroot(new Vnode(iroot));
     Ref<Descriptor> droot(new Descriptor(vroot));
@@ -27,7 +29,9 @@ void init()
     droot->mkdir("tmp", 0666);
     droot->link("dev/tty", dtty);
 
-    // droot->link("dev/tty1", tty);
+    droot->mkdir("dev/pts", 0666);
+    droot->mount("pts", "dev/pts", "pts", 0);
+
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);
 }

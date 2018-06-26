@@ -1,12 +1,17 @@
 #pragma once
 
+#include <fs/driver.h>
 #include <fs/inode.h>
 
 namespace Filesystem
 {
-class PTS : public BaseInode
+class PTS : public Driver
 {
 public:
-private:
+    PTS();
+    ~PTS();
+
+    bool mount(Superblock* sb) override;
+    uint32_t flags() override;
 };
 }  // namespace Filesystem

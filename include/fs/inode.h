@@ -42,4 +42,4 @@ protected:
     uid_t uid;
     gid_t gid;
 };
-}
+}  // namespace Filesystem

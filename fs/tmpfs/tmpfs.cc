@@ -139,9 +139,7 @@ int Directory::mkdir(const char* name, mode_t mode)
 
 Ref<Inode> Directory::find_child(const char* name)
 {
-    Log::printk(Log::DEBUG, "[find_child]: Looking for: %s\n", name);
     for (auto& i : children) {
-        Log::printk(Log::DEBUG, "[find_child]: %s\n", i.name);
         if (!String::strcmp(i.name, name)) {
             return i.inode;
         }

@@ -26,7 +26,7 @@ void init()
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
     droot->link("dev/tty", dtty);
-    droot->mount("tmpfs", "dev", "tmpfs", 0);
+    droot->mount("tmpfs", "tmp", "tmpfs", 0);
     droot->mkdir("tmp/a", 0666);
     droot->open("tmp/a/b", O_CREAT, 0755);
 

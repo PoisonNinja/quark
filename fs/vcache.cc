@@ -41,7 +41,6 @@ namespace VCache
 {
 bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
 {
-    Log::printk(Log::INFO, "Add: %p %p\n", ino, dev);
     Ref<Vnode> dummy(nullptr);
     Key key(ino, dev);
     if (vcache_hash.get(key, dummy)) {
@@ -55,7 +54,6 @@ bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
 
 Ref<Vnode> get(ino_t ino, dev_t dev)
 {
-    Log::printk(Log::INFO, "Get: %p %p\n", ino, dev);
     Ref<Vnode> dummy = Ref<Vnode>(nullptr);
     Key key(ino, dev);
     vcache_hash.get(key, dummy);

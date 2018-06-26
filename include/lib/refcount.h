@@ -53,7 +53,7 @@ template <class T>
 class Ref
 {
 public:
-    constexpr Ref() : obj(NULL)
+    constexpr Ref() : obj(nullptr)
     {
     }
     explicit Ref(T* obj) : obj(obj)
@@ -90,7 +90,7 @@ public:
             return *this;
         if (obj) {
             obj->decrement_refcount();
-            obj = NULL;
+            obj = nullptr;
         }
         if ((obj = r.allocate()))
             obj->increment_refcount();
@@ -104,7 +104,7 @@ public:
             return *this;
         if (obj) {
             obj->decrement_refcount();
-            obj = NULL;
+            obj = nullptr;
         }
         if ((obj = r.allocate()))
             obj->increment_refcount();
@@ -149,7 +149,7 @@ public:
     {
         if (obj)
             obj->decrement_refcount();
-        obj = NULL;
+        obj = nullptr;
     }
     T* allocate() const
     {
@@ -165,7 +165,7 @@ public:
     }
     operator bool() const
     {
-        return obj != NULL;
+        return obj != nullptr;
     }
     size_t refcount() const
     {

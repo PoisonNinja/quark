@@ -24,7 +24,7 @@ class RefcountBase
 {
 public:
     RefcountBase() : count(0){};
-    ~RefcountBase(){};
+    virtual ~RefcountBase(){};
     void increment_refcount()
     {
         count++;

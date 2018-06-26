@@ -32,7 +32,7 @@ class HashNode
 {
 public:
     HashNode(const K &key, const V &value)
-        : _key(key), _value(value), _next(NULL)
+        : _key(key), _value(value), _next(nullptr)
     {
     }
 
@@ -63,7 +63,7 @@ public:
 
 private:
     // key-value pair
-    K _key;
+    const K _key;
     V _value;
     // next bucket with the same key
     HashNode *_next;
@@ -88,13 +88,13 @@ public:
         for (size_t i = 0; i < tableSize; ++i) {
             HashNode<K, V> *entry = table[i];
 
-            while (entry != NULL) {
+            while (entry != nullptr) {
                 HashNode<K, V> *prev = entry;
                 entry = entry->next();
                 delete prev;
             }
 
-            table[i] = NULL;
+            table[i] = nullptr;
         }
     }
 
@@ -103,7 +103,7 @@ public:
         unsigned long hashValue = hash(key);
         HashNode<K, V> *entry = table[hashValue];
 
-        while (entry != NULL) {
+        while (entry != nullptr) {
             if (entry->key() == key) {
                 value = entry->value();
                 return true;
@@ -118,18 +118,18 @@ public:
     void put(const K &key, const V &value)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev = NULL;
+        HashNode<K, V> *prev = nullptr;
         HashNode<K, V> *entry = table[hashValue];
 
-        while (entry != NULL && entry->key() != key) {
+        while (entry != nullptr && entry->key() != key) {
             prev = entry;
             entry = entry->next();
         }
 
-        if (entry == NULL) {
+        if (entry == nullptr) {
             entry = new HashNode<K, V>(key, value);
 
-            if (prev == NULL) {
+            if (prev == nullptr) {
                 // insert as first bucket
                 table[hashValue] = entry;
 
@@ -146,20 +146,20 @@ public:
     void remove(const K &key)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev = NULL;
+        HashNode<K, V> *prev = nullptr;
         HashNode<K, V> *entry = table[hashValue];
 
-        while (entry != NULL && entry->key() != key) {
+        while (entry != nullptr && entry->key() != key) {
             prev = entry;
             entry = entry->next();
         }
 
-        if (entry == NULL) {
+        if (entry == nullptr) {
             // key not found
             return;
 
         } else {
-            if (prev == NULL) {
+            if (prev == nullptr) {
                 // remove first bucket of the list
                 table[hashValue] = entry->next();
 

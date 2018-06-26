@@ -1,4 +1,6 @@
+#include <fs/vcache.h>
 #include <fs/vnode.h>
+#include <kernel.h>
 
 namespace Filesystem
 {
@@ -28,14 +30,21 @@ int Vnode::mount(Mount* mt)
 
 Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 {
-    if (!mounts.empty()) {
-        return Ref<Vnode>(new Vnode(mounts.front().target));
-    }
     Ref<Inode> retinode = inode->open(name, flags, mode);
     if (!retinode) {
         return Ref<Vnode>(nullptr);
     }
-    return Ref<Vnode>(new Vnode(retinode));
+    Ref<Vnode> retvnode = VCache::get(retinode->ino, retinode->dev);
+    if (!retvnode) {
+        Log::printk(Log::WARNING, "Failed to find %s in cache\n", name);
+        retvnode = Ref<Vnode>(new Vnode(retinode));
+        VCache::add(retinode->ino, retinode->dev, retvnode);
+    }
+    if (!retvnode->mounts.empty()) {
+        Log::printk(Log::INFO, "Transitioning mountpoints\n");
+        return Ref<Vnode>(new Vnode(retvnode->mounts.front().target));
+    }
+    return retvnode;
 }
 
 ssize_t Vnode::pread(uint8_t* buffer, size_t count, off_t offset)

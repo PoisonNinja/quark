@@ -9,14 +9,17 @@
 
 namespace Scheduler
 {
-static class List<Thread, &Thread::scheduler_node> runnable;
-static Thread* current_thread;
-static Process* kernel_process;
-static Thread* kidle;
+namespace
+{
+List<Thread, &Thread::scheduler_node> run_queue;
+Thread* current_thread;
+Process* kernel_process;
+Thread* kidle;
 
-static PTable ptable;
+PTable ptable;
 
-static bool _online = false;
+bool _online = false;
+}  // namespace
 
 void idle()
 {
@@ -36,16 +39,18 @@ pid_t get_free_pid()
 
 bool insert(Thread* thread)
 {
-    runnable.push_front(*thread);
+    thread->state = RUNNABLE;
+    run_queue.push_front(*thread);
     return true;
 }
 
 bool remove(Thread* thread)
 {
-    for (auto it = runnable.begin(); it != runnable.end(); ++it) {
+    for (auto it = run_queue.begin(); it != run_queue.end(); ++it) {
         auto& value = *it;
         if (&value == thread) {
-            runnable.erase(it);
+            thread->state = UNMANAGED;
+            run_queue.erase(it);
             return true;
         }
     }
@@ -55,12 +60,12 @@ bool remove(Thread* thread)
 Thread* next()
 {
     Thread* next = nullptr;
-    if (runnable.empty()) {
+    if (run_queue.empty()) {
         next = kidle;
     } else {
-        next = &runnable.front();
+        next = &run_queue.front();
         remove(next);
-        runnable.push_back(*next);
+        run_queue.push_back(*next);
     }
     return next;
 }

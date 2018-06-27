@@ -53,21 +53,21 @@ Ref<Inode> PTSD::open(const char* name, int flags, mode_t mode)
 {
 }
 
-PTS::PTS()
+PTSFS::PTSFS()
 {
 }
 
-PTS::~PTS()
+PTSFS::~PTSFS()
 {
 }
 
-bool PTS::mount(Superblock* sb)
+bool PTSFS::mount(Superblock* sb)
 {
     sb->root = Ref<Inode>(new PTSD(0, 0, 0755));
     return true;
 }
 
-uint32_t PTS::flags()
+uint32_t PTSFS::flags()
 {
     return driver_pseudo;
 }

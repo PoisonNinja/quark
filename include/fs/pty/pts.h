@@ -5,11 +5,11 @@
 
 namespace Filesystem
 {
-class PTS : public Driver
+class PTSFS : public Driver
 {
 public:
-    PTS();
-    ~PTS();
+    PTSFS();
+    ~PTSFS();
 
     bool mount(Superblock* sb) override;
     uint32_t flags() override;

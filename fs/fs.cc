@@ -15,7 +15,7 @@ namespace Filesystem
 void init()
 {
     FTable::add("tmpfs", new TmpFS());
-    FTable::add("pts", new PTS());
+    FTable::add("pts", new PTSFS());
 
     Ref<Inode> iroot(new InitFS::Directory(0, 0, 0755));
     Ref<Vnode> vroot(new Vnode(iroot));

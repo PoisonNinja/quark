@@ -33,7 +33,7 @@ bool remove(Thread* thread);
 
 void init();
 void switch_next(struct InterruptContext* ctx);
-void __attribute__((noreturn)) yield();
+void yield();
 
 Process* get_current_process();
 Thread* get_current_thread();

@@ -34,6 +34,10 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
     if (!retinode) {
         return Ref<Vnode>(nullptr);
     }
+    if (retinode->flags & inode_factory) {
+        Log::printk(Log::INFO, "Opening factory inode...\n");
+        retinode = retinode->open(name, flags, mode);
+    }
     Ref<Vnode> retvnode = VCache::get(retinode->ino, retinode->dev);
     if (!retvnode) {
         Log::printk(Log::WARNING, "Failed to find %s in cache\n", name);

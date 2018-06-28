@@ -9,6 +9,7 @@ BaseInode::BaseInode()
     ino = 0;
     dev = 0;
     mode = 0;
+    flags = 0;
 }
 
 BaseInode::~BaseInode()
@@ -60,4 +61,4 @@ ssize_t BaseInode::write(uint8_t*, size_t)
 {
     return -EBADF;
 }
-}
+}  // namespace Filesystem

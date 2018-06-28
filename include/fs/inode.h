@@ -5,12 +5,15 @@
 
 namespace Filesystem
 {
+constexpr int inode_factory = (1 << 0);
+
 class Inode : public RefcountBase
 {
 public:
     ino_t ino;
     dev_t dev;
     mode_t mode;
+    int flags;
 
     virtual ~Inode(){};
     virtual int link(const char* name, Ref<Inode> node) = 0;

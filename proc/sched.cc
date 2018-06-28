@@ -27,21 +27,35 @@ bool Waiter::check(token_t token)
     return token == this->token;
 }
 
+bool Waiter::operator==(const Waiter& other) const
+{
+    return this->token == other.token;
+}
+
+Thread* Waiter::get_thread()
+{
+    return this->thread;
+}
+
 bool broadcast(token_t token)
 {
     for (auto& sleeper : sleep_queue) {
         if (sleeper.check(token)) {
-            Log::printk(Log::WARNING, "Sleeper is ready to be woken, we should "
-                                      "probably actually do it\n");
+            Log::printk(Log::DEBUG, "Sleeper is ready to be woken, %p\n");
+            Scheduler::insert(sleeper.get_thread());
+            sleep_queue.remove(sleeper);
             return true;
         }
     }
     return false;
 }
 
-void add(Waiter& waiter)
+void wait(token_t token, int flags)
 {
-    sleep_queue.push_back(waiter);
+    Waiter* waiter = new Waiter(Scheduler::get_current_thread(), token, flags);
+    sleep_queue.push_back(*waiter);
+    Scheduler::remove(Scheduler::get_current_thread());
+    yield();
 }
 
 void idle()

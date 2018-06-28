@@ -11,18 +11,22 @@ typedef void* token_t;
 class Waiter
 {
 public:
-    Waiter(Thread* t, token_t token) : thread(t), token(token){};
+    Waiter(Thread* t, token_t token, int flags)
+        : thread(t), token(token), flags(flags){};
     virtual ~Waiter(){};
+    bool operator==(const Waiter& other) const;
     virtual bool check(token_t token);
+    virtual Thread* get_thread();
     Node<Waiter> node;
 
 protected:
     Thread* thread;
     token_t token;
+    int flags;
 };
 
 bool broadcast(token_t token);
-void add(Waiter& waiter);
+void wait(token_t token, int flags);
 
 constexpr int wait_interruptible = (1 << 0);
 

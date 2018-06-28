@@ -39,15 +39,19 @@ Thread* Waiter::get_thread()
 
 bool broadcast(token_t token)
 {
-    for (auto& sleeper : sleep_queue) {
-        if (sleeper.check(token)) {
+    bool found = false;
+    auto it = sleep_queue.begin();
+    while (it != sleep_queue.end()) {
+        if ((*it).check(token)) {
             Log::printk(Log::DEBUG, "Sleeper is ready to be woken, %p\n");
-            Scheduler::insert(sleeper.get_thread());
-            sleep_queue.remove(sleeper);
-            return true;
+            Scheduler::insert((*it).get_thread());
+            it = sleep_queue.erase(it);
+            found = true;
+        } else {
+            ++it;
         }
     }
-    return false;
+    return found;
 }
 
 void wait(token_t token, int flags)

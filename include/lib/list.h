@@ -174,6 +174,17 @@ public:
                             this->content.prev) = it.current;
         return iterator<T, Link>(&(it.current->next->*Link));
     }
+    void remove(const T& value)
+    {
+        iterator<T, Link> i = begin();
+        while (i != end()) {
+            if (*i == value) {
+                i = erase(i);
+            } else {
+                ++i;
+            }
+        }
+    }
     void reset()
     {
         this->content = Node<T>();

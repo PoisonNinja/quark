@@ -6,6 +6,26 @@
 
 namespace Scheduler
 {
+typedef void* token_t;
+
+class Waiter
+{
+public:
+    Waiter(Thread* t, token_t token) : thread(t), token(token){};
+    virtual ~Waiter(){};
+    virtual bool check(token_t token);
+    Node<Waiter> node;
+
+protected:
+    Thread* thread;
+    token_t token;
+};
+
+bool broadcast(token_t token);
+void add(Waiter& waiter);
+
+constexpr int wait_interruptible = (1 << 0);
+
 void idle();
 
 bool insert(Thread* thread);

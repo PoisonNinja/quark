@@ -12,6 +12,7 @@ namespace Scheduler
 namespace
 {
 List<Thread, &Thread::scheduler_node> run_queue;
+List<Waiter, &Waiter::node> sleep_queue;
 Thread* current_thread;
 Process* kernel_process;
 Thread* kidle;
@@ -20,6 +21,28 @@ PTable ptable;
 
 bool _online = false;
 }  // namespace
+
+bool Waiter::check(token_t token)
+{
+    return token == this->token;
+}
+
+bool broadcast(token_t token)
+{
+    for (auto& sleeper : sleep_queue) {
+        if (sleeper.check(token)) {
+            Log::printk(Log::WARNING, "Sleeper is ready to be woken, we should "
+                                      "probably actually do it\n");
+            return true;
+        }
+    }
+    return false;
+}
+
+void add(Waiter& waiter)
+{
+    sleep_queue.push_back(waiter);
+}
 
 void idle()
 {

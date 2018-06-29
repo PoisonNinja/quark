@@ -182,6 +182,10 @@ static void sys_sigreturn(ucontext_t* uctx)
      */
     String::memcpy(&tctx, &Scheduler::get_current_thread()->tcontext,
                    sizeof(tctx));
+    // Unset on_stack
+    if (Scheduler::get_current_thread()->signal_stack.ss_flags & SS_ONSTACK) {
+        Scheduler::get_current_thread()->signal_stack.ss_flags &= ~SS_ONSTACK;
+    }
     // Restore signal mask
     Scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
     Signal::decode_mcontext(&uctx->uc_mcontext, &tctx);

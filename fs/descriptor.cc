@@ -211,7 +211,7 @@ bool Descriptor::seekable()
 ssize_t Descriptor::read(uint8_t* buffer, size_t count)
 {
     ssize_t ret = pread(buffer, count, current_offset);
-    if (ret > 0) {
+    if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
         current_offset += ret;
     }
@@ -225,15 +225,10 @@ int Descriptor::stat(struct stat* st)
 
 ssize_t Descriptor::write(uint8_t* buffer, size_t count)
 {
-    ssize_t ret = 0;
-    if (this->seekable()) {
-        ret = pwrite(buffer, count, current_offset);
-        if (ret > 0) {
-            // TODO: Properly handle overflows
-            current_offset += ret;
-        }
-    } else {
-        ret = vnode->write(buffer, count, current_offset);
+    ssize_t ret = pwrite(buffer, count, current_offset);
+    if (ret > 0 && this->seekable()) {
+        // TODO: Properly handle overflows
+        current_offset += ret;
     }
     return ret;
 }

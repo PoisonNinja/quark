@@ -45,11 +45,6 @@ void dispatch(int int_no, struct InterruptContext* ctx)
     if (!is_exception(int_no)) {
         IrqChip::ack(Interrupt::interrupt_to_irq(int_no));
     }
-    if (Scheduler::online()) {
-        if (Scheduler::get_current_thread()->signal_required) {
-            Scheduler::get_current_thread()->handle_signal(ctx);
-        }
-    }
 }
 
 bool register_handler(uint32_t int_no, Interrupt::Handler& handler)

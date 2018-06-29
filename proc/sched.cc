@@ -130,13 +130,16 @@ void switch_next(struct InterruptContext* ctx)
     Thread* next_thread = next();
     switch_context(ctx, current_thread, next_thread);
     current_thread = next_thread;
+    if (Scheduler::online()) {
+        if (Scheduler::get_current_thread()->signal_required) {
+            Scheduler::get_current_thread()->handle_signal(ctx);
+        }
+    }
 }
 
 void yield_switch(int, void*, struct InterruptContext* ctx)
 {
-    Thread* next_thread = next();
-    switch_context(ctx, current_thread, next_thread);
-    current_thread = next_thread;
+    switch_next(ctx);
 }
 
 Interrupt::Handler yield_handler(yield_switch, "yield", &yield_handler);

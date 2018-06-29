@@ -3,6 +3,7 @@
 #include <fs/fs.h>
 #include <fs/ftable.h>
 #include <fs/inode.h>
+#include <fs/pty/ptm.h>
 #include <fs/pty/pts.h>
 #include <fs/tmpfs/tmpfs.h>
 #include <fs/tty.h>
@@ -23,12 +24,17 @@ void init()
     Ref<Inode> tty(new VGATTY());
     Ref<Vnode> vtty(new Vnode(tty));
     Ref<Descriptor> dtty(new Descriptor(vtty));
+    Ref<Inode> ptmx(new PTMX(0, 0, 0755));
+    Ref<Vnode> vptmx(new Vnode(ptmx));
+    Ref<Descriptor> dptmx(new Descriptor(vptmx));
     iroot->link(".", iroot);
     iroot->link("..", iroot);
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
     droot->link("dev/tty", dtty);
 
+    // Initialize the PTY subsystem
+    droot->link("dev/ptmx", dptmx);
     droot->mkdir("dev/pts", 0666);
     droot->mount("pts", "dev/pts", "pts", 0);
 

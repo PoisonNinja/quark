@@ -192,12 +192,12 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 
 ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
 {
-    return vnode->pread(buffer, count, offset);
+    return vnode->read(buffer, count, offset);
 }
 
 ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
 {
-    return vnode->pwrite(buffer, count, offset);
+    return vnode->write(buffer, count, offset);
 }
 
 bool Descriptor::seekable()
@@ -233,7 +233,7 @@ ssize_t Descriptor::write(uint8_t* buffer, size_t count)
             current_offset += ret;
         }
     } else {
-        ret = vnode->write(buffer, count);
+        ret = vnode->write(buffer, count, current_offset);
     }
     return ret;
 }

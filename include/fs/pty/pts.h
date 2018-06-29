@@ -20,9 +20,8 @@ class PTSN : public BaseInode
 public:
     PTSN(ino_t ino, dev_t dev, mode_t mode);
     virtual ~PTSN();
-    virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset) override;
-    virtual ssize_t pwrite(uint8_t* buffer, size_t count,
-                           off_t offset) override;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
 };
 
 struct PTSNWrapper {

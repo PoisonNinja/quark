@@ -51,19 +51,14 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
     return retvnode;
 }
 
-ssize_t Vnode::pread(uint8_t* buffer, size_t count, off_t offset)
+ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset)
 {
-    return inode->pread(buffer, count, offset);
+    return inode->read(buffer, count, offset);
 }
 
-ssize_t Vnode::pwrite(uint8_t* buffer, size_t count, off_t offset)
+ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
 {
-    return inode->pwrite(buffer, count, offset);
-}
-
-ssize_t Vnode::read(uint8_t* buffer, size_t count)
-{
-    return inode->read(buffer, count);
+    return inode->write(buffer, count, offset);
 }
 
 int Vnode::stat(struct stat* st)
@@ -71,8 +66,4 @@ int Vnode::stat(struct stat* st)
     return inode->stat(st);
 }
 
-ssize_t Vnode::write(uint8_t* buffer, size_t count)
-{
-    return inode->write(buffer, count);
-}
 }  // namespace Filesystem

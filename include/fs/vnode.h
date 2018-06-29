@@ -19,11 +19,9 @@ public:
     int mkdir(const char* name, mode_t mode);
     int mount(Mount* mt);
     Ref<Vnode> open(const char* name, int flags, mode_t mode);
-    ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
-    ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
-    ssize_t read(uint8_t* buffer, size_t count);
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset);
+    ssize_t write(uint8_t* buffer, size_t count, off_t offset);
     int stat(struct stat* st);
-    ssize_t write(uint8_t* buffer, size_t count);
 
 private:
     List<Mount, &Mount::node> mounts;

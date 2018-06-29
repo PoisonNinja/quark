@@ -19,9 +19,8 @@ public:
     virtual int link(const char* name, Ref<Inode> node) = 0;
     virtual int mkdir(const char* name, mode_t mode) = 0;
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) = 0;
-    virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset) = 0;
-    virtual ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset) = 0;
-    virtual ssize_t read(uint8_t* buffer, size_t count) = 0;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual int stat(struct stat* st) = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count) = 0;
 };
@@ -34,9 +33,8 @@ public:
     virtual int link(const char* name, Ref<Inode> node);
     virtual int mkdir(const char* name, mode_t mode);
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode);
-    virtual ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
-    virtual ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
-    virtual ssize_t read(uint8_t* buffer, size_t count);
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset);
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset);
     virtual int stat(struct stat* st);
     virtual ssize_t write(uint8_t* buffer, size_t count);
 

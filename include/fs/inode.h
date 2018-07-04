@@ -22,7 +22,6 @@ public:
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual int stat(struct stat* st) = 0;
-    virtual ssize_t write(uint8_t* buffer, size_t count) = 0;
 };
 
 class BaseInode : public Inode
@@ -36,7 +35,6 @@ public:
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset);
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset);
     virtual int stat(struct stat* st);
-    virtual ssize_t write(uint8_t* buffer, size_t count);
 
 protected:
     size_t size;

@@ -52,8 +52,4 @@ int BaseInode::stat(struct stat* st)
     return 0;
 }
 
-ssize_t BaseInode::write(uint8_t*, size_t)
-{
-    return -EBADF;
-}
 }  // namespace Filesystem

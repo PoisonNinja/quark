@@ -27,6 +27,7 @@ void init()
     Ref<Inode> ptmx(new PTMX(0, 0, 0755));
     Ref<Vnode> vptmx(new Vnode(ptmx));
     Ref<Descriptor> dptmx(new Descriptor(vptmx));
+
     iroot->link(".", iroot);
     iroot->link("..", iroot);
     droot->mkdir("dev", 0666);

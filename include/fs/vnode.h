@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fs/dev.h>
 #include <fs/inode.h>
 #include <fs/mount.h>
 #include <lib/list.h>
@@ -12,6 +13,7 @@ class Vnode : public RefcountBase
 public:
     ino_t ino;
     dev_t dev;
+    dev_t rdev;
     mode_t mode;
 
     Vnode(Ref<Inode> inode);
@@ -25,6 +27,7 @@ public:
 
 private:
     List<Mount, &Mount::node> mounts;
+    KDevice* kdev;
     Ref<Inode> inode;
 };
 }  // namespace Filesystem

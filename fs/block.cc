@@ -15,7 +15,7 @@ private:
     BlockDevice* blkdev;
 };
 
-BlockWrapper::BlockWrapper(BlockDevice* bd) : blkdev(bd)
+BlockWrapper::BlockWrapper(BlockDevice* bd) : blkdev(bd), KDevice(BLK)
 {
 }
 

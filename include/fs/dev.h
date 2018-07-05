@@ -19,9 +19,12 @@ constexpr dev_t mkdev(dev_t major, dev_t minor)
     return ((major & 0xFF) << 8) | ((minor & 0xFF) << 0);
 }
 
+enum DeviceClass { BLK, CHR };
+
 class KDevice
 {
 public:
+    KDevice(DeviceClass type) : type(type){};
     virtual ~KDevice(){};
 
     const char* name;
@@ -29,9 +32,10 @@ public:
     // A subset of Inode operations
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
-};
 
-enum DeviceClass { BLK, CHR };
+protected:
+    DeviceClass type;
+};
 
 bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev);
 

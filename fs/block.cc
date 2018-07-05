@@ -25,10 +25,14 @@ BlockWrapper::~BlockWrapper()
 
 ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
 {
+    // TODO: Eventually implement a more intelligent scheduler
+    return blkdev->read(buffer, count, offset);
 }
 
 ssize_t BlockWrapper::write(uint8_t* buffer, size_t count, off_t offset)
 {
+    // TODO: Eventually implement a more intelligent scheduler
+    return blkdev->write(buffer, count, offset);
 }
 
 bool register_blockdev(dev_t major, BlockDevice* blkdev)

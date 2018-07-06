@@ -154,7 +154,7 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
         sb->source = source_desc->vnode;
     driver->mount(sb);
     Mount* mt = new Mount();
-    mt->target = sb->root;
+    mt->sb = sb;
     target_desc->vnode->mount(mt);
     return 0;
 }

@@ -4,11 +4,17 @@
 
 namespace Filesystem
 {
-Vnode::Vnode(Ref<Inode> inode)
+Vnode::Vnode(Superblock* sb, Ref<Inode> inode) : Vnode(sb, inode, inode->dev, 0)
 {
+}
+
+Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t d, dev_t rd)
+{
+    this->sb = sb;
     this->inode = inode;
     this->ino = inode->ino;
-    this->dev = inode->dev;
+    this->dev = d;
+    this->rdev = rd;
     this->mode = inode->mode;
 }
 
@@ -38,15 +44,20 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
         Log::printk(Log::INFO, "Opening factory inode...\n");
         retinode = retinode->open(name, flags, mode);
     }
-    Ref<Vnode> retvnode = VCache::get(retinode->ino, retinode->dev);
+    Ref<Vnode> retvnode = VCache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
         Log::printk(Log::WARNING, "Failed to find %s in cache\n", name);
-        retvnode = Ref<Vnode>(new Vnode(retinode));
-        VCache::add(retinode->ino, retinode->dev, retvnode);
-    }
-    if (!retvnode->mounts.empty()) {
-        Log::printk(Log::INFO, "Transitioning mountpoints\n");
-        return Ref<Vnode>(new Vnode(retvnode->mounts.front().target));
+        retvnode = Ref<Vnode>(new Vnode(this->sb, retinode, this->sb->rdev, 0));
+        VCache::add(retvnode->ino, retvnode->dev, retvnode);
+    } else {
+        // New Vnodes cannot have a mountpoint so we can bypass this check if
+        // the vnode was just created
+        if (!retvnode->mounts.empty()) {
+            Superblock* newsb = retvnode->mounts.front().sb;
+            Log::printk(Log::INFO,
+                        "Transitioning mountpoints, superblock at %p\n", newsb);
+            return Ref<Vnode>(new Vnode(newsb, newsb->root, newsb->rdev, 0));
+        }
     }
     return retvnode;
 }

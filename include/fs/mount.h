@@ -9,7 +9,7 @@ namespace Filesystem
 class Vnode;
 
 struct Mount {
-    Ref<Inode> target;
+    Superblock* sb;
     Node<Mount> node;
 };
 }  // namespace Filesystem

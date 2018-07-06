@@ -18,13 +18,6 @@ void init()
     FTable::add("tmpfs", new TmpFS());
     FTable::add("pts", new PTSFS());
 
-    Superblock* rootsb = new Superblock();
-    FTable::get("tmpfs")->mount(rootsb);
-
-    Ref<Inode> iroot(new InitFS::Directory(0, 0, 0755));
-    Ref<Vnode> vroot(new Vnode(rootsb, iroot));
-    Ref<Descriptor> droot(new Descriptor(vroot));
-
     // Ref<Inode> tty(new VGATTY());
     // Ref<Vnode> vtty(new Vnode(tty));
     // Ref<Descriptor> dtty(new Descriptor(vtty));
@@ -32,8 +25,13 @@ void init()
     // Ref<Vnode> vptmx(new Vnode(ptmx));
     // Ref<Descriptor> dptmx(new Descriptor(vptmx));
 
-    iroot->link(".", iroot);
-    iroot->link("..", iroot);
+    // Initialize the root filesystem
+    Superblock* rootsb = new Superblock();
+    FTable::get("tmpfs")->mount(rootsb);
+
+    Ref<Vnode> vroot(new Vnode(rootsb, rootsb->root));
+    Ref<Descriptor> droot(new Descriptor(vroot));
+
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
     // droot->link("dev/tty", dtty);

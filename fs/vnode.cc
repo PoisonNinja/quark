@@ -28,6 +28,11 @@ int Vnode::mkdir(const char* name, mode_t mode)
     return inode->mkdir(name, mode);
 }
 
+int Vnode::mknod(const char* name, mode_t mode, dev_t dev)
+{
+    return inode->mknod(name, mode, dev);
+}
+
 int Vnode::mount(Mount* mt)
 {
     this->mounts.push_front(*mt);

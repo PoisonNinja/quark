@@ -17,6 +17,7 @@ public:
     int link(const char* name, Ref<Descriptor> node);
     off_t lseek(off_t offset, int whence);
     int mkdir(const char* name, mode_t mode);
+    int mknod(const char* name, mode_t mode, dev_t dev);
     int mount(const char* source, const char* target, const char* type,
               unsigned long flags);
     Ref<Descriptor> open(const char* name, int flags, mode_t mode);

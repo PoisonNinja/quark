@@ -18,6 +18,7 @@ public:
     virtual ~Inode(){};
     virtual int link(const char* name, Ref<Inode> node) = 0;
     virtual int mkdir(const char* name, mode_t mode) = 0;
+    virtual int mknod(const char* name, mode_t mode, dev_t dev) = 0;
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) = 0;
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
@@ -31,6 +32,7 @@ public:
     virtual ~BaseInode();
     virtual int link(const char* name, Ref<Inode> node);
     virtual int mkdir(const char* name, mode_t mode);
+    virtual int mknod(const char* name, mode_t mode, dev_t dev);
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode);
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset);
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset);

@@ -128,6 +128,24 @@ int Descriptor::mkdir(const char* name, mode_t mode)
     return ret;
 }
 
+int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
+{
+    const char* dir = dirname(name);
+    const char* file = basename(name);
+    Log::printk(Log::DEBUG, "[descriptor->mknod] dir: %s file: %s\n", dir,
+                file);
+    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+    if (!directory) {
+        delete[] dir;
+        delete[] file;
+        return -ENOENT;
+    }
+    int ret = directory->vnode->mknod(file, mode, dev);
+    delete[] dir;
+    delete[] file;
+    return ret;
+}
+
 int Descriptor::mount(const char* source, const char* target, const char* type,
                       unsigned long flags)
 {

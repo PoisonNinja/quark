@@ -22,6 +22,7 @@ public:
     // Standard file operations
     int link(const char* name, Ref<Vnode> node);
     int mkdir(const char* name, mode_t mode);
+    int mknod(const char* name, mode_t mode, dev_t dev);
     Ref<Vnode> open(const char* name, int flags, mode_t mode);
     ssize_t read(uint8_t* buffer, size_t count, off_t offset);
     ssize_t write(uint8_t* buffer, size_t count, off_t offset);

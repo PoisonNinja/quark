@@ -31,6 +31,8 @@ void init()
 
     Ref<Vnode> vroot(new Vnode(rootsb, rootsb->root));
     Ref<Descriptor> droot(new Descriptor(vroot));
+    vroot->link(".", vroot);
+    vroot->link("..", vroot);
 
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);

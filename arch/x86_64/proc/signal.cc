@@ -34,9 +34,9 @@ void Thread::setup_signal(struct ksignal* ksig,
     String::memcpy(&frame->ucontext, ksig->ucontext, sizeof(frame->ucontext));
     frame->ret_location = this->parent->sigreturn;
 
-    Log::printk(Log::DEBUG, "Going to return to gadget at %p\n",
+    Log::printk(Log::LogLevel::DEBUG, "Going to return to gadget at %p\n",
                 frame->ret_location);
-    Log::printk(Log::DEBUG, "Frame at %p\n", frame);
+    Log::printk(Log::LogLevel::DEBUG, "Frame at %p\n", frame);
 
     new_state->rip = (uint64_t)ksig->sa->sa_handler;
     new_state->rdi = ksig->signum;

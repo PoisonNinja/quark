@@ -32,13 +32,13 @@ void parse(addr_t initrd)
             return;
         }
         size_t size = decode_octal(header->size);
-        Log::printk(Log::INFO, "Name: %s, Size: %zu, Type: %u\n", header->name,
+        Log::printk(Log::LogLevel::INFO, "Name: %s, Size: %zu, Type: %u\n", header->name,
                     size, header->typeflag);
         switch (header->typeflag) {
             case '0':
                 file = root->open(header->name, O_CREAT | O_RDWR, 0755);
                 if (!file) {
-                    Log::printk(Log::ERROR, "Failed to write open file\n");
+                    Log::printk(Log::LogLevel::ERROR, "Failed to write open file\n");
                     break;
                 }
                 file->write(reinterpret_cast<uint8_t*>(current + 512), size);
@@ -54,17 +54,17 @@ void parse(addr_t initrd)
 void init(struct Boot::info& info)
 {
     size_t size = info.initrd_end - info.initrd_start;
-    Log::printk(Log::INFO, "Initrd located at %p - %p, size %p\n",
+    Log::printk(Log::LogLevel::INFO, "Initrd located at %p - %p, size %p\n",
                 info.initrd_start, info.initrd_end, size);
     addr_t virt = Memory::Valloc::allocate(size);
     if (!Memory::Virtual::map_range(virt, info.initrd_start, size,
                                     PAGE_WRITABLE)) {
-        Log::printk(Log::ERROR, "Failed to map initrd into memory\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to map initrd into memory\n");
         return;
     }
     parse(virt);
     Memory::Virtual::unmap_range(virt, size);
-    Log::printk(Log::INFO, "Initrd loaded\n");
+    Log::printk(Log::LogLevel::INFO, "Initrd loaded\n");
 }
 }
 }

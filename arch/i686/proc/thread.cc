@@ -91,39 +91,39 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     tls_size = ROUND_UP(tls_size, parent->tls_alignment);
 
     if (parent->sections->locate_range(argv_zone, USER_START, argv_size)) {
-        Log::printk(Log::DEBUG, "argv located at %p\n", argv_zone);
+        Log::printk(Log::LogLevel::DEBUG, "argv located at %p\n", argv_zone);
         parent->sections->add_section(argv_zone, argv_size);
     } else {
-        Log::printk(Log::ERROR, "Failed to locate argv\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to locate argv\n");
         return false;
     }
     if (parent->sections->locate_range(envp_zone, USER_START, envp_size)) {
-        Log::printk(Log::DEBUG, "envp located at %p\n", envp_zone);
+        Log::printk(Log::LogLevel::DEBUG, "envp located at %p\n", envp_zone);
         parent->sections->add_section(envp_zone, envp_size);
     } else {
-        Log::printk(Log::ERROR, "Failed to locate envp\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to locate envp\n");
         return false;
     }
     if (parent->sections->locate_range(stack_zone, USER_START, 0x1000)) {
-        Log::printk(Log::DEBUG, "Stack located at %p\n", stack_zone);
+        Log::printk(Log::LogLevel::DEBUG, "Stack located at %p\n", stack_zone);
         parent->sections->add_section(stack_zone, 0x1000);
     } else {
-        Log::printk(Log::ERROR, "Failed to locate stack\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to locate stack\n");
         return false;
     }
     if (parent->sections->locate_range(sigreturn_zone, USER_START, 0x1000)) {
-        Log::printk(Log::DEBUG, "Sigreturn page located at %p\n",
+        Log::printk(Log::LogLevel::DEBUG, "Sigreturn page located at %p\n",
                     sigreturn_zone);
         parent->sections->add_section(sigreturn_zone, 0x1000);
     } else {
-        Log::printk(Log::ERROR, "Failed to locate sigreturn page\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to locate sigreturn page\n");
         return false;
     }
     if (parent->sections->locate_range(tls_zone, USER_START, tls_size)) {
-        Log::printk(Log::DEBUG, "TLS copy located at %p\n", tls_zone);
+        Log::printk(Log::LogLevel::DEBUG, "TLS copy located at %p\n", tls_zone);
         parent->sections->add_section(tls_zone, tls_size);
     } else {
-        Log::printk(Log::ERROR, "Failed to locate TLS copy\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to locate TLS copy\n");
         return false;
     }
     Memory::Virtual::map_range(argv_zone, argv_size,

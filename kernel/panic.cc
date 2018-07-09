@@ -17,7 +17,7 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     va_start(args, format);
     vsnprintf(panic_buffer, Kernel::panic_max, format, args);
     va_end(args);
-    Log::printk(Log::ERROR, "%s", panic_buffer);
+    Log::printk(Log::LogLevel::ERROR, "%s", panic_buffer);
     for (;;)
         CPU::halt();
 }

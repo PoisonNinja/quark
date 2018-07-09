@@ -96,7 +96,7 @@ Directory::Directory(ino_t ino, dev_t dev, mode_t mode)
 Directory::~Directory()
 {
     if (!children.empty()) {
-        Log::printk(Log::WARNING,
+        Log::printk(Log::LogLevel::WARNING,
                     "initfs directory freed, but children not freed.\n");
     }
 }

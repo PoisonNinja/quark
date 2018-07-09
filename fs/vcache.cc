@@ -44,7 +44,7 @@ bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
     Ref<Vnode> dummy(nullptr);
     Key key(ino, dev);
     if (vcache_hash.get(key, dummy)) {
-        Log::printk(Log::WARNING,
+        Log::printk(Log::LogLevel::WARNING,
                     "Vnode cache already has this vnode, discarding\n");
         return false;
     }

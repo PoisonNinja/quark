@@ -22,13 +22,13 @@ TSC::TSC()
     if (!CPU::X86::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
 #endif
         Log::printk(
-            Log::WARNING,
+            Log::LogLevel::WARNING,
             "tsc: CPU doesn't support constant TSC, timing will be unstable\n");
     }
     // Automatic calibration
-    Log::printk(Log::INFO, "tsc: Preparing to calibrate\n");
+    Log::printk(Log::LogLevel::INFO, "tsc: Preparing to calibrate\n");
     calibrated_frequency = calibrate() * 1000;
-    Log::printk(Log::INFO, "tsc: Calibrated to %llu kHZ\n",
+    Log::printk(Log::LogLevel::INFO, "tsc: Calibrated to %llu kHZ\n",
                 calibrated_frequency);
 }
 

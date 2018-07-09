@@ -27,7 +27,7 @@ bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
     switch (c) {
         case BLK:
             if (blkdev[major]) {
-                Log::printk(Log::WARNING,
+                Log::printk(Log::LogLevel::WARNING,
                             "Block device already exists with major %llX\n",
                             major);
                 return false;
@@ -36,7 +36,7 @@ bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
             return true;
         case CHR:
             if (chrdev[major]) {
-                Log::printk(Log::WARNING,
+                Log::printk(Log::LogLevel::WARNING,
                             "Character device already exists with major %llX\n",
                             major);
                 return false;
@@ -44,7 +44,7 @@ bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
             chrdev[major] = kdev;
             return true;
         default:
-            Log::printk(Log::ERROR, "Somehow got a invalid class while "
+            Log::printk(Log::LogLevel::ERROR, "Somehow got a invalid class while "
                                     "registering a kernel device\n");
             return false;
     }

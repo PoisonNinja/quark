@@ -46,12 +46,13 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
         return Ref<Vnode>(nullptr);
     }
     if (retinode->flags & inode_factory) {
-        Log::printk(Log::INFO, "Opening factory inode...\n");
+        Log::printk(Log::LogLevel::INFO, "Opening factory inode...\n");
         retinode = retinode->open(name, flags, mode);
     }
     Ref<Vnode> retvnode = VCache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
-        Log::printk(Log::WARNING, "Failed to find %s in cache\n", name);
+        Log::printk(Log::LogLevel::WARNING, "Failed to find %s in cache\n",
+                    name);
         retvnode = Ref<Vnode>(new Vnode(this->sb, retinode, this->sb->rdev, 0));
         VCache::add(retvnode->ino, retvnode->dev, retvnode);
     } else {
@@ -59,7 +60,7 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
         // the vnode was just created
         if (!retvnode->mounts.empty()) {
             Superblock* newsb = retvnode->mounts.front().sb;
-            Log::printk(Log::INFO,
+            Log::printk(Log::LogLevel::INFO,
                         "Transitioning mountpoints, superblock at %p\n", newsb);
             return Ref<Vnode>(new Vnode(newsb, newsb->root, newsb->rdev, 0));
         }

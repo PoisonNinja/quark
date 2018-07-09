@@ -43,7 +43,7 @@ bool broadcast(token_t token)
     auto it = sleep_queue.begin();
     while (it != sleep_queue.end()) {
         if ((*it).check(token)) {
-            Log::printk(Log::DEBUG, "Sleeper is ready to be woken, %p\n");
+            Log::printk(Log::LogLevel::DEBUG, "Sleeper is ready to be woken, %p\n");
             Scheduler::insert((*it).get_thread());
             it = sleep_queue.erase(it);
             found = true;
@@ -146,7 +146,7 @@ Interrupt::Handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
-    Log::printk(Log::INFO, "Initializing scheduler...\n");
+    Log::printk(Log::LogLevel::INFO, "Initializing scheduler...\n");
     Interrupt::register_handler(0x81, yield_handler);
     kernel_process = new Process(nullptr);
     kernel_process->address_space = Memory::Virtual::get_address_space_root();
@@ -161,7 +161,7 @@ void init()
      */
     current_thread = kinit;
     _online = true;
-    Log::printk(Log::INFO, "Scheduler initialized\n");
+    Log::printk(Log::LogLevel::INFO, "Scheduler initialized\n");
 }
 
 Process* get_current_process()

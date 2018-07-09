@@ -9,13 +9,13 @@ extern void* syscall_table[];
 extern "C" void syscall_trampoline(struct InterruptContext* ctx)
 {
     encode_tcontext(ctx, &Scheduler::get_current_thread()->tcontext);
-    Log::printk(Log::DEBUG,
+    Log::printk(Log::LogLevel::DEBUG,
                 "Received fast system call %d from PID %d, %lX %lX %lX "
                 "%lX %lX\n",
                 ctx->rax, Scheduler::get_current_thread()->tid, ctx->rdi,
                 ctx->rsi, ctx->rdx, ctx->r10, ctx->r8);
     if (ctx->rax > 256 || !syscall_table[ctx->rax]) {
-        Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->rax);
+        Log::printk(Log::LogLevel::ERROR, "Received invalid syscall #%d\n", ctx->rax);
         ctx->rax = -ENOSYS;
         return;
     }

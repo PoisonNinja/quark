@@ -18,13 +18,13 @@ void enable(void)
 
 void dump(InterruptContext* ctx)
 {
-    Log::printk(Log::ERROR, "EAX = %p EBX = %p ECX = %p EDX = %p\n", ctx->eax,
+    Log::printk(Log::LogLevel::ERROR, "EAX = %p EBX = %p ECX = %p EDX = %p\n", ctx->eax,
                 ctx->ebx, ctx->ecx, ctx->edx);
-    Log::printk(Log::ERROR, "ESI = %p EDI = %p EBP = %p ESP = %p\n", ctx->esi,
+    Log::printk(Log::LogLevel::ERROR, "ESI = %p EDI = %p EBP = %p ESP = %p\n", ctx->esi,
                 ctx->edi, ctx->ebp, ctx->esp);
-    Log::printk(Log::ERROR, "EIP = %p CS  = %p DS  = %p EFLAGS = %p\n",
+    Log::printk(Log::LogLevel::ERROR, "EIP = %p CS  = %p DS  = %p EFLAGS = %p\n",
                 ctx->eip, ctx->cs, ctx->ds, ctx->eflags);
-    Log::printk(Log::ERROR, "Exception #%d, error code 0x%X\n", ctx->int_no,
+    Log::printk(Log::LogLevel::ERROR, "Exception #%d, error code 0x%X\n", ctx->int_no,
                 ctx->err_code);
 }
 

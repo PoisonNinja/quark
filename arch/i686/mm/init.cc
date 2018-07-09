@@ -15,12 +15,12 @@ void arch_init(struct Boot::info &info)
         reinterpret_cast<addr_t>(multiboot) - 0xC0000000);
     addr_t multiboot_end =
         Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
-    Log::printk(Log::INFO, "Restricted memory areas:\n");
-    Log::printk(Log::INFO, "Kernel: %p -> %p\n", info.kernel_start,
+    Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");
+    Log::printk(Log::LogLevel::INFO, "Kernel: %p -> %p\n", info.kernel_start,
                 info.kernel_end);
-    Log::printk(Log::INFO, "Multiboot: %p -> %p\n", multiboot_start,
+    Log::printk(Log::LogLevel::INFO, "Multiboot: %p -> %p\n", multiboot_start,
                 multiboot_end);
-    Log::printk(Log::INFO, "initrd: %p -> %p\n", info.initrd_start,
+    Log::printk(Log::LogLevel::INFO, "initrd: %p -> %p\n", info.initrd_start,
                 info.initrd_end);
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
@@ -32,7 +32,7 @@ void arch_init(struct Boot::info &info)
         switch (tag->type) {
             case MULTIBOOT_TAG_TYPE_MMAP: {
                 multiboot_memory_map_t *mmap;
-                Log::printk(Log::INFO, "Memory map:\n");
+                Log::printk(Log::LogLevel::INFO, "Memory map:\n");
                 for (mmap = (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                                 ->entries;
                      reinterpret_cast<multiboot_uint8_t *>(mmap) <
@@ -41,7 +41,7 @@ void arch_init(struct Boot::info &info)
                          reinterpret_cast<addr_t>(mmap) +
                          (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                              ->entry_size)) {
-                    Log::printk(Log::INFO,
+                    Log::printk(Log::LogLevel::INFO,
                                 "    Base = %p, Length = %p, "
                                 "Type = 0x%x\n",
                                 static_cast<addr_t>(mmap->addr),
@@ -55,12 +55,12 @@ void arch_init(struct Boot::info &info)
                                 i < Memory::Virtual::align_up(
                                         info.kernel_end)) {
                                 Log::printk(
-                                    Log::DEBUG,
+                                    Log::LogLevel::DEBUG,
                                     "        Rejected %p because in kernel\n",
                                     i);
                             } else if (i >= multiboot_start &&
                                        i < multiboot_end) {
-                                Log::printk(Log::DEBUG,
+                                Log::printk(Log::LogLevel::DEBUG,
                                             "        Rejected %p "
                                             "because in "
                                             "multiboot\n",
@@ -69,7 +69,7 @@ void arch_init(struct Boot::info &info)
                                                 info.initrd_start) &&
                                        i < Memory::Virtual::align_up(
                                                info.initrd_end)) {
-                                Log::printk(Log::DEBUG,
+                                Log::printk(Log::LogLevel::DEBUG,
                                             "        Rejected %p because "
                                             "in initrd\n",
                                             i);

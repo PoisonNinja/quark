@@ -56,7 +56,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     Log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        Log::printk(Log::ERROR, "Multiboot magic number does not match!\n");
+        Log::printk(Log::LogLevel::ERROR, "Multiboot magic number does not match!\n");
     }
     info.architecture_data = multiboot;
     info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
@@ -76,7 +76,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 break;
             case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
                 Log::printk(
-                    Log::INFO, "Booted by %s\n",
+                    Log::LogLevel::INFO, "Booted by %s\n",
                     (reinterpret_cast<struct multiboot_tag_string *>(tag))
                         ->string);
                 break;

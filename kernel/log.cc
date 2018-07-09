@@ -51,17 +51,18 @@ static const char* colors[] = {
 
 static char printk_buffer[Log::printk_max];
 
-size_t printk(int level, const char* format, ...)
+size_t printk(LogLevel level, const char* format, ...)
 {
 #ifndef QUARK_DEBUG
-    if (level != Log::DEBUG) {
+    if (level != Log::LogLevel::DEBUG) {
 #endif
         size_t r = 0;
-        if (level < Log::CONTINUE) {
+        if (level < Log::LogLevel::CONTINUE) {
             String::memset(printk_buffer, 0, Log::printk_max);
             struct Time::timespec spec = Time::now();
             r = snprintf(printk_buffer, Log::printk_max, "%s[%05llu.%09llu]%s ",
-                         colors[level], spec.tv_sec, spec.tv_nsec, "\e[39m");
+                         colors[static_cast<int>(level)], spec.tv_sec,
+                         spec.tv_nsec, "\e[39m");
             for (auto& i : output) {
                 i.write(printk_buffer, r);
             }

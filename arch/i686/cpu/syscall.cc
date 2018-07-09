@@ -13,13 +13,13 @@ namespace X86
 static void syscall_handler(int, void*, struct InterruptContext* ctx)
 {
     encode_tcontext(ctx, &Scheduler::get_current_thread()->tcontext);
-    Log::printk(Log::DEBUG,
+    Log::printk(Log::LogLevel::DEBUG,
                 "Received legacy system call %d from PID %d, %lX %lX %lX "
                 "%lX %lX\n",
                 ctx->eax, Scheduler::get_current_thread()->tid, ctx->ebx,
                 ctx->ecx, ctx->edx, ctx->edi, ctx->esi);
     if (ctx->eax > 256 || !syscall_table[ctx->eax]) {
-        Log::printk(Log::ERROR, "Received invalid syscall #%d\n", ctx->eax);
+        Log::printk(Log::LogLevel::ERROR, "Received invalid syscall #%d\n", ctx->eax);
         ctx->eax = -ENOSYS;
         return;
     }

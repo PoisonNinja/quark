@@ -24,35 +24,36 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     if (!signum) {
         return;
     }
-    Log::printk(Log::DEBUG, "[signal]: Selecting signal %d\n", signum);
+    Log::printk(Log::LogLevel::DEBUG, "[signal]: Selecting signal %d\n",
+                signum);
 
     // The signal is handled
     Signal::sigdelset(&this->signal_pending, signum);
     this->refresh_signal();
 
     if (signum == SIGKILL) {
-        Log::printk(Log::DEBUG, "[signal]: SIGKILL, killing\n");
+        Log::printk(Log::LogLevel::DEBUG, "[signal]: SIGKILL, killing\n");
         this->exit();
     }
 
     struct sigaction* action = &this->parent->signal_actions[signum];
 
     if (action->sa_handler == SIG_IGN) {
-        Log::printk(Log::DEBUG, "[signal]: SIG_IGN, returning\n");
+        Log::printk(Log::LogLevel::DEBUG, "[signal]: SIG_IGN, returning\n");
         return;
     }
 
     if ((Signal::sigismember(&stop_signals, signum) &&
          action->sa_handler == SIG_DFL) ||
         signum == SIGSTOP) {
-        Log::printk(Log::WARNING,
+        Log::printk(Log::LogLevel::WARNING,
                     "[signal]: SIG_DFL with SIGSTOP, you "
                     "should probably implement it. Killing for now\n");
         this->exit();
     }
 
     if (signum == SIGCONT) {
-        Log::printk(Log::WARNING,
+        Log::printk(Log::LogLevel::WARNING,
                     "[signal]: SIGCONT, you "
                     "should probably implement it. Killing for now\n");
         this->exit();
@@ -60,12 +61,12 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
     if (action->sa_handler == SIG_DFL) {
         Log::printk(
-            Log::DEBUG,
+            Log::LogLevel::DEBUG,
             "[signal]: SIG_DFL with default action of SIGKILl, killing\n");
         this->exit();
     }
 
-    Log::printk(Log::DEBUG, "[signal] Has a sa_handler, calling\n");
+    Log::printk(Log::LogLevel::DEBUG, "[signal] Has a sa_handler, calling\n");
 
     bool requested_altstack = action->sa_flags & SA_ONSTACK;
     bool usable_altstack =
@@ -73,8 +74,9 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     bool use_altstack = requested_altstack && usable_altstack;
 
     if (use_altstack) {
-        Log::printk(Log::DEBUG, "[signal] Signal handler requests and has a "
-                                "valid alternate stack, using...\n");
+        Log::printk(Log::LogLevel::DEBUG,
+                    "[signal] Signal handler requests and has a "
+                    "valid alternate stack, using...\n");
         this->signal_stack.ss_flags |= SS_ONSTACK;
     }
 

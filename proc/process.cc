@@ -72,7 +72,7 @@ void Process::remove_thread(Thread* thread)
         }
     }
     if (threads.empty()) {
-        Log::printk(Log::DEBUG, "Last thread exiting, process %d terminating\n",
+        Log::printk(Log::LogLevel::DEBUG, "Last thread exiting, process %d terminating\n",
                     this->pid);
         this->exit();
     }

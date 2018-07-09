@@ -114,8 +114,8 @@ int Descriptor::mkdir(const char* name, mode_t mode)
 {
     const char* dir = dirname(name);
     const char* file = basename(name);
-    Log::printk(Log::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n", dir,
-                file);
+    Log::printk(Log::LogLevel::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
+                dir, file);
     Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
@@ -132,8 +132,8 @@ int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
 {
     const char* dir = dirname(name);
     const char* file = basename(name);
-    Log::printk(Log::DEBUG, "[descriptor->mknod] dir: %s file: %s\n", dir,
-                file);
+    Log::printk(Log::LogLevel::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
+                dir, file);
     Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
@@ -155,7 +155,8 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
      */
     Driver* driver = FTable::get(type);
     if (!driver) {
-        Log::printk(Log::WARNING, "Failed to locate driver for %s\n", type);
+        Log::printk(Log::LogLevel::WARNING, "Failed to locate driver for %s\n",
+                    type);
         return -EINVAL;
     }
     Ref<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
@@ -184,7 +185,7 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
     char* filename = basename(name);
     Ref<Descriptor> ret(this);
     while ((current = String::strtok_r(path, "/", &path))) {
-        Log::printk(Log::DEBUG, "[descriptor->open] %s\n", current);
+        Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags = flags;
         mode_t checked_mode = mode;
         if (String::strcmp(current, filename)) {
@@ -194,7 +195,7 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
         Ref<Vnode> next_vnode =
             ret->vnode->open(current, checked_flags, checked_mode);
         if (!next_vnode) {
-            Log::printk(Log::ERROR, "[descriptor->open] Failed to open %s\n",
+            Log::printk(Log::LogLevel::ERROR, "[descriptor->open] Failed to open %s\n",
                         current);
             return Ref<Descriptor>(nullptr);
         }

@@ -13,7 +13,8 @@ namespace Syscall
 {
 static long sys_read(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::DEBUG, "[sys_read] = %d, %p, %pX\n", fd, buffer, count);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_read] = %d, %p, %pX\n", fd, buffer,
+                count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -23,7 +24,8 @@ static long sys_read(int fd, const void* buffer, size_t count)
 
 static long sys_write(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer, count);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer,
+                count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -33,7 +35,8 @@ static long sys_write(int fd, const void* buffer, size_t count)
 
 static long sys_open(const char* path, int flags, mode_t mode)
 {
-    Log::printk(Log::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags, mode);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
+                mode);
     Ref<Filesystem::Descriptor> start(nullptr);
     if (*path == '/') {
         start = Scheduler::get_current_process()->get_root();
@@ -43,7 +46,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
     Ref<Filesystem::Descriptor> file = start->open(path, flags, mode);
     int ret = Scheduler::get_current_process()->get_dtable()->add(file);
     if (Scheduler::get_current_process()->get_dtable()->get(ret) != file) {
-        Log::printk(Log::ERROR,
+        Log::printk(Log::LogLevel::ERROR,
                     "WTF, someone is lying about the file descriptor...\n");
         return -1;
     }
@@ -53,7 +56,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
 
 static long sys_close(int fd)
 {
-    Log::printk(Log::DEBUG, "[sys_close] = %d\n", fd);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_close] = %d\n", fd);
     if (!Scheduler::get_current_process()->get_dtable()->remove(fd)) {
         return -1;
     } else {
@@ -63,7 +66,7 @@ static long sys_close(int fd)
 
 static long sys_stat(const char* path, struct Filesystem::stat* st)
 {
-    Log::printk(Log::DEBUG, "[sys_fstat] = %s, %p\n", path, st);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %s, %p\n", path, st);
     Ref<Filesystem::Descriptor> start(nullptr);
     if (*path == '/') {
         start = Scheduler::get_current_process()->get_root();
@@ -76,7 +79,7 @@ static long sys_stat(const char* path, struct Filesystem::stat* st)
 
 static long sys_fstat(int fd, struct Filesystem::stat* st)
 {
-    Log::printk(Log::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -85,7 +88,8 @@ static long sys_fstat(int fd, struct Filesystem::stat* st)
 
 static long sys_lseek(int fd, off_t offset, int whence)
 {
-    Log::printk(Log::DEBUG, "[sys_lseek] = %d, %llu, %d\n", fd, offset, whence);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_lseek] = %d, %llu, %d\n", fd,
+                offset, whence);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
     }
@@ -95,23 +99,27 @@ static long sys_lseek(int fd, off_t offset, int whence)
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
 {
-    Log::printk(Log::DEBUG, "[sys_mmap] = %p, %p, %zX, %u, %u, %d, %zX\n",
-                mmap_data, mmap_data->addr, mmap_data->length, mmap_data->prot,
+    Log::printk(Log::LogLevel::DEBUG,
+                "[sys_mmap] = %p, %p, %zX, %u, %u, %d, %zX\n", mmap_data,
+                mmap_data->addr, mmap_data->length, mmap_data->prot,
                 mmap_data->flags, mmap_data->fd, mmap_data->offset);
     if (mmap_data->flags & MAP_SHARED) {
-        Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested "
-                                  "MMAP_SHARED, you should probably implement"
-                                  "this\n");
+        Log::printk(Log::LogLevel::WARNING,
+                    "[sys_mmap] Userspace mmap requested "
+                    "MMAP_SHARED, you should probably implement"
+                    "this\n");
         return MAP_FAILED;
     }
     if (!(mmap_data->flags & MAP_ANONYMOUS)) {
-        Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested file "
-                                  "mapping, you should probably implement "
-                                  "this\n");
+        Log::printk(Log::LogLevel::WARNING,
+                    "[sys_mmap] Userspace mmap requested file "
+                    "mapping, you should probably implement "
+                    "this\n");
         return MAP_FAILED;
     }
     if (!(mmap_data->flags & MAP_FIXED)) {
-        Log::printk(Log::DEBUG, "[sys_mmap] Kernel selecting mapping\n");
+        Log::printk(Log::LogLevel::DEBUG,
+                    "[sys_mmap] Kernel selecting mapping\n");
         addr_t placement;
         bool ret = false;
         ret = Scheduler::get_current_process()->sections->locate_range(
@@ -120,20 +128,22 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
                                 USER_START,
             mmap_data->length);
         if (!ret) {
-            Log::printk(Log::WARNING,
+            Log::printk(Log::LogLevel::WARNING,
                         "[sys_mmap] Failed to allocate area for mmap\n");
             return MAP_FAILED;
         }
-        Log::printk(Log::DEBUG, "[sys_mmap] Selected %p\n", placement);
+        Log::printk(Log::LogLevel::DEBUG, "[sys_mmap] Selected %p\n",
+                    placement);
         Scheduler::get_current_process()->sections->add_section(
             placement, mmap_data->length);
         int flags = Memory::Virtual::prot_to_flags(mmap_data->prot);
         Memory::Virtual::map_range(placement, mmap_data->length, flags);
         return reinterpret_cast<void*>(placement);
     } else {
-        Log::printk(Log::WARNING, "[sys_mmap] Userspace mmap requested "
-                                  "MAP_FIXED, you should probably implement "
-                                  "it\n");
+        Log::printk(Log::LogLevel::WARNING,
+                    "[sys_mmap] Userspace mmap requested "
+                    "MAP_FIXED, you should probably implement "
+                    "it\n");
         return MAP_FAILED;
     }
 }
@@ -141,7 +151,8 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
 static long sys_sigaction(int signum, struct sigaction* act,
                           struct sigaction* oldact)
 {
-    Log::printk(Log::DEBUG, "[sys_sigaction]: %d %p %p\n", signum, act, oldact);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_sigaction]: %d %p %p\n", signum,
+                act, oldact);
     Process* current = Scheduler::get_current_process();
     if (oldact) {
         String::memcpy(oldact, &current->signal_actions[signum],
@@ -153,7 +164,8 @@ static long sys_sigaction(int signum, struct sigaction* act,
 
 static long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
 {
-    Log::printk(Log::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set, oldset);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set,
+                oldset);
     if (oldset) {
         *oldset = Scheduler::get_current_thread()->signal_mask;
     }
@@ -173,7 +185,7 @@ static long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
 
 static void sys_sigreturn(ucontext_t* uctx)
 {
-    Log::printk(Log::DEBUG, "[sys_return] %p\n", uctx);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_return] %p\n", uctx);
     ThreadContext tctx;
     /*
      * The syscall handler saves the userspace context, so we copy it into
@@ -200,7 +212,7 @@ static long sys_getpid()
 
 static long sys_fork()
 {
-    Log::printk(Log::DEBUG, "[sys_fork]\n");
+    Log::printk(Log::LogLevel::DEBUG, "[sys_fork]\n");
     Process* child = Scheduler::get_current_process()->fork();
     Thread* thread = new Thread(child);
     String::memcpy(&thread->tcontext,
@@ -219,8 +231,8 @@ static long sys_fork()
 static long sys_execve(const char* path, const char* old_argv[],
                        const char* old_envp[])
 {
-    Log::printk(Log::DEBUG, "[sys_execve]: %s %p %p\n", path, old_argv,
-                old_envp);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_execve]: %s %p %p\n", path,
+                old_argv, old_envp);
     size_t argc = 0, envc = 0;
     while (old_argv[argc]) {
         argc++;
@@ -247,15 +259,15 @@ static long sys_execve(const char* path, const char* old_argv[],
     Ref<Filesystem::Descriptor> file = start->open(path, 0, 0);
     struct Filesystem::stat st;
     file->stat(&st);
-    Log::printk(Log::DEBUG, "[sys_execve] binary has size of %zu bytes\n",
-                st.st_size);
+    Log::printk(Log::LogLevel::DEBUG,
+                "[sys_execve] binary has size of %zu bytes\n", st.st_size);
     uint8_t* raw = new uint8_t[st.st_size];
     file->read(raw, st.st_size);
     Scheduler::get_current_process()->sections->reset();
     struct ThreadContext ctx;
     if (!Scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
                                                argc, argv, envc, envp, ctx)) {
-        Log::printk(Log::ERROR, "Failed to load thread state\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to load thread state\n");
     }
     delete[] raw;
     load_registers(ctx);
@@ -264,18 +276,18 @@ static long sys_execve(const char* path, const char* old_argv[],
 
 static void sys_exit(int val)
 {
-    Log::printk(Log::DEBUG, "[sys_exit] = %d\n", val);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_exit] = %d\n", val);
     Scheduler::get_current_thread()->exit();
 }
 
 static long sys_kill(pid_t pid, int signum)
 {
-    Log::printk(Log::DEBUG, "[sys_kill] %u %d\n", pid, signum);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_kill] %u %d\n", pid, signum);
     Process* process = Scheduler::find_process(pid);
     if (!process) {
         return -ESRCH;
     }
-    Log::printk(Log::DEBUG, "Found process at %p\n", process);
+    Log::printk(Log::LogLevel::DEBUG, "Found process at %p\n", process);
     process->send_signal(signum);
     return 0;
 }
@@ -326,7 +338,7 @@ static long sys_sigpending(sigset_t* set)
 
 static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
 {
-    Log::printk(Log::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
     if (oldss) {
         String::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
                        sizeof(*oldss));

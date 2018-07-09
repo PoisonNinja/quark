@@ -23,8 +23,8 @@ bool register_clock(Clock& clock)
 {
     clock_list.push_back(clock);
     if (clock.features() & feature_timer) {
-        Log::printk(Log::INFO, "Selecting %s as the system tick source\n",
-                    clock.name());
+        Log::printk(Log::LogLevel::INFO,
+                    "Selecting %s as the system tick source\n", clock.name());
         if (current_ticker) {
             current_ticker->disable();
         }
@@ -33,8 +33,8 @@ bool register_clock(Clock& clock)
     }
     if (clock.features() & feature_clock) {
         if (!current_clock || current_clock->frequency() < clock.frequency()) {
-            Log::printk(Log::INFO, "Selecting %s as the system clock\n",
-                        clock.name());
+            Log::printk(Log::LogLevel::INFO,
+                        "Selecting %s as the system clock\n", clock.name());
             update_clock(&clock);
         }
     }
@@ -55,7 +55,7 @@ void udelay(time_t usec)
 {
     if (usec > UINT64_MAX / 1000) {
         Log::printk(
-            Log::WARNING,
+            Log::LogLevel::WARNING,
             "udelay received argument that is too large "
             "to safely pass to ndelay, unexpected behavior may occur\n");
     }
@@ -66,7 +66,7 @@ void mdelay(time_t msec)
 {
     if (msec > UINT64_MAX / 1000 / 1000) {
         Log::printk(
-            Log::WARNING,
+            Log::LogLevel::WARNING,
             "mdelay received argument that is too large "
             "to safely pass to ndelay, unexpected behavior may occur\n");
     }

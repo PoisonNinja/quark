@@ -39,9 +39,9 @@ void Thread::setup_signal(struct ksignal* ksig,
     frame->siginfo_address = &frame->siginfo;
     frame->ucontext_address = &frame->ucontext;
 
-    Log::printk(Log::DEBUG, "Going to return to gadget at %p\n",
+    Log::printk(Log::LogLevel::DEBUG, "Going to return to gadget at %p\n",
                 frame->ret_location);
-    Log::printk(Log::DEBUG, "Frame at %p\n", frame);
+    Log::printk(Log::LogLevel::DEBUG, "Frame at %p\n", frame);
 
     new_state->eip = (uint32_t)ksig->sa->sa_handler;
 }

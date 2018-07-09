@@ -18,17 +18,17 @@ void enable(void)
 
 void dump(InterruptContext* ctx)
 {
-    Log::printk(Log::ERROR, "RAX = %p RBX = %p RCX = %p RDX = %p\n", ctx->rax,
+    Log::printk(Log::LogLevel::ERROR, "RAX = %p RBX = %p RCX = %p RDX = %p\n", ctx->rax,
                 ctx->rbx, ctx->rcx, ctx->rdx);
-    Log::printk(Log::ERROR, "RSI = %p RDI = %p RBP = %p RSP = %p\n", ctx->rsi,
+    Log::printk(Log::LogLevel::ERROR, "RSI = %p RDI = %p RBP = %p RSP = %p\n", ctx->rsi,
                 ctx->rdi, ctx->rbp, ctx->rsp);
-    Log::printk(Log::ERROR, "R8  = %p R9  = %p R10 = %p R11 = %p\n", ctx->r8,
+    Log::printk(Log::LogLevel::ERROR, "R8  = %p R9  = %p R10 = %p R11 = %p\n", ctx->r8,
                 ctx->r9, ctx->r10, ctx->r11);
-    Log::printk(Log::ERROR, "R12 = %p R13 = %p R14 = %p R15 = %p\n", ctx->r12,
+    Log::printk(Log::LogLevel::ERROR, "R12 = %p R13 = %p R14 = %p R15 = %p\n", ctx->r12,
                 ctx->r13, ctx->r14, ctx->r15);
-    Log::printk(Log::ERROR, "RIP = %p CS  = %p DS  = %p RFLAGS = %p\n",
+    Log::printk(Log::LogLevel::ERROR, "RIP = %p CS  = %p DS  = %p RFLAGS = %p\n",
                 ctx->rip, ctx->cs, ctx->ds, ctx->rflags);
-    Log::printk(Log::ERROR, "Exception #%d, error code 0x%X\n", ctx->int_no,
+    Log::printk(Log::LogLevel::ERROR, "Exception #%d, error code 0x%X\n", ctx->int_no,
                 ctx->err_code);
 }
 

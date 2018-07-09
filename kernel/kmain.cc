@@ -19,13 +19,13 @@ void init_stage2(void*)
     Ref<Filesystem::Descriptor> root = parent->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {
-        Log::printk(Log::ERROR, "Failed to open init\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)
             CPU::halt();
     }
     struct Filesystem::stat st;
     init->stat(&st);
-    Log::printk(Log::DEBUG, "init binary has size of %zu bytes\n", st.st_size);
+    Log::printk(Log::LogLevel::DEBUG, "init binary has size of %zu bytes\n", st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
     int argc = 2;
@@ -40,9 +40,9 @@ void init_stage2(void*)
     struct ThreadContext ctx;
     if (!Scheduler::get_current_thread()->load(
             reinterpret_cast<addr_t>(init_raw), argc, argv, envc, envp, ctx)) {
-        Log::printk(Log::ERROR, "Failed to load thread state\n");
+        Log::printk(Log::LogLevel::ERROR, "Failed to load thread state\n");
     } else {
-        Log::printk(Log::DEBUG, "Preparing to jump into userspace\n");
+        Log::printk(Log::LogLevel::DEBUG, "Preparing to jump into userspace\n");
     }
     delete[] init_raw;
     load_registers(ctx);
@@ -65,8 +65,8 @@ void init_stage1()
 
 void kmain(struct Boot::info& info)
 {
-    Log::printk(Log::INFO, "%s\n", OS_STRING);
-    Log::printk(Log::INFO, "Command line: %s\n", info.cmdline);
+    Log::printk(Log::LogLevel::INFO, "%s\n", OS_STRING);
+    Log::printk(Log::LogLevel::INFO, "Command line: %s\n", info.cmdline);
     Memory::init(info);
     Interrupt::init();
     Interrupt::enable();

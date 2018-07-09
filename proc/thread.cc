@@ -21,7 +21,8 @@ void Thread::exit()
 {
     // Only the thread can kill itself
     if (this != Scheduler::get_current_thread()) {
-        Log::printk(Log::WARNING, "Only the thread can kill itself\n");
+        Log::printk(Log::LogLevel::WARNING,
+                    "Only the thread can kill itself\n");
         return;
     }
     Scheduler::remove(this);

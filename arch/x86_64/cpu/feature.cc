@@ -82,7 +82,7 @@ void detect(Core& cpu)
 
     if (highest_function < 0x80000001) {
         Log::printk(
-            Log::WARNING,
+            Log::LogLevel::WARNING,
             "CPU does not support extended feature set past 0x80000001\n");
     } else {
         regs.eax = 0x80000001;
@@ -92,7 +92,7 @@ void detect(Core& cpu)
 
         if (highest_function < 0x80000004) {
             Log::printk(
-                Log::WARNING,
+                Log::LogLevel::WARNING,
                 "CPU does not support extended feature set past 0x80000004\n");
         } else {
             regs.eax = 0x80000002;
@@ -115,23 +115,25 @@ void detect(Core& cpu)
             *(uint32_t*)&cpu.name[44] = regs.edx;
 
             if (highest_function < 0x80000007) {
-                Log::printk(Log::WARNING, "CPU does not support extended "
-                                          "feature set past 0x80000007\n");
+                Log::printk(Log::LogLevel::WARNING,
+                            "CPU does not support extended "
+                            "feature set past 0x80000007\n");
             } else {
                 regs.eax = 0x80000007;
                 cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
                 cpu.features[cpuid_8000_0007_ebx] = regs.ebx;
 
                 if (highest_function < 0x80000008) {
-                    Log::printk(Log::WARNING, "CPU does not support extended "
-                                              "feature set past 0x80000008\n");
+                    Log::printk(Log::LogLevel::WARNING,
+                                "CPU does not support extended "
+                                "feature set past 0x80000008\n");
                 } else {
                     regs.eax = 0x80000008;
                     cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
                     cpu.features[cpuid_8000_0008_ebx] = regs.ebx;
 
                     if (highest_function < 0x8000000A) {
-                        Log::printk(Log::WARNING,
+                        Log::printk(Log::LogLevel::WARNING,
                                     "CPU does not support extended "
                                     "feature set past 0x8000000A\n");
                     } else {
@@ -145,23 +147,23 @@ void detect(Core& cpu)
     }
 
     if (!String::strncmp("GenuineIntel", cpu.vendor, 13)) {
-        Log::printk(Log::INFO, "Found supported CPU vendor\n");
+        Log::printk(Log::LogLevel::INFO, "Found supported CPU vendor\n");
         detect_intel(cpu);
     } else {
         Log::printk(
-            Log::WARNING,
+            Log::LogLevel::WARNING,
             "Unknown CPU vendor, not performing extended feature detection.\n");
     }
 }
 
 void print(Core& cpu)
 {
-    Log::printk(Log::INFO, "CPU Vendor: %s\n", cpu.vendor);
-    Log::printk(Log::INFO, "CPU Name: %s\n", cpu.name);
-    Log::printk(Log::INFO, "CPU Stepping: %X\n", cpu.stepping);
-    Log::printk(Log::INFO, "CPU Type: %X\n", cpu.type);
-    Log::printk(Log::INFO, "CPU Family: %X\n", cpu.family);
-    Log::printk(Log::INFO, "CPU Model: %X\n", cpu.model);
+    Log::printk(Log::LogLevel::INFO, "CPU Vendor: %s\n", cpu.vendor);
+    Log::printk(Log::LogLevel::INFO, "CPU Name: %s\n", cpu.name);
+    Log::printk(Log::LogLevel::INFO, "CPU Stepping: %X\n", cpu.stepping);
+    Log::printk(Log::LogLevel::INFO, "CPU Type: %X\n", cpu.type);
+    Log::printk(Log::LogLevel::INFO, "CPU Family: %X\n", cpu.family);
+    Log::printk(Log::LogLevel::INFO, "CPU Model: %X\n", cpu.model);
 }
-}
-}
+}  // namespace X64
+}  // namespace CPU

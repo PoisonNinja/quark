@@ -26,10 +26,10 @@ addr_t allocate(size_t size)
 void free(addr_t address)
 {
     valloc_free_requests++;
-    Log::printk(Log::WARNING,
+    Log::printk(Log::LogLevel::WARNING,
                 "valloc memory free was requested, but this "
                 "function is not implemented! Request #%zu wanted to free %p\n",
                 valloc_free_requests, address);
 }
-}
-}
+}  // namespace Valloc
+}  // namespace Memory

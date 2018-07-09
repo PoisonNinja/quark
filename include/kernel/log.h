@@ -12,14 +12,14 @@ public:
 
 namespace Log
 {
-enum {
-    DEBUG = 0,
+enum class LogLevel : int {
+    DEBUG,
     INFO,
     WARNING,
     ERROR,
     CONTINUE,
 };
-size_t printk(int level, const char* format, ...);
+size_t printk(LogLevel level, const char* format, ...);
 
 void register_log_output(LogOutput& device);
 }  // namespace Log

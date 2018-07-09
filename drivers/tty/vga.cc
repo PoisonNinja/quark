@@ -17,7 +17,7 @@ VGATTY::VGATTY()
     addr_t virt = Memory::Valloc::allocate(VGA_BUFFER_SIZE);
     if (!Memory::Virtual::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
                                     PAGE_WRITABLE | PAGE_HARDWARE)) {
-        Log::printk(Log::WARNING, "Failed to map VGA buffer\n");
+        Log::printk(Log::LogLevel::WARNING, "Failed to map VGA buffer\n");
         return;
     }
     vga_buffer = reinterpret_cast<uint16_t *>(virt);
@@ -100,4 +100,4 @@ void VGATTY::update_cursor(int col, int row)
     outb(0x3D4, 0x0E);
     outb(0x3D5, (unsigned char)((position >> 8) & 0xFF));
 }
-}
+}  // namespace Filesystem

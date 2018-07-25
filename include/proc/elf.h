@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lib/pair.h>
 #include <proc/thread.h>
 #include <types.h>
 #include <climits>
@@ -438,7 +439,7 @@ typedef struct elf64_note {
     Elf64_Word n_type;   /* Content type */
 } Elf64_Nhdr;
 
-addr_t load(addr_t binary);
+Pair<bool, addr_t> load(addr_t binary);
 
 #if WORD_SIZE == 8
 typedef Elf64_Phdr Elf_Phdr;

@@ -20,3 +20,10 @@ If you wish to build with debug support and logging, append `-DCMAKE_BUILD_TYPE=
 ## Using the build system
 Quark is primarily designed to interface with the Pepper build system. Therefore, you should use that most of the time. However, you can always use Quark's own build files.
 
+# License
+Quark itself is licensed under the 3-clause BSD license, and the full text can be found in the file LICENSE.
+
+Quark's allocator is durand's liballoc, which has been released into the public domain.
+
+Some portions of the operating system are based on Sortie's [Sortix](https://gitlab.com/Sortix/Sortix) operating system. While no code was copied, the design is pretty similar which I feel warrants attribution. Therefore, please note that portions of the filesystem and process management code is partially licensed under the ISC license.
+

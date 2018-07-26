@@ -1,3 +1,4 @@
+#include <fs/fs.h>
 #include <fs/vcache.h>
 #include <fs/vnode.h>
 #include <kernel.h>
@@ -16,6 +17,7 @@ Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t d, dev_t rd)
     this->dev = d;
     this->rdev = rd;
     this->mode = inode->mode;
+    this->kdev = nullptr;
 }
 
 int Vnode::link(const char* name, Ref<Vnode> node)
@@ -30,7 +32,14 @@ int Vnode::mkdir(const char* name, mode_t mode)
 
 int Vnode::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    return inode->mknod(name, mode, dev);
+    // Inject O_CREAT into flags
+    Ref<Vnode> vnode = this->open(name, O_CREAT, mode);
+    if (!vnode) {
+        // TODO: Return proper errno
+        return -1;
+    }
+    this->kdev = get_kdevice(mode, dev);
+    return 0;
 }
 
 int Vnode::mount(Mount* mt)
@@ -70,11 +79,19 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 
 ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset)
 {
+    if (this->kdev) {
+        Log::printk(Log::LogLevel::DEBUG, "kdev, intercepting read\n");
+        return this->kdev->read(buffer, count, offset);
+    }
     return inode->read(buffer, count, offset);
 }
 
 ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
 {
+    if (this->kdev) {
+        Log::printk(Log::LogLevel::DEBUG, "kdev, intercepting write\n");
+        return this->kdev->write(buffer, count, offset);
+    }
     return inode->write(buffer, count, offset);
 }
 

@@ -15,6 +15,7 @@ namespace Filesystem
 {
 void init()
 {
+    // Register the filesystem drivers
     FTable::add("tmpfs", new TmpFS());
     FTable::add("pts", new PTSFS());
 

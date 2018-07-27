@@ -38,7 +38,7 @@ int Vnode::mknod(const char* name, mode_t mode, dev_t dev)
         // TODO: Return proper errno
         return -1;
     }
-    this->kdev = get_kdevice(mode, dev);
+    vnode->kdev = get_kdevice(mode, dev);
     return 0;
 }
 

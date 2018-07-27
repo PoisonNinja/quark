@@ -5,6 +5,7 @@
 #include <fs/inode.h>
 #include <fs/pty/ptm.h>
 #include <fs/pty/pts.h>
+#include <fs/stat.h>
 #include <fs/tmpfs/tmpfs.h>
 #include <fs/tty.h>
 #include <fs/vnode.h>
@@ -18,6 +19,10 @@ void init()
     // Register the filesystem drivers
     FTable::add("tmpfs", new TmpFS());
     FTable::add("pts", new PTSFS());
+
+    VGATTY* vga = new VGATTY();
+    reserve_class(CHR, 0);
+    register_kdevice(CHR, 0, vga);
 
     // Ref<Inode> tty(new VGATTY());
     // Ref<Vnode> vtty(new Vnode(tty));
@@ -46,5 +51,8 @@ void init()
 
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);
+
+    droot->mknod("/dev/tty", S_IFCHR, mkdev(0, 0));
+    droot->open("/dev/tty", 0, 0)->write((uint8_t*)"Hello", 6);
 }
 }  // namespace Filesystem

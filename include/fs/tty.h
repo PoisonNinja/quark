@@ -1,10 +1,11 @@
 #pragma once
 
+#include <fs/dev.h>
 #include <fs/inode.h>
 
 namespace Filesystem
 {
-class TTY : public BaseInode
+class TTY : public KDevice
 {
 public:
     TTY();

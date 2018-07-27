@@ -4,9 +4,8 @@
 
 namespace Filesystem
 {
-TTY::TTY()
+TTY::TTY() : KDevice(CHR)
 {
-    this->mode |= S_IFCHR;
 }
 
 TTY::~TTY()

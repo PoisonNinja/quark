@@ -12,6 +12,7 @@ public:
     ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
 
 private:
+    // TODO: Request queue
     BlockDevice* blkdev;
 };
 

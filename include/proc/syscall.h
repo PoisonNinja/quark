@@ -24,6 +24,7 @@ namespace Syscall
 #define SYS_kill 62
 #define SYS_sigpending 127
 #define SYS_sigaltstack 131
+#define SYS_mknod 133
 
 /*
  * Certain architectures (x86_64) only support passing up to 5 arguments, while

@@ -346,6 +346,11 @@ static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
     return 0;
 }
 
+static long sys_mknod(const char* path, mode_t mode, dev_t dev)
+{
+    return get_start(path)->mknod(path, mode, dev);
+}
+
 void init()
 {
     syscall_table[SYS_read] = reinterpret_cast<void*>(sys_read);
@@ -366,5 +371,6 @@ void init()
     syscall_table[SYS_kill] = reinterpret_cast<void*>(sys_kill);
     syscall_table[SYS_sigpending] = reinterpret_cast<void*>(sys_sigpending);
     syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
+    syscall_table[SYS_mknod] = reinterpret_cast<void*>(sys_mknod);
 }
 }  // namespace Syscall

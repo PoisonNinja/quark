@@ -51,8 +51,5 @@ void init()
 
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);
-
-    droot->mknod("/dev/tty", S_IFCHR, mkdev(0, 0));
-    droot->open("/dev/tty", 0, 0)->write((uint8_t*)"Hello", 6);
 }
 }  // namespace Filesystem

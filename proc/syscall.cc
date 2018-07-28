@@ -9,6 +9,20 @@
 
 void* syscall_table[256];
 
+namespace
+{
+Ref<Filesystem::Descriptor> get_start(const char* path)
+{
+    Ref<Filesystem::Descriptor> start(nullptr);
+    if (*path == '/') {
+        start = Scheduler::get_current_process()->get_root();
+    } else {
+        start = start = Scheduler::get_current_process()->get_cwd();
+    }
+    return start;
+}
+}  // namespace
+
 namespace Syscall
 {
 static long sys_read(int fd, const void* buffer, size_t count)
@@ -37,13 +51,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
-    Ref<Filesystem::Descriptor> start(nullptr);
-    if (*path == '/') {
-        start = Scheduler::get_current_process()->get_root();
-    } else {
-        start = start = Scheduler::get_current_process()->get_cwd();
-    }
-    Ref<Filesystem::Descriptor> file = start->open(path, flags, mode);
+    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, flags, mode);
     int ret = Scheduler::get_current_process()->get_dtable()->add(file);
     if (Scheduler::get_current_process()->get_dtable()->get(ret) != file) {
         Log::printk(Log::LogLevel::ERROR,
@@ -67,13 +75,7 @@ static long sys_close(int fd)
 static long sys_stat(const char* path, struct Filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %s, %p\n", path, st);
-    Ref<Filesystem::Descriptor> start(nullptr);
-    if (*path == '/') {
-        start = Scheduler::get_current_process()->get_root();
-    } else {
-        start = start = Scheduler::get_current_process()->get_cwd();
-    }
-    Ref<Filesystem::Descriptor> file = start->open(path, 0, 0);
+    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
     return file->stat(st);
 }
 
@@ -250,13 +252,7 @@ static long sys_execve(const char* path, const char* old_argv[],
         envp[i] = new char[String::strlen(old_envp[i])];
         String::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
-    Ref<Filesystem::Descriptor> start(nullptr);
-    if (*path == '/') {
-        start = Scheduler::get_current_process()->get_root();
-    } else {
-        start = start = Scheduler::get_current_process()->get_cwd();
-    }
-    Ref<Filesystem::Descriptor> file = start->open(path, 0, 0);
+    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
     struct Filesystem::stat st;
     file->stat(&st);
     Log::printk(Log::LogLevel::DEBUG,

@@ -172,11 +172,11 @@ public:
         it.current->next = (it.current->next->*Link).next;
         (it.current->next ? (it.current->next->*Link).prev :
                             this->content.prev) = it.current;
-        return iterator<T, Link>(&(it.current->next->*Link));
+        return it;
     }
     iterator<T, Link> iterator_to(T& value)
     {
-        return iterator<T, Link>(&(value.*Link));
+        return iterator<T, Link>((value.*Link).prev);
     }
     void reset()
     {

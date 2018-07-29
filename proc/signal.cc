@@ -128,6 +128,10 @@ bool Thread::send_signal(int signum)
     // TODO: Check if signal is pending already and return ESIGPENDING
     Signal::sigaddset(&this->signal_pending, signum);
     this->refresh_signal();
+    if (this->signal_required &&
+        this->state == ThreadState::SLEEPING_INTERRUPTIBLE) {
+        Scheduler::insert(this);
+    }
     return true;
 }
 

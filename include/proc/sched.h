@@ -6,29 +6,28 @@
 
 namespace Scheduler
 {
-typedef void* token_t;
+constexpr int wait_interruptible = (1 << 0);
 
-class Waiter
-{
-public:
-    Waiter(Thread* t, token_t token, int flags)
-        : thread(t), token(token), flags(flags){};
-    virtual ~Waiter(){};
-    bool operator==(const Waiter& other) const;
-    virtual bool check(token_t token);
-    virtual Thread* get_thread();
-    Node<Waiter> node;
-
-protected:
+struct WaitQueueNode {
+    WaitQueueNode(Thread* t) : thread(t), normal_wake(false){};
     Thread* thread;
-    token_t token;
-    int flags;
+    Node<WaitQueueNode> node;
+    bool normal_wake;
 };
 
-bool broadcast(token_t token);
-void wait(token_t token, int flags);
+class WaitQueue
+{
+public:
+    WaitQueue(){};
+    ~WaitQueue(){};  // TODO: We should probably do something when deallocating
 
-constexpr int wait_interruptible = (1 << 0);
+    int wait(int flags);
+
+    void wakeup();
+
+private:
+    List<WaitQueueNode, &WaitQueueNode::node> waiters;
+};
 
 void idle();
 

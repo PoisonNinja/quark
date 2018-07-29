@@ -12,7 +12,6 @@ namespace Scheduler
 namespace
 {
 List<Thread, &Thread::scheduler_node> run_queue;
-List<Waiter, &Waiter::node> sleep_queue;
 Thread* current_thread;
 Process* kernel_process;
 Thread* kidle;
@@ -22,44 +21,31 @@ PTable ptable;
 bool _online = false;
 }  // namespace
 
-bool Waiter::check(token_t token)
+int WaitQueue::wait(int flags)
 {
-    return token == this->token;
-}
-
-bool Waiter::operator==(const Waiter& other) const
-{
-    return this->token == other.token;
-}
-
-Thread* Waiter::get_thread()
-{
-    return this->thread;
-}
-
-bool broadcast(token_t token)
-{
-    bool found = false;
-    auto it = sleep_queue.begin();
-    while (it != sleep_queue.end()) {
-        if ((*it).check(token)) {
-            Log::printk(Log::LogLevel::DEBUG, "Sleeper is ready to be woken, %p\n");
-            Scheduler::insert((*it).get_thread());
-            it = sleep_queue.erase(it);
-            found = true;
-        } else {
-            ++it;
-        }
-    }
-    return found;
-}
-
-void wait(token_t token, int flags)
-{
-    Waiter* waiter = new Waiter(Scheduler::get_current_thread(), token, flags);
-    sleep_queue.push_back(*waiter);
-    Scheduler::remove(Scheduler::get_current_thread());
+    Thread* t = Scheduler::get_current_thread();
+    WaitQueueNode* node = new WaitQueueNode(t);
+    this->waiters.push_back(*node);
+    Scheduler::remove(t);
+    t->state = (flags & wait_interruptible) ?
+                   ThreadState::SLEEPING_INTERRUPTIBLE :
+                   ThreadState::SLEEPING_UNINTERRUPTIBLE;
     yield();
+    int ret = 0;
+    // Check if a signal is pending
+    if (!node->normal_wake) {
+        ret = 1;
+    }
+    delete node;
+    return ret;
+}
+
+void WaitQueue::wakeup()
+{
+    for (auto& i : this->waiters) {
+        i.normal_wake = true;
+        Scheduler::insert(i.thread);
+    }
 }
 
 void idle()

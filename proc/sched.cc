@@ -80,7 +80,7 @@ pid_t get_free_pid()
 
 bool insert(Thread* thread)
 {
-    thread->state = RUNNABLE;
+    thread->state = ThreadState::RUNNABLE;
     run_queue.push_front(*thread);
     return true;
 }
@@ -90,7 +90,7 @@ bool remove(Thread* thread)
     for (auto it = run_queue.begin(); it != run_queue.end(); ++it) {
         auto& value = *it;
         if (&value == thread) {
-            thread->state = UNMANAGED;
+            thread->state = ThreadState::UNMANAGED;
             run_queue.erase(it);
             return true;
         }

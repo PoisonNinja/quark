@@ -10,7 +10,13 @@ struct InterruptContext;
 
 class Process;
 
-enum ThreadState { UNMANAGED, SLEEPING, RUNNABLE, RUNNING };
+enum class ThreadState {
+    UNMANAGED,
+    SLEEPING_UNINTERRUPTIBLE,
+    SLEEPING_INTERRUPTIBLE,
+    RUNNABLE,
+    RUNNING,
+};
 
 class Thread
 {

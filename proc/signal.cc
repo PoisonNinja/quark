@@ -38,7 +38,9 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
     struct sigaction* action = &this->parent->signal_actions[signum];
 
-    if (action->sa_handler == SIG_IGN) {
+    if (action->sa_handler == SIG_IGN ||
+        (action->sa_handler == SIG_DFL &&
+         Signal::sigismember(&ignored_signals, signum))) {
         Log::printk(Log::LogLevel::DEBUG, "[signal]: SIG_IGN, returning\n");
         return;
     }

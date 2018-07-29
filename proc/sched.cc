@@ -30,7 +30,8 @@ int WaitQueue::wait(int flags)
     t->state = (flags & wait_interruptible) ?
                    ThreadState::SLEEPING_INTERRUPTIBLE :
                    ThreadState::SLEEPING_UNINTERRUPTIBLE;
-    yield();
+    Scheduler::yield();
+    this->waiters.erase(this->waiters.iterator_to(*node));
     int ret = 0;
     // Check if a signal is pending
     if (!node->normal_wake) {

@@ -40,5 +40,6 @@ bool register_blockdev(dev_t major, BlockDevice* blkdev)
 {
     BlockWrapper* bw = new BlockWrapper(blkdev);
     register_kdevice(BLK, major, bw);
+    return true;
 }
 }  // namespace Filesystem

@@ -25,7 +25,8 @@ void init_stage2(void*)
     }
     struct Filesystem::stat st;
     init->stat(&st);
-    Log::printk(Log::LogLevel::DEBUG, "init binary has size of %zu bytes\n", st.st_size);
+    Log::printk(Log::LogLevel::DEBUG, "init binary has size of %zu bytes\n",
+                st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
     int argc = 2;

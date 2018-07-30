@@ -26,15 +26,16 @@ int WaitQueue::wait(int flags)
     Thread* t = Scheduler::get_current_thread();
     WaitQueueNode node(t);
     this->waiters.push_back(node);
-    Scheduler::remove(t);
     t->state = (flags & wait_interruptible) ?
                    ThreadState::SLEEPING_INTERRUPTIBLE :
                    ThreadState::SLEEPING_UNINTERRUPTIBLE;
+    Scheduler::remove(t);
     Scheduler::yield();
-    this->waiters.erase(this->waiters.iterator_to(node));
     int ret = 0;
     // Check if a signal is pending
-    if (node.normal_wake) {
+    if (!node.normal_wake) {
+        // This wasn't woken up by waken(), so we need to remove it manually
+        this->waiters.erase(this->waiters.iterator_to(node));
         ret = 1;
     }
     return ret;
@@ -42,9 +43,11 @@ int WaitQueue::wait(int flags)
 
 void WaitQueue::wakeup()
 {
-    for (auto& i : this->waiters) {
-        i.normal_wake = true;
-        Scheduler::insert(i.thread);
+    for (auto it = this->waiters.begin(); it != this->waiters.end();) {
+        (*it).normal_wake = true;
+        Scheduler::insert((*it).thread);
+        // Erase the element
+        it = this->waiters.erase(it);
     }
 }
 
@@ -73,15 +76,9 @@ bool insert(Thread* thread)
 
 bool remove(Thread* thread)
 {
-    for (auto it = run_queue.begin(); it != run_queue.end(); ++it) {
-        auto& value = *it;
-        if (&value == thread) {
-            thread->state = ThreadState::UNMANAGED;
-            run_queue.erase(it);
-            return true;
-        }
-    }
-    return false;
+    thread->state = ThreadState::UNMANAGED;
+    run_queue.erase(run_queue.iterator_to(*thread));
+    return true;
 }
 
 Thread* next()
@@ -90,7 +87,7 @@ Thread* next()
     if (run_queue.empty()) {
         next = kidle;
     } else {
-        next = &run_queue.front();
+        next = &(run_queue.front());
         remove(next);
         run_queue.push_back(*next);
     }

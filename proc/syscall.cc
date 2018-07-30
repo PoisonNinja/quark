@@ -253,6 +253,11 @@ static long sys_execve(const char* path, const char* old_argv[],
         String::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
     Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
+    if (!file) {
+        delete[] envp;
+        delete[] argv;
+        return -ENOENT;
+    }
     struct Filesystem::stat st;
     file->stat(&st);
     Log::printk(Log::LogLevel::DEBUG,

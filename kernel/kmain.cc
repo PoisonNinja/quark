@@ -1,6 +1,7 @@
 #include <boot/info.h>
 #include <cpu/cpu.h>
 #include <cpu/interrupt.h>
+#include <drivers/input/i8042.h>
 #include <fs/fs.h>
 #include <fs/initrd/initrd.h>
 #include <fs/stat.h>
@@ -77,5 +78,11 @@ void kmain(struct Boot::info& info)
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();
+
+    // Core subsystems are online, let's start loading drivers
+    // In the future these will be moved into an initcall system, but this will
+    // suffice for now
+    i8042::init();
+
     init_stage1();
 }

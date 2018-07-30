@@ -24,20 +24,19 @@ bool _online = false;
 int WaitQueue::wait(int flags)
 {
     Thread* t = Scheduler::get_current_thread();
-    WaitQueueNode* node = new WaitQueueNode(t);
-    this->waiters.push_back(*node);
+    WaitQueueNode node(t);
+    this->waiters.push_back(node);
     Scheduler::remove(t);
     t->state = (flags & wait_interruptible) ?
                    ThreadState::SLEEPING_INTERRUPTIBLE :
                    ThreadState::SLEEPING_UNINTERRUPTIBLE;
     Scheduler::yield();
-    this->waiters.erase(this->waiters.iterator_to(*node));
+    this->waiters.erase(this->waiters.iterator_to(node));
     int ret = 0;
     // Check if a signal is pending
-    if (!node->normal_wake) {
+    if (node.normal_wake) {
         ret = 1;
     }
-    delete node;
     return ret;
 }
 

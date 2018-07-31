@@ -43,6 +43,25 @@ SECTIONS
         *(COMMON)
     }
 
+    .initcall ALIGN(0x1000) : AT(ADDR(.initcall) - 0xFFFFFFFF80000000)
+    {
+        __initcall1_start = .;
+        *(.initcall1)
+        __initcall2_start = .;
+        *(.initcall2)
+        __initcall3_start = .;
+        *(.initcall3)
+        __initcall4_start = .;
+        *(.initcall4)
+        __initcall5_start = .;
+        *(.initcall5)
+        __initcall6_start = .;
+        *(.initcall6)
+        __initcall7_start = .;
+        *(.initcall7)
+        __initcall_end = .;
+    }
+
     /DISCARD/ :
     {
        	*(.comment)

@@ -1,6 +1,6 @@
 #pragma once
 
-typedef int (*initcall_t)(void);
+typedef int (*initcall_t)();
 
 enum class InitLevel : int {
     EARLY,

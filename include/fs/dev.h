@@ -37,7 +37,8 @@ protected:
     DeviceClass type;
 };
 
-bool reserve_class(DeviceClass c, dev_t major);
+dev_t locate_class(DeviceClass c);
+bool register_class(DeviceClass c, dev_t major);
 
 bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev);
 

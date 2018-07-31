@@ -32,19 +32,30 @@ KDevice* KDeviceClass::get_kdevice(int minor)
 
 KDeviceClass* chrdev[max_major] = {nullptr};
 KDeviceClass* blkdev[max_major] = {nullptr};
+}  // namespace
 
-ssize_t next_free_major(KDevice* arr[max_major])
+dev_t locate_class(DeviceClass c)
 {
-    for (size_t i = 0; i < max_major; i++) {
-        if (!arr[i]) {
-            return i;
-        }
+    switch (c) {
+        case BLK:
+            for (dev_t i = 0; i < max_major; i++) {
+                if (!blkdev[i]) {
+                    return i;
+                }
+            }
+            break;
+        case CHR:
+            for (dev_t i = 0; i < max_major; i++) {
+                if (!chrdev[i]) {
+                    return i;
+                }
+            }
+            break;
     }
     return -1;
 }
-}  // namespace
 
-bool reserve_class(DeviceClass c, dev_t major)
+bool register_class(DeviceClass c, dev_t major)
 {
     switch (c) {
         case BLK:

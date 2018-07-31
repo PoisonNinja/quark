@@ -6,6 +6,7 @@
 #include <fs/initrd/initrd.h>
 #include <fs/stat.h>
 #include <kernel.h>
+#include <kernel/init.h>
 #include <kernel/time/time.h>
 #include <kernel/version.h>
 #include <lib/string.h>
@@ -78,6 +79,18 @@ void kmain(struct Boot::info& info)
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();
+
+    /*
+     * Core subsystems are online, let's starting bringing up the rest of the
+     * kernel.
+     */
+    do_initcall(InitLevel::EARLY);
+    do_initcall(InitLevel::CORE);
+    do_initcall(InitLevel::ARCH);
+    do_initcall(InitLevel::SUBSYS);
+    do_initcall(InitLevel::FS);
+    do_initcall(InitLevel::DEVICE);
+    do_initcall(InitLevel::LATE);
 
     // Core subsystems are online, let's start loading drivers
     // In the future these will be moved into an initcall system, but this will

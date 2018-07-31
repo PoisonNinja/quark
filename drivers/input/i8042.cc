@@ -3,6 +3,7 @@
 #include <drivers/input/i8042.h>
 #include <fs/dev.h>
 #include <kernel.h>
+#include <kernel/init.h>
 #include <proc/sched.h>
 
 namespace
@@ -59,11 +60,13 @@ void i8042Driver::handler(int, void* dev_id, struct InterruptContext*)
 
 namespace i8042
 {
-void init()
+int init()
 {
     dev_t major = Filesystem::locate_class(Filesystem::CHR);
     Filesystem::register_class(Filesystem::CHR, major);
     i8042Driver* d = new i8042Driver();
     Filesystem::register_kdevice(Filesystem::CHR, major, d);
+    return 0;
 }
+DEVICE_INITCALL(init);
 }  // namespace i8042

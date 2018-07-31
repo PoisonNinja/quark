@@ -2,5 +2,5 @@
 
 namespace i8042
 {
-void init();
+int init();
 }

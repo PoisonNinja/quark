@@ -92,10 +92,5 @@ void kmain(struct Boot::info& info)
     do_initcall(InitLevel::DEVICE);
     do_initcall(InitLevel::LATE);
 
-    // Core subsystems are online, let's start loading drivers
-    // In the future these will be moved into an initcall system, but this will
-    // suffice for now
-    i8042::init();
-
     init_stage1();
 }

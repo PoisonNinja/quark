@@ -21,15 +21,9 @@ void init()
     FTable::add("pts", new PTSFS());
 
     VGATTY* vga = new VGATTY();
-    reserve_class(CHR, 0);
-    register_kdevice(CHR, 0, vga);
-
-    // Ref<Inode> tty(new VGATTY());
-    // Ref<Vnode> vtty(new Vnode(tty));
-    // Ref<Descriptor> dtty(new Descriptor(vtty));
-    // Ref<Inode> ptmx(new PTMX(0, 0, 0755));
-    // Ref<Vnode> vptmx(new Vnode(ptmx));
-    // Ref<Descriptor> dptmx(new Descriptor(vptmx));
+    dev_t major = locate_class(CHR);
+    register_class(CHR, major);
+    register_kdevice(CHR, major, vga);
 
     // Initialize the root filesystem
     Superblock* rootsb = new Superblock();

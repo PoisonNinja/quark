@@ -61,8 +61,9 @@ namespace i8042
 {
 void init()
 {
-    Filesystem::reserve_class(Filesystem::CHR, 1);
+    dev_t major = Filesystem::locate_class(Filesystem::CHR);
+    Filesystem::register_class(Filesystem::CHR, major);
     i8042Driver* d = new i8042Driver();
-    Filesystem::register_kdevice(Filesystem::CHR, 1, d);
+    Filesystem::register_kdevice(Filesystem::CHR, major, d);
 }
 }  // namespace i8042

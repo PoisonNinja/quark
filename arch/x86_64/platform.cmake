@@ -3,7 +3,7 @@ add_definitions(
     -DX86_64
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=kernel -mno-red-zone")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -mcmodel=kernel -mno-red-zone")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -zmax-page-size=0x1000 -T${CMAKE_SOURCE_DIR}/arch/x86_64/quark.lds")
 

@@ -6,6 +6,7 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/kmain.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/log.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/panic.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/stacktrace.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/symbol.cc
 )
 

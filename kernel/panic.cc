@@ -1,5 +1,6 @@
 #include <cpu/cpu.h>
 #include <kernel.h>
+#include <kernel/stacktrace.h>
 #include <lib/printf.h>
 #include <lib/string.h>
 #include <stdarg.h>
@@ -18,6 +19,7 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     vsnprintf(panic_buffer, Kernel::panic_max, format, args);
     va_end(args);
     Log::printk(Log::LogLevel::ERROR, "%s", panic_buffer);
+    do_stack_trace();
     for (;;)
         CPU::halt();
 }

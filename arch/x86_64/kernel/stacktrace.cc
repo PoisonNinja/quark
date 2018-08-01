@@ -11,7 +11,12 @@ void arch_do_stack_trace()
         if (!rip)
             break;
         rbp = (uint64_t*)rbp[0];
+        if (!rbp)
+            break;
         auto data = Symbols::resolve_addr_fuzzy(rip);
+        if (!data.first) {
+            break;
+        }
         Log::printk(Log::LogLevel::ERROR, "Frame #%d: %s+%llX\n", frame++,
                     data.first, data.second);
     }

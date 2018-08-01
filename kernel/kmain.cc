@@ -1,7 +1,6 @@
 #include <boot/info.h>
 #include <cpu/cpu.h>
 #include <cpu/interrupt.h>
-#include <drivers/input/i8042.h>
 #include <fs/fs.h>
 #include <fs/initrd/initrd.h>
 #include <fs/stat.h>
@@ -81,8 +80,8 @@ void kmain(struct Boot::info& info)
     Syscall::init();
 
     /*
-     * Core subsystems are online, let's starting bringing up the rest of the
-     * kernel.
+     * Core subsystems are online, let's starting bringing up the rest of
+     * the kernel.
      */
     do_initcall(InitLevel::EARLY);
     do_initcall(InitLevel::CORE);

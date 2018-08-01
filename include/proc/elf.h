@@ -442,11 +442,15 @@ typedef struct elf64_note {
 Pair<bool, addr_t> load(addr_t binary);
 
 #if WORD_SIZE == 8
+typedef Elf64_Sym Elf_Sym;
 typedef Elf64_Phdr Elf_Phdr;
 typedef Elf64_Ehdr Elf_Ehdr;
+typedef Elf64_Shdr Elf_Shdr;
 #elif WORD_SIZE == 4
+typedef Elf32_Sym Elf_Sym;
 typedef Elf32_Phdr Elf_Phdr;
 typedef Elf32_Ehdr Elf_Ehdr;
+typedef Elf32_Shdr Elf_Shdr;
 #else
 #error "Unsupported processor word size. Add support for it here"
 #endif

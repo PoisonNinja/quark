@@ -1,34 +1,3 @@
-/*
- * Copyright (C) 2017 Jason Lu
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
- * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include <arch/cpu/cpu.h>
 #include <arch/kernel/multiboot2.h>
 #include <boot/info.h>
@@ -36,8 +5,14 @@
 #include <drivers/tty/serial.h>
 #include <kernel.h>
 #include <lib/libcxx.h>
+#include <lib/string.h>
 
 extern void kmain(struct Boot::info &info);
+
+namespace Symbols
+{
+void set_table(struct multiboot_tag_elf_sections *t);
+}
 
 namespace X64
 {
@@ -52,11 +27,71 @@ void *__kernel_end;
 static Serial serial_console;
 static struct Boot::info info;
 
+#include <proc/elf.h>
+
+// static void multiboot_parse_symbols(struct multiboot_tag_elf_sections *table)
+// {
+//     uint64_t *sections = (uint64_t *)table->sections;
+
+//     // Locate the section header string table
+//     ELF::Elf_Shdr *shdr_string_table = (ELF::Elf_Shdr *)sections +
+//     table->shndx; char *s_string_table =
+//         (char *)(shdr_string_table->sh_addr + 0xFFFFFFFF80000000);
+
+//     ELF::Elf_Shdr *string_table_header = nullptr;
+//     char *string_table = nullptr;
+//     // ELF binaries generally have three or four string tables.
+//     // Locate the correct string table (.symtab)
+//     for (uint32_t i = 0; i < table->num; i++) {
+//         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
+//         if (shdr->sh_type == SHT_STRTAB &&
+//             !String::strcmp(".strtab", s_string_table + shdr->sh_name)) {
+//             string_table_header = (ELF::Elf_Shdr *)sections + i;
+//             string_table =
+//                 (char *)(string_table_header->sh_addr + 0xFFFFFFFF80000000);
+//         }
+//     }
+
+//     if (!string_table) {
+//         Log::printk(Log::LogLevel::WARNING, "Failed to locate string
+//         table\n"); return;
+//     }
+
+//     // Locate the symbol table
+//     for (uint32_t i = 0; i < table->num; i++) {
+//         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
+//         if (shdr->sh_type == SHT_SYMTAB) {
+//             ELF::Elf_Sym *symtab =
+//                 (ELF::Elf_Sym *)(shdr->sh_addr + 0xFFFFFFFF80000000);
+//             if (!symtab)
+//                 continue;
+//             int num_syms = shdr->sh_size / shdr->sh_entsize;
+//             for (int j = 1; j <= num_syms; j++) {
+//                 symtab++;
+//                 if (ELF64_ST_TYPE(symtab->st_info) != STT_FUNC)
+//                     continue;
+//                 const char *name;
+//                 if (symtab->st_name != 0) {
+//                     name = string_table + symtab->st_name;
+//                 } else {
+//                     name = "N/A";
+//                 }
+//                 Log::printk(Log::LogLevel::DEBUG, "%s: %p\n", name,
+//                             symtab->st_value);
+//             }
+//         } else if (shdr->sh_type == SHT_STRTAB) {
+//             Log::printk(Log::LogLevel::INFO, "Found string table at %u\n",
+//             i);
+//         }
+//     }
+// }
+
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     Log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        Log::printk(Log::LogLevel::ERROR, "Multiboot magic number does not match!\n");
+        Log::printk(Log::LogLevel::ERROR,
+                    "Multiboot magic number does not match!\n");
     }
     info.architecture_data = multiboot;
     info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
@@ -87,6 +122,12 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 info.initrd_end =
                     (reinterpret_cast<struct multiboot_tag_module *>(tag))
                         ->mod_end;
+                break;
+            case MULTIBOOT_TAG_TYPE_ELF_SECTIONS:
+                Log::printk(Log::LogLevel::INFO, "Located symbol section\n");
+                struct multiboot_tag_elf_sections *sections =
+                    (struct multiboot_tag_elf_sections *)tag;
+                Symbols::set_table(sections);
                 break;
         }
     }

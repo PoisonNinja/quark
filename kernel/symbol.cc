@@ -1,3 +1,4 @@
+#include <kernel.h>
 #include <kernel/symbol.h>
 #include <lib/hashmap.h>
 #include <lib/list.h>
@@ -8,6 +9,20 @@ namespace
 {
 constexpr size_t table_size = 1024;
 
+// A wrapper for char*
+struct StringKey {
+    StringKey(const char* s) : value(s){};
+    const char* value;
+    bool operator==(const struct StringKey& other)
+    {
+        return !String::strcmp(this->value, other.value);
+    }
+    bool operator!=(const struct StringKey& other)
+    {
+        return !(*this == other);
+    }
+};
+
 struct AddressHash {
     unsigned long operator()(const addr_t key)
     {
@@ -16,13 +31,13 @@ struct AddressHash {
 };
 
 struct NameHash {
-    unsigned long operator()(const char* name)
+    unsigned long operator()(const StringKey& k)
     {
-        return Murmur::hash(name, String::strlen(name)) % table_size;
+        return Murmur::hash(k.value, String::strlen(k.value)) % table_size;
     }
 };
 
-Hashmap<const char*, addr_t, table_size, NameHash> name_to_address_hash;
+Hashmap<StringKey, addr_t, table_size, NameHash> name_to_address_hash;
 Hashmap<addr_t, const char*, table_size, AddressHash> address_to_name_hash;
 
 struct Symbol {

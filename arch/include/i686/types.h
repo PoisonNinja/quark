@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#define WORD_SIZE 4
+#define BITS 32
 
 typedef int32_t ssize_t;
 

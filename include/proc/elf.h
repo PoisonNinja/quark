@@ -497,13 +497,13 @@ typedef struct elf64_note {
 
 Pair<bool, addr_t> load(addr_t binary);
 
-#if WORD_SIZE == 8
+#if BITS == 64
 typedef Elf64_Sym Elf_Sym;
 typedef Elf64_Phdr Elf_Phdr;
 typedef Elf64_Ehdr Elf_Ehdr;
 typedef Elf64_Shdr Elf_Shdr;
 typedef Elf64_Rela Elf_Rela;
-#elif WORD_SIZE == 4
+#elif BITS == 32
 typedef Elf32_Sym Elf_Sym;
 typedef Elf32_Phdr Elf_Phdr;
 typedef Elf32_Ehdr Elf_Ehdr;

@@ -503,12 +503,16 @@ typedef Elf64_Phdr Elf_Phdr;
 typedef Elf64_Ehdr Elf_Ehdr;
 typedef Elf64_Shdr Elf_Shdr;
 typedef Elf64_Rela Elf_Rela;
+#define ELF_R_TYPE ELF64_R_TYPE
+#define ELF_R_SYM ELF64_R_SYM
 #elif BITS == 32
 typedef Elf32_Sym Elf_Sym;
 typedef Elf32_Phdr Elf_Phdr;
 typedef Elf32_Ehdr Elf_Ehdr;
 typedef Elf32_Shdr Elf_Shdr;
 typedef Elf32_Rela Elf_Rela;
+#define ELF_R_TYPE ELF32_R_TYPE
+#define ELF_R_SYM ELF32_R_SYM
 #else
 #error "Unsupported processor word size. Add support for it here"
 #endif

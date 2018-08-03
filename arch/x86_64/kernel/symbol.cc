@@ -55,9 +55,9 @@ int init()
     }
 
     ELF::Elf_Sym *sym = symtab;
-    for (int j = 1; j <= num_syms; j++) {
-        sym++;
-        if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC)
+    for (int j = 1; j <= num_syms; j++, sym++) {
+        if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC &&
+            ELF64_ST_TYPE(sym->st_info) != STT_OBJECT)
             continue;
         Symbols::load_symbol(Pair<const char *, addr_t>(
             string_table + sym->st_name, sym->st_value));
@@ -121,7 +121,8 @@ Pair<const char *, size_t> primitive_resolve_addr(addr_t address)
     ELF::Elf_Sym *sym = symtab;
     for (int j = 1; j <= num_syms; j++) {
         sym++;
-        if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC)
+        if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC &&
+            ELF64_ST_TYPE(sym->st_info) != STT_OBJECT)
             continue;
         if (sym->st_value <= address) {
             size_t temp = address - sym->st_value;

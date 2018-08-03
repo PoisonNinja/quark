@@ -18,7 +18,7 @@ void* signal_return_location = (void*)&signal_return;
 
 void set_thread_base(ThreadContext* thread)
 {
-    CPU::X64::wrmsr(CPU::X64::msr_kernel_gs_base,
+    CPU::X64::wrmsr(CPU::X86Family::msr_kernel_gs_base,
                     reinterpret_cast<uint64_t>(thread));
 }
 

@@ -125,7 +125,7 @@ addr_t fork()
     old_pml4->pages[Memory::X64::copy_entry].writable = 1;
     old_pml4->pages[Memory::X64::copy_entry].address = fork_pml4_phys / 0x1000;
 
-    Memory::X64::invlpg(reinterpret_cast<addr_t>(new_pml4));
+    Memory::X86Family::invlpg(reinterpret_cast<addr_t>(new_pml4));
 
     // Copy only user pages
     for (int i = 0; i < 256; i++) {
@@ -149,5 +149,5 @@ addr_t fork()
     }
     return fork_pml4_phys;
 }
-}
-}
+}  // namespace Virtual
+}  // namespace Memory

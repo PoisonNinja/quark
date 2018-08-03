@@ -28,7 +28,7 @@ bool protect(addr_t v, int flags)
     __set_flags(&pd->pages[Memory::X86::pd_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     __set_flags(&pt->pages[Memory::X86::pt_index(v)], flags);
-    Memory::X86::invlpg(v);
+    Memory::X86Family::invlpg(v);
     return true;
 }
 }  // namespace Virtual

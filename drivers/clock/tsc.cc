@@ -1,4 +1,4 @@
-#include <arch/cpu/feature.h>
+#include <arch/common/cpu/feature.h>
 #include <cpu/cpu.h>
 #include <drivers/clock/tsc.h>
 #include <kernel.h>

@@ -1,4 +1,4 @@
-#include <arch/cpu/feature.h>
+#include <arch/common/cpu/feature.h>
 #include <kernel.h>
 #include <lib/string.h>
 

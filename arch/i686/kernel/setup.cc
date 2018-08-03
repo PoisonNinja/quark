@@ -1,5 +1,5 @@
+#include <arch/common/kernel/multiboot2.h>
 #include <arch/cpu/cpu.h>
-#include <arch/kernel/multiboot2.h>
 #include <boot/info.h>
 #include <cpu/interrupt.h>
 #include <drivers/tty/serial.h>

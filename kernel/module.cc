@@ -7,13 +7,21 @@
 namespace
 {
 struct Module {
+    Module()
+    {
+        shdrs = nullptr;
+        sections = nullptr;
+        init = nullptr;
+        fini = nullptr;
+        name = description = version = author = nullptr;
+    }
     ~Module()
     {
         delete[] shdrs;
         delete[] sections;
     }
 
-    const char* name;
+    const char *name, *description, *version, *author;
 
     size_t shnum;
 
@@ -29,6 +37,55 @@ struct Module {
 };
 
 List<Module, &Module::node> modules;
+
+// A ghetto version of strtok that accepts \0
+const char* next_token(const char* string, const char* end)
+{
+    const char* p = string;
+    while (*p != '\0')
+        p++;
+    while (*p == '\0') {
+        if (p + 1 == end)
+            return nullptr;
+        p++;
+    }
+    return p;
+}
+
+void parse_modinfo(Module* mod, size_t index)
+{
+    const char* key = (char*)(mod->sections[index]);
+    const char* end = (char*)(mod->sections[index] + mod->shdrs[index].sh_size);
+
+    int found = 0;
+    while (key) {
+        Log::printk(Log::LogLevel::DEBUG, "[parse_modinfo]: Key: %s\n", key);
+
+        if (!String::strncmp("name=", key, 5)) {
+            mod->name = key + 5;
+            found++;
+        } else if (!String::strncmp("description=", key, 12)) {
+            mod->description = key + 12;
+            found++;
+        } else if (!String::strncmp("version=", key, 8)) {
+            mod->version = key + 8;
+            found++;
+        } else if (!String::strncmp("author=", key, 7)) {
+            mod->author = key + 7;
+            found++;
+        } else {
+            Log::printk(Log::LogLevel::WARNING,
+                        "[parse_modinfo]: Invalid token %s\n", key);
+        }
+
+        key = next_token(key, end);
+    }
+
+    if (found != 4) {
+        Log::printk(Log::LogLevel::WARNING,
+                    "[parse_modinfo]: Missing required attributes\n");
+    }
+}
 }  // namespace
 
 bool load_module(void* binary)
@@ -80,11 +137,16 @@ bool load_module(void* binary)
         reinterpret_cast<const char*>((mod->sections[header->e_shstrndx]));
 
     const char* string_table = nullptr;
+    size_t modinfo_index = 0;
     for (uint32_t i = 0; i < header->e_shnum; i++) {
         if (mod->shdrs[i].sh_type == SHT_STRTAB &&
             !String::strcmp(".strtab",
                             s_string_table + mod->shdrs[i].sh_name)) {
             string_table = reinterpret_cast<const char*>(mod->sections[i]);
+        } else if (mod->shdrs[i].sh_type == SHT_PROGBITS &&
+                   !String::strcmp(".modinfo",
+                                   s_string_table + mod->shdrs[i].sh_name)) {
+            modinfo_index = i;
         }
     }
 
@@ -97,6 +159,7 @@ bool load_module(void* binary)
         if (mod->shdrs[i].sh_type == SHT_SYMTAB) {
             symtab = reinterpret_cast<ELF::Elf_Sym*>(mod->sections[i]);
             num_syms = mod->shdrs[i].sh_size / mod->shdrs[i].sh_entsize;
+            break;
         }
     }
 
@@ -164,7 +227,28 @@ bool load_module(void* binary)
         }
     }
 
+    // The strings in modinfo are relocated so we need to wait until we
+    // completed relocations
+    parse_modinfo(mod, modinfo_index);
+
+    if (!mod->name) {
+        Log::printk(Log::LogLevel::ERROR,
+                    "[load_module]: Missing module name, not loading\n");
+        return false;
+        delete mod;
+    }
+
+    Log::printk(Log::LogLevel::INFO, "[load_module] Loaded module %s\n",
+                mod->name);
+    Log::printk(Log::LogLevel::INFO, "[load_module] Description: %s\n",
+                (mod->description) ? mod->description : "");
+    Log::printk(Log::LogLevel::INFO, "[load_module] Author: %s\n",
+                (mod->author) ? mod->author : "");
+    Log::printk(Log::LogLevel::INFO, "[load_module] Version: %s\n",
+                (mod->version) ? mod->version : "");
+
     modules.push_front(*mod);
     mod->init();
+
     return true;
 }

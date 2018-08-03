@@ -160,6 +160,11 @@ typedef struct {
 #define ELF64_R_SYM(i) ((i) >> 32)
 #define ELF64_R_TYPE(i) ((i)&0xffffffff)
 
+/* i386 relocations */
+#define R_386_NONE 0
+#define R_386_32 1
+#define R_386_PC32 2
+
 /* AMD x86-64 relocations.  */
 #define R_X86_64_NONE 0      /* No reloc */
 #define R_X86_64_64 1        /* Direct 64 bit  */

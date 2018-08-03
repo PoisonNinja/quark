@@ -70,7 +70,7 @@ void load_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
                   const char* envp[], struct ThreadContext& ctx)
 {
-    addr_t entry = ELF::load(binary);
+    addr_t entry = ELF::load(binary).second;
     size_t argv_size = sizeof(char*) * (argc + 1);  // argv is null terminated
     size_t envp_size = sizeof(char*) * (envc + 1);  // envp is null terminated
     for (int i = 0; i < argc; i++) {

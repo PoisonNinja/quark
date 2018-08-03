@@ -27,65 +27,6 @@ void *__kernel_end;
 static Serial serial_console;
 static struct Boot::info info;
 
-#include <proc/elf.h>
-
-// static void multiboot_parse_symbols(struct multiboot_tag_elf_sections *table)
-// {
-//     uint64_t *sections = (uint64_t *)table->sections;
-
-//     // Locate the section header string table
-//     ELF::Elf_Shdr *shdr_string_table = (ELF::Elf_Shdr *)sections +
-//     table->shndx; char *s_string_table =
-//         (char *)(shdr_string_table->sh_addr + 0xFFFFFFFF80000000);
-
-//     ELF::Elf_Shdr *string_table_header = nullptr;
-//     char *string_table = nullptr;
-//     // ELF binaries generally have three or four string tables.
-//     // Locate the correct string table (.symtab)
-//     for (uint32_t i = 0; i < table->num; i++) {
-//         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
-//         if (shdr->sh_type == SHT_STRTAB &&
-//             !String::strcmp(".strtab", s_string_table + shdr->sh_name)) {
-//             string_table_header = (ELF::Elf_Shdr *)sections + i;
-//             string_table =
-//                 (char *)(string_table_header->sh_addr + 0xFFFFFFFF80000000);
-//         }
-//     }
-
-//     if (!string_table) {
-//         Log::printk(Log::LogLevel::WARNING, "Failed to locate string
-//         table\n"); return;
-//     }
-
-//     // Locate the symbol table
-//     for (uint32_t i = 0; i < table->num; i++) {
-//         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
-//         if (shdr->sh_type == SHT_SYMTAB) {
-//             ELF::Elf_Sym *symtab =
-//                 (ELF::Elf_Sym *)(shdr->sh_addr + 0xFFFFFFFF80000000);
-//             if (!symtab)
-//                 continue;
-//             int num_syms = shdr->sh_size / shdr->sh_entsize;
-//             for (int j = 1; j <= num_syms; j++) {
-//                 symtab++;
-//                 if (ELF64_ST_TYPE(symtab->st_info) != STT_FUNC)
-//                     continue;
-//                 const char *name;
-//                 if (symtab->st_name != 0) {
-//                     name = string_table + symtab->st_name;
-//                 } else {
-//                     name = "N/A";
-//                 }
-//                 Log::printk(Log::LogLevel::DEBUG, "%s: %p\n", name,
-//                             symtab->st_value);
-//             }
-//         } else if (shdr->sh_type == SHT_STRTAB) {
-//             Log::printk(Log::LogLevel::INFO, "Found string table at %u\n",
-//             i);
-//         }
-//     }
-// }
-
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     Log::register_log_output(serial_console);

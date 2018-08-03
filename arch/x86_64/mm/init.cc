@@ -1,4 +1,4 @@
-#include <arch/common/kernel/multiboot2.h>
+#include <arch/kernel/multiboot2.h>
 #include <arch/mm/virtual.h>
 #include <boot/info.h>
 #include <kernel.h>

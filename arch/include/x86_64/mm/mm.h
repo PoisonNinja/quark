@@ -1,6 +1,5 @@
 #pragma once
 
-#include <arch/common/mm/mm.h>
 #include <types.h>
 
 namespace Memory
@@ -26,6 +25,23 @@ constexpr addr_t pt_index(addr_t x)
 
 constexpr addr_t recursive_entry = 510;
 constexpr addr_t copy_entry = 508;
+
+static inline uint64_t read_cr3(void)
+{
+    uint64_t value;
+    __asm__("mov %%cr3, %%rax" : "=a"(value));
+    return value;
+}
+
+static inline void write_cr3(uint64_t value)
+{
+    __asm__("mov %%rax, %%cr3" : : "a"(value));
+}
+
+static inline void invlpg(addr_t addr)
+{
+    __asm__ __volatile__("invlpg (%0)" ::"r"(addr) : "memory");
+}
 
 /*
  * Convert a table entry into the recursive mapping address. Taken from

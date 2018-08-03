@@ -1,5 +1,5 @@
-#include <arch/common/cpu/feature.h>
 #include <arch/cpu/cpu.h>
+#include <arch/cpu/feature.h>
 #include <arch/cpu/gdt.h>
 #include <arch/cpu/idt.h>
 #include <kernel.h>
@@ -31,15 +31,15 @@ void init()
      */
     uint64_t star = ((((0x20ULL | 3) - 16) << 16) | ((0x8ULL))) << 32;
     // Write STAR (segments)
-    CPU::X64::wrmsr(X86Family::msr_star, star);
+    CPU::X64::wrmsr(msr_star, star);
     // Write LSTAR (syscall entry point)
-    CPU::X64::wrmsr(X86Family::msr_lstar,
+    CPU::X64::wrmsr(msr_lstar,
                     reinterpret_cast<uint64_t>(&syscall_sysret_wrapper));
     /*
      * Write FMASK. Bits set here (currently IF) are unset in RFLAGS. We don't
      * want interrupts during a syscall
      */
-    CPU::X64::wrmsr(X86Family::msr_fmask, 0x200);
+    CPU::X64::wrmsr(msr_fmask, 0x200);
 }
 }  // namespace X64
 

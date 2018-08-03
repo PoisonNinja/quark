@@ -82,7 +82,7 @@ addr_t fork()
     old_pd->pages[Memory::X86::copy_entry].writable = 1;
     old_pd->pages[Memory::X86::copy_entry].address = fork_pd_phys / 0x1000;
 
-    Memory::X86Family::invlpg(reinterpret_cast<addr_t>(new_pd));
+    Memory::X86::invlpg(reinterpret_cast<addr_t>(new_pd));
 
     // Copy only user pages (0 - 3GB)
     for (int i = 0; i < 768; i++) {
@@ -103,5 +103,5 @@ addr_t fork()
     }
     return fork_pd_phys;
 }
-}  // namespace Virtual
-}  // namespace Memory
+}
+}

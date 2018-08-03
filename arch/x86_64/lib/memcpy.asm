@@ -1,6 +1,6 @@
 ; Based on Linux memcpy but converted to AT&T syntax
 
-global _ZN6String6memcpyEPvPKvm
+global _ZN6String6memcpyEPvPKvm:function
 _ZN6String6memcpyEPvPKvm:
     cld             ; For safety
     mov rax, rdi    ; memcpy returns dest pointer

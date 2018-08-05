@@ -1,5 +1,5 @@
 # Required for target_sources
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.4)
 
 set(QUARK_VERSION_MAJOR "0")
 set(QUARK_VERSION_MINOR "0")

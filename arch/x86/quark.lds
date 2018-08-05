@@ -1,12 +1,11 @@
 #ifdef X86_64
-ENTRY(bootstrap32)
 OUTPUT_FORMAT("elf64-x86-64")
 VMA = 0xFFFFFFFF80000000;
 #else
-ENTRY(bootstrap)
 OUTPUT_FORMAT("elf32-i386")
 VMA = 0xC0000000;
 #endif
+ENTRY(bootstrap32)
 SECTIONS
 {
 	. = 0x100000;

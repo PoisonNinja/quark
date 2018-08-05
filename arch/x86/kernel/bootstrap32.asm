@@ -1,0 +1,315 @@
+MULTIBOOT2_MAGIC                equ    0xE85250D6       ; Magic number
+MULTIBOOT2_ARCHITECTURE         equ    0                ; 32-bit i386
+MULTIBOOT2_SIZE                 equ    (multiboot2_end - multiboot2_start)
+MULTIBOOT2_CHECKSUM             equ    0x100000000 - (MULTIBOOT2_MAGIC + MULTIBOOT2_ARCHITECTURE + MULTIBOOT2_SIZE)
+
+bits 32
+section .bootstrap
+align 8
+
+multiboot2_start:
+dd MULTIBOOT2_MAGIC
+dd MULTIBOOT2_ARCHITECTURE
+dd MULTIBOOT2_SIZE
+dd MULTIBOOT2_CHECKSUM
+
+dw 0
+dw 0
+dd 8
+multiboot2_end:
+
+NO_CPUID_STRING: db "No CPUID support!", 0
+%ifdef X86_64
+NO_LONG_MODE: db "No long mode support! Use a 32-bit build!", 0
+NO_SSE_STRING: db "No SSE2 support! Use a 32-bit build!", 0
+
+extern bootstrap64
+
+align 4096
+gdt64:                           ; Global Descriptor Table (64-bit).
+    .null: equ $ - gdt64         ; The null descriptor.
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 0                         ; Access.
+    db 0                         ; Granularity.
+    db 0                         ; Base (high).
+    .code: equ $ - gdt64         ; The code descriptor.
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 10011010b                 ; Access (exec/read).
+    db 00100000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .data: equ $ - gdt64         ; The data descriptor.
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 10010010b                 ; Access (read/write).
+    db 00000000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .pointer:                    ; The GDT-pointer.
+    dw $ - gdt64 - 1             ; Limit.
+    dq gdt64                     ; Base.
+
+align 4096
+pml4:
+    dq (pml3 + 0x7)              ; Identity map
+    times 508 dq 0
+    dq (phys_pml3 + 0x7)         ; Physical memory manager page
+    dq (pml4 + 0x7)              ; Fractal mapping
+    dq (pml3 + 0x7)              ; -2GB mapping
+
+align 4096
+pml3:
+    dq (pml2 + 0x7)
+    times 509 dq 0
+    dq (pml2 + 0x7)
+    dq 0
+
+align 4096
+pml2:
+    %assign i 0
+    %rep 25
+    dq (pml1 + i + 0x7)
+    %assign i i+4096
+    %endrep
+
+    times (512-25) dq 0
+
+align 4096
+; 15 tables are described here
+; this maps 40 MB from address 0x0
+; to an identity mapping
+pml1:
+    %assign i 0
+    %rep 512*25
+    dq (i << 12) | 0x083
+    %assign i i+1
+    %endrep
+
+align 4096
+phys_pml3:
+    dq (phys_pml2 + 0x7)
+    times 511 dq 0
+
+align 4096
+phys_pml2:
+    dq (phys_pml1 + 0x7)
+    times 511 dq 0
+
+align 4096
+phys_pml1:
+    dq (phys_pml0 + 0x7)
+    times 511 dq 0
+
+align 4096
+phys_pml0:
+    times 512 dq 0
+%else
+
+align 4096
+page_directory:
+    dd (page_table + 0x7)              ; Identity map
+    times 767 dd 0
+    dd (page_table + 0x7)              ; Higher half mapping
+    times 253 dd 0
+    dd (page_table_phys + 0x7)         ; Physical
+    dd (page_directory + 0x7)          ; Fractal
+
+align 4096
+page_table:
+    %assign i 0
+    %rep 512*25
+    dd (i << 12) | 0x083
+    %assign i i+1
+    %endrep
+
+page_table_phys:
+    dd (page_phys + 0x083)
+    times 1023 dd 0
+
+page_phys:
+    times 1024 dd 0
+
+extern asm_to_cxx_trampoline
+%endif
+
+halt32:
+    cli
+    hlt
+    jmp halt32
+
+print_string:
+    pusha
+    mov edx, 0xB8000
+
+.print_string_loop:
+    mov al, [ebx]
+    mov ah, 0x0F
+
+    cmp al, 0
+    je .print_string_cleanup
+
+    mov [edx], ax
+    inc ebx
+    add edx, 2
+
+    jmp .print_string_loop
+
+.print_string_cleanup:
+    popa
+    ret
+
+wipe_screen:
+    pusha
+    mov edx, 0xB8000
+
+.wipe_screen_loop:
+    mov ax, 0
+    mov [edx], ax
+
+    cmp edx, 0xB8FA0
+    jge .wipe_screen_ret
+
+    add edx, 2
+    jmp .wipe_screen_loop
+
+.wipe_screen_ret:
+    popa
+    ret
+
+noCPUID:
+    mov ebx, NO_CPUID_STRING
+    call print_string
+    jmp halt32
+
+%ifdef X86_64
+noLongMode:
+    mov ebx, NO_LONG_MODE
+    call print_string
+    jmp halt32
+
+noSSE2:
+    mov ebx, NO_SSE_STRING
+    call print_string
+    jmp halt32
+%endif
+
+global bootstrap32
+bootstrap32:
+    ; Back up the multiboot data in the registers (magic, info struct)
+    mov esi, ebx
+    mov edi, eax
+
+    ; Why don't we use the nice SSE2 optimized memset implementation in asm?
+    ; At this point, we don't know whether this is a SSE2 compatible or even
+    ; 64-bit computer, and attempting to use those instructions on a computer
+    ; without SSE2 or long mode would cause a crash
+    call wipe_screen
+
+    pushfd                               ;Save EFLAGS
+    pushfd                               ;Store EFLAGS
+    xor dword [esp],0x00200000           ;Invert the ID bit in stored EFLAGS
+    popfd                                ;Load stored EFLAGS (with ID bit inverted)
+    pushfd                               ;Store EFLAGS again (ID bit may or may not be inverted)
+    pop eax                              ;eax = modified EFLAGS (ID bit may or may not be inverted)
+    xor eax,[esp]                        ;eax = whichever bits were changed
+    popfd                                ;Restore original EFLAGS
+    and eax,0x00200000                   ;eax = zero if ID bit can't be changed, else non-zero
+    cmp eax, 0
+    je noCPUID
+
+%ifdef X86_64
+    mov eax, 0x80000000
+    cpuid
+    cmp eax, 0x80000001                  ; Compare the A-register with 0x80000001.
+    jb noLongMode                        ; It is less, there is no long mode.
+
+    mov eax, 0x80000001                  ; Set the A-register to 0x80000001.
+    cpuid                                ; CPU identification.
+    test edx, 1 << 29                    ; Test if the LM-bit, which is bit 29, is set in the D-register.
+    jz noLongMode                        ; They aren't, there is no long mode.
+
+    mov eax, 0x00000001                  ; Long mode CPUs should have SSE, but check just in case
+    cpuid
+    test edx, 0x4000000
+    jz noSSE2
+
+    ; enable 64-bit page translation table entries
+    ; by setting CR4.PAE = 1.
+    ;
+    ; Paging is not enabled until long mode.
+    mov eax, cr4
+    bts eax, 5
+    mov cr4, eax
+%endif
+
+    ; Set control register flags
+    mov eax, cr0
+    and eax, 0xFFFFFFFB  ; Disable coprocessor emulation
+    bts eax, 1      ; Set coprocessor monitoring
+    bts eax, 16     ; Enable WP for Ring 0
+    mov cr0, eax
+    mov eax, cr4   ; Set OSFXSR and OSXMMEXCPT
+    or ax, 3 << 9
+    mov cr4, eax
+
+%ifdef X86_64
+    ; Create long mode page table and init CR3 to
+    ; point to the base of the PML4 page table
+    mov eax, pml4
+%else
+    mov eax, page_directory
+%endif
+    mov cr3, eax
+
+%ifdef X86_64
+    ; Enable Long mode, SYSCALL / SYSRET instructions, and NX bit
+    mov ecx, 0xC0000080
+    rdmsr
+    bts eax, 11
+    bts eax, 8
+    bts eax, 0
+    wrmsr
+%endif
+
+    ; enable paging to activate long mode
+    mov eax, cr0
+    bts eax, 31
+    mov cr0, eax
+
+%ifdef X86_64
+    lgdt [gdt64.pointer]         ; Load the 64-bit global descriptor table.
+
+    jmp 0x08:(trampoline)
+
+bits 64
+trampoline:
+    mov rcx, bootstrap64
+    jmp rcx
+%else
+    jmp higher_half
+
+
+section .text
+higher_half:
+    ; Allocate a stack
+    mov esp, stack + 0x4000
+
+    mov [page_directory], dword 0
+
+    ; Fixup multiboot
+    add esi, 0xC0000000
+    push esi
+    push edi
+
+    call asm_to_cxx_trampoline
+
+    jmp halt32
+
+section .bss
+global stack
+stack:
+    resb 0x4000
+%endif

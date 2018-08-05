@@ -4,8 +4,17 @@
 
 namespace Memory
 {
-namespace X64
+namespace X86
 {
+#ifdef X86_64
+constexpr addr_t recursive_entry = 510;
+constexpr addr_t copy_entry = 508;
+#else
+constexpr addr_t recursive_entry = 1023;
+constexpr addr_t copy_entry = 1020;
+#endif
+
+#ifdef X86_64
 constexpr addr_t pml4_index(addr_t x)
 {
     return ((x >> 39) & 0x1FF);
@@ -22,20 +31,35 @@ constexpr addr_t pt_index(addr_t x)
 {
     return ((x >> 12) & 0x1FF);
 }
-
-constexpr addr_t recursive_entry = 510;
-constexpr addr_t copy_entry = 508;
-
-static inline uint64_t read_cr3(void)
+#else
+constexpr addr_t pd_index(addr_t x)
 {
-    uint64_t value;
+    return ((x >> 22) & 0x3FF);
+}
+constexpr addr_t pt_index(addr_t x)
+{
+    return ((x >> 12) & 0x3FF);
+}
+#endif
+
+static inline addr_t read_cr3(void)
+{
+    addr_t value;
+#ifdef X86_64
     __asm__("mov %%cr3, %%rax" : "=a"(value));
+#else
+    __asm__("mov %%cr3, %%eax" : "=a"(value));
+#endif
     return value;
 }
 
-static inline void write_cr3(uint64_t value)
+static inline void write_cr3(addr_t value)
 {
+#ifdef X86_64
     __asm__("mov %%rax, %%cr3" : : "a"(value));
+#else
+    __asm__("mov %%eax, %%cr3" : : "a"(value));
+#endif
 }
 
 static inline void invlpg(addr_t addr)
@@ -62,5 +86,12 @@ static inline void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
     address |= pt << 12;
     return (void*)address;
 }
-}  // namespace X64
+
+static inline void* decode_fractal(uint32_t pd, uint32_t pt)
+{
+    uint32_t address = (pd << 22);
+    address |= (pt << 12);
+    return (void*)address;
+}
+}  // namespace X86
 }  // namespace Memory

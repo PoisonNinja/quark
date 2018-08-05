@@ -5,7 +5,7 @@
 
 namespace CPU
 {
-namespace X64
+namespace X86
 {
 enum feature_index {
     cpuid_1_edx = 0,
@@ -434,5 +434,5 @@ inline void set_feature(Core& cpu, uint32_t bit)
 
 void detect(Core& cpu);
 void print(Core& cpu);
-}
-}
+}  // namespace X86
+}  // namespace CPU

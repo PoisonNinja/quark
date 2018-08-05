@@ -17,7 +17,6 @@
 
 static void load_test()
 {
-    void* load_target = nullptr;
     Process* parent = Scheduler::get_current_process();
     Ref<Filesystem::Descriptor> root = parent->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/test.ko", 0, 0);

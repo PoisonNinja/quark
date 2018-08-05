@@ -19,13 +19,20 @@ enable_language(ASM_NASM)
 set(ARCH "x86_64" CACHE STRING "Architecture to build for")
 message(STATUS "Architecture: " ${ARCH})
 
-set(ARCH_PATH "${CMAKE_SOURCE_DIR}/arch/${ARCH}")
+set(SRC_ARCH ${ARCH})
+if (SRC_ARCH STREQUAL "x86_64" OR SRC_ARCH STREQUAL "i686")
+    set(SRC_ARCH "x86")
+endif()
+message(STATUS "Source architecture: " ${SRC_ARCH})
+
+
+set(ARCH_PATH "${CMAKE_SOURCE_DIR}/arch/${SRC_ARCH}")
 if(NOT EXISTS ${ARCH_PATH})
     message(FATAL_ERROR "Unable to locate architecture directory. Perhaps your ARCH is wrong?")
 endif()
 message(STATUS "Architecture folder: " ${ARCH_PATH})
 
-set(ARCH_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/arch/include/${ARCH}")
+set(ARCH_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/arch/include/${SRC_ARCH}")
 if(NOT EXISTS ${ARCH_INCLUDE_PATH})
     message(FATAL_ERROR "Unable to locate architecture include directory. Perhaps your ARCH is wrong?")
 endif()

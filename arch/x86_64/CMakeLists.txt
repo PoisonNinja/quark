@@ -1,5 +1,0 @@
-add_subdirectory(cpu)
-add_subdirectory(kernel)
-add_subdirectory(lib)
-add_subdirectory(mm)
-add_subdirectory(proc)

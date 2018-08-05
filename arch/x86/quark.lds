@@ -1,9 +1,11 @@
 #ifdef X86_64
 ENTRY(bootstrap32)
 OUTPUT_FORMAT("elf64-x86-64")
+VMA = 0xFFFFFFFF80000000;
 #else
 ENTRY(bootstrap)
 OUTPUT_FORMAT("elf32-i386")
+VMA = 0xC0000000;
 #endif
 SECTIONS
 {
@@ -15,16 +17,16 @@ SECTIONS
 		*(.trampoline)
 	}
 
-	. += 0xFFFFFFFF80000000;
+	. += VMA;
 
-    __kernel_start = . - 0xFFFFFFFF80000000;
+    __kernel_start = . - VMA;
 
-    .text ALIGN (0x1000) : AT(ADDR(.text) - 0xFFFFFFFF80000000)
+    .text ALIGN (0x1000) : AT(ADDR(.text) - VMA)
     {
     	*(.text)
 	}
 
-    .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - 0xFFFFFFFF80000000)
+    .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - VMA)
     {
         __constructors_start = .;
         *(SORT(.ctors*))
@@ -32,23 +34,23 @@ SECTIONS
         *(.rodata)
     }
 
-    .data ALIGN (0x1000) : AT(ADDR(.data) - 0xFFFFFFFF80000000)
+    .data ALIGN (0x1000) : AT(ADDR(.data) - VMA)
     {
         *(.data)
     }
 
-	.eh_frame ALIGN(0x1000) : AT(ADDR(.eh_frame) - 0xFFFFFFFF80000000)
+	.eh_frame ALIGN(0x1000) : AT(ADDR(.eh_frame) - VMA)
    	{
    	    *(.eh_frame)
    	}
 
-    .bss ALIGN(0x1000) : AT(ADDR(.bss) - 0xFFFFFFFF80000000)
+    .bss ALIGN(0x1000) : AT(ADDR(.bss) - VMA)
     {
         *(.bss)
         *(COMMON)
     }
 
-    .initcall ALIGN(0x1000) : AT(ADDR(.initcall) - 0xFFFFFFFF80000000)
+    .initcall ALIGN(0x1000) : AT(ADDR(.initcall) - VMA)
     {
         __initcall1_start = .;
         *(.initcall1)
@@ -72,5 +74,5 @@ SECTIONS
        	*(.comment)
     }
 
-    __kernel_end = . - 0xFFFFFFFF80000000;
+    __kernel_end = . - VMA;
 }

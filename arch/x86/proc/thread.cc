@@ -115,7 +115,7 @@ void decode_tcontext(struct InterruptContext* ctx,
 void save_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 {
     encode_tcontext(ctx, tcontext);
-#ifdef X86_64
+#ifndef X86_64
     tcontext->fs = CPU::X86::GDT::get_fs();
     tcontext->gs = CPU::X86::GDT::get_gs();
 #endif
@@ -297,7 +297,8 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
 {
     Thread* thread = new Thread(p);
     String::memset(&thread->tcontext, 0, sizeof(thread->tcontext));
-    addr_t* stack = reinterpret_cast<addr_t*>(new uint8_t[0x1000] + 0x1000);
+    addr_t stack =
+        reinterpret_cast<addr_t>(new uint8_t[0x1000] + 0x1000) & ~15UL;
 #ifdef X86_64
     thread->tcontext.rdi = reinterpret_cast<addr_t>(data);
     thread->tcontext.rip = reinterpret_cast<addr_t>(entry_point);
@@ -318,8 +319,7 @@ Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
     stack_ptr[-1] = reinterpret_cast<uint32_t>(data);
     thread->tcontext.esp -= 8;
 #endif
-    thread->tcontext.kernel_stack =
-        reinterpret_cast<addr_t>(new uint8_t[0x1000]) + 0x1000;
+    thread->tcontext.kernel_stack = stack;
     return thread;
 }
 

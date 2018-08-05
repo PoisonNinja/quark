@@ -8,7 +8,7 @@ namespace Virtual
 {
 static inline bool __table_is_empty(struct page_table* table)
 {
-    for (int i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
+    for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (table->pages[i].present)
             return false;
     }

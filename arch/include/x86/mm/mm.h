@@ -87,11 +87,13 @@ static inline void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
     return (void*)address;
 }
 
+#ifndef X86_64
 static inline void* decode_fractal(uint32_t pd, uint32_t pt)
 {
     uint32_t address = (pd << 22);
     address |= (pt << 12);
     return (void*)address;
 }
+#endif
 }  // namespace X86
 }  // namespace Memory

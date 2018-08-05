@@ -73,6 +73,7 @@ bool map(addr_t v, addr_t p, int flags)
     }
     r = __set_address(&pd->pages[Memory::X86::pd_index(v)]);
 #endif
+    r = __set_address(&pd->pages[Memory::X86::pd_index(v)]);
     __set_flags(&pd->pages[Memory::X86::pd_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     if (r) {

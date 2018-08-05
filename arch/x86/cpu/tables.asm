@@ -45,7 +45,7 @@ tss_load:
     mov ax, (0x28 | 3)
     ltr ax
 
-%ifdef
+%ifdef X86_64
     ; Set FS and GS to enable writing to them using MSRs
     mov ax, 0x1B
     mov fs, ax

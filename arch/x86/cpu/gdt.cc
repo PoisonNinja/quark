@@ -125,6 +125,7 @@ void init()
                    access_present(1) | access_privilege(0) |
                        access_mandantory(1) | access_data(0, 1),
                    mode_flag | flag_4kib);
+#ifdef X86_64
     GDT::set_entry(&entries[3], 0, 0xFFFFF,
                    access_present(1) | access_privilege(3) |
                        access_mandantory(1) | access_data(0, 1),
@@ -133,9 +134,16 @@ void init()
                    access_present(1) | access_privilege(3) |
                        access_mandantory(1) | access_code(0, 1),
                    mode_flag | flag_4kib);
-#ifdef X86_64
     GDT::write_tss(&entries[5], &entries[6], &tss);
 #else
+    GDT::set_entry(&entries[3], 0, 0xFFFFF,
+                   access_present(1) | access_privilege(3) |
+                       access_mandantory(1) | access_code(0, 1),
+                   mode_flag | flag_4kib);
+    GDT::set_entry(&entries[4], 0, 0xFFFFF,
+                   access_present(1) | access_privilege(3) |
+                       access_mandantory(1) | access_data(0, 1),
+                   mode_flag | flag_4kib);
     GDT::write_tss(&entries[5], &tss);
     // F segment
     GDT::set_entry(&entries[6], 0, 0xFFFFF,

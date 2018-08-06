@@ -1,7 +1,38 @@
 #pragma once
 
 #include <lib/list.h>
+#include <proc/elf.h>
 #include <types.h>
+
+struct Module {
+    Module()
+    {
+        shdrs = nullptr;
+        sections = nullptr;
+        init = nullptr;
+        fini = nullptr;
+        name = description = version = author = nullptr;
+    }
+    ~Module()
+    {
+        delete[] shdrs;
+        delete[] sections;
+    }
+
+    const char *name, *description, *version, *author;
+
+    size_t shnum;
+
+    // Dynamically allocated
+    ELF::Elf_Shdr* shdrs;
+    addr_t* sections;
+
+    // Module entry points
+    int (*init)();
+    int (*fini)();
+
+    Node<Module> node;
+};
 
 // Each key can only be defined once
 #define __define_modinfo(key, value)                                          \

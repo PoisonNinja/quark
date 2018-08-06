@@ -6,49 +6,27 @@
 
 namespace
 {
-struct Module {
-    Module()
-    {
-        shdrs = nullptr;
-        sections = nullptr;
-        init = nullptr;
-        fini = nullptr;
-        name = description = version = author = nullptr;
-    }
-    ~Module()
-    {
-        delete[] shdrs;
-        delete[] sections;
-    }
-
-    const char *name, *description, *version, *author;
-
-    size_t shnum;
-
-    // Dynamically allocated
-    ELF::Elf_Shdr* shdrs;
-    addr_t* sections;
-
-    // Module entry points
-    int (*init)();
-    int (*fini)();
-
-    Node<Module> node;
-};
-
 List<Module, &Module::node> modules;
 
 // A ghetto version of strtok that accepts \0
 const char* next_token(const char* string, const char* end)
 {
     const char* p = string;
+    // Skip until the end of the current key
     while (*p != '\0')
         p++;
+    /*
+     * Skip until the start of the next key. Due to the way that we store keys,
+     * there will be empty space in between keys for padding which are made of
+     * null terminators
+     */
     while (*p == '\0') {
+        // Check if we are overrunning the end of the entire key section
         if (p + 1 == end)
             return nullptr;
         p++;
     }
+    // By now p will be pointing to the start of the next key
     return p;
 }
 
@@ -87,6 +65,9 @@ void parse_modinfo(Module* mod, size_t index)
     }
 }
 }  // namespace
+
+extern bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
+                            const char* string_table);
 
 bool load_module(void* binary)
 {
@@ -163,69 +144,12 @@ bool load_module(void* binary)
         }
     }
 
-    for (uint32_t i = 0; i < header->e_shnum; i++) {
-#ifdef X86_64
-        if (mod->shdrs[i].sh_type == SHT_RELA) {
-#else
-        if (mod->shdrs[i].sh_type == SHT_REL) {
-#endif
-            for (uint32_t x = 0; x < mod->shdrs[i].sh_size;
-                 x += mod->shdrs[i].sh_entsize) {
-                ELF::Elf_Rela* rel =
-                    reinterpret_cast<ELF::Elf_Rela*>(mod->sections[i] + x);
-                ELF::Elf_Sym* sym = symtab + ELF_R_SYM(rel->r_info);
-                Log::printk(Log::LogLevel::DEBUG, "[load_module] Name: %s\n",
-                            string_table + sym->st_name);
-                addr_t symaddr = 0;
-                if (sym->st_shndx == 0) {
-                    addr_t temp =
-                        Symbols::resolve_name(string_table + sym->st_name);
-                    if (!temp) {
-                        Log::printk(Log::LogLevel::ERROR,
-                                    "[load_module] Undefined reference to %s\n",
-                                    string_table + sym->st_name);
-                        return false;
-                    }
-                    symaddr = temp;
-                } else if (sym->st_shndx) {
-                    symaddr = mod->sections[sym->st_shndx] + sym->st_value;
-                }
-                addr_t target = mod->sections[mod->shdrs[i].sh_info];
-                target += rel->r_offset;
-
-                addr_t addend;
-#ifdef X86_64
-                addend = rel->r_addend;
-#else
-                addend = (*(uint32_t*)(target));
-#endif
-
-                switch (ELF_R_TYPE(rel->r_info)) {
-                    case R_X86_64_64:
-                        Log::printk(Log::LogLevel::DEBUG,
-                                    "[load_module] R_X86_64_64: %p %p %p %X\n",
-                                    addend, rel->r_offset, symaddr,
-                                    mod->shdrs[i].sh_info);
-                        *(reinterpret_cast<addr_t*>(target)) = symaddr + addend;
-                        break;
-                    case R_386_PC32:
-                        Log::printk(Log::LogLevel::DEBUG,
-                                    "[load_module] R_386_PC32: %p %p %p %X\n",
-                                    addend, target, symaddr,
-                                    mod->shdrs[i].sh_info);
-                        *(reinterpret_cast<addr_t*>(target)) =
-                            symaddr + addend - target;
-                        break;
-                    default:
-                        Log::printk(
-                            Log::LogLevel::ERROR,
-                            "[load_module] Unsupported relocation type: %d\n",
-                            ELF_R_TYPE(rel->r_info));
-                        break;
-                }
-            }
-        }
+    if (!relocate_module(mod, symtab, string_table)) {
+        Log::printk(Log::LogLevel::ERROR,
+                    "[load_module] Failed to perform relocations\n");
+        return false;
     }
+
     ELF::Elf_Sym* sym = symtab;
     for (size_t j = 1; j <= num_syms; j++, sym++) {
         // We only want to consider functions

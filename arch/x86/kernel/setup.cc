@@ -14,6 +14,15 @@ namespace Symbols
 void set_table(struct multiboot_tag_elf_sections *t);
 }
 
+namespace Memory
+{
+namespace Physical
+{
+void init_early_alloc(struct Boot::info *m);
+addr_t early_allocate();
+}  // namespace Physical
+}  // namespace Memory
+
 namespace X86
 {
 extern "C" {
@@ -72,6 +81,8 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
         }
     }
     CPU::X86::init();
+    Memory::Physical::init_early_alloc(&info);
+    Memory::Physical::early_allocate();
     kmain(info);
 }
 

@@ -13,11 +13,6 @@ struct Module {
         fini = nullptr;
         name = description = version = author = nullptr;
     }
-    ~Module()
-    {
-        delete[] shdrs;
-        delete[] sections;
-    }
 
     const char *name, *description, *version, *author;
 

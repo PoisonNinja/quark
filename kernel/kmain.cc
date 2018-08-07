@@ -6,7 +6,6 @@
 #include <fs/stat.h>
 #include <kernel.h>
 #include <kernel/init.h>
-#include <kernel/module.h>
 #include <kernel/time/time.h>
 #include <kernel/version.h>
 #include <lib/string.h>
@@ -14,25 +13,6 @@
 #include <mm/virtual.h>
 #include <proc/sched.h>
 #include <proc/syscall.h>
-
-static void load_test()
-{
-    Process* parent = Scheduler::get_current_process();
-    Ref<Filesystem::Descriptor> root = parent->get_root();
-    Ref<Filesystem::Descriptor> init = root->open("/sbin/test.ko", 0, 0);
-    if (!init) {
-        Log::printk(Log::LogLevel::ERROR, "Failed to open test.ko\n");
-        for (;;)
-            CPU::halt();
-    }
-    struct Filesystem::stat st;
-    init->stat(&st);
-    Log::printk(Log::LogLevel::DEBUG, "test.ko has size of %zu bytes\n",
-                st.st_size);
-    uint8_t* init_raw = new uint8_t[st.st_size];
-    init->read(init_raw, st.st_size);
-    load_module(init_raw);
-}
 
 void init_stage2(void*)
 {
@@ -110,8 +90,6 @@ void kmain(struct Boot::info& info)
     do_initcall(InitLevel::FS);
     do_initcall(InitLevel::DEVICE);
     do_initcall(InitLevel::LATE);
-
-    load_test();
 
     init_stage1();
 }

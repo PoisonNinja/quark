@@ -163,7 +163,7 @@ bool load_module(void* binary)
                 mod->sections[sym->st_shndx] + sym->st_value);
         } else if (!String::strcmp(string_table + sym->st_name, "fini")) {
             Log::printk(Log::LogLevel::DEBUG,
-                        "[load_module] Located init point at %p\n",
+                        "[load_module] Located fini point at %p\n",
                         mod->sections[sym->st_shndx] + sym->st_value);
             mod->fini = reinterpret_cast<int (*)()>(
                 mod->sections[sym->st_shndx] + sym->st_value);
@@ -194,4 +194,26 @@ bool load_module(void* binary)
     mod->init();
 
     return true;
+}
+
+bool unload_module(const char* name)
+{
+    for (auto it = modules.begin(); it != modules.end(); it++) {
+        if (!String::strcmp(it->name, name)) {
+            Log::printk(Log::LogLevel::INFO,
+                        "[unload_module] Unloading module %s\n", name);
+            if (it->fini) {
+                it->fini();
+            }
+            delete[] it->shdrs;
+            for (size_t i = 0; i < it->shnum; i++) {
+                delete[] reinterpret_cast<uint8_t*>(it->sections[i]);
+            }
+            delete[] it->sections;
+            modules.erase(it);
+            delete &(*it);
+            return true;
+        }
+    }
+    return false;
 }

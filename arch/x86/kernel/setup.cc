@@ -31,8 +31,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     Log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        Log::printk(Log::LogLevel::ERROR,
-                    "Multiboot magic number does not match!\n");
+        Kernel::panic("Booted by a non-supported bootloader!\n");
     }
     info.architecture_data = multiboot;
     info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);

@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <fs/stat.h>
 #include <kernel.h>
+#include <kernel/module.h>
 #include <lib/string.h>
 #include <mm/virtual.h>
 #include <proc/sched.h>
@@ -27,7 +28,7 @@ namespace Syscall
 {
 static long sys_read(int fd, const void* buffer, size_t count)
 {
-    Log::printk(Log::LogLevel::DEBUG, "[sys_read] = %d, %p, %pX\n", fd, buffer,
+    Log::printk(Log::LogLevel::DEBUG, "[sys_read] = %d, %p, %p\n", fd, buffer,
                 count);
     if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
         return -EBADF;
@@ -352,7 +353,24 @@ static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
 
 static long sys_mknod(const char* path, mode_t mode, dev_t dev)
 {
+    Log::printk(Log::LogLevel::DEBUG, "[sys_mknod] %s %X %X\n", path, mode,
+                dev);
     return get_start(path)->mknod(path, mode, dev);
+}
+
+static long sys_init_module(void* module_image, unsigned long len,
+                            const char* param_values)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_init_module] %p %llX %p\n",
+                module_image, len, param_values);
+    return load_module(module_image);
+}
+
+static long sys_delete_module(const char* name, int flags)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_delete_module] %s %X\n", name,
+                flags);
+    return unload_module(name);
 }
 
 void init()
@@ -376,5 +394,8 @@ void init()
     syscall_table[SYS_sigpending] = reinterpret_cast<void*>(sys_sigpending);
     syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
     syscall_table[SYS_mknod] = reinterpret_cast<void*>(sys_mknod);
+    syscall_table[SYS_init_module] = reinterpret_cast<void*>(sys_init_module);
+    syscall_table[SYS_delete_module] =
+        reinterpret_cast<void*>(sys_delete_module);
 }
 }  // namespace Syscall

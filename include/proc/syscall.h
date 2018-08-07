@@ -25,6 +25,8 @@ namespace Syscall
 #define SYS_sigpending 127
 #define SYS_sigaltstack 131
 #define SYS_mknod 133
+#define SYS_init_module 175
+#define SYS_delete_module 176
 
 /*
  * Certain architectures (x86_64) only support passing up to 5 arguments, while
@@ -40,7 +42,5 @@ struct mmap_wrapper {
     off_t offset;
 };
 
-void syscall_sysret_handler(int number, uint64_t a, uint64_t b, uint64_t c,
-                            uint64_t d, uint64_t e);
 void init();
 }  // namespace Syscall

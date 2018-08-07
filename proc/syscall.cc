@@ -58,7 +58,6 @@ static long sys_open(const char* path, int flags, mode_t mode)
                     "WTF, someone is lying about the file descriptor...\n");
         return -1;
     }
-    return -ENODEV;
     return ret;
 }
 

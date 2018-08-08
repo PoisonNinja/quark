@@ -9,6 +9,7 @@ ENTRY(bootstrap32)
 SECTIONS
 {
 	. = 0x100000;
+    __kernel_start = .;
 
 	.bootstrap :
 	{
@@ -17,8 +18,6 @@ SECTIONS
 	}
 
 	. += VMA;
-
-    __kernel_start = . - VMA;
 
     .text ALIGN (0x1000) : AT(ADDR(.text) - VMA)
     {

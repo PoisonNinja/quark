@@ -4,6 +4,7 @@
 #include <cpu/interrupt.h>
 #include <drivers/tty/serial.h>
 #include <kernel.h>
+#include <kernel/symbol.h>
 #include <lib/libcxx.h>
 #include <lib/string.h>
 
@@ -11,8 +12,8 @@ extern void kmain(struct Boot::info &info);
 
 namespace Symbols
 {
-void set_table(struct multiboot_tag_elf_sections *t);
-}
+void init(struct multiboot_tag_elf_sections *sections);
+}  // namespace Symbols
 
 namespace Memory
 {
@@ -45,6 +46,8 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
     info.architecture_data = multiboot;
     info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
     info.kernel_end = reinterpret_cast<addr_t>(&__kernel_end);
+
+    struct multiboot_tag_elf_sections *sections = nullptr;
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<addr_t>(multiboot) + 8);
@@ -74,14 +77,13 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 break;
             case MULTIBOOT_TAG_TYPE_ELF_SECTIONS:
                 Log::printk(Log::LogLevel::INFO, "Located symbol section\n");
-                struct multiboot_tag_elf_sections *sections =
-                    (struct multiboot_tag_elf_sections *)tag;
-                Symbols::set_table(sections);
+                sections = (struct multiboot_tag_elf_sections *)tag;
                 break;
         }
     }
     CPU::X86::init();
     Memory::Physical::init_early_alloc(&info);
+    Symbols::init(sections);
     kmain(info);
 }
 

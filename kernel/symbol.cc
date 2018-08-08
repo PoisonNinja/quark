@@ -46,17 +46,12 @@ struct Symbol {
     Node<Symbol> node;
 };
 List<Symbol, &Symbol::node> symbols;
-
-bool ready = false;
 }  // namespace
 
 namespace Symbols
 {
 Pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
 {
-    if (!ready) {
-        return primitive_resolve_addr(address);
-    }
     size_t best = ~0;
     const char* ret = nullptr;
     for (auto& s : symbols) {
@@ -73,9 +68,6 @@ Pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
 
 const char* resolve_addr(addr_t address)
 {
-    if (!ready) {
-        return primitive_resolve_addr(address).first;
-    }
     const char* name = nullptr;
     if (!address_to_name_hash.get(address, name)) {
         return nullptr;
@@ -84,9 +76,6 @@ const char* resolve_addr(addr_t address)
 }
 addr_t resolve_name(const char* name)
 {
-    if (!ready) {
-        return 0;
-    }
     addr_t address = 0;
     if (!name_to_address_hash.get(name, address)) {
         return 0;

@@ -1,18 +1,10 @@
 #include <arch/kernel/multiboot2.h>
+#include <arch/mm/layout.h>
 #include <arch/mm/virtual.h>
 #include <boot/info.h>
 #include <kernel.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
-
-namespace
-{
-#ifdef X86_64
-constexpr addr_t vma = 0xFFFFFFFF80000000;
-#else
-constexpr addr_t vma = 0xC0000000;
-#endif
-}  // namespace
 
 namespace Memory
 {
@@ -21,7 +13,7 @@ void arch_init(struct Boot::info &info)
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
     addr_t multiboot_start =
-        Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - vma);
+        Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
     addr_t multiboot_end =
         Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
     Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");

@@ -1,4 +1,5 @@
 #include <arch/kernel/multiboot2.h>
+#include <arch/mm/layout.h>
 #include <arch/mm/mm.h>
 #include <boot/info.h>
 #include <kernel.h>
@@ -10,12 +11,6 @@ multiboot_memory_map_t *mmap = nullptr;
 struct multiboot_tag *mmap_tag;
 struct multiboot_fixed *multiboot = nullptr;
 struct Boot::info *info;
-
-#ifdef X86_64
-constexpr addr_t vma = 0xFFFFFFFF80000000;
-#else
-constexpr addr_t vma = 0xC0000000;
-#endif
 }  // namespace
 
 namespace Memory
@@ -63,7 +58,7 @@ void init_early_alloc(struct Boot::info *b)
 addr_t early_allocate()
 {
     addr_t multiboot_start =
-        Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - vma);
+        Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
     addr_t multiboot_end =
         Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
     for (; reinterpret_cast<multiboot_uint8_t *>(mmap) <

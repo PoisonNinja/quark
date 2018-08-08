@@ -1,20 +1,11 @@
 #include <arch/kernel/multiboot2.h>
+#include <arch/mm/layout.h>
 #include <kernel.h>
 #include <kernel/init.h>
 #include <kernel/symbol.h>
 #include <lib/pair.h>
 #include <lib/string.h>
 #include <proc/elf.h>
-
-namespace
-{
-#ifdef X86_64
-constexpr addr_t vma = 0xFFFFFFFF80000000;
-#else
-constexpr addr_t vma = 0xC0000000;
-#endif
-
-}  // namespace
 
 namespace Symbols
 {
@@ -24,7 +15,7 @@ void init(struct multiboot_tag_elf_sections *tag)
 
     // Locate the section header string table
     ELF::Elf_Shdr *shdr_string_table = (ELF::Elf_Shdr *)sections + tag->shndx;
-    char *s_string_table = (char *)(shdr_string_table->sh_addr + vma);
+    char *s_string_table = (char *)(shdr_string_table->sh_addr + VMA);
 
     // ELF binaries generally have three or four string tables.
     // Locate the correct string table (.symtab)
@@ -35,7 +26,7 @@ void init(struct multiboot_tag_elf_sections *tag)
         if (shdr->sh_type == SHT_STRTAB &&
             !String::strcmp(".strtab", s_string_table + shdr->sh_name)) {
             string_table_header = (ELF::Elf_Shdr *)sections + i;
-            string_table = (char *)(string_table_header->sh_addr + vma);
+            string_table = (char *)(string_table_header->sh_addr + VMA);
         }
     }
 
@@ -49,7 +40,7 @@ void init(struct multiboot_tag_elf_sections *tag)
     for (uint32_t i = 0; i < tag->num; i++) {
         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
         if (shdr->sh_type == SHT_SYMTAB) {
-            symtab = (ELF::Elf_Sym *)(shdr->sh_addr + vma);
+            symtab = (ELF::Elf_Sym *)(shdr->sh_addr + VMA);
             num_syms = shdr->sh_size / shdr->sh_entsize;
         }
     }

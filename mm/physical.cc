@@ -1,5 +1,6 @@
 #include <arch/mm/physical.h>
 #include <kernel.h>
+#include <mm/buddy.h>
 #include <mm/mm.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
@@ -8,20 +9,25 @@ namespace Memory
 {
 namespace Physical
 {
-static size_t stack_used = 0;
-static size_t stack_size = Memory::Virtual::PAGE_SIZE / sizeof(addr_t);
-
-static void expand_stack()
+namespace
 {
-    addr_t phys = Memory::Physical::allocate();
-    addr_t virt = reinterpret_cast<addr_t>(STACK + stack_size);
-    Memory::Virtual::map(virt, phys, PAGE_WRITABLE);
-    stack_size += Memory::Virtual::PAGE_SIZE / sizeof(addr_t);
+Buddy* buddy = nullptr;
+bool online = false;
+};  // namespace
+
+addr_t early_allocate();
+
+void init(Boot::info& info)
+{
+    buddy = new Buddy(info.highest, 12, 28);
 }
 
 addr_t allocate()
 {
-    addr_t result = STACK[--stack_used];
+    if (!online) {
+        return early_allocate();
+    }
+    addr_t result = buddy->alloc(Memory::Virtual::PAGE_SIZE);
     // TODO: Perform sanity checks
     return result;
 }
@@ -29,17 +35,12 @@ addr_t allocate()
 void free(addr_t address)
 {
     // TODO: Round address
-    if (stack_used == stack_size) {
-        expand_stack();
-    }
-    STACK[stack_used++] = address;
+    buddy->free(address, Memory::Virtual::PAGE_SIZE);
 }
 
-void put_range(addr_t base, size_t size)
+void finalize()
 {
-    for (addr_t i = base; i < base + size; i += Memory::Virtual::PAGE_SIZE) {
-        Memory::Physical::free(i);
-    }
+    online = true;
 }
 }  // namespace Physical
 }  // namespace Memory

@@ -96,13 +96,12 @@ addr_t resolve_name(const char* name)
 
 void load_symbol(Pair<const char*, addr_t> symbol)
 {
-    address_to_name_hash.put(symbol.second, symbol.first);
-    name_to_address_hash.put(symbol.first, symbol.second);
     Symbol* s = new Symbol;
     s->address = symbol.second;
     s->name = new char[String::strlen(symbol.first) + 1];
     String::strcpy(s->name, symbol.first);
     symbols.push_back(*s);
-    ready = true;
+    address_to_name_hash.put(symbol.second, s->name);
+    name_to_address_hash.put(s->name, symbol.second);
 }
 }  // namespace Symbols

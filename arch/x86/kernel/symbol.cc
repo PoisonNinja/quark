@@ -11,11 +11,13 @@ namespace Symbols
 {
 void init(struct multiboot_tag_elf_sections *tag)
 {
-    addr_t *sections = (addr_t *)tag->sections;
+    addr_t *sections = reinterpret_cast<addr_t *>(tag->sections);
 
     // Locate the section header string table
-    ELF::Elf_Shdr *shdr_string_table = (ELF::Elf_Shdr *)sections + tag->shndx;
-    char *s_string_table = (char *)(shdr_string_table->sh_addr + VMA);
+    ELF::Elf_Shdr *shdr_string_table =
+        reinterpret_cast<ELF::Elf_Shdr *>(sections) + tag->shndx;
+    char *s_string_table =
+        reinterpret_cast<char *>(shdr_string_table->sh_addr + VMA);
 
     // ELF binaries generally have three or four string tables.
     // Locate the correct string table (.symtab)
@@ -26,7 +28,8 @@ void init(struct multiboot_tag_elf_sections *tag)
         if (shdr->sh_type == SHT_STRTAB &&
             !String::strcmp(".strtab", s_string_table + shdr->sh_name)) {
             string_table_header = (ELF::Elf_Shdr *)sections + i;
-            string_table = (char *)(string_table_header->sh_addr + VMA);
+            string_table =
+                reinterpret_cast<char *>(string_table_header->sh_addr + VMA);
         }
     }
 

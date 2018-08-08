@@ -24,6 +24,7 @@ namespace Physical
 {
 void init_early_alloc(struct Boot::info *b)
 {
+    addr_t highest = 0;
     info = b;
     multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info->architecture_data);
@@ -39,9 +40,24 @@ void init_early_alloc(struct Boot::info *b)
                 mmap_tag = tag;
                 mmap = (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                            ->entries;
+                for (auto tmp = mmap;
+                     reinterpret_cast<multiboot_uint8_t *>(tmp) <
+                     reinterpret_cast<multiboot_uint8_t *>(mmap_tag) +
+                         mmap_tag->size;
+                     tmp = reinterpret_cast<multiboot_memory_map_t *>(
+                         reinterpret_cast<addr_t>(tmp) +
+                         (reinterpret_cast<struct multiboot_tag_mmap *>(
+                              mmap_tag))
+                             ->entry_size)) {
+                    if (Memory::Virtual::align_up(tmp->addr + tmp->len) >
+                        highest)
+                        highest =
+                            Memory::Virtual::align_up(tmp->addr + tmp->len);
+                }
                 break;
         }
     }
+    info->highest = highest;
 }
 
 addr_t early_allocate()

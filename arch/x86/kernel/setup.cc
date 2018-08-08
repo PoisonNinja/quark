@@ -82,7 +82,6 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
     }
     CPU::X86::init();
     Memory::Physical::init_early_alloc(&info);
-    Memory::Physical::early_allocate();
     kmain(info);
 }
 

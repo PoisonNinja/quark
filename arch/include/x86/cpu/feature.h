@@ -7,6 +7,7 @@ namespace CPU
 {
 namespace X86
 {
+// Based on Linux
 enum feature_index {
     cpuid_1_edx = 0,
     cpuid_8000_0001_edx,

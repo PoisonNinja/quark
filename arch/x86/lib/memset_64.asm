@@ -1,5 +1,7 @@
 global _ZN6String6memsetEPvim:function
 _ZN6String6memsetEPvim:
+    push rbp
+    mov rbp, rsp
     cld
     mov rcx, rdx
     and edx, 7
@@ -11,4 +13,5 @@ _ZN6String6memsetEPvim:
     mov ecx, edx
     rep stosb
     mov rax, r9
+    pop rbp
     ret

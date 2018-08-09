@@ -46,6 +46,7 @@ extern "C" void isr28(void);
 extern "C" void isr29(void);
 extern "C" void isr30(void);
 extern "C" void isr31(void);
+// x86_64 doesn't use interrupts for system calls
 #ifndef X86_64
 extern "C" void isr128(void);
 #endif
@@ -85,6 +86,7 @@ static void set_entry(struct IDT::Entry* entry, addr_t offset,
 
 void init()
 {
+    // Interrupt gates, only kernel accessible
     IDT::set_entry(&entries[0], reinterpret_cast<addr_t>(isr0), 0x08, 0x8E);
     IDT::set_entry(&entries[1], reinterpret_cast<addr_t>(isr1), 0x08, 0x8E);
     IDT::set_entry(&entries[2], reinterpret_cast<addr_t>(isr2), 0x08, 0x8E);
@@ -135,9 +137,12 @@ void init()
     IDT::set_entry(&entries[47], reinterpret_cast<addr_t>(irq15), 0x08, 0x8E);
 
 #ifndef X86_64
+    // System call vector. Attributes: interrupt gate, user mode accessible
     IDT::set_entry(&entries[0x80], reinterpret_cast<addr_t>(isr128), 0x08,
                    0xEE);
 #endif
+
+    // Yield vector
     IDT::set_entry(&entries[0x81], reinterpret_cast<addr_t>(isr129), 0x08,
                    0x8E);
 

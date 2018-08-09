@@ -1,18 +1,20 @@
 MULTIBOOT2_MAGIC                equ    0xE85250D6       ; Magic number
-MULTIBOOT2_ARCHITECTURE         equ    0                ; 32-bit i386
+MULTIBOOT2_ARCHITECTURE         equ    0                ; 32-bit i386 (even for x86_64)
 MULTIBOOT2_SIZE                 equ    (multiboot2_end - multiboot2_start)
 MULTIBOOT2_CHECKSUM             equ    0x100000000 - (MULTIBOOT2_MAGIC + MULTIBOOT2_ARCHITECTURE + MULTIBOOT2_SIZE)
 
 bits 32
 section .bootstrap
-align 8
+align 8             ; Required by Multiboot 2 spec
 
+; Multiboot 2 header
 multiboot2_start:
 dd MULTIBOOT2_MAGIC
 dd MULTIBOOT2_ARCHITECTURE
 dd MULTIBOOT2_SIZE
 dd MULTIBOOT2_CHECKSUM
 
+; Terminating tag (null tag)
 dw 0
 dw 0
 dd 8
@@ -20,11 +22,13 @@ multiboot2_end:
 
 NO_CPUID_STRING: db "No CPUID support!", 0
 %ifdef X86_64
+; These obviously don't apply to i686
 NO_LONG_MODE: db "No long mode support! Use a 32-bit build!", 0
 NO_SSE_STRING: db "No SSE2 support! Use a 32-bit build!", 0
 
 extern bootstrap64
 
+; A GDT is required to enter long mode
 align 4096
 gdt64:                           ; Global Descriptor Table (64-bit).
     .null: equ $ - gdt64         ; The null descriptor.
@@ -52,11 +56,11 @@ gdt64:                           ; Global Descriptor Table (64-bit).
     dw $ - gdt64 - 1             ; Limit.
     dq gdt64                     ; Base.
 
+; Page table
 align 4096
 pml4:
     dq (pml3 + 0x7)              ; Identity map
-    times 508 dq 0
-    dq (phys_pml3 + 0x7)         ; Physical memory manager page
+    times 509 dq 0
     dq (pml4 + 0x7)              ; Fractal mapping
     dq (pml3 + 0x7)              ; -2GB mapping
 
@@ -87,25 +91,6 @@ pml1:
     dq (i << 12) | 0x083
     %assign i i+1
     %endrep
-
-align 4096
-phys_pml3:
-    dq (phys_pml2 + 0x7)
-    times 511 dq 0
-
-align 4096
-phys_pml2:
-    dq (phys_pml1 + 0x7)
-    times 511 dq 0
-
-align 4096
-phys_pml1:
-    dq (phys_pml0 + 0x7)
-    times 511 dq 0
-
-align 4096
-phys_pml0:
-    times 512 dq 0
 %else
 
 align 4096
@@ -113,8 +98,7 @@ page_directory:
     dd (page_table + 0x7)              ; Identity map
     times 767 dd 0
     dd (page_table + 0x7)              ; Higher half mapping
-    times 253 dd 0
-    dd (page_table_phys + 0x7)         ; Physical
+    times 254 dd 0
     dd (page_directory + 0x7)          ; Fractal
 
 align 4096
@@ -297,10 +281,13 @@ higher_half:
     ; Allocate a stack
     mov esp, stack + 0x4000
 
+    ; Remove identity mapping
     mov [page_directory], dword 0
 
     ; Fixup multiboot
     add esi, 0xC0000000
+
+    ; Push magic and struct on stack to pass as arguments to C++ code
     push esi
     push edi
 
@@ -308,6 +295,7 @@ higher_half:
 
     jmp halt32
 
+; x86_64 has it's stack declared elsewhere
 section .bss
 global stack
 stack:

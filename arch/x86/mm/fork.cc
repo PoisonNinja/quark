@@ -17,7 +17,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
                      uint64_t pd_index)
 {
     String::memset(new_pt, 0, sizeof(struct page_table));
-    for (int i = 0; i < 512; i++) {
+    for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (old_pt->pages[i].present) {
             String::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
@@ -32,8 +32,8 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
             /*
              * Calculate the virtual address given the indexes for the source
              */
-            uint64_t source = ((pml4_index << 39) | (pdpt_index << 30) |
-                               (pd_index << 21) | (i << 12));
+            addr_t source = ((pml4_index << 39) | (pdpt_index << 30) |
+                             (pd_index << 21) | (i << 12));
             String::memcpy(fork_page_pointer, reinterpret_cast<void*>(source),
                            0x1000);
         }
@@ -44,7 +44,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
                      uint32_t pd_index)
 {
     String::memset(new_pt, 0, sizeof(struct page_table));
-    for (int i = 0; i < 1024; i++) {
+    for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (old_pt->pages[i].present) {
             String::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
@@ -70,7 +70,7 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
                      int pml4_index, int pdpt_index)
 {
     String::memset(new_pd, 0, sizeof(struct page_table));
-    for (int i = 0; i < 512; i++) {
+    for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (old_pd->pages[i].present) {
             String::memcpy(&new_pd->pages[i], &old_pd->pages[i],
                            sizeof(struct page));
@@ -90,7 +90,7 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
                        int pml4_index)
 {
     String::memset(new_pdpt, 0, sizeof(struct page_table));
-    for (int i = 0; i < 512; i++) {
+    for (size_t i = 0; i < 512; i++) {
         if (old_pdpt->pages[i].present) {
             String::memcpy(&new_pdpt->pages[i], &old_pdpt->pages[i],
                            sizeof(struct page));
@@ -166,7 +166,7 @@ addr_t fork()
     Memory::X86::invlpg(reinterpret_cast<addr_t>(new_pml4));
 
 #ifdef X86_64
-    // Copy only user pages
+    // Copy only user pages (lower half)
     for (int i = 0; i < 256; i++) {
 #else
     // Copy only user pages (0 - 3GB)

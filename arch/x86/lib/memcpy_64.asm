@@ -2,6 +2,8 @@
 
 global _ZN6String6memcpyEPvPKvm:function
 _ZN6String6memcpyEPvPKvm:
+    push rbp
+    mov rbp, rsp
     cld             ; For safety
     mov rax, rdi    ; memcpy returns dest pointer
     mov rcx, rdx    ; Move count into rcx
@@ -10,4 +12,5 @@ _ZN6String6memcpyEPvPKvm:
     rep movsq       ; Use movsq to move 8 bytes
     mov rcx, rdx    ; Move remaining size into rcx
     rep movsb       ; Move remaining bytes
+    pop rbp
     ret             ; Return

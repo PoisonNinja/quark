@@ -9,7 +9,10 @@ void arch_init()
     Intel8253* pit = new Intel8253();
     register_clock(*pit);
 
-    // This must be initialized after TSC
+    /*
+     * This must be initialized after PIT since we depend on an existing tick
+     * source to calibrate the TSC
+     */
     TSC* tsc = new TSC();
     register_clock(*tsc);
 }

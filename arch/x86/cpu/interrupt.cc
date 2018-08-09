@@ -56,6 +56,7 @@ bool interrupts_enabled(void)
 
 bool is_userspace(struct InterruptContext* ctx)
 {
+    // The CS values being compared to are the selectors for user code segment
 #ifdef X86_64
     return (ctx->cs == 0x23);
 #else
@@ -65,6 +66,7 @@ bool is_userspace(struct InterruptContext* ctx)
 
 bool is_exception(int int_no)
 {
+    // x86 IRQs start at 32
     if (int_no < 32) {
         return true;
     }

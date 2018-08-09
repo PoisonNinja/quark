@@ -27,7 +27,8 @@ void init(struct multiboot_tag_elf_sections *tag)
         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
         if (shdr->sh_type == SHT_STRTAB &&
             !String::strcmp(".strtab", s_string_table + shdr->sh_name)) {
-            string_table_header = (ELF::Elf_Shdr *)sections + i;
+            string_table_header =
+                reinterpret_cast<ELF::Elf_Shdr *>(sections) + i;
             string_table =
                 reinterpret_cast<char *>(string_table_header->sh_addr + VMA);
         }
@@ -38,18 +39,24 @@ void init(struct multiboot_tag_elf_sections *tag)
         return;
     }
 
+    // Locate the symbol table
     ELF::Elf_Sym *symtab = nullptr;
     int num_syms = 0;
     for (uint32_t i = 0; i < tag->num; i++) {
-        ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
+        ELF::Elf_Shdr *shdr = reinterpret_cast<ELF::Elf_Shdr *>(sections) + i;
         if (shdr->sh_type == SHT_SYMTAB) {
-            symtab = (ELF::Elf_Sym *)(shdr->sh_addr + VMA);
+            symtab = reinterpret_cast<ELF::Elf_Sym *>(shdr->sh_addr + VMA);
             num_syms = shdr->sh_size / shdr->sh_entsize;
         }
     }
 
     ELF::Elf_Sym *sym = symtab;
-    for (int j = 1; j <= num_syms; j++, sym++) {
+    for (int j = 0; j < num_syms; j++, sym++) {
+        /*
+         * We currently only care for global objects and functions. In reality,
+         * these are probably the only items anyways but we'll occasionally get
+         * some other stuff
+         */
         if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC &&
             ELF64_ST_TYPE(sym->st_info) != STT_OBJECT)
             continue;

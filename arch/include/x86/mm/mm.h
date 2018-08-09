@@ -6,6 +6,7 @@ namespace Memory
 {
 namespace X86
 {
+// Slot #s
 #ifdef X86_64
 constexpr addr_t recursive_entry = 510;
 constexpr addr_t copy_entry = 508;
@@ -14,6 +15,10 @@ constexpr addr_t recursive_entry = 1023;
 constexpr addr_t copy_entry = 1020;
 #endif
 
+/*
+ * x86_64 and x86 differ slightly in the number of bits and offset for each
+ * index
+ */
 #ifdef X86_64
 constexpr addr_t pml4_index(addr_t x)
 {

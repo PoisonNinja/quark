@@ -11,9 +11,11 @@ void arch_do_stack_trace()
 #endif
     int frame = 0;
     while (bp) {
+        // The return address is stored right below the previous base pointer.
         addr_t rip = bp[1];
         if (!rip)
             break;
+        // The base pointer points to the previous base pointer
         bp = (addr_t*)bp[0];
         if (!bp)
             break;

@@ -34,15 +34,21 @@ void *__kernel_start;
 void *__kernel_end;
 }
 
-static Serial serial_console;
-static struct Boot::info info;
+namespace
+{
+Serial serial_console;
+struct Boot::info info;
+}  // namespace
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
+    // Get a serial console running so we can output stuff
     Log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         Kernel::panic("Booted by a non-supported bootloader!\n");
     }
+
+    // Start filling out information struct
     info.architecture_data = multiboot;
     info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
     info.kernel_end = reinterpret_cast<addr_t>(&__kernel_end);
@@ -81,8 +87,17 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                 break;
         }
     }
+    // Bootstrap the IDT and GDT
     CPU::X86::init();
+    /*
+     * Initialize our physical memory early allocator so we can start using
+     * memory immediately.
+     */
     Memory::Physical::init_early_alloc(&info);
+    /*
+     * Load the symbols now. We used to do this much later, but the symbols
+     * might get overwritten later once we start using more memory.
+     */
     Symbols::init(sections);
     kmain(info);
 }

@@ -2,6 +2,10 @@
 
 #include <types.h>
 
+/*
+ * Memory locations of various kernel stuff
+ * Slot refers to a entry in the top level page table
+ */
 #ifdef X86_64
 constexpr addr_t HEAP_START = 0xFFFF880000000000;
 constexpr addr_t STACK_START = 0xFFFFFE8000000000;

@@ -18,8 +18,10 @@ Core bsp;
 
 void init()
 {
-    CPU::X86::detect(bsp);
+    // Add the BSP to the core manager
     CPU::add_core(&bsp);
+    // Perform feature detections and print them out
+    CPU::X86::detect(bsp);
     CPU::X86::print(bsp);
     GDT::init();
     IDT::init();
@@ -45,6 +47,7 @@ void init()
      */
     CPU::X86::wrmsr(msr_fmask, 0x200);
 #else
+    // Install the system call handler for i686
     CPU::X86::init_syscalls();
 #endif
 }

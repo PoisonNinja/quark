@@ -16,6 +16,7 @@ static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
 
 void detect_intel(Core& cpu)
 {
+    // Intel specific CPUID extensions
     struct {
         uint32_t eax, ebx, ecx, edx;
     } regs;
@@ -33,6 +34,7 @@ void detect(Core& cpu)
         uint32_t eax, ebx, ecx, edx;
     } regs;
 
+    // CPU vendor
     regs.eax = 0x00000000;
     cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
     *(uint32_t*)&cpu.vendor[0] = regs.ebx;
@@ -80,6 +82,10 @@ void detect(Core& cpu)
     cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
     uint32_t highest_function = regs.eax;
 
+    /*
+     * CPUID EAX values pased 0x80000000 are optional so we need to verify they
+     * exist
+     */
     if (highest_function < 0x80000001) {
         Log::printk(
             Log::LogLevel::WARNING,
@@ -146,6 +152,7 @@ void detect(Core& cpu)
         }
     }
 
+    // Vendor specific CPUID extensions
     if (!String::strncmp("GenuineIntel", cpu.vendor, 13)) {
         Log::printk(Log::LogLevel::INFO, "Found supported CPU vendor\n");
         detect_intel(cpu);

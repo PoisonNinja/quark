@@ -8,6 +8,7 @@ namespace Virtual
 {
 constexpr size_t PAGE_SIZE = 4096;
 
+// No need to pack since it's already aligned
 struct page {
     uint32_t present : 1;
     uint32_t writable : 1;
@@ -30,6 +31,7 @@ struct page {
 #endif
 };
 
+// x86_64 = 512 pages, x86 = 1024 pages
 struct page_table {
     struct page pages[PAGE_SIZE / sizeof(struct page)];
 };

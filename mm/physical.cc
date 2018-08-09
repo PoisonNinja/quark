@@ -1,4 +1,3 @@
-#include <arch/mm/physical.h>
 #include <kernel.h>
 #include <mm/buddy.h>
 #include <mm/mm.h>

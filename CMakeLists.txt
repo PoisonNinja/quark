@@ -81,7 +81,7 @@ if(NOT CMAKE_CXX_COMPILER)
                          you have already built it, make sure that you have run \
                          envsetup.sh before configuring CMake.")
 endif()
-message(STATUS "CXX Compiler: " ${CXX})
+message(STATUS "CXX Compiler: " ${CMAKE_CXX_COMPILER})
 
 # Declare our project as a C++ project
 project(Quark CXX)

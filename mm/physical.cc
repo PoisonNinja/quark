@@ -12,7 +12,9 @@ namespace
 {
 Buddy* buddy = nullptr;
 bool online = false;
-};  // namespace
+
+constexpr size_t minimum_order = 12;  // 4 KiB
+};                                    // namespace
 
 addr_t early_allocate();
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <arch/mm/virtual.h>
+#include <lib/math.h>
 #include <types.h>
 
 namespace Memory
@@ -32,12 +33,12 @@ namespace Virtual
 
 inline addr_t align_up(addr_t address)
 {
-    return ((address + PAGE_SIZE - 1) / PAGE_SIZE) * PAGE_SIZE;
+    return Math::round_up(address, PAGE_SIZE);
 }
 
 inline addr_t align_down(addr_t address)
 {
-    return ((address / PAGE_SIZE) * PAGE_SIZE);
+    return Math::round_down(address, PAGE_SIZE);
 }
 
 bool map(addr_t v, addr_t p, int flags);

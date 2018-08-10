@@ -1,17 +1,29 @@
 #pragma once
 
+#include <lib/math.h>
 #include <types.h>
 
-// Division, but rounding up
-#define DIV_ROUND_UP(x, y) (((x) + ((y)-1)) / (y))
+constexpr size_t bitset_size_calc(size_t size)
+{
+    return Math::div_round_up(size, 8);
+}
+constexpr size_t bitset_index(size_t index)
+{
+    return index / 8;
+}
 
-#define BITSET_SIZE_CALC(size) (DIV_ROUND_UP(size, 8))
-#define BITSET_INDEX(index) (index / 8)
+constexpr uint8_t bitset_full = 0xFF;
+constexpr uint8_t bitset_empty = 0x00;
 
-#define BITSET_FULL 0xFF
-#define BITSET_EMPTY 0x00
-
-#define bitset_set(bitset, index) bitset[index / 8] |= (1 << (index % 8))
-#define bitset_unset(bitset, index) bitset[index / 8] &= ~(1 << (index % 8))
-#define bitset_test(bitset, index) \
-    ((bitset[index / 8] & (1 << (index % 8))) ? 1 : 0)
+inline void bitset_set(uint8_t* bitset, size_t index)
+{
+    bitset[index / 8] |= (1 << (index % 8));
+}
+inline void bitset_unset(uint8_t* bitset, size_t index)
+{
+    bitset[index / 8] &= ~(1 << (index % 8));
+}
+inline bool bitset_test(uint8_t* bitset, size_t index)
+{
+    return (bitset[index / 8] & (1 << (index % 8))) ? true : false;
+}

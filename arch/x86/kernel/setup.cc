@@ -13,7 +13,7 @@ extern void kmain(struct Boot::info &info);
 namespace Symbols
 {
 void init(struct multiboot_tag_elf_sections *sections);
-}  // namespace Symbols
+} // namespace Symbols
 
 namespace Memory
 {
@@ -21,8 +21,8 @@ namespace Physical
 {
 void init_early_alloc(struct Boot::info *m);
 addr_t early_allocate();
-}  // namespace Physical
-}  // namespace Memory
+} // namespace Physical
+} // namespace Memory
 
 namespace X86
 {
@@ -35,7 +35,7 @@ namespace
 {
 Serial serial_console;
 struct Boot::info info;
-}  // namespace
+} // namespace
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
@@ -47,8 +47,8 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
 
     // Start filling out information struct
     info.architecture_data = multiboot;
-    info.kernel_start = reinterpret_cast<addr_t>(&__kernel_start);
-    info.kernel_end = reinterpret_cast<addr_t>(&__kernel_end);
+    info.kernel_start      = reinterpret_cast<addr_t>(&__kernel_start);
+    info.kernel_end        = reinterpret_cast<addr_t>(&__kernel_end);
 
     struct multiboot_tag_elf_sections *sections = nullptr;
     struct multiboot_tag *tag;

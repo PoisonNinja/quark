@@ -17,7 +17,7 @@
 
 void init_stage2(void*)
 {
-    Process* parent = Scheduler::get_current_process();
+    Process* parent                  = Scheduler::get_current_process();
     Ref<Filesystem::Descriptor> root = parent->get_root();
     Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
     if (!init) {
@@ -31,12 +31,12 @@ void init_stage2(void*)
                 st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
-    int argc = 2;
+    int argc           = 2;
     const char* argv[] = {
         "/sbin/init",
         "test",
     };
-    int envc = 1;
+    int envc           = 1;
     const char* envp[] = {
         "hello=world",
     };
@@ -53,7 +53,7 @@ void init_stage2(void*)
 
 void init_stage1()
 {
-    addr_t cloned = Memory::Virtual::fork();
+    addr_t cloned  = Memory::Virtual::fork();
     Process* initp = new Process(nullptr);
     Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());

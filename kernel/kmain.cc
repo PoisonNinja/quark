@@ -1,6 +1,7 @@
 #include <boot/info.h>
 #include <cpu/cpu.h>
 #include <cpu/interrupt.h>
+#include <drivers/pci/pci.h>
 #include <fs/fs.h>
 #include <fs/initrd/initrd.h>
 #include <fs/stat.h>
@@ -78,6 +79,8 @@ void kmain(struct Boot::info& info)
     Filesystem::init();
     Filesystem::Initrd::init(info);
     Syscall::init();
+
+    PCI::init();
 
     /*
      * Core subsystems are online, let's starting bringing up the rest of

@@ -8,13 +8,18 @@ namespace PCI
 class Device
 {
 public:
+    Device(uint8_t bus, uint8_t device, uint8_t function);
+
+    uint32_t read_config_32(const uint8_t offset);
+    void write_config_32(const uint8_t offset, const uint32_t value);
+    uint16_t read_config_16(const uint8_t offset);
+    void write_config_16(const uint8_t offset, const uint16_t value);
+    uint8_t read_config_8(const uint8_t offset);
+    void write_config_8(const uint8_t offset, const uint8_t value);
+
     Node<Device> node;
 
 private:
-    uint16_t vendor_id;
-    uint16_t device_id;
-    uint8_t subclass_id;
-    uint8_t class_id;
     uint8_t bus;
     uint8_t device;
     uint8_t function;
@@ -91,7 +96,7 @@ constexpr uint8_t pci_io_base_upper           = 0x30;
 constexpr uint8_t pci_io_base_lower           = 0x32;
 constexpr uint8_t pci_bridge_control          = 0x3E;
 
-bool register_driver(Driver* d);
+bool register_driver(Driver& d);
 
 void init();
 } // namespace PCI

@@ -174,11 +174,56 @@ void probe()
         }
     }
 }
+
+List<Driver, &Driver::node> drivers;
 } // namespace
+
+bool register_driver(Driver& d)
+{
+    drivers.push_back(d);
+    return true;
+}
 
 void init()
 {
     Log::printk(Log::LogLevel::INFO, "pci: Initializing...\n");
     probe();
+}
+
+Device::Device(uint8_t bus, uint8_t device, uint8_t function)
+    : bus(bus)
+    , device(device)
+    , function(function)
+{
+}
+
+uint32_t Device::read_config_32(const uint8_t offset)
+{
+    return read_32(this->bus, this->device, this->function, offset);
+}
+
+void Device::write_config_32(const uint8_t offset, const uint32_t value)
+{
+    write_32(this->bus, this->device, this->function, offset, value);
+}
+
+uint16_t Device::read_config_16(const uint8_t offset)
+{
+    return read_16(this->bus, this->device, this->function, offset);
+}
+
+void Device::write_config_16(const uint8_t offset, const uint16_t value)
+{
+    write_16(this->bus, this->device, this->function, offset, value);
+}
+
+uint8_t Device::read_config_8(const uint8_t offset)
+{
+    return read_8(this->bus, this->device, this->function, offset);
+}
+
+void Device::write_config_8(const uint8_t offset, const uint8_t value)
+{
+    write_8(this->bus, this->device, this->function, offset, value);
 }
 } // namespace PCI

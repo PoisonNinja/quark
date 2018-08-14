@@ -3,8 +3,6 @@ separate_arguments(CMAKE_CXX_FLAGS_LIST NATIVE_COMMAND ${CMAKE_CXX_FLAGS})
 if (ARCH STREQUAL "x86_64")
     list(APPEND CMAKE_CXX_FLAGS_LIST -DX86_64)
     list(APPEND CMAKE_ASM_FLAGS_LIST -felf64 -d X86_64)
-else()
-    list(APPEND CMAKE_ASM_FLAGS_LIST -felf32)
 endif()
 
 add_custom_command(

@@ -26,6 +26,9 @@ SECTIONS
 
     .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - VMA)
     {
+        __constructors_start = .;
+        *(SORT(.ctors*))
+        __constructors_end = .;
         *(.rodata)
     }
 

@@ -83,26 +83,6 @@ if(NOT CMAKE_CXX_COMPILER)
 endif()
 message(STATUS "CXX Compiler: " ${CMAKE_CXX_COMPILER})
 
-execute_process(COMMAND
-    ${CMAKE_CXX_COMPILER} "-print-file-name=crtbegin.o"
-    OUTPUT_VARIABLE CRTBEGIN
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(NOT EXISTS ${CRTBEGIN})
-    message(FATAL_ERROR "crtbegin.o does not exist. You probably have a broken toolchain: " ${CRTBEGIN})
-endif()
-message(STATUS "crtbegin.o: " ${CRTBEGIN})
-
-execute_process(COMMAND
-    ${CMAKE_CXX_COMPILER} "-print-file-name=crtend.o"
-    OUTPUT_VARIABLE CRTEND
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(NOT EXISTS ${CRTEND})
-    message(FATAL_ERROR "crtend.o does not exist. You probably have a broken toolchain: " ${CRTEND})
-endif()
-message(STATUS "crtend.o: " ${CRTEND})
-
 # Declare our project as a C++ project
 project(Quark CXX)
 
@@ -153,20 +133,6 @@ add_custom_command(
         ${CMAKE_CXX_COMPILER}
     COMMENT "Generating version header"
 )
-
-# Unfortunately to enforce the link order we must modify the linking command
-# itself since CMake does not offer a reliable way to specify objects.
-#
-# The stuff enclosed in <> are directly copied from the original
-# CMAKE_CXX_LINK_EXECUTABLE. We then insert our crt* files around the <OBJECT>
-# variable as necessary.
-#
-# This is somewhat fragile, as future CMake upgrades can completely bork this
-# and technically relies on undocumented behavior
-#
-# TODO: Explore if generators can fix this (e.g. injecting our objects in the
-# OBJECTS generator
-set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_CXX_COMPILER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> ${CMAKE_BINARY_DIR}/crti.o ${CRTBEGIN} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CRTEND} ${CMAKE_BINARY_DIR}/crtn.o")
 
 # Add quark.kernel with version.h as a dependency so it will get built
 add_executable(quark.kernel ${CMAKE_SOURCE_DIR}/include/kernel/version.h)

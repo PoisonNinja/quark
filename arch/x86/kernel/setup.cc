@@ -27,6 +27,9 @@ addr_t early_allocate();
 namespace X86
 {
 extern "C" {
+void *__constructors_start;
+void *__constructors_end;
+
 void *__kernel_start;
 void *__kernel_end;
 }
@@ -100,12 +103,10 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
 }
 
 extern "C" {
-void _init();
-
 void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
 {
-    _init();
+    libcxx::constructors_initialize(&__constructors_start, &__constructors_end);
     X86::init(magic, multiboot);
 }
 }
-} // namespace X86
+}  // namespace X86

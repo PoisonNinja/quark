@@ -190,7 +190,7 @@ bool load_module(void* binary)
      */
     typedef void (*constructor_t)();
     constructor_t* start = reinterpret_cast<constructor_t*>(ctor_start);
-    constructor_t* end   = reinterpret_cast<constructor_t*>(ctor_start);
+    constructor_t* end   = reinterpret_cast<constructor_t*>(ctor_end);
 
     for (constructor_t* current = start; current != end; ++current) {
         (*current)();

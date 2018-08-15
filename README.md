@@ -13,7 +13,7 @@ To generate the build files, run a variation of the command below:
 cmake .. -G <your generator>
 ```
 
-Replace `<your generator>` with your preferred build system, such as Make or Ninja. For a list, see the CMake documentation.
+Replace `<your generator>` with your preferred build system. Due to the way that we enforce dependencies for linker scripts and out-of-tree objects, only Make and Ninja are supported as build generators (see [here](https://cmake.org/gitweb?p=cmake.git;a=blob;f=Tests/BuildDepends/CMakeLists.txt;h=39a5131fed09be30e935a68c9c4008390fa6fe1e;hb=c4b0e96c37b1d030bf63bc9cf005a50329e7e71c#l37)).
 
 If you wish to build with debug support and logging, append `-DCMAKE_BUILD_TYPE=Debug` to the command to generate the build files.
 

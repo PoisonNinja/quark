@@ -1,10 +1,9 @@
 add_definitions(
-    -DX86
     -DX86_64
 )
 
 if (ARCH STREQUAL "x86_64")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -mcmodel=large -mno-red-zone")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=kernel -mno-red-zone")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()

@@ -5,10 +5,17 @@ SECTIONS
         *(.text)
     }
 
+    .rodata :
+    {
+        *(.rodata)
+        __constructors_start = .;
+        *(SORT(.ctors*))
+        __constructors_end = .;
+    }
+
     .data :
     {
         *(.data)
-        *(.rodata)
     }
     
     .bss :
@@ -21,5 +28,5 @@ SECTIONS
         *(.modinfo)
     }
     
-	/DISCARD/ : { *(.comment) *(.eh_frame) *(.debug_abbrev) *(.debug_info) *(.debug_line) *(.debug_loc) *(.debug_pubnames) *(.debug_aranges) *(.debug_str) *(.debug_macinfo) *(.debug_ranges) *(.stab) *(.stabstr) }
+	/DISCARD/ : { *(.comment) }
 }

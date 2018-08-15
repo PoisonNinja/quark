@@ -64,7 +64,7 @@ void parse_modinfo(Module* mod, size_t index)
                     "[parse_modinfo]: Missing required attributes\n");
     }
 }
-}  // namespace
+} // namespace
 
 extern bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                             const char* string_table);
@@ -82,8 +82,8 @@ bool load_module(void* binary)
 
     struct Module* mod = new Module;
 
-    mod->shnum = header->e_shnum;
-    mod->shdrs = new ELF::Elf_Shdr[mod->shnum];
+    mod->shnum    = header->e_shnum;
+    mod->shdrs    = new ELF::Elf_Shdr[mod->shnum];
     mod->sections = new addr_t[mod->shnum];
 
     for (uint32_t i = 0; i < header->e_shnum; i++) {
@@ -118,7 +118,7 @@ bool load_module(void* binary)
         reinterpret_cast<const char*>((mod->sections[header->e_shstrndx]));
 
     const char* string_table = nullptr;
-    size_t modinfo_index = 0;
+    size_t modinfo_index     = 0;
     for (uint32_t i = 0; i < header->e_shnum; i++) {
         if (mod->shdrs[i].sh_type == SHT_STRTAB &&
             !String::strcmp(".strtab",
@@ -138,7 +138,7 @@ bool load_module(void* binary)
     size_t num_syms;
     for (uint32_t i = 0; i < header->e_shnum; i++) {
         if (mod->shdrs[i].sh_type == SHT_SYMTAB) {
-            symtab = reinterpret_cast<ELF::Elf_Sym*>(mod->sections[i]);
+            symtab   = reinterpret_cast<ELF::Elf_Sym*>(mod->sections[i]);
             num_syms = mod->shdrs[i].sh_size / mod->shdrs[i].sh_entsize;
             break;
         }
@@ -151,10 +151,11 @@ bool load_module(void* binary)
     }
 
     ELF::Elf_Sym* sym = symtab;
+    addr_t ctor_start, ctor_end;
     for (size_t j = 1; j <= num_syms; j++, sym++) {
         // We only want to consider functions
-        if (ELF_ST_TYPE(sym->st_info) != STT_FUNC)
-            continue;
+        // if (ELF_ST_TYPE(sym->st_info) != STT_FUNC)
+        //     continue;
         if (!String::strcmp(string_table + sym->st_name, "init")) {
             Log::printk(Log::LogLevel::DEBUG,
                         "[load_module] Located init point at %p\n",
@@ -167,7 +168,32 @@ bool load_module(void* binary)
                         mod->sections[sym->st_shndx] + sym->st_value);
             mod->fini = reinterpret_cast<int (*)()>(
                 mod->sections[sym->st_shndx] + sym->st_value);
+        } else if (!String::strcmp(string_table + sym->st_name,
+                                   "__constructors_start")) {
+            Log::printk(
+                Log::LogLevel::DEBUG,
+                "[load_module] Located __constructors_start point at %p\n",
+                mod->sections[sym->st_shndx] + sym->st_value);
+            ctor_start = mod->sections[sym->st_shndx] + sym->st_value;
+        } else if (!String::strcmp(string_table + sym->st_name,
+                                   "__constructors_end")) {
+            Log::printk(
+                Log::LogLevel::DEBUG,
+                "[load_module] Located __constructors_end point at %p\n",
+                mod->sections[sym->st_shndx] + sym->st_value);
+            ctor_end = mod->sections[sym->st_shndx] + sym->st_value;
         }
+    }
+
+    /*
+     * Iterate through the constructors to initialize them
+     */
+    typedef void (*constructor_t)();
+    constructor_t* start = reinterpret_cast<constructor_t*>(ctor_start);
+    constructor_t* end   = reinterpret_cast<constructor_t*>(ctor_start);
+
+    for (constructor_t* current = start; current != end; ++current) {
+        (*current)();
     }
 
     // The strings in modinfo are relocated so we need to wait until we

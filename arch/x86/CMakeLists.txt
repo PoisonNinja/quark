@@ -20,6 +20,7 @@ add_custom_target(
 )
 
 add_dependencies(quark.kernel lds)
+set_target_properties(quark.kernel PROPERTIES LINK_DEPENDS lds)
 
 add_subdirectory(cpu)
 add_subdirectory(kernel)

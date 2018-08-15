@@ -1,0 +1,3 @@
+obj-y := cpu/ kernel/ lib/ mm/ proc/
+
+extra-y := quark.lds

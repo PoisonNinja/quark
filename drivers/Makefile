@@ -1,0 +1,1 @@
+obj-y := clock/ input/ irqchip/ pci/ tty/

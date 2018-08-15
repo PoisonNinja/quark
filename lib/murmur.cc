@@ -7,24 +7,24 @@ const uint32_t SEED = 0x1234ABCD;
 
 uint32_t hash_internal(const void *key, uint32_t len, uint32_t seed)
 {
-    uint32_t c1 = 0xcc9e2d51;
-    uint32_t c2 = 0x1b873593;
-    uint32_t r1 = 15;
-    uint32_t r2 = 13;
-    uint32_t m = 5;
-    uint32_t n = 0xe6546b64;
-    uint32_t h = 0;
-    uint32_t k = 0;
-    uint8_t *d = (uint8_t *)key;  // 32 bit extract from `key'
+    uint32_t c1            = 0xcc9e2d51;
+    uint32_t c2            = 0x1b873593;
+    uint32_t r1            = 15;
+    uint32_t r2            = 13;
+    uint32_t m             = 5;
+    uint32_t n             = 0xe6546b64;
+    uint32_t h             = 0;
+    uint32_t k             = 0;
+    uint8_t *d             = (uint8_t *)key; // 32 bit extract from `key'
     const uint32_t *chunks = nullptr;
-    const uint8_t *tail = nullptr;  // tail - last 8 bytes
-    int i = 0;
-    int l = len / 4;  // chunk length
+    const uint8_t *tail    = nullptr; // tail - last 8 bytes
+    int i                  = 0;
+    int l                  = len / 4; // chunk length
 
     h = seed;
 
-    chunks = (const uint32_t *)(d + l * 4);  // body
-    tail = (const uint8_t *)(d + l * 4);     // last 8 byte chunk of `key'
+    chunks = (const uint32_t *)(d + l * 4); // body
+    tail   = (const uint8_t *)(d + l * 4);  // last 8 byte chunk of `key'
 
     // for each 4 byte chunk of `key'
     for (i = -l; i != 0; ++i) {
@@ -45,7 +45,7 @@ uint32_t hash_internal(const void *key, uint32_t len, uint32_t seed)
     k = 0;
 
     // remainder
-    switch (len & 3) {  // `len % 4'
+    switch (len & 3) { // `len % 4'
         case 3:
             k ^= (tail[2] << 16);
             [[fallthrough]];
@@ -75,4 +75,4 @@ uint32_t hash(const void *key, uint32_t len)
 {
     return hash_internal(key, len, SEED);
 }
-}  // namespace Murmur
+} // namespace Murmur

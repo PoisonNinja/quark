@@ -23,10 +23,10 @@ constexpr size_t stack_overhead(size_t total_memory, size_t block_size)
 Buddy::Buddy(size_t s, size_t min, size_t max)
 {
     // TODO: Perform sanity checks
-    this->size = s;
-    this->min_order = min;
-    this->max_order = max;
-    this->orders = new BuddyOrder[max + 1];
+    this->size          = s;
+    this->min_order     = min;
+    this->max_order     = max;
+    this->orders        = new BuddyOrder[max + 1];
     size_t stack_offset = 0;
     for (size_t i = min; i <= max; i++) {
         this->orders[i].free.set_base(

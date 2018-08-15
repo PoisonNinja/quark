@@ -11,7 +11,7 @@ multiboot_memory_map_t *mmap = nullptr;
 struct multiboot_tag *mmap_tag;
 struct multiboot_fixed *multiboot = nullptr;
 struct Boot::info *info;
-}  // namespace
+} // namespace
 
 namespace Memory
 {
@@ -20,7 +20,7 @@ namespace Physical
 void init_early_alloc(struct Boot::info *b)
 {
     addr_t highest = 0;
-    info = b;
+    info           = b;
     multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info->architecture_data);
     struct multiboot_tag *tag;
@@ -63,8 +63,8 @@ addr_t early_allocate()
 {
     addr_t multiboot_start =
         Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end =
-        Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
+    addr_t multiboot_end = Memory::Virtual::align_up(
+        reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     /*
      * Iterate through the memory ranges. mmap will be set to the first free
      * range, whether set by the initial set up or incremented in the loop
@@ -102,5 +102,5 @@ addr_t early_allocate()
     }
     Kernel::panic("Out of memory!\n");
 }
-}  // namespace Physical
-}  // namespace Memory
+} // namespace Physical
+} // namespace Memory

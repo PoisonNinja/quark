@@ -14,8 +14,8 @@ void arch_init(struct Boot::info &info)
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
     addr_t multiboot_start =
         Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end =
-        Memory::Virtual::align_up(multiboot_start + multiboot->total_size);
+    addr_t multiboot_end = Memory::Virtual::align_up(
+        reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");
     Log::printk(Log::LogLevel::INFO, "Kernel:    %p -> %p\n", info.kernel_start,
                 info.kernel_end);
@@ -84,4 +84,4 @@ void arch_init(struct Boot::info &info)
         }
     }
 }
-}  // namespace Memory
+} // namespace Memory

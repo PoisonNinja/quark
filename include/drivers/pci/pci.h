@@ -25,21 +25,10 @@ private:
     uint8_t function;
 };
 
-/*
- * For now, a driver can either support one specific model or one entire family
- * of devices. In the future we may look into multiple vendors/devices, but this
- * will suffice for now.
- */
-struct Filter {
-    uint16_t vendor_id;
-    uint16_t device_id;
-    uint8_t class_id;
-    uint8_t subclass_id;
-};
-
 class Driver
 {
 public:
+    virtual ~Driver(){};
     virtual bool probe(Device* dev) = 0;
     virtual const char* name()      = 0;
     Filter filter;

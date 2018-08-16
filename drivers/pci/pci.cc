@@ -5,9 +5,58 @@
 
 namespace PCI
 {
-
 namespace
 {
+List<Driver, &Driver::node> drivers;
+List<Device, &Device::node> devices;
+
+Driver* match_device(Device& device)
+{
+    PCIID id = device.get_pciid();
+    if (drivers.empty()) {
+        return nullptr;
+    }
+    for (auto& driver : drivers) {
+        if (driver.filter.vendor_id == id.vendor_id &&
+            driver.filter.device_id == id.device_id) {
+            Log::printk(Log::LogLevel::INFO,
+                        "pci: Found driver %s for device %X:%X\n",
+                        driver.name(), id.vendor_id, id.device_id);
+            return &driver;
+        }
+    }
+    Log::printk(Log::LogLevel::WARNING,
+                "pci: Didn't find driver for %X:%X based on fine search, "
+                "switching to coarse\n",
+                id.vendor_id, id.device_id);
+    for (auto& driver : drivers) {
+        if (driver.filter.class_id == id.class_id &&
+            driver.filter.subclass_id == id.subclass_id) {
+            Log::printk(
+                Log::LogLevel::INFO,
+                "pci: Found driver %s for device %X:%X by coarse search\n",
+                driver.name(), id.vendor_id, id.device_id);
+            return &driver;
+        }
+    }
+    Log::printk(Log::LogLevel::ERROR,
+                "pci: Didn't find driver for %X:%X at all\n", id.vendor_id,
+                id.device_id);
+    return nullptr;
+}
+
+void match_all_devices()
+{
+    for (auto& device : devices) {
+        if (!device.is_claimed()) {
+            Driver* driver = match_device(device);
+            if (driver) {
+                driver->probe(&device);
+            }
+        }
+    }
+}
+
 constexpr uint16_t config_address = 0xCF8;
 constexpr uint16_t config_data    = 0xCFC;
 
@@ -139,6 +188,9 @@ void probe_device(uint8_t bus, uint8_t dev)
             Log::printk(Log::LogLevel::INFO,
                         "pci: Found device: %X:%X (%s %s)\n", vendor_id,
                         device_id, pci_vendor.VenFull, pci_device.ChipDesc);
+            Device* device = new Device(bus, dev, i);
+            devices.push_back(*device);
+            match_all_devices();
         }
     }
 }

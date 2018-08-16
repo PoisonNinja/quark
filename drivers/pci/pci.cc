@@ -2,6 +2,8 @@
 #include <drivers/pci/pci.h>
 #include <drivers/pci/pci_list.h>
 #include <kernel.h>
+#include <mm/valloc.h>
+#include <mm/virtual.h>
 
 namespace PCI
 {
@@ -226,14 +228,20 @@ void probe()
         }
     }
 }
-
-List<Driver, &Driver::node> drivers;
 } // namespace
 
 bool register_driver(Driver& d)
 {
     drivers.push_back(d);
+    match_all_devices();
     return true;
+}
+
+Pair<bool, addr_t> map(uint64_t phys, size_t size)
+{
+    addr_t v = Memory::Valloc::allocate(size);
+    Memory::Virtual::map_range(v, phys, size, PAGE_WRITABLE | PAGE_HARDWARE);
+    return make_pair(true, v);
 }
 
 void init()
@@ -277,5 +285,71 @@ uint8_t Device::read_config_8(const uint8_t offset)
 void Device::write_config_8(const uint8_t offset, const uint8_t value)
 {
     write_8(this->bus, this->device, this->function, offset, value);
+}
+
+PCIID Device::get_pciid()
+{
+    PCIID id;
+    id.vendor_id   = this->read_config_16(pci_vendor_id);
+    id.device_id   = this->read_config_16(pci_device_id);
+    id.class_id    = this->read_config_8(pci_class);
+    id.subclass_id = this->read_config_8(pci_subclass);
+    return id;
+}
+
+PCIBAR Device::get_pcibar(int bar)
+{
+    // BAR0 = 0x10, BAR1 = 0x14, so BARX = 0x10 + (4 * x)
+    uint32_t low = this->read_config_32(0x10 + (4 * bar));
+    PCIBAR pcibar;
+    if (bar_is_32(low)) {
+        pcibar.addr = low & 0xFFFFFFF0;
+        this->write_config_32(0x10 + (4 * bar), 0xFFFFFFFF);
+        uint32_t size = this->read_config_32(0x10 + (4 * bar));
+        pcibar.size   = ~(size & 0xFFFFFFF0) + 1;
+        this->write_config_32(0x10 + (4 * bar), low);
+    } else if (bar_is_64(low)) {
+        uint64_t high     = this->read_config_32(0x10 + (4 * bar + 1));
+        uint64_t complete = (high << 32) | low;
+        pcibar.addr       = complete & 0xFFFFFFFFFFFFFFF0;
+        this->write_config_32(0x10 + (4 * bar), 0xFFFFFFFF);
+        this->write_config_32(0x10 + (4 * bar + 1), 0xFFFFFFFF);
+        uint32_t size_low  = this->read_config_32(0x10 + (4 * bar));
+        uint64_t size_high = this->read_config_32(0x10 + (4 * bar + 1));
+        uint64_t size      = (size_high << 32) | size_low;
+        pcibar.size        = ~(size & 0xFFFFFFFFFFFFFFF0) + 1;
+        this->write_config_32(0x10 + (4 * bar), low);
+        this->write_config_32(0x10 + (4 * bar + 1), high);
+    } else {
+        Log::printk(Log::LogLevel::WARNING,
+                    "pci: Unsupported BAR type (probably 16-bit or IO)\n");
+    }
+    return pcibar;
+}
+
+bool Device::is_claimed()
+{
+    return this->claimed;
+}
+
+void Device::claim()
+{
+    if (this->claimed) {
+        Log::printk(
+            Log::LogLevel::WARNING,
+            "pci: Attempting to claim device that is already claimed!\n");
+        return;
+    }
+    this->claimed = true;
+}
+
+void Device::unclaim()
+{
+    if (!this->claimed) {
+        Log::printk(Log::LogLevel::WARNING,
+                    "pci: Attempting to unclaim device that is not claimed!\n");
+        return;
+    }
+    this->claimed = false;
 }
 } // namespace PCI

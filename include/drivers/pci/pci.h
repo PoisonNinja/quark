@@ -1,10 +1,45 @@
 #pragma once
 
 #include <lib/list.h>
+#include <lib/pair.h>
 #include <types.h>
 
 namespace PCI
 {
+/*
+ * For now, a driver can either support one specific model or one entire family
+ * of devices. In the future we may look into multiple vendors/devices, but this
+ * will suffice for now.
+ */
+struct Filter {
+    uint16_t vendor_id;
+    uint16_t device_id;
+    uint8_t class_id;
+    uint8_t subclass_id;
+};
+
+struct PCIID {
+    uint16_t vendor_id;
+    uint16_t device_id;
+    uint8_t class_id;
+    uint8_t subclass_id;
+};
+
+struct PCIBAR {
+    addr_t addr;
+    size_t size;
+};
+
+constexpr bool bar_is_32(uint32_t low)
+{
+    return ((low & 0x6) == 0x0);
+}
+
+constexpr bool bar_is_64(uint32_t low)
+{
+    return ((low & 0x6) == 0x4);
+}
+
 class Device
 {
 public:
@@ -17,9 +52,17 @@ public:
     uint8_t read_config_8(const uint8_t offset);
     void write_config_8(const uint8_t offset, const uint8_t value);
 
+    PCIID get_pciid();
+    PCIBAR get_pcibar(int bar);
+
+    bool is_claimed();
+    void claim();
+    void unclaim();
+
     Node<Device> node;
 
 private:
+    bool claimed = false;
     uint8_t bus;
     uint8_t device;
     uint8_t function;
@@ -87,5 +130,6 @@ constexpr uint8_t pci_bridge_control          = 0x3E;
 
 bool register_driver(Driver& d);
 
+Pair<bool, addr_t> map(addr_t phys, size_t size);
 void init();
 } // namespace PCI

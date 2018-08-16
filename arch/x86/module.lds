@@ -32,5 +32,9 @@ SECTIONS
         *(.modinfo)
     }
     
-	/DISCARD/ : { *(.comment) }
+    /DISCARD/ : 
+    { 
+        *(.comment)
+        *(.debug_info)
+    }
 }

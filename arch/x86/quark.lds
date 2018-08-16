@@ -26,15 +26,19 @@ SECTIONS
 
     .rodata ALIGN (0x1000) : AT(ADDR(.rodata) - VMA)
     {
-        __constructors_start = .;
-        *(SORT(.ctors*))
-        __constructors_end = .;
         *(.rodata)
     }
 
     .data ALIGN (0x1000) : AT(ADDR(.data) - VMA)
     {
         *(.data)
+    }
+
+    .ctors ALIGN (0x1000) : AT(ADDR(.ctors) - VMA)
+    {
+        __constructors_start = .;
+        *(SORT(.ctors*))
+        __constructors_end = .;
     }
 
 	.eh_frame ALIGN(0x1000) : AT(ADDR(.eh_frame) - VMA)

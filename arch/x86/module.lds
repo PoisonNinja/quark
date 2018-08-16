@@ -8,9 +8,6 @@ SECTIONS
     .rodata :
     {
         *(.rodata)
-        __constructors_start = .;
-        *(SORT(.ctors*))
-        __constructors_end = .;
     }
 
     .data :
@@ -21,6 +18,13 @@ SECTIONS
     .bss :
     {
 	    *(.bss)
+    }
+
+    .ctors :
+    {
+        __constructors_start = .;
+        *(SORT(.ctors*))
+        __constructors_end = .;
     }
 
     .modinfo :

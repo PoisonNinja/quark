@@ -22,9 +22,6 @@ endif("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 set(CMAKE_SYSTEM_NAME       Generic)
 set(CMAKE_SYSTEM_VERSION    1)
 
-# Enable NASM to compile ASM files
-enable_language(ASM_NASM)
-
 # Default architecture is x86_64
 set(ARCH "x86_64" CACHE STRING "Architecture to build for")
 message(STATUS "Architecture: " ${ARCH})
@@ -87,6 +84,9 @@ message(STATUS "CXX Compiler: " ${CMAKE_CXX_COMPILER})
 project(Quark CXX)
 
 include(${PLATFORM_FILE})
+
+# Enable NASM to compile ASM files
+enable_language(ASM_NASM)
 
 # We want C++11
 set(CMAKE_CXX_STANDARD 11)

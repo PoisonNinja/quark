@@ -16,7 +16,9 @@ private:
     BlockDevice* blkdev;
 };
 
-BlockWrapper::BlockWrapper(BlockDevice* bd) : KDevice(BLK), blkdev(bd)
+BlockWrapper::BlockWrapper(BlockDevice* bd)
+    : KDevice(BLK)
+    , blkdev(bd)
 {
 }
 
@@ -36,10 +38,14 @@ ssize_t BlockWrapper::write(uint8_t* buffer, size_t count, off_t offset)
     return blkdev->write(buffer, count, offset);
 }
 
+BlockDevice::~BlockDevice()
+{
+}
+
 bool register_blockdev(dev_t major, BlockDevice* blkdev)
 {
     BlockWrapper* bw = new BlockWrapper(blkdev);
     register_kdevice(BLK, major, bw);
     return true;
 }
-}  // namespace Filesystem
+} // namespace Filesystem

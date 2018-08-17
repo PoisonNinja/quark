@@ -46,7 +46,7 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                         return false;
                     }
                     symaddr = temp;
-                } else if (sym->st_shndx) {
+                } else {
                     /*
                      * Internal reference. st_shndx stores the index of the
                      * section containing the target symbol and st_value
@@ -64,7 +64,7 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                 addend = rel->r_addend;
 #else
                 // The addend is stored at the target itself
-                addend = (*(uint32_t*)(target));
+                addend = (*(addr_t*)(target));
 #endif
 
                 switch (ELF_R_TYPE(rel->r_info)) {

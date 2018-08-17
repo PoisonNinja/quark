@@ -237,7 +237,7 @@ bool register_driver(Driver& d)
     return true;
 }
 
-Pair<bool, addr_t> map(uint64_t phys, size_t size)
+Pair<bool, addr_t> map(addr_t phys, size_t size)
 {
     addr_t v = Memory::Valloc::allocate(size);
     Memory::Virtual::map_range(v, phys, size, PAGE_WRITABLE | PAGE_HARDWARE);

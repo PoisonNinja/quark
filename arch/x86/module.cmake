@@ -1,6 +1,8 @@
-add_definitions(
-    -DX86_64
-)
+if (ARCH STREQUAL "x86_64")
+    add_definitions(
+        -DX86_64
+    )
+endif()
 
 if (ARCH STREQUAL "x86_64")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcmodel=large -mno-red-zone")
@@ -13,8 +15,10 @@ if (ARCH STREQUAL "x86_64")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -zmax-page-size=0x1000")
 endif()
 
+set(CMAKE_ASM_NASM_FLAGS "${CMAKE_ASM_NASM_FLAGS} -F dwarf")
 if (ARCH STREQUAL "x86_64")
-    set(CMAKE_ASM_NASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT} -d X86_64 -felf64 -i${CMAKE_SOURCE_DIR}/arch/include/x86/asm/")
+    set(CMAKE_ASM_NASM_FLAGS "${CMAKE_ASM_NASM_FLAGS} -d X86_64 -i${CMAKE_SOURCE_DIR}/arch/include/x86/asm/")
+    set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
 else()
-    set(CMAKE_ASM_NASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT} -felf32")
+    set(CMAKE_ASM_NASM_OBJECT_FORMAT elf)
 endif()

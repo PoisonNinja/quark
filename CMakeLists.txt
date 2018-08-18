@@ -107,6 +107,8 @@ message(STATUS "CXXFLAGS: " ${CMAKE_CXX_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib")
 message(STATUS "LDFLAGS: " ${CMAKE_EXE_LINKER_FLAGS})
 
+message(STATUS "ASMFLAGS: " ${CMAKE_ASM_NASM_FLAGS})
+
 # Set the kernel include directory as a search path
 set(INCLUDE_DIRS "${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include/")
 include_directories(${INCLUDE_DIRS})

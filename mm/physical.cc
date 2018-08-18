@@ -14,13 +14,14 @@ Buddy* buddy = nullptr;
 bool online  = false;
 
 constexpr size_t minimum_order = 12; // 4 KiB
+constexpr size_t maximum_order = 28; // 256 MiB
 };                                   // namespace
 
 addr_t early_allocate();
 
 void init(Boot::info& info)
 {
-    buddy = new Buddy(info.highest, 12, 28);
+    buddy = new Buddy(info.highest, minimum_order, maximum_order);
 }
 
 addr_t allocate()

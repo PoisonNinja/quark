@@ -25,4 +25,4 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     for (;;)
         CPU::halt();
 }
-}  // namespace Kernel
+} // namespace Kernel

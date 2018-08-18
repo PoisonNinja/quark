@@ -55,8 +55,8 @@ syscall_sysret_wrapper:
 
     add rsp, 16 ; Skip the rest of the IRET frame
     pop rcx     ; RIP
-    add rsp, 8
+    add rsp, 8  ; Skip CS
     pop r11     ; RFLAGS
-    pop rsp
+    pop rsp     ; RSP
 
     o64 sysret          ; Return

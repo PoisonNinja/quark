@@ -22,7 +22,7 @@ Ref<Filesystem::Descriptor> get_start(const char* path)
     }
     return start;
 }
-}  // namespace
+} // namespace
 
 namespace Syscall
 {
@@ -124,10 +124,10 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
                     "[sys_mmap] Kernel selecting mapping\n");
         addr_t placement;
         bool ret = false;
-        ret = Scheduler::get_current_process()->sections->locate_range(
+        ret      = Scheduler::get_current_process()->sections->locate_range(
             placement,
-            (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr) :
-                                USER_START,
+            (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr)
+                              : USER_START,
             mmap_data->length);
         if (!ret) {
             Log::printk(Log::LogLevel::WARNING,
@@ -220,6 +220,7 @@ static long sys_fork()
     String::memcpy(&thread->tcontext,
                    &Scheduler::get_current_thread()->tcontext,
                    sizeof(thread->tcontext));
+    // Child process gets 0 returned from fork
 #ifdef X86_64
     thread->tcontext.rax = 0;
 #else
@@ -375,27 +376,27 @@ static long sys_delete_module(const char* name, int flags)
 
 void init()
 {
-    syscall_table[SYS_read] = reinterpret_cast<void*>(sys_read);
-    syscall_table[SYS_write] = reinterpret_cast<void*>(sys_write);
-    syscall_table[SYS_open] = reinterpret_cast<void*>(sys_open);
-    syscall_table[SYS_close] = reinterpret_cast<void*>(sys_close);
-    syscall_table[SYS_stat] = reinterpret_cast<void*>(sys_stat);
-    syscall_table[SYS_fstat] = reinterpret_cast<void*>(sys_fstat);
-    syscall_table[SYS_lseek] = reinterpret_cast<void*>(sys_lseek);
-    syscall_table[SYS_mmap] = reinterpret_cast<void*>(sys_mmap);
-    syscall_table[SYS_sigaction] = reinterpret_cast<void*>(sys_sigaction);
+    syscall_table[SYS_read]        = reinterpret_cast<void*>(sys_read);
+    syscall_table[SYS_write]       = reinterpret_cast<void*>(sys_write);
+    syscall_table[SYS_open]        = reinterpret_cast<void*>(sys_open);
+    syscall_table[SYS_close]       = reinterpret_cast<void*>(sys_close);
+    syscall_table[SYS_stat]        = reinterpret_cast<void*>(sys_stat);
+    syscall_table[SYS_fstat]       = reinterpret_cast<void*>(sys_fstat);
+    syscall_table[SYS_lseek]       = reinterpret_cast<void*>(sys_lseek);
+    syscall_table[SYS_mmap]        = reinterpret_cast<void*>(sys_mmap);
+    syscall_table[SYS_sigaction]   = reinterpret_cast<void*>(sys_sigaction);
     syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
-    syscall_table[SYS_sigreturn] = reinterpret_cast<void*>(sys_sigreturn);
-    syscall_table[SYS_getpid] = reinterpret_cast<void*>(sys_getpid);
-    syscall_table[SYS_fork] = reinterpret_cast<void*>(sys_fork);
-    syscall_table[SYS_execve] = reinterpret_cast<void*>(sys_execve);
-    syscall_table[SYS_exit] = reinterpret_cast<void*>(sys_exit);
-    syscall_table[SYS_kill] = reinterpret_cast<void*>(sys_kill);
-    syscall_table[SYS_sigpending] = reinterpret_cast<void*>(sys_sigpending);
+    syscall_table[SYS_sigreturn]   = reinterpret_cast<void*>(sys_sigreturn);
+    syscall_table[SYS_getpid]      = reinterpret_cast<void*>(sys_getpid);
+    syscall_table[SYS_fork]        = reinterpret_cast<void*>(sys_fork);
+    syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);
+    syscall_table[SYS_exit]        = reinterpret_cast<void*>(sys_exit);
+    syscall_table[SYS_kill]        = reinterpret_cast<void*>(sys_kill);
+    syscall_table[SYS_sigpending]  = reinterpret_cast<void*>(sys_sigpending);
     syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
-    syscall_table[SYS_mknod] = reinterpret_cast<void*>(sys_mknod);
+    syscall_table[SYS_mknod]       = reinterpret_cast<void*>(sys_mknod);
     syscall_table[SYS_init_module] = reinterpret_cast<void*>(sys_init_module);
     syscall_table[SYS_delete_module] =
         reinterpret_cast<void*>(sys_delete_module);
 }
-}  // namespace Syscall
+} // namespace Syscall

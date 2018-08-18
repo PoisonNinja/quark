@@ -19,16 +19,16 @@ Thread* kidle;
 PTable ptable;
 
 bool _online = false;
-}  // namespace
+} // namespace
 
 int WaitQueue::wait(int flags)
 {
     Thread* t = Scheduler::get_current_thread();
     WaitQueueNode node(t);
     this->waiters.push_back(node);
-    t->state = (flags & wait_interruptible) ?
-                   ThreadState::SLEEPING_INTERRUPTIBLE :
-                   ThreadState::SLEEPING_UNINTERRUPTIBLE;
+    t->state = (flags & wait_interruptible)
+                   ? ThreadState::SLEEPING_INTERRUPTIBLE
+                   : ThreadState::SLEEPING_UNINTERRUPTIBLE;
     Scheduler::remove(t);
     Scheduler::yield();
     int ret = 0;
@@ -131,7 +131,7 @@ void init()
 {
     Log::printk(Log::LogLevel::INFO, "Initializing scheduler...\n");
     Interrupt::register_handler(0x81, yield_handler);
-    kernel_process = new Process(nullptr);
+    kernel_process                = new Process(nullptr);
     kernel_process->address_space = Memory::Virtual::get_address_space_root();
     // TODO: Move this to architecture specific
     Thread* kinit = new Thread(kernel_process);
@@ -143,7 +143,7 @@ void init()
      * the kernel just became a thread.
      */
     current_thread = kinit;
-    _online = true;
+    _online        = true;
     Log::printk(Log::LogLevel::INFO, "Scheduler initialized\n");
 }
 
@@ -176,4 +176,4 @@ bool remove_process(pid_t pid)
 {
     return ptable.remove(pid);
 }
-}  // namespace Scheduler
+} // namespace Scheduler

@@ -1,4 +1,5 @@
 #include <kernel.h>
+#include <lib/pair.h>
 #include <mm/buddy.h>
 #include <mm/mm.h>
 #include <mm/physical.h>
@@ -56,6 +57,25 @@ void free(addr_t address)
 void free(addr_t address, size_t size)
 {
     buddy->free(address, size);
+}
+
+/*
+ * Unfortunately there is no way to implement this without somewhat relying on
+ * the properties of the buddy allocator, so this probably won't even work if
+ * we ever change physical memory algorithms.
+ */
+Pair<addr_t, size_t> try_allocate(size_t max_size)
+{
+    if (max_size <= Memory::Virtual::PAGE_SIZE)
+        max_size = Memory::Virtual::PAGE_SIZE;
+    size_t rounded_size = Math::pow_2(Math::log_2(max_size));
+    while (rounded_size >= Memory::Virtual::PAGE_SIZE) {
+        if (buddy->available(rounded_size)) {
+            return make_pair(buddy->alloc(rounded_size), rounded_size);
+        }
+        rounded_size /= 2;
+    }
+    Kernel::panic("Out of memory!\n");
 }
 
 void finalize()

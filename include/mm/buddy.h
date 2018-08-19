@@ -19,6 +19,9 @@ public:
     addr_t alloc(size_t size);
     void free(addr_t addr, size_t size);
 
+    // Returns whether there is physical memory chunks available for this size
+    bool available(size_t size);
+
 private:
     size_t size;
     size_t min_order;

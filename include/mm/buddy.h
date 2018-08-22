@@ -1,14 +1,12 @@
 #pragma once
 
+#include <lib/bitset.h>
 #include <mm/stack.h>
 #include <types.h>
 
-struct BuddyOrder {
-    Stack free;
-    uint8_t* bitset;
-};
-
 constexpr size_t max_num_orders = 28 - 12;
+
+struct BuddyOrder;
 
 class Buddy
 {

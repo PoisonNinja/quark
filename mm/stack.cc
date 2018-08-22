@@ -21,11 +21,6 @@ bool Stack::empty()
     return this->used == 0;
 }
 
-void Stack::set_base(addr_t *b)
-{
-    this->base = b;
-}
-
 void Stack::expand()
 {
     addr_t phys = Memory::Physical::allocate();

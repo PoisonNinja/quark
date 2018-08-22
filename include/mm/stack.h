@@ -1,15 +1,18 @@
 #pragma once
 
+#include <mm/virtual.h>
 #include <types.h>
 
 class Stack
 {
 public:
-    Stack() : base(nullptr), size(0), used(0){};
+    Stack(addr_t* base)
+        : base(base)
+        , size(0)
+        , used(0){};
     void push(addr_t address);
     addr_t pop();
     bool empty();
-    void set_base(addr_t* b);
 
 private:
     void expand();
@@ -19,4 +22,8 @@ private:
     size_t used;
 };
 
-constexpr size_t stack_overhead(size_t total_memory, size_t block_size);
+constexpr size_t stack_overhead(size_t total_memory, size_t block_size)
+{
+    return total_memory / block_size /
+           (Memory::Virtual::PAGE_SIZE / sizeof(addr_t));
+}

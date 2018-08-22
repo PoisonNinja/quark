@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <types.h>
+
 template <typename K, size_t tableSize>
 struct KeyHash {
     unsigned long operator()(const K &key) const
@@ -32,7 +34,9 @@ class HashNode
 {
 public:
     HashNode(const K &key, const V &value)
-        : _key(key), _value(value), _next(nullptr)
+        : _key(key)
+        , _value(value)
+        , _next(nullptr)
     {
     }
 
@@ -74,11 +78,13 @@ private:
 
 // Hash map class template
 template <typename K, typename V, size_t tableSize,
-          typename F = KeyHash<K, tableSize> >
+          typename F = KeyHash<K, tableSize>>
 class Hashmap
 {
 public:
-    Hashmap() : table(), hash()
+    Hashmap()
+        : table()
+        , hash()
     {
     }
 
@@ -90,7 +96,7 @@ public:
 
             while (entry != nullptr) {
                 HashNode<K, V> *prev = entry;
-                entry = entry->next();
+                entry                = entry->next();
                 delete prev;
             }
 
@@ -101,7 +107,7 @@ public:
     bool get(const K &key, V &value)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *entry = table[hashValue];
+        HashNode<K, V> *entry   = table[hashValue];
 
         while (entry != nullptr) {
             if (entry->key() == key) {
@@ -118,11 +124,11 @@ public:
     void put(const K &key, const V &value)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev = nullptr;
-        HashNode<K, V> *entry = table[hashValue];
+        HashNode<K, V> *prev    = nullptr;
+        HashNode<K, V> *entry   = table[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
-            prev = entry;
+            prev  = entry;
             entry = entry->next();
         }
 
@@ -146,11 +152,11 @@ public:
     void remove(const K &key)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev = nullptr;
-        HashNode<K, V> *entry = table[hashValue];
+        HashNode<K, V> *prev    = nullptr;
+        HashNode<K, V> *entry   = table[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
-            prev = entry;
+            prev  = entry;
             entry = entry->next();
         }
 

@@ -29,7 +29,7 @@ public:
 
     tid_t tid;
     ThreadState state;
-    struct ThreadContext tcontext;  // Thread execution state
+    struct ThreadContext tcontext; // Thread execution state
     Node<Thread> process_node;
     Node<Thread> scheduler_node;
     Process *parent;

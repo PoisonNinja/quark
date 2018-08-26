@@ -2,18 +2,45 @@
 
 #include <fs/dev.h>
 
+namespace Memory
+{
+namespace DMA
+{
+class SGList;
+}
+} // namespace Memory
+
 namespace Filesystem
 {
+enum class BlockRequestType : int {
+    READ,
+    WRITE,
+};
+
+typedef uint64_t sector_t;
+
+struct BlockRequest {
+    BlockRequestType command;
+    sector_t start;
+    sector_t num_sectors;
+    Memory::DMA::SGList* sglist;
+};
+
 class BlockDevice
 {
 public:
     virtual ~BlockDevice();
 
-    // A subset of Inode operations
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
+    virtual bool request(BlockRequest* request) = 0;
+
+    // Size of a sector
+    virtual sector_t sector_size() = 0;
+    // Max size of a individual scatter gather target
+    virtual size_t sg_max_size() = 0;
+    // Max # of scatter gather targets
+    virtual size_t sg_max_count() = 0;
 };
 
 bool register_blockdev(dev_t major, BlockDevice* blkdev);
 
-}  // namespace Filesystem
+} // namespace Filesystem

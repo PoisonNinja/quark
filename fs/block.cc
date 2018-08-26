@@ -43,7 +43,8 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
      */
     while (processed < count) {
         Memory::DMA::SGList* sglist = Memory::DMA::build_sglist(
-            this->blkdev->sg_max_count(), this->blkdev->sg_max_size(), count);
+            this->blkdev->sg_max_count(), this->blkdev->sg_max_size(),
+            count - processed);
         Log::printk(Log::LogLevel::INFO,
                     "block: SGList contains %p bytes in %llX regions\n",
                     sglist->total_size, sglist->num_regions);
@@ -72,6 +73,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
                         reinterpret_cast<void*>(region.virtual_base + distance),
                         region.size - distance);
                     processed += region.size - distance;
+                    current += region.size - distance;
                 } else {
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Aligned disk read :)\n");
@@ -79,6 +81,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
                                    reinterpret_cast<void*>(region.virtual_base),
                                    region.size);
                     processed += region.size;
+                    current += region.size;
                 }
             }
         } else {

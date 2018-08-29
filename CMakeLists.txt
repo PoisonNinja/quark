@@ -88,6 +88,14 @@ include(${PLATFORM_FILE})
 # Enable NASM to compile ASM files
 enable_language(ASM_NASM)
 
+# HACK: Setting CMAKE_ASM_NASM_FLAGS before enabling ASM_NASM overwrites the
+#       flags we set in the platform file.
+#
+#       To work around this, platforms will set CMAKE_ASM_FLAGS and then we
+#       will set it into ASM_NASM for them. This has the advantage of making
+#       transitions to new assemblers slightly easier
+set(CMAKE_ASM_NASM_FLAGS ${CMAKE_ASM_FLAGS})
+
 # We want C++11
 set(CMAKE_CXX_STANDARD 11)
 

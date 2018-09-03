@@ -1,23 +1,25 @@
 #include <fs/fs.h>
+#include <fs/stat.h>
 #include <fs/vcache.h>
 #include <fs/vnode.h>
 #include <kernel.h>
 
 namespace Filesystem
 {
-Vnode::Vnode(Superblock* sb, Ref<Inode> inode) : Vnode(sb, inode, inode->dev, 0)
+Vnode::Vnode(Superblock* sb, Ref<Inode> inode)
+    : Vnode(sb, inode, inode->dev, 0)
 {
 }
 
 Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t d, dev_t rd)
 {
-    this->sb = sb;
+    this->sb    = sb;
     this->inode = inode;
-    this->ino = inode->ino;
-    this->dev = d;
-    this->rdev = rd;
-    this->mode = inode->mode;
-    this->kdev = nullptr;
+    this->ino   = inode->ino;
+    this->dev   = d;
+    this->rdev  = rd;
+    this->mode  = inode->mode;
+    this->kdev  = nullptr;
 }
 
 int Vnode::link(const char* name, Ref<Vnode> node)
@@ -32,14 +34,8 @@ int Vnode::mkdir(const char* name, mode_t mode)
 
 int Vnode::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    // Inject O_CREAT into flags
-    Ref<Vnode> vnode = this->open(name, O_CREAT, mode);
-    if (!vnode) {
-        // TODO: Return proper errno
-        return -1;
-    }
-    vnode->kdev = get_kdevice(mode, dev);
-    return 0;
+    // TODO: Check if file exists
+    return this->inode->mknod(name, mode, dev);
 }
 
 int Vnode::mount(Mount* mt)
@@ -60,13 +56,26 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
     }
     Ref<Vnode> retvnode = VCache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
+        struct KDevice* kdev = get_kdevice(retinode->mode, retinode->dev);
+        if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
+            Log::printk(Log::LogLevel::INFO,
+                        "kdev: Looking for mode %X and dev %p\n",
+                        retinode->mode, retinode->dev);
+            if (!kdev) {
+                // TODO: Return -ENXIO
+                return Ref<Vnode>(nullptr);
+            }
+        }
         Log::printk(Log::LogLevel::WARNING, "Failed to find %s in cache\n",
                     name);
         retvnode = Ref<Vnode>(new Vnode(this->sb, retinode, this->sb->rdev, 0));
         VCache::add(retvnode->ino, retvnode->dev, retvnode);
+        if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
+            retvnode->kdev = kdev;
+        }
     } else {
-        // New Vnodes cannot have a mountpoint so we can bypass this check if
-        // the vnode was just created
+        // New Vnodes cannot have a mountpoint so we can bypass this check
+        // if the vnode was just created
         if (!retvnode->mounts.empty()) {
             Superblock* newsb = retvnode->mounts.front().sb;
             Log::printk(Log::LogLevel::INFO,
@@ -100,4 +109,4 @@ int Vnode::stat(struct stat* st)
     return inode->stat(st);
 }
 
-}  // namespace Filesystem
+} // namespace Filesystem

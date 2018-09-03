@@ -32,7 +32,7 @@ KDevice* KDeviceClass::get_kdevice(int minor)
 
 KDeviceClass* chrdev[max_major] = {nullptr};
 KDeviceClass* blkdev[max_major] = {nullptr};
-}  // namespace
+} // namespace
 
 dev_t locate_class(DeviceClass c)
 {
@@ -115,12 +115,18 @@ bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
 KDevice* get_kdevice(mode_t mode, dev_t dev)
 {
     if (S_ISBLK(mode)) {
+        if (!blkdev[major(dev)]) {
+            return nullptr;
+        }
         return blkdev[major(dev)]->get_kdevice(minor(dev));
     } else if (S_ISCHR(mode)) {
+        if (!chrdev[major(dev)]) {
+            return nullptr;
+        }
         return chrdev[major(dev)]->get_kdevice(minor(dev));
     } else {
         return nullptr;
     }
 }
 
-}  // namespace Filesystem
+} // namespace Filesystem

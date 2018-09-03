@@ -46,10 +46,11 @@ public:
     virtual int link(const char* name, Ref<Inode> node) override;
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;
     virtual int mkdir(const char* name, mode_t mode) override;
+    virtual int mknod(const char* name, mode_t mode, dev_t dev) override;
 
 private:
     Ref<Inode> find_child(const char* name);
     List<InitFSNode, &InitFSNode::node> children;
 };
-}  // namespace InitFS
-}  // namespace Filesystem
+} // namespace InitFS
+} // namespace Filesystem

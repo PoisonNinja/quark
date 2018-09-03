@@ -31,7 +31,7 @@ namespace InitFS
 InitFSNode::InitFSNode(Ref<Inode> inode, const char* name)
 {
     this->inode = inode;
-    this->name = String::strdup(name);
+    this->name  = String::strdup(name);
 }
 
 InitFSNode::~InitFSNode()
@@ -41,14 +41,14 @@ InitFSNode::~InitFSNode()
 
 File::File(ino_t ino, dev_t dev, mode_t mode)
 {
-    this->ino = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
+    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
+    this->dev  = dev;
     this->mode = mode;
     this->size = 0;
-    this->uid = 0;
-    this->gid = 0;
+    this->uid  = 0;
+    this->gid  = 0;
     // Allocate when actually used
-    data = nullptr;
+    data        = nullptr;
     buffer_size = 0;
 }
 
@@ -73,13 +73,13 @@ ssize_t File::write(uint8_t* buffer, size_t count, off_t offset)
 {
     if (count + offset > buffer_size) {
         size_t new_buffer_size = count + offset;
-        uint8_t* new_buffer = new uint8_t[new_buffer_size];
+        uint8_t* new_buffer    = new uint8_t[new_buffer_size];
         if (data) {
             String::memcpy(new_buffer, data, buffer_size);
             delete[] data;
         }
         buffer_size = new_buffer_size;
-        data = new_buffer;
+        data        = new_buffer;
     }
     this->size = buffer_size;
     String::memcpy(data + offset, buffer, count);
@@ -88,8 +88,8 @@ ssize_t File::write(uint8_t* buffer, size_t count, off_t offset)
 
 Directory::Directory(ino_t ino, dev_t dev, mode_t mode)
 {
-    this->ino = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
+    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
+    this->dev  = dev;
     this->mode = mode | S_IFDIR;
 }
 
@@ -140,6 +140,14 @@ int Directory::mkdir(const char* name, mode_t mode)
     return 0;
 }
 
+int Directory::mknod(const char* name, mode_t mode, dev_t dev)
+{
+    Ref<File> child(new File(0, dev, mode));
+    InitFSNode* node = new InitFSNode(child, name);
+    children.push_back(*node);
+    return 0;
+}
+
 Ref<Inode> Directory::find_child(const char* name)
 {
     for (auto& i : children) {
@@ -149,5 +157,5 @@ Ref<Inode> Directory::find_child(const char* name)
     }
     return Ref<Inode>(nullptr);
 }
-}  // namespace InitFS
-}  // namespace Filesystem
+} // namespace InitFS
+} // namespace Filesystem

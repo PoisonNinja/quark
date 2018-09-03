@@ -16,14 +16,18 @@ struct Filter {
     uint16_t device_id;
     uint8_t class_id;
     uint8_t subclass_id;
+    uint8_t prog_if;
 };
-#define PCI_VDEV(vendor, device) vendor, device, 0, 0
+#define PCI_VDEV(vendor, device) vendor, device, 0, 0, 0
+#define PCI_CLASS_IF(class, subclass, prog_if) 0, 0, class, subclass, prog_if
+#define PCI_CLASS(class, subclass) 0, 0, class, subclass, 0
 
 struct PCIID {
     uint16_t vendor_id;
     uint16_t device_id;
     uint8_t class_id;
     uint8_t subclass_id;
+    uint8_t prog_if;
 };
 
 struct PCIBAR {

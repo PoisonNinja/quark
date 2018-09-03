@@ -24,38 +24,59 @@ Driver* match_device(Device& device)
     if (drivers.empty()) {
         return nullptr;
     }
+    // We do three passes through driver lists
+    // Pass 1: Match only vendor/device ID (highest granularity)
     for (auto& driver : drivers) {
         auto filter = driver.filter();
         for (size_t i = 0; !is_terminator(filter[i]); i++) {
             if (filter[i].vendor_id == id.vendor_id &&
                 filter[i].device_id == id.device_id) {
                 Log::printk(Log::LogLevel::INFO,
-                            "pci: Found driver %s for device %X:%X\n",
+                            "pci: Found driver %s for device %X:%X "
+                            "(vendor/device match)\n",
                             driver.name(), id.vendor_id, id.device_id);
                 return &driver;
             }
         }
     }
-    Log::printk(Log::LogLevel::WARNING,
-                "pci: Didn't find driver for %X:%X based on fine search, "
-                "switching to coarse\n",
-                id.vendor_id, id.device_id);
+    // Pass 2: Match class, subclass, and prog_if
     for (auto& driver : drivers) {
         auto filter = driver.filter();
         for (size_t i = 0; !is_terminator(filter[i]); i++) {
             if (filter[i].class_id == id.class_id &&
-                filter[i].subclass_id == id.subclass_id) {
-                Log::printk(
-                    Log::LogLevel::INFO,
-                    "pci: Found driver %s for device %X:%X by coarse search\n",
-                    driver.name(), id.vendor_id, id.device_id);
+                filter[i].subclass_id == id.subclass_id &&
+                filter[i].prog_if == id.prog_if) {
+                Log::printk(Log::LogLevel::INFO,
+                            "pci: Found driver %s for device %X:%X "
+                            "(class/subclass/prog_if match)\n",
+                            driver.name(), id.vendor_id, id.device_id);
                 return &driver;
             }
         }
     }
-    Log::printk(Log::LogLevel::ERROR,
-                "pci: Didn't find driver for %X:%X at all\n", id.vendor_id,
-                id.device_id);
+    /*
+     * Pass 3: Match class, subclass (lowest granularity). Generally speaking
+     * drivers do not configure this because it has the least change of
+     * actually working.
+     *
+     * Drivers must explicitly use PCI_CLASS instead of relying on PCI_CLASS_IF
+     * to also fill out class/subclass fields
+     */
+    for (auto& driver : drivers) {
+        auto filter = driver.filter();
+        for (size_t i = 0; !is_terminator(filter[i]); i++) {
+            if (filter[i].class_id == id.class_id &&
+                filter[i].subclass_id == id.subclass_id && !filter[i].prog_if) {
+                Log::printk(Log::LogLevel::INFO,
+                            "pci: Found driver %s for device %X:%X "
+                            "(class/subclass match)\n",
+                            driver.name(), id.vendor_id, id.device_id);
+                return &driver;
+            }
+        }
+    }
+    Log::printk(Log::LogLevel::ERROR, "pci: Didn't find driver for %X:%X\n",
+                id.vendor_id, id.device_id);
     return nullptr;
 }
 
@@ -306,6 +327,7 @@ PCIID Device::get_pciid()
     id.device_id   = this->read_config_16(pci_device_id);
     id.class_id    = this->read_config_8(pci_class);
     id.subclass_id = this->read_config_8(pci_subclass);
+    id.prog_if     = this->read_config_8(pci_prog_if);
     return id;
 }
 

@@ -17,6 +17,7 @@ struct Filter {
     uint8_t class_id;
     uint8_t subclass_id;
 };
+#define PCI_VDEV(vendor, device) vendor, device, 0, 0
 
 struct PCIID {
     uint16_t vendor_id;
@@ -74,7 +75,7 @@ public:
     virtual ~Driver(){};
     virtual bool probe(Device* dev) = 0;
     virtual const char* name()      = 0;
-    Filter filter;
+    virtual const Filter* filter()  = 0;
     Node<Driver> node;
 };
 

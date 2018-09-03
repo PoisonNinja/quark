@@ -12,6 +12,12 @@ namespace
 List<Driver, &Driver::node> drivers;
 List<Device, &Device::node> devices;
 
+bool is_terminator(const Filter& filter)
+{
+    return !((filter.class_id) || (filter.device_id) || (filter.subclass_id) ||
+             (filter.vendor_id));
+}
+
 Driver* match_device(Device& device)
 {
     PCIID id = device.get_pciid();
@@ -19,12 +25,15 @@ Driver* match_device(Device& device)
         return nullptr;
     }
     for (auto& driver : drivers) {
-        if (driver.filter.vendor_id == id.vendor_id &&
-            driver.filter.device_id == id.device_id) {
-            Log::printk(Log::LogLevel::INFO,
-                        "pci: Found driver %s for device %X:%X\n",
-                        driver.name(), id.vendor_id, id.device_id);
-            return &driver;
+        auto filter = driver.filter();
+        for (size_t i = 0; !is_terminator(filter[i]); i++) {
+            if (filter[i].vendor_id == id.vendor_id &&
+                filter[i].device_id == id.device_id) {
+                Log::printk(Log::LogLevel::INFO,
+                            "pci: Found driver %s for device %X:%X\n",
+                            driver.name(), id.vendor_id, id.device_id);
+                return &driver;
+            }
         }
     }
     Log::printk(Log::LogLevel::WARNING,
@@ -32,13 +41,16 @@ Driver* match_device(Device& device)
                 "switching to coarse\n",
                 id.vendor_id, id.device_id);
     for (auto& driver : drivers) {
-        if (driver.filter.class_id == id.class_id &&
-            driver.filter.subclass_id == id.subclass_id) {
-            Log::printk(
-                Log::LogLevel::INFO,
-                "pci: Found driver %s for device %X:%X by coarse search\n",
-                driver.name(), id.vendor_id, id.device_id);
-            return &driver;
+        auto filter = driver.filter();
+        for (size_t i = 0; !is_terminator(filter[i]); i++) {
+            if (filter[i].class_id == id.class_id &&
+                filter[i].subclass_id == id.subclass_id) {
+                Log::printk(
+                    Log::LogLevel::INFO,
+                    "pci: Found driver %s for device %X:%X by coarse search\n",
+                    driver.name(), id.vendor_id, id.device_id);
+                return &driver;
+            }
         }
     }
     Log::printk(Log::LogLevel::ERROR,
@@ -192,7 +204,7 @@ void probe_device(uint8_t bus, uint8_t dev)
                         device_id, pci_vendor.VenFull, pci_device.ChipDesc);
             Device* device = new Device(bus, dev, i);
             devices.push_back(*device);
-            match_all_devices();
+            match_device(*device);
         }
     }
 }
@@ -210,8 +222,8 @@ void probe()
     // Get the root PCI controller type
     uint8_t type = read_8(0, 0, 0, pci_type);
     /*
-     * Check if it's multifunction by checking the leading bit of the type. If
-     * it's not set, then we only have one PCI controller. Otherwise, we have
+     * Check if it's multifunction by checking the leading bit of the type.
+     * If it's not set, then we only have one PCI controller. Otherwise, we have
      * multiple PCI controllers on different function numbers and we need to
      * scan through them too.
      */

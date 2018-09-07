@@ -42,9 +42,12 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
      * disk requests until we get all the data.
      */
     while (processed < count) {
-        Memory::DMA::SGList* sglist = Memory::DMA::build_sglist(
-            this->blkdev->sg_max_count(), this->blkdev->sg_max_size(),
-            count - processed);
+        size_t to_process = count - processed;
+        if (current % this->blkdev->sector_size())
+            to_process += this->blkdev->sector_size();
+        Memory::DMA::SGList* sglist =
+            Memory::DMA::build_sglist(this->blkdev->sg_max_count(),
+                                      this->blkdev->sg_max_size(), to_process);
         Log::printk(Log::LogLevel::INFO,
                     "block: SGList contains %p bytes in %llX regions\n",
                     sglist->total_size, sglist->num_regions);

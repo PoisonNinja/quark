@@ -5,9 +5,11 @@
 #include <mm/physical.h>
 #include <mm/virtual.h>
 
+namespace
+{
 static addr_t heap_end = HEAP_START;
 
-static void *map_heap(size_t size)
+void *map_heap(size_t size)
 {
     size *= Memory::Virtual::PAGE_SIZE;
     Memory::Virtual::map_range(heap_end, size, PAGE_WRITABLE);
@@ -15,7 +17,7 @@ static void *map_heap(size_t size)
     return reinterpret_cast<void *>(heap_end - size);
 }
 
-static void free_heap(void *start, size_t size)
+void free_heap(void *start, size_t size)
 {
     size *= Memory::Virtual::PAGE_SIZE;
     for (size_t i = 0; i < size; i += Memory::Virtual::PAGE_SIZE) {
@@ -23,17 +25,18 @@ static void free_heap(void *start, size_t size)
     }
 }
 
-static int liballoc_lock(void)
+int liballoc_lock(void)
 {
     // spin_lock(heap_lock);
     return 0;
 }
 
-static int liballoc_unlock(void)
+int liballoc_unlock(void)
 {
     // spin_unlock(heap_lock);
     return 0;
 }
+} // namespace
 
 #define VERSION "1.1"
 #define ALIGNMENT                                                              \
@@ -487,7 +490,7 @@ void *operator new(size_t size)
 
 void *operator new[](size_t size)
 {
-    return malloc(size);
+    return ::operator new(size);
 }
 
 void operator delete(void *p)
@@ -495,7 +498,17 @@ void operator delete(void *p)
     free(p);
 }
 
+void operator delete(void *p, size_t)
+{
+    ::operator delete(p);
+}
+
 void operator delete[](void *p)
 {
-    free(p);
+    ::operator delete(p);
+}
+
+void operator delete[](void *p, size_t)
+{
+    ::operator delete(p);
 }

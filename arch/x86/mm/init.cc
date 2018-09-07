@@ -1,5 +1,6 @@
 #include <arch/kernel/multiboot2.h>
 #include <arch/mm/layout.h>
+#include <arch/mm/mm.h>
 #include <arch/mm/virtual.h>
 #include <boot/info.h>
 #include <kernel.h>
@@ -51,30 +52,8 @@ void arch_init(struct Boot::info &info)
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
                              i += Memory::Virtual::PAGE_SIZE) {
-                            if (i >= Memory::Virtual::align_down(
-                                         info.kernel_start) &&
-                                i < Memory::Virtual::align_up(
-                                        info.kernel_end)) {
-                                Log::printk(
-                                    Log::LogLevel::DEBUG,
-                                    "        Rejected %p because in kernel\n",
-                                    i);
-                            } else if (i >= multiboot_start &&
-                                       i < multiboot_end) {
-                                Log::printk(Log::LogLevel::DEBUG,
-                                            "        Rejected %p "
-                                            "because in "
-                                            "multiboot\n",
-                                            i);
-                            } else if (i >= Memory::Virtual::align_down(
-                                                info.initrd_start) &&
-                                       i < Memory::Virtual::align_up(
-                                               info.initrd_end)) {
-                                Log::printk(Log::LogLevel::DEBUG,
-                                            "        Rejected %p because "
-                                            "in initrd\n",
-                                            i);
-                            } else {
+                            if (Memory::X86::is_valid_physical_memory(i,
+                                                                      info)) {
                                 Memory::Physical::free(i);
                             }
                         }
@@ -83,5 +62,5 @@ void arch_init(struct Boot::info &info)
             } break;
         }
     }
-}
+} // namespace Memory
 } // namespace Memory

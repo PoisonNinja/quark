@@ -61,10 +61,6 @@ void init_early_alloc(struct Boot::info *b)
 
 addr_t early_allocate()
 {
-    addr_t multiboot_start =
-        Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end = Memory::Virtual::align_up(
-        reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     /*
      * Iterate through the memory ranges. mmap will be set to the first free
      * range, whether set by the initial set up or incremented in the loop
@@ -90,11 +86,7 @@ addr_t early_allocate()
                 mmap->addr += Memory::Virtual::PAGE_SIZE;
                 mmap->len -= Memory::Virtual::PAGE_SIZE;
                 // Check if it's in a restricted area
-                if (!((i >= Memory::Virtual::align_down(info->kernel_start) &&
-                       i < Memory::Virtual::align_up(info->kernel_end)) ||
-                      (i >= multiboot_start && i < multiboot_end) ||
-                      (i >= Memory::Virtual::align_down(info->initrd_start) &&
-                       i < Memory::Virtual::align_up(info->initrd_end)))) {
+                if (Memory::X86::is_valid_physical_memory(i, *info)) {
                     return i;
                 }
             }

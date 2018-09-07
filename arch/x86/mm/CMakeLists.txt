@@ -1,5 +1,6 @@
 target_sources(quark.kernel
     PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/common.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/early.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/fork.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/init.cc

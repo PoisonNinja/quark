@@ -2,6 +2,11 @@
 
 #include <types.h>
 
+namespace Boot
+{
+struct info;
+}
+
 namespace Memory
 {
 namespace X86
@@ -9,10 +14,10 @@ namespace X86
 // Slot #s
 #ifdef X86_64
 constexpr addr_t recursive_entry = 510;
-constexpr addr_t copy_entry = 508;
+constexpr addr_t copy_entry      = 508;
 #else
 constexpr addr_t recursive_entry = 1023;
-constexpr addr_t copy_entry = 1020;
+constexpr addr_t copy_entry      = 1020;
 #endif
 
 /*
@@ -76,8 +81,8 @@ static inline void invlpg(addr_t addr)
  * Convert a table entry into the recursive mapping address. Taken from
  * some forum post on osdev.org
  */
-static inline void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
-                                   uint64_t pt)
+constexpr void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
+                               uint64_t pt)
 {
     uint64_t address = (pml4 << 39);
 
@@ -89,16 +94,18 @@ static inline void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
     address |= pdp << 30;
     address |= pd << 21;
     address |= pt << 12;
-    return (void*)address;
+    return reinterpret_cast<void*>(address);
 }
 
 #ifndef X86_64
-static inline void* decode_fractal(uint32_t pd, uint32_t pt)
+constexpr void* decode_fractal(uint32_t pd, uint32_t pt)
 {
     uint32_t address = (pd << 22);
     address |= (pt << 12);
-    return (void*)address;
+    return reinterpret_cast<void*>(address);
 }
 #endif
-}  // namespace X86
-}  // namespace Memory
+
+bool is_valid_physical_memory(addr_t m, struct Boot::info& info);
+} // namespace X86
+} // namespace Memory

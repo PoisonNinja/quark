@@ -7,12 +7,11 @@ namespace Filesystem
 {
 PTSN::PTSN(ino_t ino, dev_t dev, mode_t mode)
 {
-    this->ino = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
+    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
     this->mode = mode;
     this->size = 0;
-    this->uid = 0;
-    this->gid = 0;
+    this->uid  = 0;
+    this->gid  = 0;
 }
 
 PTSN::~PTSN()
@@ -30,7 +29,7 @@ ssize_t PTSN::write(uint8_t* buffer, size_t count, off_t offset)
 PTSNWrapper::PTSNWrapper(Ref<Inode> inode, const char* name)
 {
     this->inode = inode;
-    this->name = String::strdup(name);
+    this->name  = String::strdup(name);
 }
 
 PTSNWrapper::~PTSNWrapper()
@@ -40,8 +39,7 @@ PTSNWrapper::~PTSNWrapper()
 
 PTSD::PTSD(ino_t ino, dev_t dev, mode_t mode)
 {
-    this->ino = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->dev = (dev) ? dev : reinterpret_cast<dev_t>(this);
+    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
     this->mode = mode;
 }
 
@@ -102,4 +100,4 @@ uint32_t PTSFS::flags()
 {
     return driver_pseudo;
 }
-}  // namespace Filesystem
+} // namespace Filesystem

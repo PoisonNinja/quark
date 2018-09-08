@@ -11,7 +11,6 @@ class Inode : public RefcountBase
 {
 public:
     ino_t ino;
-    dev_t dev;
     dev_t rdev;
     mode_t mode;
     int flags;

@@ -6,9 +6,9 @@ namespace Filesystem
 {
 BaseInode::BaseInode()
 {
-    ino = 0;
-    dev = 0;
-    mode = 0;
+    ino   = 0;
+    rdev  = 0;
+    mode  = 0;
     flags = 0;
 }
 
@@ -48,13 +48,12 @@ ssize_t BaseInode::write(uint8_t*, size_t, off_t)
 
 int BaseInode::stat(struct stat* st)
 {
-    st->st_ino = ino;
-    st->st_dev = dev;
+    st->st_ino  = ino;
     st->st_mode = mode;
     st->st_size = size;
-    st->st_uid = uid;
-    st->st_gid = gid;
+    st->st_uid  = uid;
+    st->st_gid  = gid;
     return 0;
 }
 
-}  // namespace Filesystem
+} // namespace Filesystem

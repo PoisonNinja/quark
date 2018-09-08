@@ -11,10 +11,10 @@ namespace Filesystem
 class Vnode : public RefcountBase
 {
 public:
-    ino_t ino;    // Inode number
-    dev_t dev;    // Device # of device this filesystem is mounted on
-    dev_t rdev;   // Device # if special file, ignored otherwise
-    mode_t mode;  // Mode of the file
+    ino_t ino;   // Inode number
+    dev_t dev;   // Device # of device this filesystem is mounted on
+    dev_t rdev;  // Device # if special file, ignored otherwise
+    mode_t mode; // Mode of the file
 
     Vnode(Superblock* sb, Ref<Inode> inode);
     Vnode(Superblock* sb, Ref<Inode> inode, dev_t d, dev_t rd = 0);
@@ -37,4 +37,4 @@ private:
     Superblock* sb;
     Ref<Inode> inode;
 };
-}  // namespace Filesystem
+} // namespace Filesystem

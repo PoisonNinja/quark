@@ -7,7 +7,7 @@
 namespace Filesystem
 {
 Vnode::Vnode(Superblock* sb, Ref<Inode> inode)
-    : Vnode(sb, inode, inode->dev, 0)
+    : Vnode(sb, inode, sb->rdev, inode->rdev)
 {
 }
 
@@ -56,11 +56,11 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
     }
     Ref<Vnode> retvnode = VCache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
-        struct KDevice* kdev = get_kdevice(retinode->mode, retinode->dev);
+        struct KDevice* kdev = get_kdevice(retinode->mode, retinode->rdev);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
             Log::printk(Log::LogLevel::INFO,
                         "kdev: Looking for mode %X and dev %p\n",
-                        retinode->mode, retinode->dev);
+                        retinode->mode, retinode->rdev);
             if (!kdev) {
                 // TODO: Return -ENXIO
                 return Ref<Vnode>(nullptr);
@@ -106,6 +106,7 @@ ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
 
 int Vnode::stat(struct stat* st)
 {
+    st->st_dev = this->dev;
     return inode->stat(st);
 }
 

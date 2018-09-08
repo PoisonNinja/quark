@@ -28,7 +28,7 @@ struct InitFSNode {
 class File : public BaseInode
 {
 public:
-    File(ino_t ino, dev_t dev, mode_t mode);
+    File(ino_t ino, dev_t rdev, mode_t mode);
     virtual ~File();
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
@@ -41,7 +41,7 @@ private:
 class Directory : public BaseInode
 {
 public:
-    Directory(ino_t ino, dev_t dev, mode_t mode);
+    Directory(ino_t ino, dev_t rdev, mode_t mode);
     virtual ~Directory();
     virtual int link(const char* name, Ref<Inode> node) override;
     virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;

@@ -12,17 +12,18 @@ class Inode : public RefcountBase
 public:
     ino_t ino;
     dev_t dev;
+    dev_t rdev;
     mode_t mode;
     int flags;
 
     virtual ~Inode(){};
-    virtual int link(const char* name, Ref<Inode> node) = 0;
-    virtual int mkdir(const char* name, mode_t mode) = 0;
-    virtual int mknod(const char* name, mode_t mode, dev_t dev) = 0;
-    virtual Ref<Inode> open(const char* name, int flags, mode_t mode) = 0;
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
+    virtual int link(const char* name, Ref<Inode> node)                = 0;
+    virtual int mkdir(const char* name, mode_t mode)                   = 0;
+    virtual int mknod(const char* name, mode_t mode, dev_t dev)        = 0;
+    virtual Ref<Inode> open(const char* name, int flags, mode_t mode)  = 0;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset)  = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
-    virtual int stat(struct stat* st) = 0;
+    virtual int stat(struct stat* st)                                  = 0;
 };
 
 class BaseInode : public Inode
@@ -43,4 +44,4 @@ protected:
     uid_t uid;
     gid_t gid;
 };
-}  // namespace Filesystem
+} // namespace Filesystem

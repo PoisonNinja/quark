@@ -39,10 +39,10 @@ InitFSNode::~InitFSNode()
     delete[] this->name;
 }
 
-File::File(ino_t ino, dev_t dev, mode_t mode)
+File::File(ino_t ino, dev_t rdev, mode_t mode)
 {
     this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->dev  = dev;
+    this->rdev = rdev;
     this->mode = mode;
     this->size = 0;
     this->uid  = 0;
@@ -86,10 +86,10 @@ ssize_t File::write(uint8_t* buffer, size_t count, off_t offset)
     return count;
 }
 
-Directory::Directory(ino_t ino, dev_t dev, mode_t mode)
+Directory::Directory(ino_t ino, dev_t rdev, mode_t mode)
 {
     this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->dev  = dev;
+    this->rdev = rdev;
     this->mode = mode | S_IFDIR;
 }
 

@@ -68,17 +68,14 @@ char* basename(const char* path)
 
 Descriptor::Descriptor(Ref<Vnode> vnode)
 {
-    this->vnode = vnode;
-    this->ino = vnode->ino;
-    this->dev = vnode->dev;
-    this->mode = vnode->mode;
+    this->vnode    = vnode;
     current_offset = 0;
 }
 
 int Descriptor::link(const char* name, Ref<Descriptor> node)
 {
-    const char* dir = dirname(name);
-    const char* file = basename(name);
+    const char* dir           = dirname(name);
+    const char* file          = basename(name);
     Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
@@ -112,7 +109,7 @@ off_t Descriptor::lseek(off_t offset, int whence)
 
 int Descriptor::mkdir(const char* name, mode_t mode)
 {
-    const char* dir = dirname(name);
+    const char* dir  = dirname(name);
     const char* file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
                 dir, file);
@@ -130,7 +127,7 @@ int Descriptor::mkdir(const char* name, mode_t mode)
 
 int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    const char* dir = dirname(name);
+    const char* dir  = dirname(name);
     const char* file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
                 dir, file);
@@ -168,12 +165,12 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
         return -ENOENT;
     }
     Superblock* sb = new Superblock();
-    sb->path = source;
+    sb->path       = source;
     if (source_desc)
         sb->source = source_desc->vnode;
     driver->mount(sb);
     Mount* mt = new Mount();
-    mt->sb = sb;
+    mt->sb    = sb;
     target_desc->vnode->mount(mt);
     return 0;
 }
@@ -186,17 +183,17 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
     Ref<Descriptor> ret(this);
     while ((current = String::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
-        int checked_flags = flags;
+        int checked_flags   = flags;
         mode_t checked_mode = mode;
         if (String::strcmp(current, filename)) {
             checked_flags = O_RDONLY;
-            mode = 0;
+            mode          = 0;
         }
         Ref<Vnode> next_vnode =
             ret->vnode->open(current, checked_flags, checked_mode);
         if (!next_vnode) {
-            Log::printk(Log::LogLevel::ERROR, "[descriptor->open] Failed to open %s\n",
-                        current);
+            Log::printk(Log::LogLevel::ERROR,
+                        "[descriptor->open] Failed to open %s\n", current);
             return Ref<Descriptor>(nullptr);
         }
         Ref<Descriptor> next_descriptor(new Descriptor(next_vnode));
@@ -221,7 +218,7 @@ ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
 
 bool Descriptor::seekable()
 {
-    if (S_ISCHR(this->mode)) {
+    if (S_ISCHR(this->vnode->mode)) {
         return false;
     }
     return true;
@@ -251,4 +248,4 @@ ssize_t Descriptor::write(uint8_t* buffer, size_t count)
     }
     return ret;
 }
-}  // namespace Filesystem
+} // namespace Filesystem

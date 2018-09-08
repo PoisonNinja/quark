@@ -9,10 +9,6 @@ namespace Filesystem
 class Descriptor : public RefcountBase
 {
 public:
-    ino_t ino;
-    dev_t dev;
-    mode_t mode;
-
     Descriptor(Ref<Vnode> vnode);
     int link(const char* name, Ref<Descriptor> node);
     off_t lseek(off_t offset, int whence);
@@ -32,4 +28,4 @@ private:
     Ref<Vnode> vnode;
     off_t current_offset;
 };
-}  // namespace Filesystem
+} // namespace Filesystem

@@ -7,17 +7,15 @@
 namespace Filesystem
 {
 Vnode::Vnode(Superblock* sb, Ref<Inode> inode)
-    : Vnode(sb, inode, sb->rdev, inode->rdev)
+    : Vnode(sb, inode, inode->rdev)
 {
 }
 
-Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t d, dev_t rd)
+Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t rdev)
 {
     this->sb    = sb;
     this->inode = inode;
-    this->ino   = inode->ino;
-    this->dev   = d;
-    this->rdev  = rd;
+    this->rdev  = rdev;
     this->mode  = inode->mode;
     this->kdev  = nullptr;
 }
@@ -68,8 +66,8 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
         }
         Log::printk(Log::LogLevel::WARNING, "Failed to find %s in cache\n",
                     name);
-        retvnode = Ref<Vnode>(new Vnode(this->sb, retinode, this->sb->rdev, 0));
-        VCache::add(retvnode->ino, retvnode->dev, retvnode);
+        retvnode = Ref<Vnode>(new Vnode(this->sb, retinode, 0));
+        VCache::add(retinode->ino, this->sb->rdev, retvnode);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
             retvnode->kdev = kdev;
         }
@@ -80,7 +78,7 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
             Superblock* newsb = retvnode->mounts.front().sb;
             Log::printk(Log::LogLevel::INFO,
                         "Transitioning mountpoints, superblock at %p\n", newsb);
-            return Ref<Vnode>(new Vnode(newsb, newsb->root, newsb->rdev, 0));
+            return Ref<Vnode>(new Vnode(newsb, newsb->root, 0));
         }
     }
     return retvnode;
@@ -106,7 +104,7 @@ ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
 
 int Vnode::stat(struct stat* st)
 {
-    st->st_dev = this->dev;
+    st->st_dev = this->sb->rdev;
     return inode->stat(st);
 }
 

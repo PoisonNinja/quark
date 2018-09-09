@@ -6,10 +6,9 @@ namespace Filesystem
 {
 BaseInode::BaseInode()
 {
-    ino   = 0;
-    rdev  = 0;
-    mode  = 0;
-    flags = 0;
+    ino  = 0;
+    rdev = 0;
+    mode = 0;
 }
 
 BaseInode::~BaseInode()
@@ -31,7 +30,12 @@ int BaseInode::mknod(const char*, mode_t, dev_t)
     return -EBADF;
 }
 
-Ref<Inode> BaseInode::open(const char*, int, mode_t)
+int BaseInode::open(const char*, dev_t)
+{
+    return -EBADF;
+}
+
+Ref<Inode> BaseInode::lookup(const char*, int, mode_t)
 {
     return Ref<Inode>(nullptr);
 }

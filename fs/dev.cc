@@ -129,4 +129,8 @@ KDevice* get_kdevice(mode_t mode, dev_t dev)
     }
 }
 
+int KDevice::open(const char* name, dev_t dev)
+{
+    return 0;
+}
 } // namespace Filesystem

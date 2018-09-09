@@ -58,7 +58,7 @@ int PTSD::link(const char* name, Ref<Inode> node)
     return 0;
 }
 
-Ref<Inode> PTSD::open(const char* name, int flags, mode_t mode)
+Ref<Inode> PTSD::lookup(const char* name, int flags, mode_t mode)
 {
     Ref<Inode> ret = find_child(name);
     if (ret) {

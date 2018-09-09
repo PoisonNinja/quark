@@ -44,7 +44,8 @@ public:
     Directory(ino_t ino, dev_t rdev, mode_t mode);
     virtual ~Directory();
     virtual int link(const char* name, Ref<Inode> node) override;
-    virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;
+    virtual Ref<Inode> lookup(const char* name, int flags,
+                              mode_t mode) override;
     virtual int mkdir(const char* name, mode_t mode) override;
     virtual int mknod(const char* name, mode_t mode, dev_t dev) override;
 

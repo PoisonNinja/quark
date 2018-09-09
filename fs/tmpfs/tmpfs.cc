@@ -112,7 +112,7 @@ int Directory::link(const char* name, Ref<Inode> node)
     return 0;
 }
 
-Ref<Inode> Directory::open(const char* name, int flags, mode_t mode)
+Ref<Inode> Directory::lookup(const char* name, int flags, mode_t mode)
 {
     Ref<Inode> ret = find_child(name);
     if (ret) {

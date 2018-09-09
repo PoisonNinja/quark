@@ -25,7 +25,10 @@ private:
     Scheduler::WaitQueue queue;
 };
 
-i8042Driver::i8042Driver() : KDevice(Filesystem::CHR), head(0), tail(0)
+i8042Driver::i8042Driver()
+    : KDevice(Filesystem::CHR)
+    , head(0)
+    , tail(0)
 {
     Interrupt::Handler* h = new Interrupt::Handler(
         handler, "keyboard", reinterpret_cast<void*>(this));
@@ -55,8 +58,7 @@ void i8042Driver::handler(int, void* dev_id, struct InterruptContext*)
     driver->buffer[driver->head++ % buffer_size] = inb(0x60);
     driver->queue.wakeup();
 }
-
-}  // namespace
+} // namespace
 
 namespace i8042
 {
@@ -69,4 +71,4 @@ int init()
     return 0;
 }
 DEVICE_INITCALL(init);
-}  // namespace i8042
+} // namespace i8042

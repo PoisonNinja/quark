@@ -4,23 +4,17 @@
 
 namespace Filesystem
 {
-class PTM : public BaseInode
+class PTMX : public KDevice
 {
 public:
-    PTM(ino_t ino, dev_t dev, mode_t mode);
-    virtual ~PTM();
+    PTMX();
+    virtual ~PTMX();
+    virtual int open(const char* name, dev_t dev) override;
+
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
-};
-
-class PTMX : public BaseInode
-{
-public:
-    PTMX(ino_t ino, dev_t dev, mode_t mode);
-    virtual ~PTMX();
-    virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;
 
 private:
     size_t next_pty_number;
 };
-}  // namespace Filesystem
+} // namespace Filesystem

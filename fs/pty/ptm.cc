@@ -1,51 +1,46 @@
+#include <fs/dev.h>
 #include <fs/pty/ptm.h>
 #include <fs/stat.h>
 #include <kernel.h>
+#include <kernel/init.h>
 
 namespace Filesystem
 {
-namespace
+PTMX::PTMX()
+    : KDevice(Filesystem::CHR)
 {
-}
-
-PTM::PTM(ino_t ino, dev_t dev, mode_t mode)
-{
-    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->mode = mode | S_IFCHR;
-    Log::printk(Log::LogLevel::INFO, "PTM created\n");
-}
-
-PTM::~PTM()
-{
-}
-
-ssize_t PTM::read(uint8_t* buffer, size_t count, off_t offset)
-{
-    Log::printk(Log::LogLevel::INFO, "PTM read\n");
-    return 0;
-}
-
-ssize_t PTM::write(uint8_t* buffer, size_t count, off_t offset)
-{
-    Log::printk(Log::LogLevel::INFO, "PTM read\n");
-    return 0;
-}
-
-PTMX::PTMX(ino_t ino, dev_t dev, mode_t mode)
-{
-    this->ino             = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->mode            = mode | S_IFCHR;
-    this->flags           = inode_factory;
-    this->next_pty_number = 0;
 }
 
 PTMX::~PTMX()
 {
 }
 
-Ref<Inode> PTMX::open(const char* name, int flags, mode_t mode)
+int PTMX::open(const char* name, dev_t dev)
 {
-    Log::printk(Log::LogLevel::INFO, "Creating PTMX\n");
-    return Ref<PTM>(new PTM(0, 0, 0));
+    Log::printk(Log::LogLevel::INFO, "ptmx: Opening!\n");
+    return 0;
 }
+
+ssize_t PTMX::read(uint8_t*, size_t count, off_t)
+{
+    return count;
+}
+
+ssize_t PTMX::write(uint8_t*, size_t count, off_t)
+{
+    return count;
+}
+
+namespace
+{
+int init()
+{
+    PTMX* ptmx = new PTMX();
+    Log::printk(Log::LogLevel::INFO, "Registering PTMX character device\n");
+    Filesystem::register_class(Filesystem::CHR, 5);
+    Filesystem::register_kdevice(Filesystem::CHR, 5, ptmx);
+    return 0;
+}
+FS_INITCALL(init);
+} // namespace
 } // namespace Filesystem

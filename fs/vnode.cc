@@ -44,13 +44,9 @@ int Vnode::mount(Mount* mt)
 
 Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
 {
-    Ref<Inode> retinode = inode->open(name, flags, mode);
+    Ref<Inode> retinode = inode->lookup(name, flags, mode);
     if (!retinode) {
         return Ref<Vnode>(nullptr);
-    }
-    if (retinode->flags & inode_factory) {
-        Log::printk(Log::LogLevel::INFO, "Opening factory inode...\n");
-        retinode = retinode->open(name, flags, mode);
     }
     Ref<Vnode> retvnode = VCache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
@@ -80,6 +76,12 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
                         "Transitioning mountpoints, superblock at %p\n", newsb);
             return Ref<Vnode>(new Vnode(newsb, newsb->root, 0));
         }
+    }
+    // Some implementations may want to do something (e.g. drivers)
+    if (retvnode->kdev) {
+        retvnode->kdev->open(name, 0);
+    } else {
+        retvnode->inode->open(name, 0);
     }
     return retvnode;
 }

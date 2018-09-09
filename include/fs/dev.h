@@ -24,13 +24,16 @@ enum DeviceClass { BLK, CHR };
 class KDevice
 {
 public:
-    KDevice(DeviceClass type) : type(type){};
+    KDevice(DeviceClass type)
+        : type(type){};
     virtual ~KDevice(){};
 
     const char* name;
 
     // A subset of Inode operations
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) = 0;
+    virtual int open(const char* name, dev_t dev);
+
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset)  = 0;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
 
 protected:
@@ -43,4 +46,4 @@ bool register_class(DeviceClass c, dev_t major);
 bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev);
 
 KDevice* get_kdevice(mode_t mode, dev_t dev);
-}  // namespace Filesystem
+} // namespace Filesystem

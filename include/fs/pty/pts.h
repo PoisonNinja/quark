@@ -38,10 +38,11 @@ public:
     PTSD(ino_t ino, dev_t dev, mode_t mode);
     virtual ~PTSD();
     virtual int link(const char* name, Ref<Inode> node) override;
-    virtual Ref<Inode> open(const char* name, int flags, mode_t mode) override;
+    virtual Ref<Inode> lookup(const char* name, int flags,
+                              mode_t mode) override;
 
 private:
     Ref<Inode> find_child(const char* name);
     List<PTSNWrapper, &PTSNWrapper::node> children;
 };
-}  // namespace Filesystem
+} // namespace Filesystem

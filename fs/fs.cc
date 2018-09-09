@@ -36,14 +36,8 @@ void init()
 
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
-    // droot->link("dev/tty", dtty);
-
-    // Initialize the PTY subsystem
-    // droot->link("dev/ptmx", dptmx);
-    droot->mkdir("dev/pts", 0666);
-    droot->mount("pts", "dev/pts", "pts", 0);
 
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);
 }
-}  // namespace Filesystem
+} // namespace Filesystem

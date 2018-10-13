@@ -30,9 +30,10 @@ int BaseInode::mknod(const char*, mode_t, dev_t)
     return -EBADF;
 }
 
-int BaseInode::open(const char*, dev_t)
+Pair<int, void*> BaseInode::open(const char*)
 {
-    return -EBADF;
+    // Can't use make_pair here
+    return Pair<int, void*>(0, nullptr);
 }
 
 Ref<Inode> BaseInode::lookup(const char*, int, mode_t)

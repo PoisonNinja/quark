@@ -180,7 +180,8 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
     char* path = String::strdup(name);
     char* current;
     char* filename = basename(name);
-    Ref<Descriptor> ret(this);
+    Ref<Descriptor> ret(nullptr);
+    Ref<Vnode> curr_vnode = this->vnode;
     while ((current = String::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags   = flags;
@@ -189,18 +190,18 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
             checked_flags = O_RDONLY;
             mode          = 0;
         }
-        Ref<Vnode> next_vnode =
-            ret->vnode->open(current, checked_flags, checked_mode);
-        if (!next_vnode) {
+        curr_vnode = curr_vnode->lookup(current, checked_flags, checked_mode);
+        if (!curr_vnode) {
             Log::printk(Log::LogLevel::ERROR,
                         "[descriptor->open] Failed to open %s\n", current);
             return Ref<Descriptor>(nullptr);
         }
-        Ref<Descriptor> next_descriptor(new Descriptor(next_vnode));
-        if (!next_descriptor) {
-            return Ref<Descriptor>(nullptr);
-        }
-        ret = next_descriptor;
+    }
+    ret                   = Ref<Descriptor>(new Descriptor(curr_vnode));
+    auto [status, cookie] = curr_vnode->open(name);
+    if (!status) {
+        this->cookie = cookie;
+        Log::printk(Log::LogLevel::DEBUG, "Setting cookie to %p\n", cookie);
     }
     delete[] path;
     return ret;

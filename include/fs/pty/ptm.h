@@ -9,7 +9,7 @@ class PTMX : public KDevice
 public:
     PTMX();
     virtual ~PTMX();
-    virtual int open(const char* name, dev_t dev) override;
+    virtual Pair<int, void*> open(const char* name) override;
 
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;

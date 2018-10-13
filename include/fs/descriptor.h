@@ -27,5 +27,6 @@ public:
 private:
     Ref<Vnode> vnode;
     off_t current_offset;
+    void* cookie;
 };
 } // namespace Filesystem

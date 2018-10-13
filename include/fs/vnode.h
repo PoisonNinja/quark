@@ -4,6 +4,7 @@
 #include <fs/inode.h>
 #include <fs/mount.h>
 #include <lib/list.h>
+#include <lib/pair.h>
 #include <lib/refcount.h>
 
 namespace Filesystem
@@ -19,9 +20,10 @@ public:
 
     // Standard file operations
     int link(const char* name, Ref<Vnode> node);
+    Ref<Vnode> lookup(const char* name, int flags, mode_t mode);
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
-    Ref<Vnode> open(const char* name, int flags, mode_t mode);
+    virtual Pair<int, void*> open(const char* name);
     ssize_t read(uint8_t* buffer, size_t count, off_t offset);
     ssize_t write(uint8_t* buffer, size_t count, off_t offset);
     int stat(struct stat* st);

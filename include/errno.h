@@ -168,3 +168,5 @@
 /* for robust mutexes */
 #define EOWNERDEAD 130      /* Owner died */
 #define ENOTRECOVERABLE 131 /* State not recoverable */
+
+extern int errno;

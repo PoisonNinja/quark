@@ -42,7 +42,7 @@ int Vnode::mount(Mount* mt)
     return 0;
 }
 
-Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
+Ref<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
 {
     Ref<Inode> retinode = inode->lookup(name, flags, mode);
     if (!retinode) {
@@ -77,13 +77,15 @@ Ref<Vnode> Vnode::open(const char* name, int flags, mode_t mode)
             return Ref<Vnode>(new Vnode(newsb, newsb->root, 0));
         }
     }
-    // Some implementations may want to do something (e.g. drivers)
-    if (retvnode->kdev) {
-        retvnode->kdev->open(name, 0);
-    } else {
-        retvnode->inode->open(name, 0);
-    }
     return retvnode;
+}
+
+Pair<int, void*> Vnode::open(const char* name)
+{
+    if (this->kdev) {
+        return this->kdev->open(name);
+    }
+    return this->inode->open(name);
 }
 
 ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset)

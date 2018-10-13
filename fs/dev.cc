@@ -129,8 +129,8 @@ KDevice* get_kdevice(mode_t mode, dev_t dev)
     }
 }
 
-int KDevice::open(const char* name, dev_t dev)
+Pair<int, void*> KDevice::open(const char* name)
 {
-    return 0;
+    return Pair<int, void*>(0, nullptr);
 }
 } // namespace Filesystem

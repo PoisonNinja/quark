@@ -8,6 +8,7 @@ namespace Filesystem
 {
 PTMX::PTMX()
     : KDevice(Filesystem::CHR)
+    , next_pty_number(0)
 {
 }
 
@@ -15,10 +16,10 @@ PTMX::~PTMX()
 {
 }
 
-int PTMX::open(const char* name, dev_t dev)
+Pair<int, void*> PTMX::open(const char* name)
 {
     Log::printk(Log::LogLevel::INFO, "ptmx: Opening!\n");
-    return 0;
+    return Pair<int, void*>(0, (void*)0xDEADBEEF + next_pty_number++);
 }
 
 ssize_t PTMX::read(uint8_t*, size_t count, off_t)

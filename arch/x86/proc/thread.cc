@@ -136,17 +136,16 @@ void load_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
                   const char* envp[], struct ThreadContext& ctx)
 {
-    Pair<bool, addr_t> load_result = ELF::load(binary);
+    auto [success, entry] = ELF::load(binary);
 
     /*
      * ELF::load returns a pair. The first parameter (bool) indicates status,
      * and second parameter is the entry address. If the first parameter is
      * false, the second parameter is undefined (but usually 0)
      */
-    if (!load_result.first) {
+    if (!success) {
         return false;
     }
-    addr_t entry = load_result.second;
 
     size_t argv_size = sizeof(char*) * (argc + 1); // argv is null terminated
     size_t envp_size = sizeof(char*) * (envc + 1); // envp is null terminated

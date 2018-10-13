@@ -19,11 +19,11 @@ void arch_do_stack_trace()
         bp = (addr_t*)bp[0];
         if (!bp)
             break;
-        auto data = Symbols::resolve_addr_fuzzy(rip);
-        if (!data.first) {
+        auto [name, offset] = Symbols::resolve_addr_fuzzy(rip);
+        if (!name) {
             break;
         }
         Log::printk(Log::LogLevel::ERROR, "Frame #%d: %s+%llX\n", frame++,
-                    data.first, data.second);
+                    name, offset);
     }
 }

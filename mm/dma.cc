@@ -31,19 +31,19 @@ SGList* build_sglist(size_t max_elements, size_t max_element_size,
         // We always try to allocate the maximum size
         size_t alloc_size =
             (max_element_size < total_size) ? max_element_size : total_size;
-        auto alloc            = Memory::Physical::try_allocate(alloc_size);
+        auto [physical_base, real_size]           = Memory::Physical::try_allocate(alloc_size);
         Region* region        = new Region();
-        region->physical_base = alloc.first;
-        region->real_size     = alloc.second;
-        allocated += alloc.second;
+        region->physical_base = physical_base;
+        region->real_size     = real_size;
+        allocated += real_size;
 
         if (allocated < total_size) {
-            region->size = alloc.second;
+            region->size = real_size;
         } else {
-            region->size = total_size - (allocated - alloc.second);
+            region->size = total_size - (allocated - real_size);
         }
 
-        region->virtual_base = Memory::Valloc::allocate(alloc.second);
+        region->virtual_base = Memory::Valloc::allocate(real_size);
         Memory::Virtual::map_range(region->virtual_base, region->physical_base,
                                    region->size, PAGE_WRITABLE);
         sglist->list.push_back(*region);

@@ -22,13 +22,15 @@ Pair<int, void*> PTMX::open(const char* name)
     return Pair<int, void*>(0, (void*)0xDEADBEEF + next_pty_number++);
 }
 
-ssize_t PTMX::read(uint8_t*, size_t count, off_t)
+ssize_t PTMX::read(uint8_t*, size_t count, off_t, void* cookie)
 {
+    Log::printk(Log::LogLevel::INFO, "ptmx: Cookie is %p!\n", cookie);
     return count;
 }
 
-ssize_t PTMX::write(uint8_t*, size_t count, off_t)
+ssize_t PTMX::write(uint8_t*, size_t count, off_t, void* cookie)
 {
+    Log::printk(Log::LogLevel::INFO, "ptmx: Cookie is %p!\n", cookie);
     return count;
 }
 

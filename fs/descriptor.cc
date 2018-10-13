@@ -68,8 +68,9 @@ char* basename(const char* path)
 
 Descriptor::Descriptor(Ref<Vnode> vnode)
 {
-    this->vnode    = vnode;
-    current_offset = 0;
+    this->vnode          = vnode;
+    this->cookie         = nullptr;
+    this->current_offset = 0;
 }
 
 int Descriptor::link(const char* name, Ref<Descriptor> node)
@@ -197,11 +198,12 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
             return Ref<Descriptor>(nullptr);
         }
     }
-    ret                   = Ref<Descriptor>(new Descriptor(curr_vnode));
-    auto [status, cookie] = curr_vnode->open(name);
+    ret                    = Ref<Descriptor>(new Descriptor(curr_vnode));
+    auto [status, _cookie] = curr_vnode->open(name);
     if (!status) {
-        this->cookie = cookie;
-        Log::printk(Log::LogLevel::DEBUG, "Setting cookie to %p\n", cookie);
+        ret->cookie = _cookie;
+        Log::printk(Log::LogLevel::DEBUG, "Setting cookie to %p\n",
+                    ret->cookie);
     }
     delete[] path;
     return ret;
@@ -209,12 +211,20 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 
 ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
 {
-    return vnode->read(buffer, count, offset);
+    if (this->cookie) {
+        return vnode->read(buffer, count, offset, this->cookie);
+    } else {
+        return vnode->read(buffer, count, offset);
+    }
 }
 
 ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
 {
-    return vnode->write(buffer, count, offset);
+    if (this->cookie) {
+        return vnode->write(buffer, count, offset, this->cookie);
+    } else {
+        return vnode->write(buffer, count, offset);
+    }
 }
 
 bool Descriptor::seekable()

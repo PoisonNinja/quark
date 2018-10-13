@@ -97,6 +97,16 @@ ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset)
     return inode->read(buffer, count, offset);
 }
 
+ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+{
+    if (this->kdev) {
+        Log::printk(Log::LogLevel::DEBUG,
+                    "kdev, intercepting read with cookie\n");
+        return this->kdev->read(buffer, count, offset, cookie);
+    }
+    return inode->read(buffer, count, offset, cookie);
+}
+
 ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
 {
     if (this->kdev) {
@@ -104,6 +114,16 @@ ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
         return this->kdev->write(buffer, count, offset);
     }
     return inode->write(buffer, count, offset);
+}
+
+ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+{
+    if (this->kdev) {
+        Log::printk(Log::LogLevel::DEBUG,
+                    "kdev, intercepting write with cookie\n");
+        return this->kdev->write(buffer, count, offset, cookie);
+    }
+    return inode->write(buffer, count, offset, cookie);
 }
 
 int Vnode::stat(struct stat* st)

@@ -11,8 +11,10 @@ public:
     virtual ~PTMX();
     virtual Pair<int, void*> open(const char* name) override;
 
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie) override;
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                          void* cookie) override;
 
 private:
     size_t next_pty_number;

@@ -25,7 +25,9 @@ public:
     int mknod(const char* name, mode_t mode, dev_t dev);
     virtual Pair<int, void*> open(const char* name);
     ssize_t read(uint8_t* buffer, size_t count, off_t offset);
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset, void* cookie);
     ssize_t write(uint8_t* buffer, size_t count, off_t offset);
+    ssize_t write(uint8_t* buffer, size_t count, off_t offset, void* cookie);
     int stat(struct stat* st);
 
     // VFS operations

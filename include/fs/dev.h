@@ -34,8 +34,12 @@ public:
     // A subset of Inode operations
     virtual Pair<int, void*> open(const char* name);
 
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset)  = 0;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset);
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie);
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset);
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                          void* cookie);
 
 protected:
     DeviceClass type;

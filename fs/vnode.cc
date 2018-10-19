@@ -20,12 +20,12 @@ Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t rdev)
     this->kdev  = nullptr;
 }
 
-int Vnode::ioctl(unsigned long request, char* argp)
+int Vnode::ioctl(unsigned long request, char* argp, void* cookie)
 {
     if (this->kdev) {
-        return this->kdev->ioctl(request, argp);
+        return this->kdev->ioctl(request, argp, cookie);
     }
-    return this->inode->ioctl(request, argp);
+    return this->inode->ioctl(request, argp, cookie);
 }
 
 int Vnode::link(const char* name, Ref<Vnode> node)
@@ -96,15 +96,6 @@ Pair<int, void*> Vnode::open(const char* name)
     return this->inode->open(name);
 }
 
-ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset)
-{
-    if (this->kdev) {
-        Log::printk(Log::LogLevel::DEBUG, "kdev, intercepting read\n");
-        return this->kdev->read(buffer, count, offset);
-    }
-    return inode->read(buffer, count, offset);
-}
-
 ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     if (this->kdev) {
@@ -113,15 +104,6 @@ ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
         return this->kdev->read(buffer, count, offset, cookie);
     }
     return inode->read(buffer, count, offset, cookie);
-}
-
-ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset)
-{
-    if (this->kdev) {
-        Log::printk(Log::LogLevel::DEBUG, "kdev, intercepting write\n");
-        return this->kdev->write(buffer, count, offset);
-    }
-    return inode->write(buffer, count, offset);
 }
 
 ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)

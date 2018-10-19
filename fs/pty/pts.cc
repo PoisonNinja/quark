@@ -19,11 +19,11 @@ PTSN::~PTSN()
 {
 }
 
-ssize_t PTSN::read(uint8_t* buffer, size_t count, off_t offset)
+ssize_t PTSN::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
 }
 
-ssize_t PTSN::write(uint8_t* buffer, size_t count, off_t offset)
+ssize_t PTSN::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
 }
 

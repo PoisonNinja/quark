@@ -12,7 +12,7 @@ public:
     VGATTY();
     ~VGATTY();
 
-    ssize_t write(uint8_t* buffer, size_t count) override;
+    ssize_t write(uint8_t* buffer, size_t count, void* cookie) override;
 
 private:
     volatile uint16_t* vga_buffer;

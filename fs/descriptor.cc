@@ -75,7 +75,7 @@ Descriptor::Descriptor(Ref<Vnode> vnode)
 
 int Descriptor::ioctl(unsigned long request, char* argp)
 {
-    return this->vnode->ioctl(request, argp);
+    return this->vnode->ioctl(request, argp, this->cookie);
 }
 
 int Descriptor::link(const char* name, Ref<Descriptor> node)
@@ -216,20 +216,12 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 
 ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
 {
-    if (this->cookie) {
-        return vnode->read(buffer, count, offset, this->cookie);
-    } else {
-        return vnode->read(buffer, count, offset);
-    }
+    return vnode->read(buffer, count, offset, this->cookie);
 }
 
 ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
 {
-    if (this->cookie) {
-        return vnode->write(buffer, count, offset, this->cookie);
-    } else {
-        return vnode->write(buffer, count, offset);
-    }
+    return vnode->write(buffer, count, offset, this->cookie);
 }
 
 bool Descriptor::seekable()

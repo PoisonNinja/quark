@@ -15,7 +15,7 @@ BaseInode::~BaseInode()
 {
 }
 
-int BaseInode::ioctl(unsigned long request, char* argp)
+int BaseInode::ioctl(unsigned long request, char* argp, void* cookie)
 {
     return -EBADF;
 }
@@ -46,17 +46,7 @@ Ref<Inode> BaseInode::lookup(const char*, int, mode_t)
     return Ref<Inode>(nullptr);
 }
 
-ssize_t BaseInode::read(uint8_t*, size_t, off_t)
-{
-    return -EBADF;
-}
-
 ssize_t BaseInode::read(uint8_t*, size_t, off_t, void*)
-{
-    return -EBADF;
-}
-
-ssize_t BaseInode::write(uint8_t*, size_t, off_t)
 {
     return -EBADF;
 }

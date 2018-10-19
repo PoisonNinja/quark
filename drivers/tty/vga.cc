@@ -36,7 +36,7 @@ VGATTY::~VGATTY()
     Memory::Valloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGATTY::write(uint8_t *buffer, size_t size)
+ssize_t VGATTY::write(uint8_t *buffer, size_t size, void *cookie)
 {
     size_t length = size;
     char *string  = reinterpret_cast<char *>(buffer);

@@ -23,7 +23,7 @@ Pair<int, void*> PTMX::open(const char* name)
     return Pair<int, void*>(0, (void*)0xDEADBEEF + next_pty_number++);
 }
 
-int PTMX::ioctl(unsigned long request, char* argp)
+int PTMX::ioctl(unsigned long request, char* argp, void* cookie)
 {
     *argp = 5;
     return 0;

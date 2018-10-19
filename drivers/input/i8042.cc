@@ -15,8 +15,10 @@ class i8042Driver : public Filesystem::KDevice
 public:
     i8042Driver();
 
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie) override;
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                          void* cookie) override;
 
 private:
     static void handler(int, void*, struct InterruptContext*);
@@ -35,7 +37,8 @@ i8042Driver::i8042Driver()
     Interrupt::register_handler(Interrupt::irq_to_interrupt(1), *h);
 }
 
-ssize_t i8042Driver::read(uint8_t* buffer, size_t count, off_t /*offset*/)
+ssize_t i8042Driver::read(uint8_t* buffer, size_t count, off_t /*offset*/,
+                          void*)
 {
     size_t read = 0;
     while (read < count) {
@@ -47,7 +50,7 @@ ssize_t i8042Driver::read(uint8_t* buffer, size_t count, off_t /*offset*/)
     return read;
 }
 
-ssize_t i8042Driver::write(uint8_t*, size_t, off_t)
+ssize_t i8042Driver::write(uint8_t*, size_t, off_t, void*)
 {
     return 0;
 }

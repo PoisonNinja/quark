@@ -59,7 +59,7 @@ File::~File()
     }
 }
 
-ssize_t File::read(uint8_t* buffer, size_t count, off_t offset)
+ssize_t File::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     // Trim out of bound reads
     if (count + offset > buffer_size) {
@@ -69,7 +69,7 @@ ssize_t File::read(uint8_t* buffer, size_t count, off_t offset)
     return count;
 }
 
-ssize_t File::write(uint8_t* buffer, size_t count, off_t offset)
+ssize_t File::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     if (count + offset > buffer_size) {
         size_t new_buffer_size = count + offset;

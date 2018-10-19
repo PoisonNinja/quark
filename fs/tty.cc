@@ -26,22 +26,12 @@ Pair<int, void*> TTY::open(const char* name)
     return Pair<int, void*>(0, nullptr);
 }
 
-int TTY::ioctl(unsigned long request, char* argp)
+int TTY::ioctl(unsigned long request, char* argp, void* cookie)
 {
     return 0;
 }
 
-ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/)
-{
-    return -ENOSYS;
-}
-
 ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
-{
-    return -ENOSYS;
-}
-
-ssize_t TTY::write(uint8_t* /*buffer*/, size_t /*size*/)
 {
     return -ENOSYS;
 }
@@ -56,14 +46,12 @@ class TTYDevice : public Filesystem::KDevice
 public:
     TTYDevice(TTY* driver);
 
-    int ioctl(unsigned long request, char* argp) override;
+    int ioctl(unsigned long request, char* argp, void* cookie) override;
 
     Pair<int, void*> open(const char* name) override;
 
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                  void* cookie) override;
-    ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
     ssize_t write(uint8_t* buffer, size_t count, off_t offset,
                   void* cookie) override;
 
@@ -77,9 +65,9 @@ TTYDevice::TTYDevice(TTY* tty)
 {
 }
 
-int TTYDevice::ioctl(unsigned long request, char* argp)
+int TTYDevice::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    return this->tty->ioctl(request, argp);
+    return this->tty->ioctl(request, argp, cookie);
 }
 
 Pair<int, void*> TTYDevice::open(const char* name)
@@ -87,20 +75,10 @@ Pair<int, void*> TTYDevice::open(const char* name)
     return this->tty->open(name);
 }
 
-ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */)
-{
-    return this->tty->read(buffer, count);
-}
-
 ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */,
                         void* cookie)
 {
     return this->tty->read(buffer, count, cookie);
-}
-
-ssize_t TTYDevice::write(uint8_t* buffer, size_t count, off_t /* offset */)
-{
-    return this->tty->write(buffer, count);
 }
 
 ssize_t TTYDevice::write(uint8_t* buffer, size_t count, off_t /* offset */,

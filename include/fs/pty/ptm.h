@@ -1,22 +1,27 @@
 #pragma once
 
 #include <fs/inode.h>
+#include <fs/tty.h>
 
 namespace Filesystem
 {
-class PTMX : public KDevice
+namespace TTY
+{
+class PTMX : public TTY
 {
 public:
     PTMX();
     virtual ~PTMX();
-    virtual Pair<int, void*> open(const char* name) override;
 
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                         void* cookie) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
-                          void* cookie) override;
+    virtual Pair<int, void*> open(const char* name) override;
+    virtual int ioctl(unsigned long request, char* argp) override;
+
+    virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
+    virtual ssize_t write(uint8_t* buffer, size_t count, void* cookie) override;
 
 private:
     size_t next_pty_number;
 };
+
+} // namespace TTY
 } // namespace Filesystem

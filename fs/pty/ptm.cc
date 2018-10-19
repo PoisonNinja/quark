@@ -6,9 +6,10 @@
 
 namespace Filesystem
 {
+namespace TTY
+{
 PTMX::PTMX()
-    : KDevice(Filesystem::CHR)
-    , next_pty_number(0)
+    : next_pty_number(0)
 {
 }
 
@@ -22,13 +23,19 @@ Pair<int, void*> PTMX::open(const char* name)
     return Pair<int, void*>(0, (void*)0xDEADBEEF + next_pty_number++);
 }
 
-ssize_t PTMX::read(uint8_t*, size_t count, off_t, void* cookie)
+int PTMX::ioctl(unsigned long request, char* argp)
+{
+    *argp = 5;
+    return 0;
+}
+
+ssize_t PTMX::read(uint8_t*, size_t count, void* cookie)
 {
     Log::printk(Log::LogLevel::INFO, "ptmx: Cookie is %p!\n", cookie);
     return count;
 }
 
-ssize_t PTMX::write(uint8_t*, size_t count, off_t, void* cookie)
+ssize_t PTMX::write(uint8_t*, size_t count, void* cookie)
 {
     Log::printk(Log::LogLevel::INFO, "ptmx: Cookie is %p!\n", cookie);
     return count;
@@ -41,9 +48,10 @@ int init()
     PTMX* ptmx = new PTMX();
     Log::printk(Log::LogLevel::INFO, "Registering PTMX character device\n");
     Filesystem::register_class(Filesystem::CHR, 5);
-    Filesystem::register_kdevice(Filesystem::CHR, 5, ptmx);
+    Filesystem::TTY::register_tty(5, ptmx);
     return 0;
 }
 FS_INITCALL(init);
 } // namespace
+} // namespace TTY
 } // namespace Filesystem

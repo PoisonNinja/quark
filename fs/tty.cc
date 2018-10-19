@@ -21,6 +21,11 @@ TTY::~TTY()
 {
 }
 
+Pair<int, void*> TTY::open(const char* name)
+{
+    return Pair<int, void*>(0, nullptr);
+}
+
 int TTY::ioctl(unsigned long request, char* argp)
 {
     return 0;
@@ -31,7 +36,17 @@ ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/)
     return -ENOSYS;
 }
 
+ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
+{
+    return -ENOSYS;
+}
+
 ssize_t TTY::write(uint8_t* /*buffer*/, size_t /*size*/)
+{
+    return -ENOSYS;
+}
+
+ssize_t TTY::write(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
 {
     return -ENOSYS;
 }
@@ -46,7 +61,11 @@ public:
     Pair<int, void*> open(const char* name) override;
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                 void* cookie) override;
     ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
+    ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                  void* cookie) override;
 
 private:
     TTY* tty;
@@ -65,7 +84,7 @@ int TTYDevice::ioctl(unsigned long request, char* argp)
 
 Pair<int, void*> TTYDevice::open(const char* name)
 {
-    return Pair<int, void*>(0, nullptr);
+    return this->tty->open(name);
 }
 
 ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */)
@@ -73,9 +92,21 @@ ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */)
     return this->tty->read(buffer, count);
 }
 
+ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */,
+                        void* cookie)
+{
+    return this->tty->read(buffer, count, cookie);
+}
+
 ssize_t TTYDevice::write(uint8_t* buffer, size_t count, off_t /* offset */)
 {
     return this->tty->write(buffer, count);
+}
+
+ssize_t TTYDevice::write(uint8_t* buffer, size_t count, off_t /* offset */,
+                         void* cookie)
+{
+    return this->tty->write(buffer, count, cookie);
 }
 
 bool register_tty(dev_t major, TTY* driver)

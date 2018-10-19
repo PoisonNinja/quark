@@ -31,7 +31,7 @@ Pair<int, void*> PTMX::open(const char* name)
 
 int PTMX::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    *argp = reinterpret_cast<PTY*>(cookie)->index();
+    *reinterpret_cast<int*>(argp) = static_cast<PTY*>(cookie)->index();
     return 0;
 }
 

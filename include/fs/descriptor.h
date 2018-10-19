@@ -10,6 +10,7 @@ class Descriptor : public RefcountBase
 {
 public:
     Descriptor(Ref<Vnode> vnode);
+    int ioctl(unsigned long request, char* argp);
     int link(const char* name, Ref<Descriptor> node);
     off_t lseek(off_t offset, int whence);
     int mkdir(const char* name, mode_t mode);

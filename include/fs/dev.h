@@ -33,6 +33,7 @@ public:
 
     // A subset of Inode operations
     virtual Pair<int, void*> open(const char* name);
+    virtual int ioctl(unsigned long request, char* argp);
 
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset);
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,

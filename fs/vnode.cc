@@ -20,6 +20,14 @@ Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t rdev)
     this->kdev  = nullptr;
 }
 
+int Vnode::ioctl(unsigned long request, char* argp)
+{
+    if (this->kdev) {
+        return this->kdev->ioctl(request, argp);
+    }
+    return this->inode->ioctl(request, argp);
+}
+
 int Vnode::link(const char* name, Ref<Vnode> node)
 {
     return inode->link(name, node->inode);

@@ -14,6 +14,7 @@ public:
     mode_t mode;
 
     virtual ~Inode(){};
+    virtual int ioctl(unsigned long request, char* argp)                = 0;
     virtual int link(const char* name, Ref<Inode> node)                 = 0;
     virtual Ref<Inode> lookup(const char* name, int flags, mode_t mode) = 0;
     virtual int mkdir(const char* name, mode_t mode)                    = 0;
@@ -33,6 +34,7 @@ class BaseInode : public Inode
 public:
     BaseInode();
     virtual ~BaseInode();
+    virtual int ioctl(unsigned long request, char* argp);
     virtual int link(const char* name, Ref<Inode> node);
     virtual int mkdir(const char* name, mode_t mode);
     virtual int mknod(const char* name, mode_t mode, dev_t dev);

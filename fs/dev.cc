@@ -135,6 +135,11 @@ Pair<int, void*> KDevice::open(const char*)
     return Pair<int, void*>(0, nullptr);
 }
 
+int KDevice::ioctl(unsigned long, char*)
+{
+    return -ENOSYS;
+}
+
 ssize_t KDevice::read(uint8_t*, size_t, off_t)
 {
     return -EBADF;

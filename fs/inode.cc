@@ -15,6 +15,11 @@ BaseInode::~BaseInode()
 {
 }
 
+int BaseInode::ioctl(unsigned long request, char* argp)
+{
+    return -EBADF;
+}
+
 int BaseInode::link(const char*, Ref<Inode>)
 {
     return -EBADF;

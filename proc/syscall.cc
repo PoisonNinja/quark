@@ -53,6 +53,9 @@ static long sys_open(const char* path, int flags, mode_t mode)
     Log::printk(Log::LogLevel::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
     Ref<Filesystem::Descriptor> file = get_start(path)->open(path, flags, mode);
+    if (!file) {
+        return -ENOENT;
+    }
     int ret = Scheduler::get_current_process()->get_dtable()->add(file);
     if (Scheduler::get_current_process()->get_dtable()->get(ret) != file) {
         Log::printk(Log::LogLevel::ERROR,
@@ -204,6 +207,17 @@ static void sys_sigreturn(ucontext_t* uctx)
     Scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
     Signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
     load_registers(tctx);
+}
+
+static long sys_ioctl(int fd, unsigned long request, char* argp)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_ioctl] = %d, 0x%lX, %p\n", fd,
+                request, argp);
+    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+        return -EBADF;
+    }
+    return Scheduler::get_current_process()->get_dtable()->get(fd)->ioctl(
+        request, argp);
 }
 
 static long sys_getpid()
@@ -387,6 +401,7 @@ void init()
     syscall_table[SYS_sigaction]   = reinterpret_cast<void*>(sys_sigaction);
     syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
     syscall_table[SYS_sigreturn]   = reinterpret_cast<void*>(sys_sigreturn);
+    syscall_table[SYS_ioctl]       = reinterpret_cast<void*>(sys_ioctl);
     syscall_table[SYS_getpid]      = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork]        = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);

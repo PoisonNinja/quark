@@ -21,6 +21,11 @@ TTY::~TTY()
 {
 }
 
+int TTY::ioctl(unsigned long request, char* argp)
+{
+    return 0;
+}
+
 ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/)
 {
     return -ENOSYS;
@@ -36,19 +41,26 @@ class TTYDevice : public Filesystem::KDevice
 public:
     TTYDevice(TTY* driver);
 
+    int ioctl(unsigned long request, char* argp) override;
+
     Pair<int, void*> open(const char* name) override;
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
 
 private:
-    TTY* driver;
+    TTY* tty;
 };
 
-TTYDevice::TTYDevice(TTY* driver)
+TTYDevice::TTYDevice(TTY* tty)
     : KDevice(CHR)
-    , driver(driver)
+    , tty(tty)
 {
+}
+
+int TTYDevice::ioctl(unsigned long request, char* argp)
+{
+    return this->tty->ioctl(request, argp);
 }
 
 Pair<int, void*> TTYDevice::open(const char* name)
@@ -58,12 +70,12 @@ Pair<int, void*> TTYDevice::open(const char* name)
 
 ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */)
 {
-    return this->driver->read(buffer, count);
+    return this->tty->read(buffer, count);
 }
 
 ssize_t TTYDevice::write(uint8_t* buffer, size_t count, off_t /* offset */)
 {
-    return this->driver->write(buffer, count);
+    return this->tty->write(buffer, count);
 }
 
 bool register_tty(dev_t major, TTY* driver)

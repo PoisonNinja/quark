@@ -19,6 +19,7 @@ public:
     Vnode(Superblock* sb, Ref<Inode> inode, dev_t rdev);
 
     // Standard file operations
+    int ioctl(unsigned long request, char* argp);
     int link(const char* name, Ref<Vnode> node);
     Ref<Vnode> lookup(const char* name, int flags, mode_t mode);
     int mkdir(const char* name, mode_t mode);

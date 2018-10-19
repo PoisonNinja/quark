@@ -73,6 +73,11 @@ Descriptor::Descriptor(Ref<Vnode> vnode)
     this->current_offset = 0;
 }
 
+int Descriptor::ioctl(unsigned long request, char* argp)
+{
+    return this->vnode->ioctl(request, argp);
+}
+
 int Descriptor::link(const char* name, Ref<Descriptor> node)
 {
     const char* dir           = dirname(name);

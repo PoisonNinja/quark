@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <lib/murmur.h>
+#include <lib/string.h>
 #include <types.h>
 
 template <typename K, size_t tableSize>
@@ -25,6 +27,28 @@ struct KeyHash {
     unsigned long operator()(const K &key) const
     {
         return reinterpret_cast<unsigned long>(key) % tableSize;
+    }
+};
+
+struct StringKey {
+    StringKey(const char *s)
+        : value(s){};
+    const char *value;
+    bool operator==(const struct StringKey &other)
+    {
+        return !String::strcmp(this->value, other.value);
+    }
+    bool operator!=(const struct StringKey &other)
+    {
+        return !(*this == other);
+    }
+};
+
+template <size_t tableSize>
+struct StringHash {
+    unsigned long operator()(const StringKey &k)
+    {
+        return Murmur::hash(k.value, String::strlen(k.value)) % tableSize;
     }
 };
 

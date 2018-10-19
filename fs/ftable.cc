@@ -9,14 +9,28 @@ namespace FTable
 {
 constexpr size_t ftable_size = 1024;
 
-struct FTableHash {
-    unsigned long operator()(const char* name)
+struct StringKey {
+    StringKey(const char* s)
+        : value(s){};
+    const char* value;
+    bool operator==(const struct StringKey& other)
     {
-        return Murmur::hash(name, String::strlen(name)) % ftable_size;
+        return !String::strcmp(this->value, other.value);
+    }
+    bool operator!=(const struct StringKey& other)
+    {
+        return !(*this == other);
     }
 };
 
-static Hashmap<const char*, Driver*, ftable_size, FTableHash> ftable_hash;
+struct NameHash {
+    unsigned long operator()(const StringKey& k)
+    {
+        return Murmur::hash(k.value, String::strlen(k.value)) % ftable_size;
+    }
+};
+
+static Hashmap<StringKey, Driver*, ftable_size, NameHash> ftable_hash;
 
 bool add(const char* name, Driver* driver)
 {
@@ -33,5 +47,5 @@ Driver* get(const char* name)
         return driver;
     }
 }
-}  // namespace FTable
-}  // namespace Filesystem
+} // namespace FTable
+} // namespace Filesystem

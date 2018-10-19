@@ -21,7 +21,7 @@ void init()
 
     // Register the filesystem drivers
     FTable::add("tmpfs", new TmpFS());
-    FTable::add("pts", new PTSFS());
+    FTable::add("ptsfs", new PTSFS());
 
     TTY::VGATTY* vga = new TTY::VGATTY();
     TTY::register_tty(0, vga);
@@ -38,7 +38,7 @@ void init()
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
     auto pts = droot->mkdir("dev/pts", 0666);
-    droot->mount("pts", "dev/pts", "pts", 0);
+    droot->mount("", "dev/pts", "ptsfs", 0);
 
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);

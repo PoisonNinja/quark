@@ -5,15 +5,15 @@ namespace Filesystem
 {
 DTable::DTable(int s)
 {
-    fds = new Ref<Descriptor>[s];
+    fds  = new Ref<Descriptor>[s];
     size = step_size = s;
 }
 
 DTable::DTable(const DTable& other)
 {
-    size = other.size;
+    size      = other.size;
     step_size = other.step_size;
-    fds = new Ref<Descriptor>[other.size];
+    fds       = new Ref<Descriptor>[other.size];
     for (int i = 0; i < size; i++) {
         fds[i] = other.fds[i];
     }
@@ -32,6 +32,7 @@ void DTable::resize()
     }
     delete[] fds;
     fds = tmp;
+    this->size += step_size;
 }
 
 int DTable::add(Ref<Descriptor> desc)
@@ -64,4 +65,4 @@ Ref<Descriptor> DTable::get(int index)
     }
     return fds[index];
 }
-}
+} // namespace Filesystem

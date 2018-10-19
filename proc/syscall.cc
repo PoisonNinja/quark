@@ -220,6 +220,22 @@ static long sys_ioctl(int fd, unsigned long request, char* argp)
         request, argp);
 }
 
+static long sys_dup(int oldfd)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_dup] = %d\n", oldfd);
+    auto desc = Scheduler::get_current_process()->get_dtable()->get(oldfd);
+    if (!desc) {
+        return -EBADF;
+    }
+    return Scheduler::get_current_process()->get_dtable()->add(desc);
+}
+
+static long sys_dup2(int oldfd, int newfd)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_dup2] = %d %d\n", oldfd, newfd);
+    return Scheduler::get_current_process()->get_dtable()->copy(oldfd, newfd);
+}
+
 static long sys_getpid()
 {
     // Return process ID not thread ID
@@ -402,6 +418,8 @@ void init()
     syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
     syscall_table[SYS_sigreturn]   = reinterpret_cast<void*>(sys_sigreturn);
     syscall_table[SYS_ioctl]       = reinterpret_cast<void*>(sys_ioctl);
+    syscall_table[SYS_dup]         = reinterpret_cast<void*>(sys_dup),
+    syscall_table[SYS_dup2]        = reinterpret_cast<void*>(sys_dup2),
     syscall_table[SYS_getpid]      = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork]        = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);

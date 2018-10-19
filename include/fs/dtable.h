@@ -13,6 +13,7 @@ public:
 
     int add(Ref<Descriptor> desc);
     Ref<Descriptor> get(int index);
+    int copy(int oldfd, int newfd);
     bool remove(int fd);
 
 private:
@@ -21,4 +22,4 @@ private:
     int size;
     int step_size;
 };
-}
+} // namespace Filesystem

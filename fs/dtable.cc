@@ -65,4 +65,10 @@ Ref<Descriptor> DTable::get(int index)
     }
     return fds[index];
 }
+
+int DTable::copy(int oldfd, int newfd)
+{
+    this->fds[oldfd] = this->fds[newfd];
+    return oldfd;
+}
 } // namespace Filesystem

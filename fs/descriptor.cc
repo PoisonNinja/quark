@@ -202,8 +202,8 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
     auto [status, _cookie] = curr_vnode->open(name);
     if (!status) {
         ret->cookie = _cookie;
-        Log::printk(Log::LogLevel::DEBUG, "Setting cookie to %p\n",
-                    ret->cookie);
+        Log::printk(Log::LogLevel::DEBUG,
+                    "[descriptor->open] Setting cookie to %p\n", ret->cookie);
     }
     delete[] path;
     return ret;

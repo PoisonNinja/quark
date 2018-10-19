@@ -4,13 +4,15 @@
 
 namespace Filesystem
 {
+namespace TTY
+{
 class VGATTY : public TTY
 {
 public:
     VGATTY();
     ~VGATTY();
 
-    ssize_t output(uint8_t* buffer, size_t size);
+    ssize_t write(uint8_t* buffer, size_t count);
 
 private:
     volatile uint16_t* vga_buffer;
@@ -20,4 +22,5 @@ private:
 
     static void update_cursor(int col, int row);
 };
-}
+} // namespace TTY
+} // namespace Filesystem

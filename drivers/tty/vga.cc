@@ -5,12 +5,18 @@
 #include <mm/valloc.h>
 #include <mm/virtual.h>
 
-namespace Filesystem
+namespace
 {
 const addr_t VGA_BUFFER_BASE = 0xB8000;
 const size_t VGA_BUFFER_SIZE = 0x8000;
-const int VGA_HEIGHT = 25;
-const int VGA_WIDTH = 80;
+const int VGA_HEIGHT         = 25;
+const int VGA_WIDTH          = 80;
+} // namespace
+
+namespace Filesystem
+{
+namespace TTY
+{
 
 VGATTY::VGATTY()
 {
@@ -30,10 +36,10 @@ VGATTY::~VGATTY()
     Memory::Valloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGATTY::output(uint8_t *buffer, size_t size)
+ssize_t VGATTY::write(uint8_t *buffer, size_t size)
 {
     size_t length = size;
-    char *string = reinterpret_cast<char *>(buffer);
+    char *string  = reinterpret_cast<char *>(buffer);
     while (length) {
         if (*string == '\n') {
             x = 0;
@@ -45,19 +51,19 @@ ssize_t VGATTY::output(uint8_t *buffer, size_t size)
             length -= 3;
             switch (*string) {
                 case '1':
-                    color = 12;  // Light Red
+                    color = 12; // Light Red
                     break;
                 case '2':
-                    color = 10;  // Light Green
+                    color = 10; // Light Green
                     break;
                 case '3':
-                    color = 14;  // Yellow
+                    color = 14; // Yellow
                     break;
                 case '6':
-                    color = 11;  // Light Blue
+                    color = 11; // Light Blue
                     break;
                 case '9':
-                    color = 15;  // Reset to white
+                    color = 15; // Reset to white
                     break;
                 default:
                     color = 15;
@@ -66,7 +72,7 @@ ssize_t VGATTY::output(uint8_t *buffer, size_t size)
             string += 2;
             length -= 2;
         } else {
-            size_t index = y * VGA_WIDTH + x++;
+            size_t index      = y * VGA_WIDTH + x++;
             vga_buffer[index] = *string++ | (color << 8);
             length--;
         }
@@ -100,4 +106,5 @@ void VGATTY::update_cursor(int col, int row)
     outb(0x3D4, 0x0E);
     outb(0x3D5, (unsigned char)((position >> 8) & 0xFF));
 }
-}  // namespace Filesystem
+} // namespace TTY
+} // namespace Filesystem

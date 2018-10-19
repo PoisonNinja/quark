@@ -16,14 +16,15 @@ namespace Filesystem
 {
 void init()
 {
+    // Initialize the TTY layer
+    TTY::init();
+
     // Register the filesystem drivers
     FTable::add("tmpfs", new TmpFS());
     FTable::add("pts", new PTSFS());
 
-    VGATTY* vga = new VGATTY();
-    dev_t major = locate_class(CHR);
-    register_class(CHR, major);
-    register_kdevice(CHR, major, vga);
+    TTY::VGATTY* vga = new TTY::VGATTY();
+    TTY::register_tty(0, vga);
 
     // Initialize the root filesystem
     Superblock* rootsb = new Superblock();
@@ -36,6 +37,8 @@ void init()
 
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
+    auto pts = droot->mkdir("dev/pts", 0666);
+    droot->mount("pts", "dev/pts", "pts", 0);
 
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);

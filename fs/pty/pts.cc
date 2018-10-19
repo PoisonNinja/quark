@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fs/pty/pts.h>
+#include <kernel.h>
 #include <lib/list.h>
 #include <lib/string.h>
 

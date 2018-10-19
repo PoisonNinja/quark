@@ -6,13 +6,14 @@ namespace Filesystem
 {
 namespace TTY
 {
-class VGATTY : public TTY
+class VGATTY : public KDevice
 {
 public:
     VGATTY();
     ~VGATTY();
 
-    ssize_t write(uint8_t* buffer, size_t count, void* cookie) override;
+    ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                  void* cookie) override;
 
 private:
     volatile uint16_t* vga_buffer;

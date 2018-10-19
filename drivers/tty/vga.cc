@@ -19,6 +19,7 @@ namespace TTY
 {
 
 VGATTY::VGATTY()
+    : KDevice(CHR)
 {
     addr_t virt = Memory::Valloc::allocate(VGA_BUFFER_SIZE);
     if (!Memory::Virtual::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
@@ -36,7 +37,7 @@ VGATTY::~VGATTY()
     Memory::Valloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGATTY::write(uint8_t *buffer, size_t size, void *cookie)
+ssize_t VGATTY::write(uint8_t *buffer, size_t size, off_t offset, void *cookie)
 {
     size_t length = size;
     char *string  = reinterpret_cast<char *>(buffer);

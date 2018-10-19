@@ -1,5 +1,8 @@
 #include <fs/dev.h>
+#include <fs/ftable.h>
 #include <fs/pty/ptm.h>
+#include <fs/pty/pts.h>
+#include <fs/pty/pty.h>
 #include <fs/stat.h>
 #include <kernel.h>
 #include <kernel/init.h>
@@ -20,25 +23,26 @@ PTMX::~PTMX()
 Pair<int, void*> PTMX::open(const char* name)
 {
     Log::printk(Log::LogLevel::INFO, "ptmx: Opening!\n");
-    return Pair<int, void*>(0, (void*)0xDEADBEEF + next_pty_number++);
+    // TODO: Perhaps have PTSFS generate this?
+    PTY* pty = new PTY(next_pty_number++);
+    static_cast<PTSFS*>(FTable::get("ptsfs"))->register_pty(pty);
+    return Pair<int, void*>(0, pty);
 }
 
 int PTMX::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    *argp = 5;
+    *argp = reinterpret_cast<PTY*>(cookie)->index();
     return 0;
 }
 
-ssize_t PTMX::read(uint8_t*, size_t count, void* cookie)
+ssize_t PTMX::read(uint8_t* buffer, size_t count, void* cookie)
 {
-    Log::printk(Log::LogLevel::INFO, "ptmx: Cookie is %p!\n", cookie);
-    return count;
+    return static_cast<PTY*>(cookie)->mread(buffer, count);
 }
 
-ssize_t PTMX::write(uint8_t*, size_t count, void* cookie)
+ssize_t PTMX::write(uint8_t* buffer, size_t count, void* cookie)
 {
-    Log::printk(Log::LogLevel::INFO, "ptmx: Cookie is %p!\n", cookie);
-    return count;
+    return static_cast<PTY*>(cookie)->mwrite(buffer, count);
 }
 
 namespace

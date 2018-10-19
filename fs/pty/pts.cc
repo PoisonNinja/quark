@@ -1,104 +1,73 @@
 #include <errno.h>
+#include <fs/dev.h>
 #include <fs/pty/pts.h>
+#include <fs/stat.h>
+#include <fs/tty.h>
 #include <kernel.h>
 #include <lib/list.h>
+#include <lib/printf.h>
 #include <lib/string.h>
+
+// HACK
+#include <proc/sched.h>
 
 namespace Filesystem
 {
-PTSN::PTSN(ino_t ino, dev_t dev, mode_t mode)
+namespace TTY
 {
-    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->mode = mode;
-    this->size = 0;
-    this->uid  = 0;
-    this->gid  = 0;
+class PTS : public TTY
+{
+public:
+    PTS(PTY* pty);
+
+    virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
+
+    virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
+    virtual ssize_t write(uint8_t* buffer, size_t count, void* cookie) override;
+
+private:
+    PTY* pty;
+};
+
+PTS::PTS(PTY* pty)
+{
+    this->pty = pty;
 }
 
-PTSN::~PTSN()
+int PTS::ioctl(unsigned long request, char* argp, void* cookie)
 {
-}
-
-ssize_t PTSN::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
-{
-}
-
-ssize_t PTSN::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
-{
-}
-
-PTSNWrapper::PTSNWrapper(Ref<Inode> inode, const char* name)
-{
-    this->inode = inode;
-    this->name  = String::strdup(name);
-}
-
-PTSNWrapper::~PTSNWrapper()
-{
-    delete[] this->name;
-}
-
-PTSD::PTSD(ino_t ino, dev_t dev, mode_t mode)
-{
-    this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
-    this->mode = mode;
-}
-
-PTSD::~PTSD()
-{
-}
-
-int PTSD::link(const char* name, Ref<Inode> node)
-{
-    Ref<Inode> child = find_child(name);
-    if (child) {
-        return -EEXIST;
-    }
-    PTSNWrapper* wrapper = new PTSNWrapper(node, name);
-    children.push_back(*wrapper);
     return 0;
 }
 
-Ref<Inode> PTSD::lookup(const char* name, int flags, mode_t mode)
+ssize_t PTS::read(uint8_t* buffer, size_t count, void* cookie)
 {
-    Ref<Inode> ret = find_child(name);
-    if (ret) {
-        return ret;
-    } else if (!ret && !(flags & O_CREAT)) {
-        return Ref<Inode>(nullptr);
-    }
-    Ref<PTSN> child(new PTSN(0, 0, mode));
-    PTSNWrapper* node = new PTSNWrapper(child, name);
-    children.push_back(*node);
-    return child;
+    return pty->sread(buffer, count);
+}
+ssize_t PTS::write(uint8_t* buffer, size_t count, void* cookie)
+{
+    return pty->swrite(buffer, count);
 }
 
-Ref<Inode> PTSD::find_child(const char* name)
-{
-    for (auto& i : children) {
-        if (!String::strcmp(i.name, name)) {
-            return i.inode;
-        }
-    }
-    return Ref<Inode>(nullptr);
-}
-
+} // namespace TTY
 PTSFS::PTSFS()
 {
-}
-
-PTSFS::~PTSFS()
-{
+    Filesystem::register_class(Filesystem::CHR, 134);
+    this->root = new InitFS::Directory(0, 0, 0755);
 }
 
 bool PTSFS::mount(Superblock* sb)
 {
-    sb->root = Ref<Inode>(new PTSD(0, 0, 0755));
+    sb->root = Ref<Inode>(this->root);
     return true;
 }
 
-uint32_t PTSFS::flags()
+bool PTSFS::register_pty(TTY::PTY* pty)
 {
-    return driver_pseudo;
+    char name[128];
+    TTY::PTS* pts = new TTY::PTS(pty);
+    TTY::register_tty(134, pts);
+    sprintf(name, "pts%d", pty->index());
+    this->root->mknod(name, S_IFCHR | 0644, mkdev(134, pty->index()));
+    return true;
 }
 } // namespace Filesystem

@@ -12,7 +12,7 @@
 	#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
 #endif
 
-namespace eastl
+namespace stl
 {
 
 	/// EASTL_FIXED_TUPLE_VECTOR_DEFAULT_NAME
@@ -22,7 +22,7 @@ namespace eastl
 	/// to overflow allocations. 
 	///
 	#ifndef EASTL_FIXED_TUPLE_VECTOR_DEFAULT_NAME
-		#define EASTL_FIXED_TUPLE_VECTOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_tuple_vector" // Unless the user overrides something, this is "EASTL fixed_vector".
+		#define EASTL_FIXED_TUPLE_VECTOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_tuple_vector" // Unless the user overrides something, this is "stl fixed_vector".
 	#endif
 
 
@@ -176,7 +176,7 @@ public:
 		else
 		{
 			// Fixed containers use a special swap that can deal with excessively large buffers.
-			eastl::fixed_swap(*this, x);
+			stl::fixed_swap(*this, x);
 		}
 	}
 
@@ -204,6 +204,6 @@ inline void swap(fixed_tuple_vector<nodeCount, bEnableOverflow, Ts...>& a,
 }
 
 
-}  // namespace eastl
+}  // namespace stl
 
 #endif  // EASTL_TUPLEVECTOR_H

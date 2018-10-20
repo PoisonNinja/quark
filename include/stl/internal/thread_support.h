@@ -67,7 +67,7 @@
 //
 // Defined as 0 or 1, based on existing support.
 // Identifies if thread support (e.g. atomics, mutexes) is available for use.
-// The large majority of EASTL doesn't use thread support, but a few parts 
+// The large majority of stl doesn't use thread support, but a few parts 
 // of it (e.g. shared_ptr) do.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -82,7 +82,7 @@
 #endif
 
 
-namespace eastl
+namespace stl
 {
 	namespace Internal
 	{
@@ -104,7 +104,7 @@ namespace eastl
 									);
 				return result + 1;
 			#else
-				EASTL_FAIL_MSG("EASTL thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
+				EASTL_FAIL_MSG("stl thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
 				return ++*p32;
 			#endif
 		}
@@ -126,7 +126,7 @@ namespace eastl
 									);
 				return result - 1;
 			#else
-				EASTL_FAIL_MSG("EASTL thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
+				EASTL_FAIL_MSG("stl thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
 				return --*p32;
 			#endif
 		}
@@ -161,7 +161,7 @@ namespace eastl
 					);
 				return result == condition;
 			#else
-				EASTL_FAIL_MSG("EASTL thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
+				EASTL_FAIL_MSG("stl thread safety is not implemented yet. See EAThread for how to do this for the given platform.");
 				if(*p32 == condition)
 				{
 					*p32 = newValue;
@@ -237,7 +237,7 @@ namespace eastl
 
 	} // namespace Internal
 
-} // namespace eastl
+} // namespace stl
 
 
 #if defined(_MSC_VER)

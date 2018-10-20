@@ -20,7 +20,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 	/// EASTL_FIXED_SLIST_DEFAULT_NAME
 	///
@@ -29,7 +29,7 @@ namespace eastl
 	/// to overflow allocations. 
 	///
 	#ifndef EASTL_FIXED_SLIST_DEFAULT_NAME
-		#define EASTL_FIXED_SLIST_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_slist" // Unless the user overrides something, this is "EASTL fixed_slist".
+		#define EASTL_FIXED_SLIST_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_slist" // Unless the user overrides something, this is "stl fixed_slist".
 	#endif
 
 
@@ -293,7 +293,7 @@ namespace eastl
 	inline void fixed_slist<T, nodeCount, bEnableOverflow, OverflowAllocator>::swap(this_type& x)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(*this, x);
+		stl::fixed_swap(*this, x);
 	}
 
 
@@ -375,12 +375,12 @@ namespace eastl
 					 fixed_slist<T, nodeCount, bEnableOverflow, OverflowAllocator>& b)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(a, b);
+		stl::fixed_swap(a, b);
 	}
 
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

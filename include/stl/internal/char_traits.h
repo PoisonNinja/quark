@@ -5,8 +5,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // This file implements similar functionality to char_traits which is part of
 // the C++ standard STL library specification. This is intended for internal
-// EASTL use only.  Functionality can be accessed through the eastl::string or
-// eastl::string_view types.  
+// stl use only.  Functionality can be accessed through the stl::string or
+// stl::string_view types.  
 //
 // http://en.cppreference.com/w/cpp/string/char_traits
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ EA_DISABLE_ALL_VC_WARNINGS()
 #include <string.h>             // memset, etc.
 EA_RESTORE_ALL_VC_WARNINGS()
 
-namespace eastl
+namespace stl
 {
 	///////////////////////////////////////////////////////////////////////////////
 	/// DecodePart
@@ -481,6 +481,6 @@ namespace eastl
 			return pDestination;
 		}
 	#endif
-} // namespace eastl
+} // namespace stl
 
 #endif // EASTL_CHAR_TRAITS_H

@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // *** Note ***
 // *** This code is deprecated in favor of the C++11-conforming             *** 
-// *** eastl::unique_ptr template class found in <EASTL/unique_ptr.h>       *** 
+// *** stl::unique_ptr template class found in <stl/unique_ptr.h>       *** 
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -24,7 +24,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// class scoped_array
@@ -181,7 +181,7 @@ namespace eastl
 	/// Example usage:
 	///    unique_array<int> uniqueIntArray;
 	/// Example usage:
-	///    UNIQUE_ARRAY_T(int, eastl::smart_ptr_deleter<int>) uniqueIntArray;
+	///    UNIQUE_ARRAY_T(int, stl::smart_ptr_deleter<int>) uniqueIntArray;
 	///
 	#if defined(EA_COMPILER_NO_TEMPLATE_ALIASES)
 		#define UNIQUE_ARRAY_T(T, Deleter) scoped_array<T, Deleter>
@@ -223,7 +223,7 @@ namespace eastl
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

@@ -11,7 +11,7 @@
 
 #include <stl/internal/config.h>
 
-namespace eastl
+namespace stl
 {
 	template<typename T, size_t Count, typename Allocator = EASTLAllocatorType>
 	class segment

@@ -16,12 +16,12 @@
 
 
 
-namespace eastl
+namespace stl
 {
-	// We provide default implementations of AddRef and Release in the eastl namespace.
+	// We provide default implementations of AddRef and Release in the stl namespace.
 	// The user can override these on a per-class basis by defining their own specialized
 	// intrusive_ptr_add_ref and intrusive_ptr_release functions. User-defined specializations
-	// do not need to exist in the eastl namespace, but should preferably be in the namespace 
+	// do not need to exist in the stl namespace, but should preferably be in the namespace 
 	// of the templated class T.
 	template <typename T>
 	void intrusive_ptr_add_ref(T* p)
@@ -103,7 +103,7 @@ namespace eastl
 			: mpObject(p) 
 		{
 			if(mpObject && bAddRef)
-				intrusive_ptr_add_ref(mpObject);  // Intentionally do not prefix the call with eastl:: but instead allow namespace lookup to resolve the namespace.
+				intrusive_ptr_add_ref(mpObject);  // Intentionally do not prefix the call with stl:: but instead allow namespace lookup to resolve the namespace.
 		} 
 
 		/// intrusive_ptr
@@ -395,7 +395,7 @@ namespace eastl
 	#endif
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

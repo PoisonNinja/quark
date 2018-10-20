@@ -21,7 +21,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// accumulate
@@ -234,7 +234,7 @@ namespace eastl
 
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

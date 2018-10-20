@@ -78,7 +78,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// EASTL_SHARED_ARRAY_DEFAULT_NAME
@@ -86,7 +86,7 @@ namespace eastl
 	/// Defines a default container name in the absence of a user-provided name.
 	///
 	#ifndef EASTL_SHARED_ARRAY_DEFAULT_NAME
-		#define EASTL_SHARED_ARRAY_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " shared_array" // Unless the user overrides something, this is "EASTL shared_array".
+		#define EASTL_SHARED_ARRAY_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " shared_array" // Unless the user overrides something, this is "stl shared_array".
 	#endif
 
 
@@ -235,12 +235,12 @@ namespace eastl
 		{
 			// We leave mAllocator as-is.
 
-			// eastl::swap(mpArray, sharedArray.mpArray);
+			// stl::swap(mpArray, sharedArray.mpArray);
 			T* const pArray     = sharedArray.mpArray;
 			sharedArray.mpArray = mpArray;
 			mpArray             = pArray;
 
-			// eastl::swap(mpRefCount, sharedArray.mpRefCount);
+			// stl::swap(mpRefCount, sharedArray.mpRefCount);
 			ref_count* const pRefCount = sharedArray.mpRefCount;
 			sharedArray.mpRefCount     = mpRefCount;
 			mpRefCount                 = pRefCount;
@@ -420,7 +420,7 @@ namespace eastl
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

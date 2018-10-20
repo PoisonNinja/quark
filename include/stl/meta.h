@@ -13,11 +13,11 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// This file contains meta programming utilities that are internal to EASTL. We reserve
+// This file contains meta programming utilities that are internal to stl. We reserve
 // the right to change this file at any time as it is only intended to be used internally.
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace eastl
+namespace stl
 {
 	namespace meta
 	{
@@ -216,7 +216,7 @@ namespace eastl
 		using overload_resolution_t = typename overload_resolution<decay_t<T>, OverloadSet>::type;
 
 	} // namespace meta 
-} // namespace eastl
+} // namespace stl
 
 #endif // EASTL_META_H
 

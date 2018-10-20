@@ -7,7 +7,7 @@
 
 #include <stl/internal/config.h>
 
-namespace eastl
+namespace stl
 {
 	template <typename T1, typename T2>
 	struct pair;

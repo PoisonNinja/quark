@@ -34,7 +34,7 @@
 	EA_RESTORE_ALL_VC_WARNINGS()
 #endif
 
-namespace eastl
+namespace stl
 {
 
 	#if EASTL_EXCEPTIONS_ENABLED
@@ -99,7 +99,7 @@ namespace eastl
 		struct is_functor_inplace_allocatable
 		{
 			static constexpr bool value = sizeof(Functor) <= sizeof(functor_storage<SIZE_IN_BYTES>)
-									   && (eastl::alignment_of<functor_storage<SIZE_IN_BYTES>>::value % eastl::alignment_of<Functor>::value) == 0;
+									   && (stl::alignment_of<functor_storage<SIZE_IN_BYTES>>::value % stl::alignment_of<Functor>::value) == 0;
 		};
 
 		template <int SIZE_IN_BYTES>
@@ -134,7 +134,7 @@ namespace eastl
 				template <typename T>
 				static void CreateFunctor(FunctorStorageType& storage, T&& functor)
 				{
-					::new (GetFunctorPtr(storage)) Functor(eastl::forward<T>(functor));
+					::new (GetFunctorPtr(storage)) Functor(stl::forward<T>(functor));
 				}
 
 				static void DestructFunctor(FunctorStorageType& storage)
@@ -149,7 +149,7 @@ namespace eastl
 
 				static void MoveFunctor(FunctorStorageType& to, FunctorStorageType& from) EA_NOEXCEPT
 				{
-					::new (GetFunctorPtr(to)) Functor(eastl::move(*GetFunctorPtr(from)));
+					::new (GetFunctorPtr(to)) Functor(stl::move(*GetFunctorPtr(from)));
 				}
 
 				static void* Manager(void* to, void* from, typename function_base_detail::ManagerOperations ops) EA_NOEXCEPT
@@ -182,7 +182,7 @@ namespace eastl
 
 			// Functor is allocated on the heap
 			template <typename Functor>
-			class function_manager_base<Functor, typename eastl::enable_if<!is_functor_inplace_allocatable<Functor, SIZE_IN_BYTES>::value>::type>
+			class function_manager_base<Functor, typename stl::enable_if<!is_functor_inplace_allocatable<Functor, SIZE_IN_BYTES>::value>::type>
 			{
 			public:
 				static Functor* GetFunctorPtr(const FunctorStorageType& storage) EA_NOEXCEPT
@@ -208,7 +208,7 @@ namespace eastl
 				#else
 					EASTL_ASSERT_MSG(func != nullptr, "Allocation failed!");
 				#endif
-					::new (static_cast<void*>(func)) Functor(eastl::forward<T>(functor));
+					::new (static_cast<void*>(func)) Functor(stl::forward<T>(functor));
 					GetFunctorPtrRef(storage) = func;
 				}
 
@@ -311,7 +311,7 @@ namespace eastl
 
 				static R Invoker(const FunctorStorageType& functor, Args... args)
 				{
-					return eastl::invoke(*Base::GetFunctorPtr(functor), eastl::forward<Args>(args)...);
+					return stl::invoke(*Base::GetFunctorPtr(functor), stl::forward<Args>(args)...);
 				}
 			};
 
@@ -320,9 +320,9 @@ namespace eastl
 		};
 
 		#define EASTL_INTERNAL_FUNCTION_VALID_FUNCTION_ARGS(FUNCTOR, RET, ARGS, BASE, MYSELF) \
-			typename eastl::enable_if<eastl::is_invocable_r<RET, FUNCTOR, ARGS>::value \
-									  && !eastl::is_base_of_v<BASE, eastl::decay_t<FUNCTOR>> \
-									  && !eastl::is_same_v<eastl::decay_t<FUNCTOR>, MYSELF>>::type
+			typename stl::enable_if<stl::is_invocable_r<RET, FUNCTOR, ARGS>::value \
+									  && !stl::is_base_of_v<BASE, stl::decay_t<FUNCTOR>> \
+									  && !stl::is_same_v<stl::decay_t<FUNCTOR>, MYSELF>>::type
 
 		#define EASTL_INTERNAL_FUNCTION_DETAIL_VALID_FUNCTION_ARGS(FUNCTOR, RET, ARGS, MYSELF) \
 			EASTL_INTERNAL_FUNCTION_VALID_FUNCTION_ARGS(FUNCTOR, RET, ARGS, MYSELF, MYSELF)
@@ -354,13 +354,13 @@ namespace eastl
 
 			function_detail(function_detail&& other)
 			{
-				Move(eastl::move(other));
+				Move(stl::move(other));
 			}
 
 			template <typename Functor, typename = EASTL_INTERNAL_FUNCTION_DETAIL_VALID_FUNCTION_ARGS(Functor, R, Args..., function_detail)>
 			function_detail(Functor functor)
 			{
-				CreateForwardFunctor(eastl::move(functor));
+				CreateForwardFunctor(stl::move(functor));
 			}
 
 			~function_detail() EA_NOEXCEPT
@@ -379,7 +379,7 @@ namespace eastl
 			function_detail& operator=(function_detail&& other)
 			{
 				Destroy();
-				Move(eastl::move(other));
+				Move(stl::move(other));
 
 				return *this;
 			}
@@ -396,13 +396,13 @@ namespace eastl
 			template <typename Functor, typename = EASTL_INTERNAL_FUNCTION_DETAIL_VALID_FUNCTION_ARGS(Functor, R, Args..., function_detail)>
 			function_detail& operator=(Functor&& functor)
 			{
-				CreateForwardFunctor(eastl::forward<Functor>(functor));
+				CreateForwardFunctor(stl::forward<Functor>(functor));
 
 				return *this;
 			}
 
 			template <typename Functor>
-			function_detail& operator=(eastl::reference_wrapper<Functor> f) EA_NOEXCEPT
+			function_detail& operator=(stl::reference_wrapper<Functor> f) EA_NOEXCEPT
 			{
 				CreateForwardFunctor(f);
 
@@ -428,8 +428,8 @@ namespace eastl
 											   Base::ManagerOperations::MGROPS_MOVE_FUNCTOR);
 				}
 
-				eastl::swap(mMgrFuncPtr, other.mMgrFuncPtr);
-				eastl::swap(mInvokeFuncPtr, other.mInvokeFuncPtr);
+				stl::swap(mMgrFuncPtr, other.mMgrFuncPtr);
+				stl::swap(mInvokeFuncPtr, other.mInvokeFuncPtr);
 			}
 
 			explicit operator bool() const EA_NOEXCEPT
@@ -442,12 +442,12 @@ namespace eastl
 			#if EASTL_EXCEPTIONS_ENABLED
 				if (!HaveManager())
 				{
-					throw eastl::bad_function_call();
+					throw stl::bad_function_call();
 				}
 			#else
 				EASTL_ASSERT_MSG(HaveManager(), "function_detail call on an empty function_detail<R(Args..)>");
 			#endif
-				return (*mInvokeFuncPtr)(mStorage, eastl::forward<Args>(args)...);
+				return (*mInvokeFuncPtr)(mStorage, stl::forward<Args>(args)...);
 			}
 
 			#if EASTL_RTTI_ENABLED
@@ -528,7 +528,7 @@ namespace eastl
 			template <typename Functor>
 			void CreateForwardFunctor(Functor&& functor)
 			{
-				using DecayedFunctorType = typename eastl::decay<Functor>::type;
+				using DecayedFunctorType = typename stl::decay<Functor>::type;
 				using FunctionManagerType = typename Base::template function_manager<DecayedFunctorType, R, Args...>;
 
 				if (internal::is_null(functor))
@@ -540,7 +540,7 @@ namespace eastl
 				{
 					mMgrFuncPtr = &FunctionManagerType::Manager;
 					mInvokeFuncPtr = &FunctionManagerType::Invoker;
-					FunctionManagerType::CreateFunctor(mStorage, eastl::forward<Functor>(functor));
+					FunctionManagerType::CreateFunctor(mStorage, stl::forward<Functor>(functor));
 				}
 			}
 
@@ -554,6 +554,6 @@ namespace eastl
 
 	} // namespace internal
 
-} // namespace eastl
+} // namespace stl
 
 #endif // EASTL_FUNCTION_DETAIL_H

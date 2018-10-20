@@ -21,7 +21,7 @@
 #endif
 
 
-namespace eastl
+namespace stl
 {
 	/// EASTL_FIXED_STRING_DEFAULT_NAME
 	///
@@ -30,7 +30,7 @@ namespace eastl
 	/// to overflow allocations.
 	///
 	#ifndef EASTL_FIXED_STRING_DEFAULT_NAME
-		#define EASTL_FIXED_STRING_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_string" // Unless the user overrides something, this is "EASTL fixed_string".
+		#define EASTL_FIXED_STRING_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_string" // Unless the user overrides something, this is "stl fixed_string".
 	#endif
 
 
@@ -43,7 +43,7 @@ namespace eastl
 	/// is false, fixed_string behaves like regular string with the exception that
 	/// its capacity can never increase. All operations you do on such a fixed_string
 	/// which require a capacity increase will result in undefined behavior or an
-	/// C++ allocation exception, depending on the configuration of EASTL.
+	/// C++ allocation exception, depending on the configuration of stl.
 	///
 	/// Note: The nodeCount value is the amount of characters to allocate, which needs to
 	/// take into account a terminating zero. Thus if you want to store strings with a strlen
@@ -544,7 +544,7 @@ namespace eastl
 	inline void fixed_string<T, nodeCount, bEnableOverflow, OverflowAllocator>::swap(this_type& x)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(*this, x);
+		stl::fixed_swap(*this, x);
 	}
 
 
@@ -633,7 +633,7 @@ namespace eastl
 		#endif
 
 			return fixed_string(internalLayout().HeapBeginPtr() + position,
-								internalLayout().HeapBeginPtr() + position + eastl::min_alt(n, internalLayout().GetSize() - position));
+								internalLayout().HeapBeginPtr() + position + stl::min_alt(n, internalLayout().GetSize() - position));
 	}
 
 
@@ -808,10 +808,10 @@ namespace eastl
 					 fixed_string<T, nodeCount, bEnableOverflow, OverflowAllocator>& b)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(a, b);
+		stl::fixed_swap(a, b);
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 #endif // Header include guard

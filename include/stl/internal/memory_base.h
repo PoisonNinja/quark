@@ -15,10 +15,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 // This file contains basic functionality found in the standard library 'memory' header that
 // have limited or no dependencies.  This allows us to utilize these utilize these functions
-// in other EASTL code while avoid circular dependencies.
+// in other stl code while avoid circular dependencies.
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace eastl
+namespace stl
 {
 	/// addressof
 	///
@@ -31,7 +31,7 @@ namespace eastl
 		return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(value)));
 	}
 
-} // namespace eastl
+} // namespace stl
 
 #endif // EASTL_INTERNAL_MEMORY_BASE_H
 

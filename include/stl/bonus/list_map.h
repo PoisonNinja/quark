@@ -10,7 +10,7 @@
 #include <stl/map.h>
 
 
-namespace eastl
+namespace stl
 {
 
 	/// EASTL_MAP_DEFAULT_NAME
@@ -18,7 +18,7 @@ namespace eastl
 	/// Defines a default container name in the absence of a user-provided name.
 	///
 	#ifndef EASTL_LIST_MAP_DEFAULT_NAME
-		#define EASTL_LIST_MAP_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " list_map" // Unless the user overrides something, this is "EASTL list_map".
+		#define EASTL_LIST_MAP_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " list_map" // Unless the user overrides something, this is "stl list_map".
 	#endif
 
 	/// EASTL_MAP_DEFAULT_ALLOCATOR
@@ -98,8 +98,8 @@ namespace eastl
 	/// use_value_first
 	///
 	/// operator()(x) simply returns x.mValue.first. Used in list_map.
-	/// This is similar to eastl::use_first, however it assumes that the input type is an object
-	/// whose mValue is an eastl::pair, and the first value in the pair is the desired return.
+	/// This is similar to stl::use_first, however it assumes that the input type is an object
+	/// whose mValue is an stl::pair, and the first value in the pair is the desired return.
 	///
 	template <typename Object>
 	struct use_value_first
@@ -168,29 +168,29 @@ namespace eastl
 	///     MemoryPool myPool(sizeof(WidgetMap::node_type), 100);               // Make a pool of 100 Widget nodes.
 	///     WidgetMap myMap(&myPool);                                           // Create a map that uses the pool.
 	///
-	template <typename Key, typename T, typename Compare = eastl::less<Key>, typename Allocator = EASTLAllocatorType>
+	template <typename Key, typename T, typename Compare = stl::less<Key>, typename Allocator = EASTLAllocatorType>
 	class list_map
-		: protected rbtree<Key, eastl::list_map_data<eastl::pair<const Key, T> >, Compare, Allocator, eastl::use_value_first<eastl::list_map_data<eastl::pair<const Key, T> > >, true, true>
+		: protected rbtree<Key, stl::list_map_data<stl::pair<const Key, T> >, Compare, Allocator, stl::use_value_first<stl::list_map_data<stl::pair<const Key, T> > >, true, true>
 	{
 	public:
-		typedef rbtree<Key, eastl::list_map_data<eastl::pair<const Key, T> >, Compare, Allocator,
-					   eastl::use_value_first<eastl::list_map_data<eastl::pair<const Key, T> > >, true, true>   base_type;
+		typedef rbtree<Key, stl::list_map_data<stl::pair<const Key, T> >, Compare, Allocator,
+					   stl::use_value_first<stl::list_map_data<stl::pair<const Key, T> > >, true, true>   base_type;
 		typedef list_map<Key, T, Compare, Allocator>                                                            this_type;
 		typedef typename base_type::size_type                                                                   size_type;
 		typedef typename base_type::key_type                                                                    key_type;
 		typedef T                                                                                               mapped_type;
-		typedef typename eastl::pair<const Key, T>                                                              value_type;          // This is intentionally different from base_type::value_type
+		typedef typename stl::pair<const Key, T>                                                              value_type;          // This is intentionally different from base_type::value_type
 		typedef value_type&                                                                                     reference;
 		typedef const value_type&                                                                               const_reference;
 		typedef typename base_type::node_type                                                                   node_type;           // Despite the internal and external values being different, we're keeping the node type the same as the base
-																																	 // in order to allow for pool allocation.  See EASTL/map.h for more information.
-		typedef typename eastl::list_map_iterator<value_type, value_type*, value_type&>                         iterator;            // This is intentionally different from base_type::iterator
-		typedef typename eastl::list_map_iterator<value_type, const value_type*, const value_type&>             const_iterator;      // This is intentionally different from base_type::const_iterator
-		typedef eastl::reverse_iterator<iterator>                                                               reverse_iterator;
-		typedef eastl::reverse_iterator<const_iterator>                                                         const_reverse_iterator;
+																																	 // in order to allow for pool allocation.  See stl/map.h for more information.
+		typedef typename stl::list_map_iterator<value_type, value_type*, value_type&>                         iterator;            // This is intentionally different from base_type::iterator
+		typedef typename stl::list_map_iterator<value_type, const value_type*, const value_type&>             const_iterator;      // This is intentionally different from base_type::const_iterator
+		typedef stl::reverse_iterator<iterator>                                                               reverse_iterator;
+		typedef stl::reverse_iterator<const_iterator>                                                         const_reverse_iterator;
 		typedef typename base_type::allocator_type                                                              allocator_type;
-		typedef typename eastl::pair<iterator, bool>                                                            insert_return_type;  // This is intentionally removed, as list_map doesn't support insert() functions, in favor of list like push_back and push_front
-		typedef typename eastl::use_first<value_type>                                                           extract_key;         // This is intentionally different from base_type::extract_key
+		typedef typename stl::pair<iterator, bool>                                                            insert_return_type;  // This is intentionally removed, as list_map doesn't support insert() functions, in favor of list like push_back and push_front
+		typedef typename stl::use_first<value_type>                                                           extract_key;         // This is intentionally different from base_type::extract_key
 
 		using base_type::get_allocator;
 		using base_type::set_allocator;
@@ -199,7 +199,7 @@ namespace eastl
 		using base_type::size;
 
 	protected:
-		typedef typename eastl::list_map_data<eastl::pair<const Key, T> >                                       internal_value_type;
+		typedef typename stl::list_map_data<stl::pair<const Key, T> >                                       internal_value_type;
 
 	protected:
 		// internal base node, acting as the sentinel for list like behaviors
@@ -331,8 +331,8 @@ namespace eastl
 			iterator       upper_bound(const key_type& key) = delete;
 			const_iterator upper_bound(const key_type& key) const = delete;
 		 
-			eastl::pair<iterator, iterator>             equal_range(const key_type& key) = delete;
-			eastl::pair<const_iterator, const_iterator> equal_range(const key_type& key) const = delete;
+			stl::pair<iterator, iterator>             equal_range(const key_type& key) = delete;
+			stl::pair<const_iterator, const_iterator> equal_range(const key_type& key) const = delete;
 
 			mapped_type& operator[](const key_type& key) = delete; // Of map, multimap, set, and multimap, only map has operator[].
 		#endif
@@ -470,7 +470,7 @@ namespace eastl
 
 
 	// We provide additional template paremeters here to support comparisons between const and non-const iterators.
-	// See C++ defect report #179, or EASTL/list.h for more information.
+	// See C++ defect report #179, or stl/list.h for more information.
 	template <typename T, typename PointerA, typename ReferenceA, typename PointerB, typename ReferenceB>
 	inline bool operator==(const list_map_iterator<T, PointerA, ReferenceA>& a, 
 						   const list_map_iterator<T, PointerB, ReferenceB>& b)
@@ -710,13 +710,13 @@ namespace eastl
 	template <typename Key, typename T, typename Compare, typename Allocator>
 	bool list_map<Key, T, Compare, Allocator>::push_front(const key_type& key, const mapped_type& value)
 	{
-		return push_front(eastl::make_pair(key, value));
+		return push_front(stl::make_pair(key, value));
 	}
 
 	template <typename Key, typename T, typename Compare, typename Allocator>
 	bool list_map<Key, T, Compare, Allocator>::push_back(const key_type& key, const mapped_type& value)
 	{
-		return push_back(eastl::make_pair(key, value));
+		return push_back(stl::make_pair(key, value));
 	}
 
 	template <typename Key, typename T, typename Compare, typename Allocator>
@@ -927,7 +927,7 @@ namespace eastl
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

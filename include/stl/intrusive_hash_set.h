@@ -17,7 +17,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// intrusive_hash_set
@@ -28,7 +28,7 @@ namespace eastl
 	///     Hash            Hash function. See functional.h for examples of hash functions.
 	///     Equal           Equality testing predicate; tells if two elements are equal.
 	///
-	template <typename T, size_t bucketCount, typename Hash = eastl::hash<T>, typename Equal = eastl::equal_to<T> >
+	template <typename T, size_t bucketCount, typename Hash = stl::hash<T>, typename Equal = stl::equal_to<T> >
 	class intrusive_hash_set : public intrusive_hashtable<T, T, Hash, Equal, bucketCount, true, true>
 	{
 	public:
@@ -62,7 +62,7 @@ namespace eastl
 	///     Hash            Hash function. See functional.h for examples of hash functions.
 	///     Equal           Equality testing predicate; tells if two elements are equal.
 	///
-	template <typename T, size_t bucketCount, typename Hash = eastl::hash<T>, typename Equal = eastl::equal_to<T> >
+	template <typename T, size_t bucketCount, typename Hash = stl::hash<T>, typename Equal = stl::equal_to<T> >
 	class intrusive_hash_multiset : public intrusive_hashtable<T, T, Hash, Equal, bucketCount, true, false>
 	{
 	public:
@@ -82,7 +82,7 @@ namespace eastl
 	}; // intrusive_hash_multiset
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

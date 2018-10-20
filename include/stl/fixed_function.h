@@ -11,7 +11,7 @@
 
 #include <stl/internal/function_detail.h>
 
-namespace eastl
+namespace stl
 {
 
 	#define EASTL_INTERNAL_FIXED_FUNCTION_STATIC_ASSERT(TYPE) \
@@ -40,13 +40,13 @@ namespace eastl
 		}
 
 		fixed_function(fixed_function&& other)
-			: Base(eastl::move(other))
+			: Base(stl::move(other))
 		{
 		}
 
 		template <typename Functor, typename = EASTL_INTERNAL_FUNCTION_VALID_FUNCTION_ARGS(Functor, R, Args..., Base, fixed_function)>
 		fixed_function(Functor functor)
-			: Base(eastl::move(functor))
+			: Base(stl::move(functor))
 		{
 			EASTL_INTERNAL_FIXED_FUNCTION_STATIC_ASSERT(Functor);
 		}
@@ -61,7 +61,7 @@ namespace eastl
 
 		fixed_function& operator=(fixed_function&& other)
 		{
-			Base::operator=(eastl::move(other));
+			Base::operator=(stl::move(other));
 			return *this;
 		}
 
@@ -74,15 +74,15 @@ namespace eastl
 		template <typename Functor, typename = EASTL_INTERNAL_FUNCTION_VALID_FUNCTION_ARGS(Functor, R, Args..., Base, fixed_function)>
 		fixed_function& operator=(Functor&& functor)
 		{
-			EASTL_INTERNAL_FIXED_FUNCTION_STATIC_ASSERT(eastl::decay_t<Functor>);
-			Base::operator=(eastl::forward<Functor>(functor));
+			EASTL_INTERNAL_FIXED_FUNCTION_STATIC_ASSERT(stl::decay_t<Functor>);
+			Base::operator=(stl::forward<Functor>(functor));
 			return *this;
 		}
 
 		template <typename Functor>
-		fixed_function& operator=(eastl::reference_wrapper<Functor> f) EA_NOEXCEPT
+		fixed_function& operator=(stl::reference_wrapper<Functor> f) EA_NOEXCEPT
 		{
-			EASTL_INTERNAL_FIXED_FUNCTION_STATIC_ASSERT(eastl::reference_wrapper<Functor>);
+			EASTL_INTERNAL_FIXED_FUNCTION_STATIC_ASSERT(stl::reference_wrapper<Functor>);
 			Base::operator=(f);
 			return *this;
 		}
@@ -99,7 +99,7 @@ namespace eastl
 
 		R operator ()(Args... args) const
 		{
-			return Base::operator ()(eastl::forward<Args>(args)...);
+			return Base::operator ()(stl::forward<Args>(args)...);
 		}
 
 	#if EASTL_RTTI_ENABLED
@@ -154,6 +154,6 @@ namespace eastl
 		lhs.swap(rhs);
 	}
 
-} // namespace eastl
+} // namespace stl
 
 #endif // EASTL_FIXED_FUNCTION_H

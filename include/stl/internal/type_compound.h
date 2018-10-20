@@ -19,7 +19,7 @@
 #endif
 
 
-namespace eastl
+namespace stl
 {
 
 	///////////////////////////////////////////////////////////////////////
@@ -40,19 +40,19 @@ namespace eastl
 	#define EASTL_TYPE_TRAIT_extent_CONFORMANCE 1    // extent is conforming.
 
 	template<typename T, unsigned N> 
-	struct extent_help : public eastl::integral_constant<size_t, 0> {};
+	struct extent_help : public stl::integral_constant<size_t, 0> {};
 
 	template<typename T, unsigned I>
-	struct extent_help<T[I], 0> : public eastl::integral_constant<size_t, I> {};
+	struct extent_help<T[I], 0> : public stl::integral_constant<size_t, I> {};
 
 	template<typename T, unsigned N, unsigned I>
-	struct extent_help<T[I], N> : public eastl::extent_help<T, N - 1> { };
+	struct extent_help<T[I], N> : public stl::extent_help<T, N - 1> { };
 
 	template<typename T, unsigned N>
-	struct extent_help<T[], N> : public eastl::extent_help<T, N - 1> {};
+	struct extent_help<T[], N> : public stl::extent_help<T, N - 1> {};
 
 	template<typename T, unsigned N = 0> // extent uses unsigned instead of size_t.
-	struct extent : public eastl::extent_help<T, N> { };
+	struct extent : public stl::extent_help<T, N> { };
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -66,13 +66,13 @@ namespace eastl
 	#define EASTL_TYPE_TRAIT_is_array_CONFORMANCE 1    // is_array is conforming; doesn't make mistakes.
 
 	template<typename T>
-	struct is_array : public eastl::false_type {};
+	struct is_array : public stl::false_type {};
 
 	template<typename T>
-	struct is_array<T[]> : public eastl::true_type {};
+	struct is_array<T[]> : public stl::true_type {};
 
 	template<typename T, size_t N>
-	struct is_array<T[N]> : public eastl::true_type {};
+	struct is_array<T[N]> : public stl::true_type {};
 
 	#if !defined(EA_COMPILER_NO_TEMPLATE_ALIASES)
 		template<typename T>
@@ -92,7 +92,7 @@ namespace eastl
 
 	template<typename T>
 	struct is_array_of_known_bounds
-		: public eastl::integral_constant<bool, eastl::extent<T>::value != 0> {};
+		: public stl::integral_constant<bool, stl::extent<T>::value != 0> {};
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ namespace eastl
 
 	template<typename T>
 	struct is_array_of_unknown_bounds
-		: public eastl::integral_constant<bool, eastl::is_array<T>::value && (eastl::extent<T>::value == 0)> {};
+		: public stl::integral_constant<bool, stl::is_array<T>::value && (stl::extent<T>::value == 0)> {};
 
 
 	///////////////////////////////////////////////////////////////////////
@@ -190,11 +190,11 @@ namespace eastl
 
 	template <typename T> 
 	struct is_member_pointer 
-		: public eastl::integral_constant<bool, eastl::is_member_function_pointer<T>::value>{};
+		: public stl::integral_constant<bool, stl::is_member_function_pointer<T>::value>{};
 
 	template <typename T, typename U>
 	struct is_member_pointer<U T::*> 
-		: public eastl::true_type{};
+		: public stl::true_type{};
 
 
 
@@ -209,9 +209,9 @@ namespace eastl
 	#define EASTL_TYPE_TRAIT_is_member_object_pointer_CONFORMANCE 1    // is_member_object_pointer is conforming; doesn't make mistakes.
 
 	template<typename T>
-	struct is_member_object_pointer : public eastl::integral_constant<bool,
-																	  eastl::is_member_pointer<T>::value &&
-																	 !eastl::is_member_function_pointer<T>::value
+	struct is_member_object_pointer : public stl::integral_constant<bool,
+																	  stl::is_member_pointer<T>::value &&
+																	 !stl::is_member_function_pointer<T>::value
 																	 > {};
 
 
@@ -285,9 +285,9 @@ namespace eastl
 	#else
 		#define EASTL_TYPE_TRAIT_is_convertible_CONFORMANCE 1
 
-		template<typename From, typename To, bool = eastl::is_void<From>::value || eastl::is_function<To>::value || eastl::is_array<To>::value >
+		template<typename From, typename To, bool = stl::is_void<From>::value || stl::is_function<To>::value || stl::is_array<To>::value >
 		struct is_convertible_helper // Anything is convertible to void. Nothing is convertible to a function or an array.
-			{ static const bool value = eastl::is_void<To>::value; };
+			{ static const bool value = stl::is_void<To>::value; };
 
 		template<typename From, typename To>
 		class is_convertible_helper<From, To, false>
@@ -296,10 +296,10 @@ namespace eastl
 			static void ToFunction(To1);    // We try to call this function with an instance of From. It is valid if From can be converted to To.
 
 			template<typename /*From1*/, typename /*To1*/>
-			static eastl::no_type is(...);
+			static stl::no_type is(...);
 
 			template<typename From1, typename To1>
-			static decltype(ToFunction<To1>(eastl::declval<From1>()), eastl::yes_type()) is(int);
+			static decltype(ToFunction<To1>(stl::declval<From1>()), stl::yes_type()) is(int);
 
 		public:
 			static const bool value = sizeof(is<From, To>(0)) == 1;
@@ -352,7 +352,7 @@ namespace eastl
 		template <typename T> struct is_union : public false_type{};
 	#endif
 
-	#define EASTL_DECLARE_UNION(T) namespace eastl{ template <> struct is_union<T> : public true_type{}; template <> struct is_union<const T> : public true_type{}; }
+	#define EASTL_DECLARE_UNION(T) namespace stl{ template <> struct is_union<T> : public true_type{}; template <> struct is_union<const T> : public true_type{}; }
 
 
 
@@ -445,7 +445,7 @@ namespace eastl
 		template <> struct is_enum<void const volatile> : public false_type {};
 	#endif
 
-	#define EASTL_DECLARE_ENUM(T) namespace eastl{ template <> struct is_enum<T> : public true_type{}; template <> struct is_enum<const T> : public true_type{}; }
+	#define EASTL_DECLARE_ENUM(T) namespace stl{ template <> struct is_enum<T> : public true_type{}; template <> struct is_enum<const T> : public true_type{}; }
 
 
 
@@ -600,15 +600,15 @@ namespace eastl
 	template<typename T>
 	struct decay
 	{
-		typedef typename eastl::remove_reference<T>::type U;
+		typedef typename stl::remove_reference<T>::type U;
 
-		typedef typename eastl::conditional< 
-			eastl::is_array<U>::value,
-			typename eastl::remove_extent<U>::type*,
-			typename eastl::conditional< 
-				eastl::is_function<U>::value,
-				typename eastl::add_pointer<U>::type,
-				typename eastl::remove_cv<U>::type
+		typedef typename stl::conditional< 
+			stl::is_array<U>::value,
+			typename stl::remove_extent<U>::type*,
+			typename stl::conditional< 
+				stl::is_function<U>::value,
+				typename stl::add_pointer<U>::type,
+				typename stl::remove_cv<U>::type
 			>::type
 		>::type type;
 	};
@@ -685,7 +685,7 @@ namespace eastl
 		template <typename T>
 		struct is_final : public false_type {};
 	#endif
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

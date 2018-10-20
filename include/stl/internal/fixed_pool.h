@@ -44,7 +44,7 @@
 #endif
 
 
-namespace eastl
+namespace stl
 {
 
 	/// EASTL_FIXED_POOL_DEFAULT_NAME
@@ -52,7 +52,7 @@ namespace eastl
 	/// Defines a default allocator name in the absence of a user-provided name.
 	///
 	#ifndef EASTL_FIXED_POOL_DEFAULT_NAME
-		#define EASTL_FIXED_POOL_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_pool" // Unless the user overrides something, this is "EASTL fixed_pool".
+		#define EASTL_FIXED_POOL_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_pool" // Unless the user overrides something, this is "stl fixed_pool".
 	#endif
 
 
@@ -238,8 +238,8 @@ namespace eastl
 	/// fixed_pool
 	///
 	/// Implements a simple fixed pool allocator for use by fixed-size containers. 
-	/// This is not a generic eastl allocator which can be plugged into an arbitrary
-	/// eastl container, as it simplifies some functions are arguments for the 
+	/// This is not a generic stl allocator which can be plugged into an arbitrary
+	/// stl container, as it simplifies some functions are arguments for the 
 	/// purpose of efficiency.
 	/// 
 	class EASTL_API fixed_pool : public fixed_pool_base
@@ -511,7 +511,7 @@ namespace eastl
 				else
 				{
 					p = allocate_memory(mOverflowAllocator, mnNodeSize, alignment, alignmentOffset);
-					EASTL_ASSERT_MSG(p != nullptr, "the behaviour of eastl::allocators that return nullptr is not defined.");
+					EASTL_ASSERT_MSG(p != nullptr, "the behaviour of stl::allocators that return nullptr is not defined.");
 				}
 
 			}
@@ -1627,7 +1627,7 @@ namespace eastl
 
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #if defined(_MSC_VER)

@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// We support eastl::numeric_limits for the following types. Sized types such
+// We support stl::numeric_limits for the following types. Sized types such
 // as int32_t are covered by these basic types, with the exception of int128_t.
 //
 //     bool
@@ -134,7 +134,7 @@ EA_DISABLE_VC_WARNING(4310 4296)
     ((EASTL_LIMITS_IS_SIGNED(T) ? EASTL_LIMITS_DIGITS10_S(T)                   \
                                 : EASTL_LIMITS_DIGITS10_U(T)))
 
-namespace eastl
+namespace stl
 {
 // See C++11 18.3.2.5
 enum float_round_style {
@@ -2209,7 +2209,7 @@ struct numeric_limits<long double> {
 };
 #endif
 
-} // namespace eastl
+} // namespace stl
 
 EA_RESTORE_VC_WARNING()
 

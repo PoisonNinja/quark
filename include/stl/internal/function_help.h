@@ -12,7 +12,7 @@
 #include <stl/internal/config.h>
 #include <stl/type_traits.h>
 
-namespace eastl
+namespace stl
 {
 	namespace internal
 	{
@@ -45,7 +45,7 @@ namespace eastl
 		}
 
 	} // namespace internal
-} // namespace eastl
+} // namespace stl
 
 #endif // Header include guard
 

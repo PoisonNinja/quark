@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // ReadMe
 //
-// This is the EASTL configuration file. All configurable parameters of EASTL
+// This is the stl configuration file. All configurable parameters of stl
 // are controlled through this file. However, all the settings here can be
 // manually overridden by the user. There are three ways for a user to override
 // the settings in this file:
@@ -28,7 +28,7 @@
 // EASTL_USER_CONFIG_HEADER
 //
 // This allows the user to define a header file to be #included before the
-// EASTL config.h contents are compiled. A primary use of this is to override
+// stl config.h contents are compiled. A primary use of this is to override
 // the contents of this config.h file. Note that all the settings below in
 // this file are user-overridable.
 //
@@ -85,8 +85,8 @@
 //     "12.03.01"   // Major version 12, minor version 03, patch version
 //
 // Example usage:
-//     printf("EASTL version: %s", EASTL_VERSION);
-//     printf("EASTL version: %d.%d.%d", EASTL_VERSION_N / 10000 % 100, EASTL_VERSION_N / 100 % 100, EASTL_VERSION_N % 100);
+//     printf("stl version: %s", EASTL_VERSION);
+//     printf("stl version: %d.%d.%d", EASTL_VERSION_N / 10000 % 100, EASTL_VERSION_N / 100 % 100, EASTL_VERSION_N % 100);
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -157,14 +157,14 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// EASTL namespace
+// stl namespace
 //
 // We define this so that users that #include this config file can reference
 // these namespaces without seeing any other files that happen to use them.
 ///////////////////////////////////////////////////////////////////////////////
 
 /// EA Standard Template Library
-namespace eastl
+namespace stl
 {
 	// Intentionally empty.
 }
@@ -194,7 +194,7 @@ namespace eastl
 	#endif
 #endif
 
-// Developer debug. Helps EASTL developers assert EASTL is coded correctly.
+// Developer debug. Helps stl developers assert stl is coded correctly.
 // Normally disabled for users since it validates internal things and not user things.
 #ifndef EASTL_DEV_DEBUG
 	#define EASTL_DEV_DEBUG 0
@@ -233,7 +233,7 @@ namespace eastl
 // Defined as 0 or 1. The default is dependent on the definition of EA_DLL.
 // If EA_DLL is defined, then EASTL_DLL is 1, else EASTL_DLL is 0.
 // EA_DLL is a define that controls DLL builds within the EAConfig build system.
-// EASTL_DLL controls whether EASTL is built and used as a DLL.
+// EASTL_DLL controls whether stl is built and used as a DLL.
 // Normally you wouldn't do such a thing, but there are use cases for such
 // a thing, particularly in the case of embedding C++ into C# applications.
 //
@@ -250,8 +250,8 @@ namespace eastl
 // EASTL_API
 //
 // This is used to label functions as DLL exports under Microsoft platforms.
-// If EA_DLL is defined, then the user is building EASTL as a DLL and EASTL's
-// non-templated functions will be exported. EASTL template functions are not
+// If EA_DLL is defined, then the user is building stl as a DLL and stl's
+// non-templated functions will be exported. stl template functions are not
 // labelled as EASTL_API (and are thus not exported in a DLL build). This is
 // because it's not possible (or at least unsafe) to implement inline templated
 // functions in a DLL.
@@ -295,7 +295,7 @@ namespace eastl
 ///////////////////////////////////////////////////////////////////////////////
 // EASTL_EASTDC_API
 //
-// This is used for importing EAStdC functions into EASTL, possibly via a DLL import.
+// This is used for importing EAStdC functions into stl, possibly via a DLL import.
 //
 #ifndef EASTL_EASTDC_API
 	#if EASTL_DLL
@@ -324,9 +324,9 @@ namespace eastl
 //
 // Defined as 0 or 1. By default it is 1.
 //
-// When enabled EASTL uses EAStdC's Vsnprintf function directly instead of
+// When enabled stl uses EAStdC's Vsnprintf function directly instead of
 // having the user provide a global Vsnprintf8/16/32 function. The benefit
-// of this is that it will allow EASTL to just link to EAStdC's Vsnprintf
+// of this is that it will allow stl to just link to EAStdC's Vsnprintf
 // without the user doing anything. The downside is that any users who aren't
 // already using EAStdC will either need to now depend on EAStdC or globally
 // define this property to be 0 and simply provide functions that have the same
@@ -379,10 +379,10 @@ namespace eastl
 ///////////////////////////////////////////////////////////////////////////////
 // EASTL_DEFAULT_NAME_PREFIX
 //
-// Defined as a string literal. Defaults to "EASTL".
-// This define is used as the default name for EASTL where such a thing is
-// referenced in EASTL. For example, if the user doesn't specify an allocator
-// name for their deque, it is named "EASTL deque". However, you can override
+// Defined as a string literal. Defaults to "stl".
+// This define is used as the default name for stl where such a thing is
+// referenced in stl. For example, if the user doesn't specify an allocator
+// name for their deque, it is named "stl deque". However, you can override
 // this to say "SuperBaseball deque" by changing EASTL_DEFAULT_NAME_PREFIX.
 //
 // Example usage (which is simply taken from how deque.h uses this define):
@@ -391,7 +391,7 @@ namespace eastl
 //     #endif
 //
 #ifndef EASTL_DEFAULT_NAME_PREFIX
-	#define EASTL_DEFAULT_NAME_PREFIX "EASTL"
+	#define EASTL_DEFAULT_NAME_PREFIX "stl"
 #endif
 
 
@@ -414,7 +414,7 @@ namespace eastl
 	#define EASTL_ASSERT_ENABLED EASTL_DEBUG
 #endif
 
-// Developer assert. Helps EASTL developers assert EASTL is coded correctly.
+// Developer assert. Helps stl developers assert stl is coded correctly.
 // Normally disabled for users since it validates internal things and not user things.
 #ifndef EASTL_DEV_ASSERT_ENABLED
 	#define EASTL_DEV_ASSERT_ENABLED EASTL_DEV_DEBUG
@@ -466,7 +466,7 @@ namespace eastl
 #ifndef EASTL_ASSERTION_FAILURE_DEFINED
 	#define EASTL_ASSERTION_FAILURE_DEFINED
 
-	namespace eastl
+	namespace stl
 	{
 		typedef void (*EASTL_AssertionFailureFunction)(const char* pExpression, void* pContext);
 		EASTL_API void SetAssertionFailureFunction(EASTL_AssertionFailureFunction pFunction, void* pContext);
@@ -495,7 +495,7 @@ namespace eastl
 			EA_DISABLE_VC_WARNING(4127) \
 			do { \
 				EA_ANALYSIS_ASSUME(expression); \
-				(void)((expression) || (eastl::AssertionFailure(#expression), 0)); \
+				(void)((expression) || (stl::AssertionFailure(#expression), 0)); \
 			} while (0) \
 			EA_RESTORE_VC_WARNING()
 	#else
@@ -503,7 +503,7 @@ namespace eastl
 	#endif
 #endif
 
-// Developer assert. Helps EASTL developers assert EASTL is coded correctly.
+// Developer assert. Helps stl developers assert stl is coded correctly.
 // Normally disabled for users since it validates internal things and not user things.
 #ifndef EASTL_DEV_ASSERT
 	#if EASTL_DEV_ASSERT_ENABLED
@@ -511,7 +511,7 @@ namespace eastl
 			EA_DISABLE_VC_WARNING(4127) \
 			do { \
 				EA_ANALYSIS_ASSUME(expression); \
-				(void)((expression) || (eastl::AssertionFailure(#expression), 0)); \
+				(void)((expression) || (stl::AssertionFailure(#expression), 0)); \
 			} while(0) \
 			EA_RESTORE_VC_WARNING()
 	#else
@@ -534,7 +534,7 @@ namespace eastl
 			EA_DISABLE_VC_WARNING(4127) \
 			do { \
 				EA_ANALYSIS_ASSUME(expression); \
-				(void)((expression) || (eastl::AssertionFailure(message), 0)); \
+				(void)((expression) || (stl::AssertionFailure(message), 0)); \
 			} while (0) \
 			EA_RESTORE_VC_WARNING()
 	#else
@@ -556,7 +556,7 @@ namespace eastl
 
 #ifndef EASTL_FAIL_MSG
 	#if EASTL_ASSERT_ENABLED
-		#define EASTL_FAIL_MSG(message) (eastl::AssertionFailure(message))
+		#define EASTL_FAIL_MSG(message) (stl::AssertionFailure(message))
 	#else
 		#define EASTL_FAIL_MSG(message)
 	#endif
@@ -663,7 +663,7 @@ namespace eastl
 // Defined as 0 or 1. Default is 0 (disabled) until some future date.
 // If enabled (1) then container operator= copies the allocator from the
 // source container. It ideally should be set to enabled but for backwards
-// compatibility with older versions of EASTL it is currently set to 0.
+// compatibility with older versions of stl it is currently set to 0.
 // Regardless of whether this value is 0 or 1, this container copy constructs
 // or copy assigns allocators.
 //
@@ -698,7 +698,7 @@ namespace eastl
 // Defined as 0 or 1. Default is 1 if RTTI is supported by the compiler.
 // This define exists so that we can use some dynamic_cast operations in the
 // code without warning. dynamic_cast is only used if the specifically refers
-// to it; EASTL won't do dynamic_cast behind your back.
+// to it; stl won't do dynamic_cast behind your back.
 //
 // Example usage:
 //     #if EASTL_RTTI_ENABLED
@@ -729,7 +729,7 @@ namespace eastl
 // compiler is set to disable exceptions then EASTL_EXCEPTIONS_ENABLED is
 // forced to a value of 0 regardless of the user predefine.
 //
-// Note that we do not enable EASTL exceptions by default if the compiler
+// Note that we do not enable stl exceptions by default if the compiler
 // has exceptions enabled. To enable EASTL_EXCEPTIONS_ENABLED you need to
 // manually set it to 1.
 //
@@ -834,10 +834,10 @@ namespace eastl
 // EASTL_DEFAULT_ALLOCATOR_ALIGNED_ALLOCATIONS_SUPPORTED
 //
 // Defined as 0 or 1.
-// Tells if you can use the default EASTL allocator to do aligned allocations,
+// Tells if you can use the default stl allocator to do aligned allocations,
 // which for most uses tells if you can store aligned objects in containers
 // that use default allocators. It turns out that when built as a DLL for
-// some platforms, EASTL doesn't have a way to do aligned allocations, as it
+// some platforms, stl doesn't have a way to do aligned allocations, as it
 // doesn't have a heap that supports it. There is a way to work around this
 // with dynamically defined allocators, but that's currently a to-do.
 //
@@ -943,7 +943,7 @@ namespace eastl
 // EASTL_MAX_STACK_USAGE
 //
 // Defined as an integer greater than zero. Default is 4000.
-// There are some places in EASTL where temporary objects are put on the
+// There are some places in stl where temporary objects are put on the
 // stack. A common example of this is in the implementation of container
 // swap functions whereby a temporary copy of the container is made.
 // There is a problem, however, if the size of the item created on the stack
@@ -1007,8 +1007,8 @@ namespace eastl
 // Defined as 0 or 1. Default is 0 until such day that it's deemeed safe.
 // When enabled, enables operator= for other char types, e.g. for code
 // like this:
-//     eastl::string8  s8;
-//     eastl::string16 s16;
+//     stl::string8  s8;
+//     stl::string16 s16;
 //     s8 = s16;
 // This option is considered experimental, and may exist as such for an
 // indefinite amount of time.
@@ -1041,10 +1041,10 @@ namespace eastl
 // EASTL_STD_ITERATOR_CATEGORY_ENABLED
 //
 // Defined as 0 or 1. Default is 0.
-// If defined as non-zero, EASTL iterator categories (iterator.h's input_iterator_tag,
+// If defined as non-zero, stl iterator categories (iterator.h's input_iterator_tag,
 // forward_iterator_tag, etc.) are defined to be those from std C++ in the std
 // namespace. The reason for wanting to enable such a feature is that it allows
-// EASTL containers and algorithms to work with std STL containes and algorithms.
+// stl containers and algorithms to work with std STL containes and algorithms.
 // The default value was changed from 1 to 0 in EASL 1.13.03, January 11, 2012.
 // The reason for the change was that almost nobody was taking advantage of it and
 // it was slowing down compile times for some compilers quite a bit due to them
@@ -1058,7 +1058,7 @@ namespace eastl
 #if EASTL_STD_ITERATOR_CATEGORY_ENABLED
 	#define EASTL_ITC_NS std
 #else
-	#define EASTL_ITC_NS eastl
+	#define EASTL_ITC_NS stl
 #endif
 
 
@@ -1073,7 +1073,7 @@ namespace eastl
 // of the validity of containers and their iterators. Validation checking is
 // something that often involves significantly more than basic assertion
 // checking, and it may sometimes be desirable to disable it.
-// This macro would generally be used internally by EASTL.
+// This macro would generally be used internally by stl.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1250,7 +1250,7 @@ namespace eastl
 
 	#elif defined(__MSL_CPP__) && (__MSL_CPP__ >= 0x8000) // CodeWarrior compiler.
 		#define EASTL_STD_TYPE_TRAITS_AVAILABLE 0
-		// To do: Implement support for this (via modifying the EASTL type
+		// To do: Implement support for this (via modifying the stl type
 		//        traits headers, as CodeWarrior provides this.
 	#else
 		#define EASTL_STD_TYPE_TRAITS_AVAILABLE 0
@@ -1322,8 +1322,8 @@ namespace eastl
 // Defined as 0 or 1; default is 1.
 // Specifies whether the min and max algorithms are available.
 // It may be useful to disable the min and max algorithems because sometimes
-// #defines for min and max exist which would collide with EASTL min and max.
-// Note that there are already alternative versions of min and max in EASTL
+// #defines for min and max exist which would collide with stl min and max.
+// Note that there are already alternative versions of min and max in stl
 // with the min_alt and max_alt functions. You can use these without colliding
 // with min/max macros that may exist.
 //
@@ -1344,7 +1344,7 @@ namespace eastl
 // max definitions in algorithm.h to work as expected. An alternative to
 // the enabling of EASTL_NOMINMAX is to #define NOMINMAX in your project
 // settings if you are compiling for Windows.
-// Note that this does not control the availability of the EASTL min and max
+// Note that this does not control the availability of the stl min and max
 // algorithms; the EASTL_MINMAX_ENABLED configuration parameter does that.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -1405,7 +1405,7 @@ namespace eastl
 // operations is enabled.
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(EASTL_MOVE_SEMANTICS_ENABLED)
-	#if EASTL_NO_RVALUE_REFERENCES // If the compiler doesn't support rvalue references or EASTL is configured to disable them...
+	#if EASTL_NO_RVALUE_REFERENCES // If the compiler doesn't support rvalue references or stl is configured to disable them...
 		#define EASTL_MOVE_SEMANTICS_ENABLED 0
 	#else
 		#define EASTL_MOVE_SEMANTICS_ENABLED 1
@@ -1476,7 +1476,7 @@ namespace eastl
 // Defined as 0 or 1.
 // This is the same as EABase EA_HAVE_CPP11_TYPE_TRAITS except that it
 // follows the convention of being always defined, as 0 or 1. Note that this
-// identifies if the Standard Library has C++11 type traits and not if EASTL
+// identifies if the Standard Library has C++11 type traits and not if stl
 // has its equivalents to C++11 type traits.
 ///////////////////////////////////////////////////////////////////////////////
 #if !defined(EASTL_HAVE_CPP11_TYPE_TRAITS)
@@ -1638,8 +1638,8 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 // EASTL_ALLOCATOR_MIN_ALIGNMENT
 //
 // Defined as an integral power-of-2 that's >= 1.
-// Identifies the minimum alignment that EASTL should assume its allocators
-// use. There is code within EASTL that decides whether to do a Malloc or
+// Identifies the minimum alignment that stl should assume its allocators
+// use. There is code within stl that decides whether to do a Malloc or
 // MallocAligned call and it's typically better if it can use the Malloc call.
 // But this requires knowing what the minimum possible alignment is.
 #if !defined(EASTL_ALLOCATOR_MIN_ALIGNMENT)
@@ -1650,7 +1650,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 ///////////////////////////////////////////////////////////////////////////////
 // EASTL_SYSTEM_ALLOCATOR_MIN_ALIGNMENT
 //
-// Identifies the minimum alignment that EASTL should assume system allocations
+// Identifies the minimum alignment that stl should assume system allocations
 // from malloc and new will have.
 #if !defined(EASTL_SYSTEM_ALLOCATOR_MIN_ALIGNMENT)
 	#if defined(EA_PLATFORM_MICROSOFT) || defined(EA_PLATFORM_APPLE)
@@ -1662,9 +1662,9 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// EASTL allocator
+// stl allocator
 //
-// The EASTL allocator system allows you to redefine how memory is allocated
+// The stl allocator system allows you to redefine how memory is allocated
 // via some defines that are set up here. In the container code, memory is
 // allocated via macros which expand to whatever the user has them set to
 // expand to. Given that there are multiple allocator systems available,
@@ -1683,7 +1683,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// namespace eastl
+// namespace stl
 // {
 //     class allocator
 //     {
@@ -1721,20 +1721,20 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 #endif
 
 #ifndef EASTLAllocatorType
-	#define EASTLAllocatorType eastl::allocator
+	#define EASTLAllocatorType stl::allocator
 #endif
 
 #ifndef EASTLDummyAllocatorType
-	#define EASTLDummyAllocatorType eastl::dummy_allocator
+	#define EASTLDummyAllocatorType stl::dummy_allocator
 #endif
 
 #ifndef EASTLAllocatorDefault
 	// EASTLAllocatorDefault returns the default allocator instance. This is not a global
 	// allocator which implements all container allocations but is the allocator that is
-	// used when EASTL needs to allocate memory internally. There are very few cases where
-	// EASTL allocates memory internally, and in each of these it is for a sensible reason
+	// used when stl needs to allocate memory internally. There are very few cases where
+	// stl allocates memory internally, and in each of these it is for a sensible reason
 	// that is documented to behave as such.
-	#define EASTLAllocatorDefault eastl::GetDefaultAllocator
+	#define EASTLAllocatorDefault stl::GetDefaultAllocator
 #endif
 
 
@@ -1743,7 +1743,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 /// Defines a default allocator name in the absence of a user-provided name.
 ///
 #ifndef EASTL_ALLOCATOR_DEFAULT_NAME
-	#define EASTL_ALLOCATOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX // Unless the user overrides something, this is "EASTL".
+	#define EASTL_ALLOCATOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX // Unless the user overrides something, this is "stl".
 #endif
 
 /// EASTL_USE_FORWARD_WORKAROUND
@@ -1760,7 +1760,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 #endif
 
 /// EASTL_TUPLE_ENABLED
-/// EASTL tuple implementation depends on variadic template support
+/// stl tuple implementation depends on variadic template support
 #if EASTL_VARIADIC_TEMPLATES_ENABLED && !defined(EA_COMPILER_NO_TEMPLATE_ALIASES)
 	#define EASTL_TUPLE_ENABLED 1
 #else
@@ -1818,7 +1818,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 #endif
 
 /// EASTL_OPENSOURCE
-/// This is enabled when EASTL is building built in an "open source" mode.  Which is a mode that eliminates code
+/// This is enabled when stl is building built in an "open source" mode.  Which is a mode that eliminates code
 /// dependencies on other technologies that have not been released publically.
 /// EASTL_OPENSOURCE = 0, is the default.
 /// EASTL_OPENSOURCE = 1, utilizes technologies that not publically available.
@@ -1858,7 +1858,7 @@ typedef EASTL_SSIZE_T eastl_ssize_t; // Signed version of eastl_size_t. Concept 
 
 
 /// EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR
-/// This feature define allows users to toggle the problematic eastl::pair implicit 
+/// This feature define allows users to toggle the problematic stl::pair implicit 
 /// single element constructor.
 #ifndef EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR
 	#define EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR 1

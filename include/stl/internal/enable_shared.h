@@ -12,7 +12,7 @@
 	#pragma once
 #endif
 
-namespace eastl
+namespace stl
 {
 
 	/// enable_shared_from_this
@@ -65,7 +65,7 @@ namespace eastl
 
 	}; // enable_shared_from_this
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

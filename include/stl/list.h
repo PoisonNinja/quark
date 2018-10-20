@@ -62,7 +62,7 @@ EA_RESTORE_ALL_VC_WARNINGS()
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// EASTL_LIST_DEFAULT_NAME
@@ -70,7 +70,7 @@ namespace eastl
 	/// Defines a default container name in the absence of a user-provided name.
 	///
 	#ifndef EASTL_LIST_DEFAULT_NAME
-		#define EASTL_LIST_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " list" // Unless the user overrides something, this is "EASTL list".
+		#define EASTL_LIST_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " list" // Unless the user overrides something, this is "stl list".
 	#endif
 
 
@@ -280,8 +280,8 @@ namespace eastl
 		typedef const T&                                const_reference;
 		typedef ListIterator<T, T*, T&>                 iterator;
 		typedef ListIterator<T, const T*, const T&>     const_iterator;
-		typedef eastl::reverse_iterator<iterator>       reverse_iterator;
-		typedef eastl::reverse_iterator<const_iterator> const_reverse_iterator;
+		typedef stl::reverse_iterator<iterator>       reverse_iterator;
+		typedef stl::reverse_iterator<const_iterator> const_reverse_iterator;
 		typedef typename base_type::size_type           size_type;
 		typedef typename base_type::difference_type     difference_type;
 		typedef typename base_type::allocator_type      allocator_type;
@@ -908,7 +908,7 @@ namespace eastl
 	#if EASTL_MOVE_SEMANTICS_ENABLED
 		template <typename T, typename Allocator>
 		inline list<T, Allocator>::list(this_type&& x)
-			: base_type(eastl::move(x.mAllocator))
+			: base_type(stl::move(x.mAllocator))
 		{
 			swap(x);
 		}
@@ -1126,7 +1126,7 @@ namespace eastl
 				return n;
 			#else
 				// The following optimizes to slightly better code than the code above.
-				return (size_type)eastl::distance(const_iterator((ListNodeBase*)mNode.mpNext), const_iterator((ListNodeBase*)&mNode));
+				return (size_type)stl::distance(const_iterator((ListNodeBase*)mNode.mpNext), const_iterator((ListNodeBase*)&mNode));
 			#endif
 		#endif
 	}
@@ -1159,7 +1159,7 @@ namespace eastl
 				#endif
 			}
 
-			DoAssign(x.begin(), x.end(), eastl::false_type());
+			DoAssign(x.begin(), x.end(), stl::false_type());
 		}
 
 		return *this;
@@ -1270,27 +1270,27 @@ namespace eastl
 			template <typename... Args>
 			void list<T, Allocator>::emplace_front(Args&&... args)
 			{
-				DoInsertValue((ListNodeBase*)mNode.mpNext, eastl::forward<Args>(args)...);
+				DoInsertValue((ListNodeBase*)mNode.mpNext, stl::forward<Args>(args)...);
 			}
 
 			template <typename T, typename Allocator>
 			template <typename... Args>
 			void list<T, Allocator>::emplace_back(Args&&... args)
 			{
-				DoInsertValue((ListNodeBase*)&mNode, eastl::forward<Args>(args)...);
+				DoInsertValue((ListNodeBase*)&mNode, stl::forward<Args>(args)...);
 			}
 	#else
 		#if EASTL_MOVE_SEMANTICS_ENABLED
 			template <typename T, typename Allocator>
 			void list<T, Allocator>::emplace_front(value_type&& value)
 			{
-				DoInsertValue((ListNodeBase*)mNode.mpNext, eastl::move(value));
+				DoInsertValue((ListNodeBase*)mNode.mpNext, stl::move(value));
 			}
 
 			template <typename T, typename Allocator>
 			void list<T, Allocator>::emplace_back(value_type&& value)
 			{
-				DoInsertValue((ListNodeBase*)&mNode, eastl::move(value));
+				DoInsertValue((ListNodeBase*)&mNode, stl::move(value));
 			}
 		#endif
 
@@ -1319,7 +1319,7 @@ namespace eastl
 		template <typename T, typename Allocator>
 		inline void list<T, Allocator>::push_front(value_type&& value)
 		{
-			emplace(begin(), eastl::move(value));
+			emplace(begin(), stl::move(value));
 		}
 	#endif
 
@@ -1372,7 +1372,7 @@ namespace eastl
 		template <typename T, typename Allocator>
 		inline void list<T, Allocator>::push_back(value_type&& value)
 		{
-			emplace(end(), eastl::move(value));
+			emplace(end(), stl::move(value));
 		}
 	#endif
 
@@ -1420,7 +1420,7 @@ namespace eastl
 		inline typename list<T, Allocator>::iterator
 		list<T, Allocator>::emplace(const_iterator position, Args&&... args)
 		{
-			DoInsertValue(position.mpNode, eastl::forward<Args>(args)...);
+			DoInsertValue(position.mpNode, stl::forward<Args>(args)...);
 			return iterator(position.mpNode->mpPrev);
 		}
 	#else
@@ -1429,7 +1429,7 @@ namespace eastl
 			inline typename list<T, Allocator>::iterator
 			list<T, Allocator>::emplace(const_iterator position, value_type&& value)
 			{
-				DoInsertValue(position.mpNode, eastl::move(value));
+				DoInsertValue(position.mpNode, stl::move(value));
 				return iterator(position.mpNode->mpPrev);
 			}
 		#endif
@@ -1475,7 +1475,7 @@ namespace eastl
 		inline typename list<T, Allocator>::iterator
 		list<T, Allocator>::insert(const_iterator position, value_type&& value)
 		{
-			return emplace(position, eastl::move(value));
+			return emplace(position, stl::move(value));
 		}
 	#endif
 
@@ -1673,7 +1673,7 @@ namespace eastl
 		if(mAllocator == x.mAllocator)
 		{
 			#if EASTL_LIST_SIZE_CACHE
-				const size_type n = (size_type)eastl::distance(first, last);
+				const size_type n = (size_type)stl::distance(first, last);
 
 				if(n)
 				{
@@ -1710,7 +1710,7 @@ namespace eastl
 			DoSwap(x);
 		else // else swap the contents.
 		{
-			const this_type temp(*this); // Can't call eastl::swap because that would
+			const this_type temp(*this); // Can't call stl::swap because that would
 			*this = x;                   // itself call this member swap function.
 			x     = temp;
 		}
@@ -1843,7 +1843,7 @@ namespace eastl
 	template <typename T, typename Allocator>
 	void list<T, Allocator>::sort()
 	{
-		eastl::less<value_type> compare;
+		stl::less<value_type> compare;
 		DoSort(begin(), end(), size(), compare);
 	}
 
@@ -1915,7 +1915,7 @@ namespace eastl
 		// two halves that are each sorted but we'll need to merge the two together before returning.
 		iterator  result;
 		size_type nMid = (n / 2);
-		iterator  end1 = eastl::next(i1, (difference_type)nMid);
+		iterator  end1 = stl::next(i1, (difference_type)nMid);
 				  i1   = DoSort(i1, end1, nMid, compare);        // Return the new beginning of the first sorted sub-range.
 		iterator  i2   = DoSort(end1, end2, n - nMid, compare);  // Return the new beginning of the second sorted sub-range.
 
@@ -1978,7 +1978,7 @@ namespace eastl
 			#if EASTL_EXCEPTIONS_ENABLED
 				try
 				{
-					::new((void*)&pNode->mValue) value_type(eastl::forward<Args>(args)...);
+					::new((void*)&pNode->mValue) value_type(stl::forward<Args>(args)...);
 				}
 				catch(...)
 				{
@@ -1986,7 +1986,7 @@ namespace eastl
 					throw;
 				}
 			#else
-				::new((void*)&pNode->mValue) value_type(eastl::forward<Args>(args)...);
+				::new((void*)&pNode->mValue) value_type(stl::forward<Args>(args)...);
 			#endif
 
 			return pNode;
@@ -2002,7 +2002,7 @@ namespace eastl
 				#if EASTL_EXCEPTIONS_ENABLED
 					try
 					{
-						::new((void*)&pNode->mValue) value_type(eastl::move(value));
+						::new((void*)&pNode->mValue) value_type(stl::move(value));
 					}
 					catch(...)
 					{
@@ -2010,7 +2010,7 @@ namespace eastl
 						throw;
 					}
 				#else
-					::new((void*)&pNode->mValue) value_type(eastl::move(value));
+					::new((void*)&pNode->mValue) value_type(stl::move(value));
 				#endif
 
 				return pNode;
@@ -2141,7 +2141,7 @@ namespace eastl
 		template<typename... Args>
 		inline void list<T, Allocator>::DoInsertValue(ListNodeBase* pNode, Args&&... args)
 		{
-			node_type* const pNodeNew = DoCreateNode(eastl::forward<Args>(args)...);
+			node_type* const pNodeNew = DoCreateNode(stl::forward<Args>(args)...);
 			((ListNodeBase*)pNodeNew)->insert(pNode);
 			#if EASTL_LIST_SIZE_CACHE
 				++mSize;
@@ -2152,7 +2152,7 @@ namespace eastl
 			template <typename T, typename Allocator>
 			inline void list<T, Allocator>::DoInsertValue(ListNodeBase* pNode, value_type&& value)
 			{
-				node_type* const pNodeNew = DoCreateNode(eastl::move(value));
+				node_type* const pNodeNew = DoCreateNode(stl::move(value));
 				((ListNodeBase*)pNodeNew)->insert(pNode);
 				#if EASTL_LIST_SIZE_CACHE
 					++mSize;
@@ -2203,9 +2203,9 @@ namespace eastl
 	inline void list<T, Allocator>::DoSwap(this_type& x)
 	{
 		ListNodeBase::swap((ListNodeBase&)mNode, (ListNodeBase&)x.mNode); // We need to implement a special swap because we can't do a shallow swap.
-		eastl::swap(mAllocator, x.mAllocator); // We do this even if EASTL_ALLOCATOR_COPY_ENABLED is 0.
+		stl::swap(mAllocator, x.mAllocator); // We do this even if EASTL_ALLOCATOR_COPY_ENABLED is 0.
 		#if EASTL_LIST_SIZE_CACHE
-			eastl::swap(mSize, x.mSize);
+			stl::swap(mSize, x.mSize);
 		#endif
 	}
 
@@ -2284,7 +2284,7 @@ namespace eastl
 	template <typename T, typename Allocator>
 	bool operator<(const list<T, Allocator>& a, const list<T, Allocator>& b)
 	{
-		return eastl::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+		return stl::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 	}
 
 	template <typename T, typename Allocator>
@@ -2318,7 +2318,7 @@ namespace eastl
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 
 EA_RESTORE_SN_WARNING()

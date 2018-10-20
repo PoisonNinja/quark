@@ -21,7 +21,7 @@
 //    - basic_string has less deeply nested function calls and allows the user
 //    to
 //      enable forced inlining in debug builds in order to reduce bloat.
-//    - basic_string doesn't use char traits. As a result, EASTL assumes that
+//    - basic_string doesn't use char traits. As a result, stl assumes that
 //      strings will hold characters and not exotic things like widgets. At the
 //      very least, basic_string assumes that the value_type is a POD.
 //    - basic_string::size_type is defined as eastl_size_t instead of size_t in
@@ -204,7 +204,7 @@ EASTL_EASTDC_API int Vsnprintf(wchar_t* EA_RESTRICT pDestination, size_t n,
 } // namespace StdC
 } // namespace EA
 
-namespace eastl
+namespace stl
 {
 inline int Vsnprintf(char8_t* EA_RESTRICT pDestination, size_t n,
                      const char8_t* EA_RESTRICT pFormat, va_list arguments)
@@ -231,7 +231,7 @@ inline int Vsnprintf(wchar_t* EA_RESTRICT pDestination, size_t n,
     return EA::StdC::Vsnprintf(pDestination, n, pFormat, arguments);
 }
 #endif
-} // namespace eastl
+} // namespace stl
 #else
 // User-provided functions.
 extern int Vsnprintf8(char8_t* pDestination, size_t n, const char8_t* pFormat,
@@ -245,7 +245,7 @@ extern int VsnprintfW(wchar_t* pDestination, size_t n, const wchar_t* pFormat,
                       va_list arguments);
 #endif
 
-namespace eastl
+namespace stl
 {
 inline int Vsnprintf(char8_t* pDestination, size_t n, const char8_t* pFormat,
                      va_list arguments)
@@ -272,11 +272,11 @@ inline int Vsnprintf(wchar_t* pDestination, size_t n, const wchar_t* pFormat,
     return VsnprintfW(pDestination, n, pFormat, arguments);
 }
 #endif
-} // namespace eastl
+} // namespace stl
 #endif
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace eastl
+namespace stl
 {
 
 /// EASTL_BASIC_STRING_DEFAULT_NAME
@@ -286,7 +286,7 @@ namespace eastl
 #ifndef EASTL_BASIC_STRING_DEFAULT_NAME
 #define EASTL_BASIC_STRING_DEFAULT_NAME                                        \
     EASTL_DEFAULT_NAME_PREFIX                                                  \
-        " basic_string" // Unless the user overrides something, this is "EASTL
+        " basic_string" // Unless the user overrides something, this is "stl
                         // basic_string".
 #endif
 
@@ -332,8 +332,8 @@ public:
                   // at least in release builds -- as this gives some algorithms
                   // an advantage that optimizers cannot get around.
     typedef const T* const_iterator;
-    typedef eastl::reverse_iterator<iterator> reverse_iterator;
-    typedef eastl::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef stl::reverse_iterator<iterator> reverse_iterator;
+    typedef stl::reverse_iterator<const_iterator> const_reverse_iterator;
     typedef eastl_size_t size_type; // See config.h for the definition of
                                     // eastl_size_t, which defaults to uint32_t.
     typedef ptrdiff_t difference_type;
@@ -651,11 +651,11 @@ protected:
         }
         inline void Move(Layout& dst, Layout& src) EA_NOEXCEPT
         {
-            eastl::swap(dst.raw, src.raw);
+            stl::swap(dst.raw, src.raw);
         }
         inline void Swap(Layout& a, Layout& b) EA_NOEXCEPT
         {
-            eastl::swap(a.raw, b.raw);
+            stl::swap(a.raw, b.raw);
         }
 
         inline void ResetToSSO() EA_NOEXCEPT
@@ -664,7 +664,7 @@ protected:
         }
     };
 
-    eastl::compressed_pair<Layout, allocator_type> mPair;
+    stl::compressed_pair<Layout, allocator_type> mPair;
 
     inline Layout& internalLayout() EA_NOEXCEPT
     {
@@ -1139,12 +1139,12 @@ basic_string<T, Allocator>::basic_string(const this_type& x, size_type position,
         RangeInitialize(
             x.internalLayout().BeginPtr() + position,
             x.internalLayout().BeginPtr() + position +
-                eastl::min_alt(n, x.internalLayout().GetSize() - position));
+                stl::min_alt(n, x.internalLayout().GetSize() - position));
 #else
     RangeInitialize(
         x.internalLayout().BeginPtr() + position,
         x.internalLayout().BeginPtr() + position +
-            eastl::min_alt(n, x.internalLayout().GetSize() - position));
+            stl::min_alt(n, x.internalLayout().GetSize() - position));
 #endif
 }
 
@@ -1267,7 +1267,7 @@ template <typename T, typename Allocator>
 basic_string<T, Allocator>::basic_string(this_type&& x) EA_NOEXCEPT
     : mPair(x.get_allocator())
 {
-    internalLayout() = eastl::move(x.internalLayout());
+    internalLayout() = stl::move(x.internalLayout());
     x.AllocateSelf();
 }
 
@@ -1278,7 +1278,7 @@ basic_string<T, Allocator>::basic_string(this_type&& x,
 {
     if (get_allocator() == x.get_allocator()) // If we can borrow from x...
     {
-        internalLayout() = eastl::move(x.internalLayout());
+        internalLayout() = stl::move(x.internalLayout());
         x.AllocateSelf();
     } else if (x.internalLayout().BeginPtr()) {
         RangeInitialize(x.internalLayout().BeginPtr(),
@@ -1573,7 +1573,7 @@ template <typename T, typename Allocator>
 inline typename basic_string<T, Allocator>::this_type&
 basic_string<T, Allocator>::operator=(this_type&& x)
 {
-    return assign(eastl::move(x));
+    return assign(stl::move(x));
 }
 
 template <typename T, typename Allocator>
@@ -1635,7 +1635,7 @@ void basic_string<T, Allocator>::reserve(size_type n)
     // there is no effect.
     // http://en.cppreference.com/w/cpp/string/basic_string/reserve
 
-    n = eastl::max_alt(
+    n = stl::max_alt(
         n, internalLayout().GetSize()); // Calculate the new capacity, which
                                         // needs to be >= container size.
 
@@ -1901,7 +1901,7 @@ basic_string<T, Allocator>::append(const this_type& x, size_type position,
     return append(
         x.internalLayout().BeginPtr() + position,
         x.internalLayout().BeginPtr() + position +
-            eastl::min_alt(n, x.internalLayout().GetSize() - position));
+            stl::min_alt(n, x.internalLayout().GetSize() - position));
 }
 
 template <typename T, typename Allocator>
@@ -1985,7 +1985,7 @@ basic_string<T, Allocator>& basic_string<T, Allocator>::append(size_type n,
     const size_type nCapacity = capacity();
 
     if ((nSize + n) > nCapacity)
-        reserve(eastl::max_alt(GetNewCapacity(nCapacity), (nSize + n)));
+        reserve(stl::max_alt(GetNewCapacity(nCapacity), (nSize + n)));
 
     if (n > 0) {
         pointer pNewEnd =
@@ -2015,7 +2015,7 @@ basic_string<T, Allocator>::append(const value_type* pBegin,
 
         if ((nOldSize + n) > nCapacity) {
             const size_type nLength =
-                eastl::max_alt(GetNewCapacity(nCapacity), (nOldSize + n));
+                stl::max_alt(GetNewCapacity(nCapacity), (nOldSize + n));
 
             pointer pNewBegin = DoAllocate(nLength + 1);
 
@@ -2080,7 +2080,7 @@ basic_string<T, Allocator>::append_sprintf_va_list(const value_type* pFormat,
     va_copy(argumentsSaved, arguments);
 #endif
 
-    nReturnValue = eastl::Vsnprintf(nullptr, 0, pFormat, arguments);
+    nReturnValue = stl::Vsnprintf(nullptr, 0, pFormat, arguments);
 
     if (nReturnValue > 0) {
         resize(nReturnValue + nInitialSize);
@@ -2091,7 +2091,7 @@ basic_string<T, Allocator>::append_sprintf_va_list(const value_type* pFormat,
 #endif
 
         nReturnValue =
-            eastl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
+            stl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
                              (size_t)(nReturnValue + 1), pFormat, arguments);
     }
 
@@ -2114,7 +2114,7 @@ basic_string<T, Allocator>::append_sprintf_va_list(const value_type* pFormat,
     va_copy(argumentsSaved, arguments);
 #endif
 
-    nReturnValue = eastl::Vsnprintf(internalLayout().EndPtr(),
+    nReturnValue = stl::Vsnprintf(internalLayout().EndPtr(),
                                     (size_t)nInitialRemainingCapacity + 1,
                                     pFormat, arguments);
 
@@ -2128,12 +2128,12 @@ basic_string<T, Allocator>::append_sprintf_va_list(const value_type* pFormat,
 #endif
         resize(nInitialSize + nReturnValue);
         nReturnValue =
-            eastl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
+            stl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
                              (size_t)(nReturnValue + 1), pFormat, arguments);
     } else if (nReturnValue < 0) // If vsnprintf is non-C99-standard
     {
         // In this case we either have C89 extension behaviour or C99 behaviour.
-        size_type n = eastl::max_alt((size_type)(SSOLayout::SSO_CAPACITY - 1),
+        size_type n = stl::max_alt((size_type)(SSOLayout::SSO_CAPACITY - 1),
                                      (size_type)(nInitialSize * 2));
 
         for (; (nReturnValue < 0) && (n < 1000000); n *= 2) {
@@ -2145,13 +2145,13 @@ basic_string<T, Allocator>::append_sprintf_va_list(const value_type* pFormat,
 
             const size_t nCapacity = (size_t)(n - nInitialSize);
             nReturnValue =
-                eastl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
+                stl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
                                  nCapacity + 1, pFormat, arguments);
 
             if (nReturnValue == (int)(unsigned)nCapacity) {
                 resize(++n);
                 nReturnValue =
-                    eastl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
+                    stl::Vsnprintf(internalLayout().BeginPtr() + nInitialSize,
                                      nCapacity + 2, pFormat, arguments);
             }
         }
@@ -2224,7 +2224,7 @@ basic_string<T, Allocator>::assign(const this_type& x, size_type position,
     return assign(
         x.internalLayout().BeginPtr() + position,
         x.internalLayout().BeginPtr() + position +
-            eastl::min_alt(n, x.internalLayout().GetSize() - position));
+            stl::min_alt(n, x.internalLayout().GetSize() - position));
 }
 
 template <typename T, typename Allocator>
@@ -2286,7 +2286,7 @@ inline basic_string<T, Allocator>&
 basic_string<T, Allocator>::assign(this_type&& x)
 {
     if (get_allocator() == x.get_allocator()) {
-        eastl::swap(internalLayout(), x.internalLayout());
+        stl::swap(internalLayout(), x.internalLayout());
     } else
         assign(x.internalLayout().BeginPtr(), x.internalLayout().EndPtr());
 
@@ -2354,7 +2354,7 @@ basic_string<T, Allocator>::insert(size_type position, const this_type& x,
         ThrowRangeException();
 #endif
 
-    size_type nLength = eastl::min_alt(n, x.internalLayout().GetSize() - beg);
+    size_type nLength = stl::min_alt(n, x.internalLayout().GetSize() - beg);
 
 #if EASTL_STRING_OPT_LENGTH_ERRORS
     if (EASTL_UNLIKELY(internalLayout().GetSize() > (max_size() - nLength)))
@@ -2507,7 +2507,7 @@ basic_string<T, Allocator>::insert(const_iterator p, size_type n, value_type c)
             const size_type nOldSize = internalLayout().GetSize();
             const size_type nOldCap  = capacity();
             const size_type nLength =
-                eastl::max_alt(GetNewCapacity(nOldCap), nOldSize + n);
+                stl::max_alt(GetNewCapacity(nOldCap), nOldSize + n);
 
             iterator pNewBegin = DoAllocate(nLength + 1);
 
@@ -2632,7 +2632,7 @@ basic_string<T, Allocator>::insert(const_iterator p, const value_type* pBegin,
                 nLength = nOldSize + n;
             else
                 nLength =
-                    eastl::max_alt(GetNewCapacity(nOldCap), (nOldSize + n));
+                    stl::max_alt(GetNewCapacity(nOldCap), (nOldSize + n));
 
             pointer pNewBegin = DoAllocate(nLength + 1);
 
@@ -2677,7 +2677,7 @@ basic_string<T, Allocator>::erase(size_type position, size_type n)
 
     erase(internalLayout().BeginPtr() + position,
           internalLayout().BeginPtr() + position +
-              eastl::min_alt(n, internalLayout().GetSize() - position));
+              stl::min_alt(n, internalLayout().GetSize() - position));
 
     return *this;
 }
@@ -2745,7 +2745,7 @@ basic_string<T, Allocator>::replace(size_type position, size_type n,
 #endif
 
     const size_type nLength =
-        eastl::min_alt(n, internalLayout().GetSize() - position);
+        stl::min_alt(n, internalLayout().GetSize() - position);
 
 #if EASTL_STRING_OPT_LENGTH_ERRORS
     if (EASTL_UNLIKELY((internalLayout().GetSize() - nLength) >=
@@ -2771,9 +2771,9 @@ basic_string<T, Allocator>::replace(size_type pos1, size_type n1,
 #endif
 
     const size_type nLength1 =
-        eastl::min_alt(n1, internalLayout().GetSize() - pos1);
+        stl::min_alt(n1, internalLayout().GetSize() - pos1);
     const size_type nLength2 =
-        eastl::min_alt(n2, x.internalLayout().GetSize() - pos2);
+        stl::min_alt(n2, x.internalLayout().GetSize() - pos2);
 
 #if EASTL_STRING_OPT_LENGTH_ERRORS
     if (EASTL_UNLIKELY((internalLayout().GetSize() - nLength1) >=
@@ -2798,7 +2798,7 @@ basic_string<T, Allocator>::replace(size_type position, size_type n1,
 #endif
 
     const size_type nLength =
-        eastl::min_alt(n1, internalLayout().GetSize() - position);
+        stl::min_alt(n1, internalLayout().GetSize() - position);
 
 #if EASTL_STRING_OPT_LENGTH_ERRORS
     if (EASTL_UNLIKELY((n2 > max_size()) || ((internalLayout().GetSize() -
@@ -2821,7 +2821,7 @@ basic_string<T, Allocator>::replace(size_type position, size_type n1,
 #endif
 
     const size_type nLength =
-        eastl::min_alt(n1, internalLayout().GetSize() - position);
+        stl::min_alt(n1, internalLayout().GetSize() - position);
 
 #if EASTL_STRING_OPT_LENGTH_ERRORS
     const size_type n2 = (size_type)CharStrlen(p);
@@ -2846,7 +2846,7 @@ basic_string<T, Allocator>::replace(size_type position, size_type n1,
 #endif
 
     const size_type nLength =
-        eastl::min_alt(n1, internalLayout().GetSize() - position);
+        stl::min_alt(n1, internalLayout().GetSize() - position);
 
 #if EASTL_STRING_OPT_LENGTH_ERRORS
     if (EASTL_UNLIKELY((n2 > max_size()) || (internalLayout().GetSize() -
@@ -2955,7 +2955,7 @@ basic_string<T, Allocator>& basic_string<T, Allocator>::replace(
             // temporary memory.
             const size_type nOldSize     = internalLayout().GetSize();
             const size_type nOldCap      = capacity();
-            const size_type nNewCapacity = eastl::max_alt(
+            const size_type nNewCapacity = stl::max_alt(
                 GetNewCapacity(nOldCap), (nOldSize + (nLength2 - nLength1)));
 
             pointer pNewBegin = DoAllocate(nNewCapacity + 1);
@@ -2990,7 +2990,7 @@ basic_string<T, Allocator>::copy(value_type* p, size_type n,
     // char_traits::copy() thus the 'p' must not overlap *this string, so we can
     // use memcpy
     const size_type nLength =
-        eastl::min_alt(n, internalLayout().GetSize() - position);
+        stl::min_alt(n, internalLayout().GetSize() - position);
     CharStringUninitializedCopy(
         internalLayout().BeginPtr() + position,
         internalLayout().BeginPtr() + position + nLength, p);
@@ -3005,11 +3005,11 @@ void basic_string<T, Allocator>::swap(this_type& x)
          x.internalLayout().IsSSO())) // If allocators are equivalent...
     {
         // We leave mAllocator as-is.
-        eastl::swap(internalLayout(), x.internalLayout());
+        stl::swap(internalLayout(), x.internalLayout());
     } else // else swap the contents.
     {
         const this_type temp(
-            *this); // Can't call eastl::swap because that would
+            *this); // Can't call stl::swap because that would
         *this = x;  // itself call this member swap function.
         x     = temp;
     }
@@ -3050,7 +3050,7 @@ basic_string<T, Allocator>::find(const value_type* p, size_type position,
                 internalLayout().GetSize())) // If the range is valid...
     {
         const value_type* const pTemp =
-            eastl::search(internalLayout().BeginPtr() + position,
+            stl::search(internalLayout().BeginPtr() + position,
                           internalLayout().EndPtr(), p, p + n);
 
         if ((pTemp != internalLayout().EndPtr()) || (n == 0))
@@ -3076,7 +3076,7 @@ basic_string<T, Allocator>::find(value_type c,
                      internalLayout().GetSize())) // If the position is valid...
     {
         const const_iterator pResult =
-            eastl::find(internalLayout().BeginPtr() + position,
+            stl::find(internalLayout().BeginPtr() + position,
                         internalLayout().EndPtr(), c);
 
         if (pResult != internalLayout().EndPtr())
@@ -3127,7 +3127,7 @@ basic_string<T, Allocator>::rfind(const value_type* p, size_type position,
     if (EASTL_LIKELY(n <= nLength)) {
         if (EASTL_LIKELY(n)) {
             const const_iterator pEnd = internalLayout().BeginPtr() +
-                                        eastl::min_alt(nLength - n, position) +
+                                        stl::min_alt(nLength - n, position) +
                                         n;
             const const_iterator pResult = CharTypeStringRSearch(
                 internalLayout().BeginPtr(), pEnd, p, p + n);
@@ -3135,7 +3135,7 @@ basic_string<T, Allocator>::rfind(const value_type* p, size_type position,
             if (pResult != pEnd)
                 return (size_type)(pResult - internalLayout().BeginPtr());
         } else
-            return eastl::min_alt(nLength, position);
+            return stl::min_alt(nLength, position);
     }
     return npos;
 }
@@ -3150,7 +3150,7 @@ basic_string<T, Allocator>::rfind(value_type c,
 
     if (EASTL_LIKELY(nLength)) {
         const value_type* const pEnd = internalLayout().BeginPtr() +
-                                       eastl::min_alt(nLength - 1, position) +
+                                       stl::min_alt(nLength - 1, position) +
                                        1;
         const value_type* const pResult =
             CharTypeStringRFind(pEnd, internalLayout().BeginPtr(), c);
@@ -3230,7 +3230,7 @@ basic_string<T, Allocator>::find_last_of(const value_type* p,
 
     if (EASTL_LIKELY(nLength)) {
         const value_type* const pEnd = internalLayout().BeginPtr() +
-                                       eastl::min_alt(nLength - 1, position) +
+                                       stl::min_alt(nLength - 1, position) +
                                        1;
         const value_type* const pResult = CharTypeStringRFindFirstOf(
             pEnd, internalLayout().BeginPtr(), p, p + n);
@@ -3328,7 +3328,7 @@ basic_string<T, Allocator>::find_last_not_of(const value_type* p,
 
     if (EASTL_LIKELY(nLength)) {
         const value_type* const pEnd = internalLayout().BeginPtr() +
-                                       eastl::min_alt(nLength - 1, position) +
+                                       stl::min_alt(nLength - 1, position) +
                                        1;
         const value_type* const pResult = CharTypeStringRFindFirstNotOf(
             pEnd, internalLayout().BeginPtr(), p, p + n);
@@ -3350,7 +3350,7 @@ basic_string<T, Allocator>::find_last_not_of(
         // Todo: Possibly make a specialized version of
         // CharTypeStringRFindFirstNotOf(pBegin, pEnd, c).
         const value_type* const pEnd = internalLayout().BeginPtr() +
-                                       eastl::min_alt(nLength - 1, position) +
+                                       stl::min_alt(nLength - 1, position) +
                                        1;
         const value_type* const pResult = CharTypeStringRFindFirstNotOf(
             pEnd, internalLayout().BeginPtr(), &c, &c + 1);
@@ -3378,7 +3378,7 @@ basic_string<T, Allocator>::substr(size_type position, size_type n) const
     return basic_string(
         internalLayout().BeginPtr() + position,
         internalLayout().BeginPtr() + position +
-            eastl::min_alt(n, internalLayout().GetSize() - position),
+            stl::min_alt(n, internalLayout().GetSize() - position),
         get_allocator());
 }
 
@@ -3401,7 +3401,7 @@ inline int basic_string<T, Allocator>::compare(size_type pos1, size_type n1,
 
     return compare(internalLayout().BeginPtr() + pos1,
                    internalLayout().BeginPtr() + pos1 +
-                       eastl::min_alt(n1, internalLayout().GetSize() - pos1),
+                       stl::min_alt(n1, internalLayout().GetSize() - pos1),
                    x.internalLayout().BeginPtr(), x.internalLayout().EndPtr());
 }
 
@@ -3421,10 +3421,10 @@ inline int basic_string<T, Allocator>::compare(size_type pos1, size_type n1,
 
     return compare(internalLayout().BeginPtr() + pos1,
                    internalLayout().BeginPtr() + pos1 +
-                       eastl::min_alt(n1, internalLayout().GetSize() - pos1),
+                       stl::min_alt(n1, internalLayout().GetSize() - pos1),
                    x.internalLayout().BeginPtr() + pos2,
                    x.internalLayout().BeginPtr() + pos2 +
-                       eastl::min_alt(n2, x.internalLayout().GetSize() - pos2));
+                       stl::min_alt(n2, x.internalLayout().GetSize() - pos2));
 }
 
 template <typename T, typename Allocator>
@@ -3445,7 +3445,7 @@ inline int basic_string<T, Allocator>::compare(size_type pos1, size_type n1,
 
     return compare(internalLayout().BeginPtr() + pos1,
                    internalLayout().BeginPtr() + pos1 +
-                       eastl::min_alt(n1, internalLayout().GetSize() - pos1),
+                       stl::min_alt(n1, internalLayout().GetSize() - pos1),
                    p, p + CharStrlen(p));
 }
 
@@ -3461,7 +3461,7 @@ inline int basic_string<T, Allocator>::compare(size_type pos1, size_type n1,
 
     return compare(internalLayout().BeginPtr() + pos1,
                    internalLayout().BeginPtr() + pos1 +
-                       eastl::min_alt(n1, internalLayout().GetSize() - pos1),
+                       stl::min_alt(n1, internalLayout().GetSize() - pos1),
                    p, p + n2);
 }
 
@@ -3567,7 +3567,7 @@ int basic_string<T, Allocator>::compare(const value_type* pBegin1,
 {
     const difference_type n1   = pEnd1 - pBegin1;
     const difference_type n2   = pEnd2 - pBegin2;
-    const difference_type nMin = eastl::min_alt(n1, n2);
+    const difference_type nMin = stl::min_alt(n1, n2);
     const int cmp              = Compare(pBegin1, pBegin2, (size_t)nMin);
 
     return (cmp != 0 ? cmp : (n1 < n2 ? -1 : (n1 > n2 ? 1 : 0)));
@@ -3581,7 +3581,7 @@ int basic_string<T, Allocator>::comparei(const value_type* pBegin1,
 {
     const difference_type n1   = pEnd1 - pBegin1;
     const difference_type n2   = pEnd2 - pBegin2;
-    const difference_type nMin = eastl::min_alt(n1, n2);
+    const difference_type nMin = stl::min_alt(n1, n2);
     const int cmp              = CompareI(pBegin1, pBegin2, (size_t)nMin);
 
     return (cmp != 0 ? cmp : (n1 < n2 ? -1 : (n1 > n2 ? 1 : 0)));
@@ -3619,7 +3619,7 @@ basic_string<T, Allocator>::InsertInternal(const_iterator p, value_type c)
         const size_type nOldSize = internalLayout().GetSize();
         const size_type nOldCap  = capacity();
         const size_type nLength =
-            eastl::max_alt(GetNewCapacity(nOldCap), (nOldSize + 1));
+            stl::max_alt(GetNewCapacity(nOldCap), (nOldSize + 1));
 
         iterator pNewBegin = DoAllocate(nLength + 1);
 
@@ -3826,7 +3826,7 @@ basic_string<T, Allocator>::CharTypeStringSearch(const value_type* p1Begin,
 
     // Test for a pattern of length 1.
     if ((p2Begin + 1) == p2End)
-        return eastl::find(p1Begin, p1End, *p2Begin);
+        return stl::find(p1Begin, p1End, *p2Begin);
 
     // General case.
     const value_type* pTemp;
@@ -3834,7 +3834,7 @@ basic_string<T, Allocator>::CharTypeStringSearch(const value_type* p1Begin,
     const value_type* pCurrent = p1Begin;
 
     while (p1Begin != p1End) {
-        p1Begin = eastl::find(p1Begin, p1End, *p2Begin);
+        p1Begin = stl::find(p1Begin, p1End, *p2Begin);
         if (p1Begin == p1End)
             return p1End;
 
@@ -4098,7 +4098,7 @@ basic_string<T, Allocator> operator+(basic_string<T, Allocator>&& a,
                                      basic_string<T, Allocator>&& b)
 {
     a.append(b); // Using an rvalue by name results in it becoming an lvalue.
-    return eastl::move(a);
+    return stl::move(a);
 }
 
 template <typename T, typename Allocator>
@@ -4106,7 +4106,7 @@ basic_string<T, Allocator> operator+(basic_string<T, Allocator>&& a,
                                      const basic_string<T, Allocator>& b)
 {
     a.append(b);
-    return eastl::move(a);
+    return stl::move(a);
 }
 
 template <typename T, typename Allocator>
@@ -4124,7 +4124,7 @@ operator+(basic_string<T, Allocator>&& a,
           const typename basic_string<T, Allocator>::value_type* p)
 {
     a.append(p);
-    return eastl::move(a);
+    return stl::move(a);
 }
 
 template <typename T, typename Allocator>
@@ -4133,7 +4133,7 @@ operator+(basic_string<T, Allocator>&& a,
           typename basic_string<T, Allocator>::value_type c)
 {
     a.push_back(c);
-    return eastl::move(a);
+    return stl::move(a);
 }
 
 template <typename T, typename Allocator>
@@ -4339,7 +4339,7 @@ typedef basic_string<char32_t> u32string;
 
 /// hash<string>
 ///
-/// We provide EASTL hash function objects for use in hash table containers.
+/// We provide stl hash function objects for use in hash table containers.
 ///
 /// Example usage:
 ///    #include <stl/hash_set.h>
@@ -4403,7 +4403,7 @@ struct hash<wstring> {
 
 /// to_string
 ///
-/// Converts integral types to an eastl::string with the same content that
+/// Converts integral types to an stl::string with the same content that
 /// sprintf produces.  The following implementation provides a type safe
 /// conversion mechanism which avoids the common bugs associated with sprintf
 /// style format strings.
@@ -4449,7 +4449,7 @@ inline string to_string(long double value)
 
 /// to_wstring
 ///
-/// Converts integral types to an eastl::wstring with the same content that
+/// Converts integral types to an stl::wstring with the same content that
 /// sprintf produces.  The following implementation provides a type safe
 /// conversion mechanism which avoids the common bugs associated with sprintf
 /// style format strings.
@@ -4530,7 +4530,7 @@ inline wstring operator"" s(const wchar_t* str, size_t len) EA_NOEXCEPT
 EA_RESTORE_VC_WARNING() // warning: 4455
 #endif
 
-} // namespace eastl
+} // namespace stl
 
 #ifdef _MSC_VER
 #pragma warning(pop)

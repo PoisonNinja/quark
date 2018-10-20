@@ -21,7 +21,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 	/// EASTL_FIXED_SET_DEFAULT_NAME
 	///
@@ -30,11 +30,11 @@ namespace eastl
 	/// to overflow allocations. 
 	///
 	#ifndef EASTL_FIXED_SET_DEFAULT_NAME
-		#define EASTL_FIXED_SET_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_set" // Unless the user overrides something, this is "EASTL fixed_set".
+		#define EASTL_FIXED_SET_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_set" // Unless the user overrides something, this is "stl fixed_set".
 	#endif
 
 	#ifndef EASTL_FIXED_MULTISET_DEFAULT_NAME
-		#define EASTL_FIXED_MULTISET_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_multiset" // Unless the user overrides something, this is "EASTL fixed_multiset".
+		#define EASTL_FIXED_MULTISET_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " fixed_multiset" // Unless the user overrides something, this is "stl fixed_multiset".
 	#endif
 
 
@@ -63,7 +63,7 @@ namespace eastl
 	///     Compare                Compare function/object for set ordering.
 	///     OverflowAllocator              Overflow allocator, which is only used if bEnableOverflow == true. Defaults to the global heap.
 	///
-	template <typename Key, size_t nodeCount, bool bEnableOverflow = true, typename Compare = eastl::less<Key>, typename OverflowAllocator = EASTLAllocatorType>
+	template <typename Key, size_t nodeCount, bool bEnableOverflow = true, typename Compare = stl::less<Key>, typename OverflowAllocator = EASTLAllocatorType>
 	class fixed_set : public set<Key, Compare, fixed_node_allocator<sizeof(typename set<Key>::node_type), 
 								 nodeCount, EASTL_ALIGN_OF(Key), 0, bEnableOverflow, OverflowAllocator> >
 	{
@@ -129,7 +129,7 @@ namespace eastl
 	///     Compare                Compare function/object for set ordering.
 	///     OverflowAllocator              Overflow allocator, which is only used if bEnableOverflow == true. Defaults to the global heap.
 	///
-	template <typename Key, size_t nodeCount, bool bEnableOverflow = true, typename Compare = eastl::less<Key>, typename OverflowAllocator = EASTLAllocatorType>
+	template <typename Key, size_t nodeCount, bool bEnableOverflow = true, typename Compare = stl::less<Key>, typename OverflowAllocator = EASTLAllocatorType>
 	class fixed_multiset : public multiset<Key, Compare, fixed_node_allocator<sizeof(typename multiset<Key>::node_type), 
 										   nodeCount, EASTL_ALIGN_OF(Key), 0, bEnableOverflow, OverflowAllocator> >
 	{
@@ -315,7 +315,7 @@ namespace eastl
 	inline void fixed_set<Key, nodeCount, bEnableOverflow, Compare, OverflowAllocator>::swap(this_type& x)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(*this, x);
+		stl::fixed_swap(*this, x);
 	}
 
 
@@ -367,7 +367,7 @@ namespace eastl
 					 fixed_set<Key, nodeCount, bEnableOverflow, Compare, OverflowAllocator>& b)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(a, b);
+		stl::fixed_swap(a, b);
 	}
 
 
@@ -505,7 +505,7 @@ namespace eastl
 	inline void fixed_multiset<Key, nodeCount, bEnableOverflow, Compare, OverflowAllocator>::swap(this_type& x)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(*this, x);
+		stl::fixed_swap(*this, x);
 	}
 
 
@@ -557,12 +557,12 @@ namespace eastl
 					 fixed_multiset<Key, nodeCount, bEnableOverflow, Compare, OverflowAllocator>& b)
 	{
 		// Fixed containers use a special swap that can deal with excessively large buffers.
-		eastl::fixed_swap(a, b);
+		stl::fixed_swap(a, b);
 	}
 
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

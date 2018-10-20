@@ -9,7 +9,7 @@
 #include <stl/internal/config.h>
 #include <stl/type_traits.h>
 
-namespace eastl
+namespace stl
 {
 
 #if EASTL_VARIADIC_TEMPLATES_ENABLED && !defined(EA_COMPILER_NO_TEMPLATE_ALIASES)
@@ -20,7 +20,7 @@ class integer_sequence
 {
 public:
 	typedef T value_type;
-	static_assert(is_integral<T>::value, "eastl::integer_sequence can only be instantiated with an integral type");
+	static_assert(is_integral<T>::value, "stl::integer_sequence can only be instantiated with an integral type");
 	static EA_CONSTEXPR size_t size() EA_NOEXCEPT { return sizeof...(Ints); }
 };
 
@@ -69,6 +69,6 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
 #endif  // EASTL_VARIADIC_TEMPLATES_ENABLED
 
-}  // namespace eastl
+}  // namespace stl
 
 #endif  // EASTL_INTEGER_SEQUENCE_H

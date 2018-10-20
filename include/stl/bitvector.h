@@ -33,7 +33,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// EASTL_BITVECTOR_DEFAULT_NAME
@@ -41,7 +41,7 @@ namespace eastl
 	/// Defines a default container name in the absence of a user-provided name.
 	///
 	#ifndef EASTL_BITVECTOR_DEFAULT_NAME
-		#define EASTL_BITVECTOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " bitvector" // Unless the user overrides something, this is "EASTL bitvector".
+		#define EASTL_BITVECTOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " bitvector" // Unless the user overrides something, this is "stl bitvector".
 	#endif
 
 	/// EASTL_BITVECTOR_DEFAULT_ALLOCATOR
@@ -201,7 +201,7 @@ namespace eastl
 	///
 	template <typename Allocator = EASTLAllocatorType, 
 			  typename Element   = BitvectorWordType, 
-			  typename Container = eastl::vector<Element, Allocator> >
+			  typename Container = stl::vector<Element, Allocator> >
 	class bitvector
 	{
 	public:
@@ -211,8 +211,8 @@ namespace eastl
 		typedef bool                                        const_reference;
 		typedef bitvector_iterator<Element>                 iterator;
 		typedef bitvector_const_iterator<Element>           const_iterator;
-		typedef eastl::reverse_iterator<iterator>           reverse_iterator;
-		typedef eastl::reverse_iterator<const_iterator>     const_reverse_iterator;
+		typedef stl::reverse_iterator<iterator>           reverse_iterator;
+		typedef stl::reverse_iterator<const_iterator>     const_reverse_iterator;
 		typedef Allocator                                   allocator_type;
 		typedef Element                                     element_type;
 		typedef Container                                   container_type;
@@ -604,9 +604,9 @@ namespace eastl
 			if(nExtraBits == 0)
 			{
 				if(pCurrent == pEnd && mReference)
-					return eastl::isf_valid | eastl::isf_current;
+					return stl::isf_valid | stl::isf_current;
 				else if(pCurrent < pEnd)
-					return eastl::isf_valid | eastl::isf_current | eastl::isf_can_dereference;
+					return stl::isf_valid | stl::isf_current | stl::isf_can_dereference;
 			}
 			else if(pCurrent == (pEnd - 1))
 			{
@@ -614,17 +614,17 @@ namespace eastl
 				const size_type lastbit = kBitCount - nExtraBits;
 				
 				if(bit == lastbit)
-					return eastl::isf_valid | eastl::isf_current;
+					return stl::isf_valid | stl::isf_current;
 				else if(bit < lastbit)
-					return eastl::isf_valid | eastl::isf_current | eastl::isf_can_dereference;
+					return stl::isf_valid | stl::isf_current | stl::isf_can_dereference;
 			}
 			else if(pCurrent < pEnd)
 			{
-				return eastl::isf_valid | eastl::isf_current | eastl::isf_can_dereference;
+				return stl::isf_valid | stl::isf_current | stl::isf_can_dereference;
 			}
 		}
 
-		return eastl::isf_none;
+		return stl::isf_none;
 	}
 
 
@@ -1166,7 +1166,7 @@ namespace eastl
 		iterator iPosition(position.get_reference_type()); // This is just a non-const version of position.
 
 		#if EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(validate_iterator(iPosition) & eastl::isf_valid) == 0)
+			if(EASTL_UNLIKELY(validate_iterator(iPosition) & stl::isf_valid) == 0)
 				EASTL_FAIL_MSG("bitvector::insert -- invalid iterator");
 		#endif
 
@@ -1188,7 +1188,7 @@ namespace eastl
 		iterator iPosition(position.get_reference_type()); // This is just a non-const version of position.
 
 		#if EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(validate_iterator(iPosition) & eastl::isf_valid) == 0)
+			if(EASTL_UNLIKELY(validate_iterator(iPosition) & stl::isf_valid) == 0)
 				EASTL_FAIL_MSG("bitvector::insert -- invalid iterator");
 		#endif
 
@@ -1245,7 +1245,7 @@ namespace eastl
 		iterator iPosition(position.get_reference_type()); // This is just a non-const version of position.
 
 		#if EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(validate_iterator(iPosition) & eastl::isf_can_dereference) == 0)
+			if(EASTL_UNLIKELY(validate_iterator(iPosition) & stl::isf_can_dereference) == 0)
 				EASTL_FAIL_MSG("bitvector::erase -- invalid iterator");
 		#endif
 
@@ -1253,7 +1253,7 @@ namespace eastl
 		resize(size() - 1);
 
 		// Verify that no reallocation occurred.
-		EASTL_ASSERT(validate_iterator(iPosition) & eastl::isf_valid);
+		EASTL_ASSERT(validate_iterator(iPosition) & stl::isf_valid);
 		return iPosition;
 	}
 
@@ -1266,14 +1266,14 @@ namespace eastl
 		iterator iLast(last.get_reference_type());   // This is just a non-const version of last.
 
 		#if EASTL_ASSERT_ENABLED
-			if(EASTL_UNLIKELY(validate_iterator(iLast) & eastl::isf_valid) == 0)
+			if(EASTL_UNLIKELY(validate_iterator(iLast) & stl::isf_valid) == 0)
 				EASTL_FAIL_MSG("bitvector::erase -- invalid iterator");
 		#endif
 
 		if(!(iFirst == iLast))
 		{
 			#if EASTL_ASSERT_ENABLED
-				if(EASTL_UNLIKELY(validate_iterator(iFirst) & eastl::isf_can_dereference) == 0)
+				if(EASTL_UNLIKELY(validate_iterator(iFirst) & stl::isf_can_dereference) == 0)
 					EASTL_FAIL_MSG("bitvector::erase -- invalid iterator");
 			#endif
 
@@ -1283,7 +1283,7 @@ namespace eastl
 
 			// Verify that no reallocation occurred.
 			#if EASTL_ASSERT_ENABLED
-				if(EASTL_UNLIKELY(validate_iterator(iFirst) & eastl::isf_valid) == 0)
+				if(EASTL_UNLIKELY(validate_iterator(iFirst) & stl::isf_valid) == 0)
 					EASTL_FAIL_MSG("bitvector::erase -- invalid iterator");
 			#endif
 		}
@@ -1319,7 +1319,7 @@ namespace eastl
 	void bitvector<Allocator, Element, Container>::swap(this_type& rhs)
 	{
 		mContainer.swap(rhs.mContainer);
-		eastl::swap(mFreeBitCount, rhs.mFreeBitCount);
+		stl::swap(mFreeBitCount, rhs.mFreeBitCount);
 	}
 
 
@@ -1469,7 +1469,7 @@ namespace eastl
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #ifdef _MSC_VER

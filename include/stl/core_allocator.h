@@ -15,11 +15,11 @@ namespace EA
 	{
 		/// EASTLCoreAllocatorImpl
 		///
-		/// EASTL provides an out of the box implementation of the
+		/// stl provides an out of the box implementation of the
 		/// ICoreAllocator interface.  This is provided as a convenience for
-		/// users who wish to provide ICoreAllocator implementations for EASTL to use.  
+		/// users who wish to provide ICoreAllocator implementations for stl to use.  
 		///
-		/// EASTL has a dependency on coreallocator so to provide an out of 
+		/// stl has a dependency on coreallocator so to provide an out of 
 		/// the box implementation for EASTLCoreAlloctor and EASTLCoreDeleter 
 		/// that can be used and tested.  Historically we could not test 
 		/// ICoreAllocator interface because we relied on the code being linked 

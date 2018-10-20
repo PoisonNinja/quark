@@ -27,7 +27,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 
@@ -97,7 +97,7 @@ namespace eastl
 	};
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

@@ -49,13 +49,13 @@
 #endif
 
 
-namespace eastl
+namespace stl
 {
 
 	///////////////////////////////////////////////////////////////////////////////
 	// allocator_malloc
 	//
-	// Implements an EASTL allocator that uses malloc/free as opposed to 
+	// Implements an stl allocator that uses malloc/free as opposed to 
 	// new/delete or PPMalloc Malloc/Free. 
 	//
 	// Example usage:
@@ -108,7 +108,7 @@ namespace eastl
 	};
 
 
-} // namespace eastl
+} // namespace stl
 
 
 

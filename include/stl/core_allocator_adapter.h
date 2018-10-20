@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-// Implements an EASTL allocator that uses an ICoreAllocator.
+// Implements an stl allocator that uses an ICoreAllocator.
 // However, this header file is not dependent on ICoreAllocator or its package.
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -38,11 +38,11 @@ namespace EA
 	{
 		/// CoreAllocatorAdapter
 		///
-		/// Implements the EASTL allocator interface.
+		/// Implements the stl allocator interface.
 		/// Allocates memory from an instance of ICoreAllocator or another class with an equivalent interface.
 		/// ICoreAllocator is a pure-virtual memory allocation interface used by a number of EA games and 
-		/// shared libraries. It's completely unrelated to EASTL, but it's prevalent enough that it's useful
-		/// for EASTL to have a built-in adapter for this interface. ICoreAllocator is declared in the 
+		/// shared libraries. It's completely unrelated to stl, but it's prevalent enough that it's useful
+		/// for stl to have a built-in adapter for this interface. ICoreAllocator is declared in the 
 		/// CoreAllocator package icoreallocator_interface.h header, but CoreAllocatorAdapter can work with
 		/// any equivalent interface, as defined below.
 		///
@@ -63,18 +63,18 @@ namespace EA
 		/// Example usage:
 		///     #include <coreallocator/icoreallocator_interface.h>
 		///     typedef EA::Allocator::CoreAllocatorAdapter<EASTLTestCoreAllocator> Adapter;
-		///     eastl::list<Widget, Adapter> widgetList(Adapter("UI/WidgetList", pSomeCoreAllocator));
+		///     stl::list<Widget, Adapter> widgetList(Adapter("UI/WidgetList", pSomeCoreAllocator));
 		///     widgetList.push_back(Widget());
 		///
 		/// Example usage:
 		///     #include <MyEquivalentCoreAllocatorInterface.h>
-		///     eastl::list<Widget, CoreAllocatorAdapter<MyCoreAllocatorInterface> > widgetList;
+		///     stl::list<Widget, CoreAllocatorAdapter<MyCoreAllocatorInterface> > widgetList;
 		///     widgetList.push_back(Widget());
 		///
 		/// Example usage:
 		///     #include <coreallocator/icoreallocator_interface.h>
 		///     typedef EA::Allocator::CoreAllocatorAdapter<EASTLTestCoreAllocator> Adapter;
-		///     typedef eastl::list<Widget, Adapter> WidgetList;
+		///     typedef stl::list<Widget, Adapter> WidgetList;
 		///     CoreAllocatorFixed<WidgetList::node_type> widgetCoreAllocator(pFixedAllocatorForWidgetListValueType); // CoreAllocatorFixed is a hypothetical implementation of the ICoreAllocator interface.
 		///     WidgetList widgetList(Adapter("UI/WidgetList", &widgetCoreAllocator));                                // Note that the widgetCoreAllocator is declared before and thus destroyed after the widget list.
 		///
@@ -128,7 +128,7 @@ namespace EA
 		/// Provides a standardized typedef for ICoreAllocator;
 		/// 
 		/// Example usage:
-		///     eastl::list<Widget, EASTLICoreAllocator> widgetList("UI/WidgetList", pSomeCoreAllocator);
+		///     stl::list<Widget, EASTLICoreAllocator> widgetList("UI/WidgetList", pSomeCoreAllocator);
 		///     widgetList.push_back(Widget());
 		///
 		class ICoreAllocator;
@@ -144,7 +144,7 @@ namespace EA
 		///
 		/// Implements a functor which can free memory from the specified
 		/// ICoreAllocator interface.  This is a convenience object provided for
-		/// users who wish to have EASTL containers deallocate memory obtained from
+		/// users who wish to have stl containers deallocate memory obtained from
 		/// ICoreAllocator interfaces.
 		///
 		template <class AllocatorType>
@@ -195,7 +195,7 @@ namespace EA
 		/// Provides a standardized typedef for ICoreAllocator implementations.
 		///
 		/// Example usage: 
-		///     eastl::shared_ptr<A> foo(pA, EASTLCoreDeleter());
+		///     stl::shared_ptr<A> foo(pA, EASTLCoreDeleter());
 		///
 		typedef CoreDeleterAdapter<ICoreAllocator> EASTLICoreDeleterAdapter;
 		typedef CoreDeleterAdapter<EASTLCoreAllocatorImpl> EASTLCoreDeleterAdapter;
@@ -268,7 +268,7 @@ namespace EA
 		template<class AllocatorType>
 		inline void* CoreAllocatorAdapter<AllocatorType>::allocate(size_t n, int /*flags*/)
 		{
-			// It turns out that EASTL itself doesn't use the flags parameter, 
+			// It turns out that stl itself doesn't use the flags parameter, 
 			// whereas the user here might well want to specify a flags 
 			// parameter. So we use ours instead of the one passed in.
 			return mpCoreAllocator->Alloc(n, EASTL_NAME_VAL(mpName), (unsigned)mnFlags);
@@ -277,7 +277,7 @@ namespace EA
 		template<class AllocatorType>
 		inline void* CoreAllocatorAdapter<AllocatorType>::allocate(size_t n, size_t alignment, size_t offset, int /*flags*/)
 		{
-			// It turns out that EASTL itself doesn't use the flags parameter, 
+			// It turns out that stl itself doesn't use the flags parameter, 
 			// whereas the user here might well want to specify a flags 
 			// parameter. So we use ours instead of the one passed in.
 			return mpCoreAllocator->Alloc(n, EASTL_NAME_VAL(mpName), (unsigned)mnFlags, (unsigned)alignment, (unsigned)offset);

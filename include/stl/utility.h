@@ -32,7 +32,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	/// swap
@@ -48,9 +48,9 @@ namespace eastl
 	///
 
 	template <typename T> 
-	inline void swap(T& a, T& b) EA_NOEXCEPT_IF(eastl::is_nothrow_move_constructible<T>::value && eastl::is_nothrow_move_assignable<T>::value)
+	inline void swap(T& a, T& b) EA_NOEXCEPT_IF(stl::is_nothrow_move_constructible<T>::value && stl::is_nothrow_move_assignable<T>::value)
 	{
-		T temp(EASTL_MOVE(a));  // EASTL_MOVE uses EASTL::move when available, else is a no-op.
+		T temp(EASTL_MOVE(a));  // EASTL_MOVE uses stl::move when available, else is a no-op.
 		a = EASTL_MOVE(b);
 		b = EASTL_MOVE(temp);
 	}
@@ -75,24 +75,24 @@ namespace eastl
 
 		template <typename>
 		struct is_swappable
-			: public eastl::false_type {};
+			: public stl::false_type {};
 	#else
 		#define EASTL_TYPE_TRAIT_is_swappable_CONFORMANCE 1
 
-		// We declare this version of 'eastl::swap' to make compile-time existance checks for swap functions possible.  
+		// We declare this version of 'stl::swap' to make compile-time existance checks for swap functions possible.  
 		//
 		#if EASTL_VARIADIC_TEMPLATES_ENABLED
-			eastl::unused swap(eastl::argument_sink, eastl::argument_sink);
+			stl::unused swap(stl::argument_sink, stl::argument_sink);
 		#else
 			// Compilers that do not support variadic templates suffer from a bug with variable arguments list that
 			// causes the construction of aligned types in unaligned memory. To prevent the aligned type construction we
 			// accept the parameters by reference.
-			eastl::unused swap(eastl::argument_sink&, eastl::argument_sink&);
+			stl::unused swap(stl::argument_sink&, stl::argument_sink&);
 		#endif
 
 		template <typename T>
 		struct is_swappable
-			: public integral_constant<bool, !eastl::is_same<decltype(swap(eastl::declval<T&>(), eastl::declval<T&>())), eastl::unused>::value> {}; // Don't prefix swap with eastl:: as we want to allow user-defined swaps via argument-dependent lookup.
+			: public integral_constant<bool, !stl::is_same<decltype(swap(stl::declval<T&>(), stl::declval<T&>())), stl::unused>::value> {}; // Don't prefix swap with stl:: as we want to allow user-defined swaps via argument-dependent lookup.
 	#endif
 	
 	#if EASTL_VARIABLE_TEMPLATES_ENABLED
@@ -115,19 +115,19 @@ namespace eastl
 
 	template <typename T>
 	struct is_nothrow_swappable_helper_noexcept_wrapper
-		{ const static bool value = noexcept(swap(eastl::declval<T&>(), eastl::declval<T&>())); };
+		{ const static bool value = noexcept(swap(stl::declval<T&>(), stl::declval<T&>())); };
 
 	template <typename T, bool>
 	struct is_nothrow_swappable_helper
-		: public eastl::integral_constant<bool, is_nothrow_swappable_helper_noexcept_wrapper<T>::value> {}; // Don't prefix swap with eastl:: as we want to allow user-defined swaps via argument-dependent lookup.
+		: public stl::integral_constant<bool, is_nothrow_swappable_helper_noexcept_wrapper<T>::value> {}; // Don't prefix swap with stl:: as we want to allow user-defined swaps via argument-dependent lookup.
 
 	template <typename T>
 	struct is_nothrow_swappable_helper<T, false>
-		: public eastl::false_type {};
+		: public stl::false_type {};
 
 	template <typename T>
 	struct is_nothrow_swappable
-		: public eastl::is_nothrow_swappable_helper<T, eastl::is_swappable<T>::value> {};
+		: public stl::is_nothrow_swappable_helper<T, stl::is_swappable<T>::value> {};
 
 	#if EASTL_VARIABLE_TEMPLATES_ENABLED
         template <class T>
@@ -139,13 +139,13 @@ namespace eastl
 	/// is_swappable_with
 	///
 	///
-	template <typename T, typename U, bool OneTypeIsVoid = (eastl::is_void<T>::value || eastl::is_void<U>::value)>
+	template <typename T, typename U, bool OneTypeIsVoid = (stl::is_void<T>::value || stl::is_void<U>::value)>
 	struct is_swappable_with_helper
 	{
-		// Don't prefix swap with eastl:: as we want to allow user-defined swaps via argument-dependent lookup.
+		// Don't prefix swap with stl:: as we want to allow user-defined swaps via argument-dependent lookup.
 	    static const bool value =
-	        !eastl::is_same<decltype(swap(eastl::declval<T>(), eastl::declval<U>())), eastl::unused>::value &&
-	        !eastl::is_same<decltype(swap(eastl::declval<U>(), eastl::declval<T>())), eastl::unused>::value;
+	        !stl::is_same<decltype(swap(stl::declval<T>(), stl::declval<U>())), stl::unused>::value &&
+	        !stl::is_same<decltype(swap(stl::declval<U>(), stl::declval<T>())), stl::unused>::value;
     };
 
 	template <typename T, typename U>
@@ -153,7 +153,7 @@ namespace eastl
 
     template<typename T, typename U>
 	struct is_swappable_with 
-			: public eastl::bool_constant<is_swappable_with_helper<T, U>::value> {}; 
+			: public stl::bool_constant<is_swappable_with_helper<T, U>::value> {}; 
 
 	#if EASTL_VARIABLE_TEMPLATES_ENABLED
         template <class T, class U>
@@ -171,12 +171,12 @@ namespace eastl
 		struct is_nothrow_swappable_with_helper { static const bool value = false; };
 	#else
 		#define EASTL_TYPE_TRAIT_is_nothrow_swappable_with_CONFORMANCE 1
-		template <typename T, typename U, bool OneTypeIsVoid = (eastl::is_void<T>::value || eastl::is_void<U>::value)>
+		template <typename T, typename U, bool OneTypeIsVoid = (stl::is_void<T>::value || stl::is_void<U>::value)>
 		struct is_nothrow_swappable_with_helper
 		{
-	        // Don't prefix swap with eastl:: as we want to allow user-defined swaps via argument-dependent lookup.
-	        static const bool value = noexcept(swap(eastl::declval<T>(), eastl::declval<U>())) &&
-	                                  noexcept(swap(eastl::declval<U>(), eastl::declval<T>()));
+	        // Don't prefix swap with stl:: as we want to allow user-defined swaps via argument-dependent lookup.
+	        static const bool value = noexcept(swap(stl::declval<T>(), stl::declval<U>())) &&
+	                                  noexcept(swap(stl::declval<U>(), stl::declval<T>()));
         };
 
 		template <typename T, typename U>
@@ -184,7 +184,7 @@ namespace eastl
 	#endif
 
     template <typename T, typename U>
-    struct is_nothrow_swappable_with : public eastl::bool_constant<is_nothrow_swappable_with_helper<T, U>::value> {};
+    struct is_nothrow_swappable_with : public stl::bool_constant<is_nothrow_swappable_with_helper<T, U>::value> {};
 
     #if EASTL_VARIABLE_TEMPLATES_ENABLED
         template <class T, class U>
@@ -202,9 +202,9 @@ namespace eastl
 		template <typename ForwardIterator1, typename ForwardIterator2>
 		static void iter_swap(ForwardIterator1 a, ForwardIterator2 b)
 		{
-			typedef typename eastl::iterator_traits<ForwardIterator1>::value_type value_type_a;
+			typedef typename stl::iterator_traits<ForwardIterator1>::value_type value_type_a;
 
-			value_type_a temp(EASTL_MOVE(*a)); // EASTL_MOVE uses EASTL::move when available, else is a no-op.
+			value_type_a temp(EASTL_MOVE(*a)); // EASTL_MOVE uses stl::move when available, else is a no-op.
 			*a = EASTL_MOVE(*b);
 			*b = EASTL_MOVE(temp); 
 		}
@@ -216,7 +216,7 @@ namespace eastl
 		template <typename ForwardIterator1, typename ForwardIterator2>
 		static void iter_swap(ForwardIterator1 a, ForwardIterator2 b)
 		{
-			swap(*a, *b);  // Don't prefix swap with eastl:: as we want to allow user-defined swaps via argument-dependent lookup.
+			swap(*a, *b);  // Don't prefix swap with stl:: as we want to allow user-defined swaps via argument-dependent lookup.
 		}
 	};
 
@@ -236,12 +236,12 @@ namespace eastl
 	template <typename ForwardIterator1, typename ForwardIterator2>
 	inline void iter_swap(ForwardIterator1 a, ForwardIterator2 b)
 	{
-		typedef typename eastl::iterator_traits<ForwardIterator1>::value_type value_type_a;
-		typedef typename eastl::iterator_traits<ForwardIterator2>::value_type value_type_b;
-		typedef typename eastl::iterator_traits<ForwardIterator1>::reference  reference_a;
-		typedef typename eastl::iterator_traits<ForwardIterator2>::reference  reference_b;
+		typedef typename stl::iterator_traits<ForwardIterator1>::value_type value_type_a;
+		typedef typename stl::iterator_traits<ForwardIterator2>::value_type value_type_b;
+		typedef typename stl::iterator_traits<ForwardIterator1>::reference  reference_a;
+		typedef typename stl::iterator_traits<ForwardIterator2>::reference  reference_b;
 
-		eastl::iter_swap_impl<eastl::type_and<eastl::is_same<value_type_a, value_type_b>::value, eastl::is_same<value_type_a&, reference_a>::value, eastl::is_same<value_type_b&, reference_b>::value >::value >::iter_swap(a, b);
+		stl::iter_swap_impl<stl::type_and<stl::is_same<value_type_a, value_type_b>::value, stl::is_same<value_type_a&, reference_a>::value, stl::is_same<value_type_b&, reference_b>::value >::value >::iter_swap(a, b);
 	}
 
 
@@ -266,7 +266,7 @@ namespace eastl
 	swap_ranges(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2)
 	{
 		for(; first1 != last1; ++first1, ++first2)
-			iter_swap(first1, first2); // Don't prefix swap with eastl:: as we want to allow user-defined swaps via argument-dependent lookup.
+			iter_swap(first1, first2); // Don't prefix swap with stl:: as we want to allow user-defined swaps via argument-dependent lookup.
 		return first2;
 	}
 
@@ -278,9 +278,9 @@ namespace eastl
 	///
 	template <typename T, size_t N>
 	inline void
-	swap(T (&a)[N], T (&b)[N]) EA_NOEXCEPT_IF(eastl::is_nothrow_swappable<T>::value)
+	swap(T (&a)[N], T (&b)[N]) EA_NOEXCEPT_IF(stl::is_nothrow_swappable<T>::value)
 	{
-		eastl::swap_ranges(a, a + N, b);
+		stl::swap_ranges(a, a + N, b);
 	}
 
 
@@ -294,8 +294,8 @@ namespace eastl
 	template <typename T, typename U = T>
 	inline T exchange(T& obj, U&& new_value)
 	{
-		T old_value = eastl::move(obj);
-		obj = eastl::forward<U>(new_value);
+		T old_value = stl::move(obj);
+		obj = stl::forward<U>(new_value);
 		return old_value;
 	}
 
@@ -310,10 +310,10 @@ namespace eastl
 	/// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4380.html
 	///
 	template <class T>
-	EA_CONSTEXPR typename eastl::add_const<T>::type& as_const(T& t) EA_NOEXCEPT
+	EA_CONSTEXPR typename stl::add_const<T>::type& as_const(T& t) EA_NOEXCEPT
 		{ return t; }
 
-	// The C++17 forbids 'eastl::as_const' from accepting rvalues.  Passing an rvalue reference to 'eastl::as_const'
+	// The C++17 forbids 'stl::as_const' from accepting rvalues.  Passing an rvalue reference to 'stl::as_const'
 	// generates an 'const T&' or const lvalue reference to a temporary object. 
 	template <class T>
 	void as_const(const T&&) = delete;
@@ -378,15 +378,15 @@ namespace eastl
 
 		template <typename TT1 = T1,
 		          typename TT2 = T2,
-		          class = eastl::enable_if_t<eastl::is_default_constructible_v<TT1> &&
-		                                     eastl::is_default_constructible_v<TT2>>>
+		          class = stl::enable_if_t<stl::is_default_constructible_v<TT1> &&
+		                                     stl::is_default_constructible_v<TT2>>>
 		EA_CONSTEXPR pair()
 		    : first(), second()
 		{
 		}
 
 	#if EASTL_ENABLE_PAIR_FIRST_ELEMENT_CONSTRUCTOR
-		template <typename TT2 = T2, typename = eastl::enable_if_t<eastl::is_default_constructible_v<TT2>>>
+		template <typename TT2 = T2, typename = stl::enable_if_t<stl::is_default_constructible_v<TT2>>>
 		EA_CPP14_CONSTEXPR pair(const T1& x)
 		    : first(x), second()
 		{
@@ -395,12 +395,12 @@ namespace eastl
 		// GCC has a bug with overloading rvalue and lvalue function templates.	
 		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54425	
 		//	
-		// error: 'eastl::pair<T1, T2>::pair(T1&&) [with T1 = const int&; T2 = const int&]' cannot be overloaded	
-		// error: with 'eastl::pair<T1, T2>::pair(const T1&) [with T1 = const int&; T2 = const int&]'
+		// error: 'stl::pair<T1, T2>::pair(T1&&) [with T1 = const int&; T2 = const int&]' cannot be overloaded	
+		// error: with 'stl::pair<T1, T2>::pair(const T1&) [with T1 = const int&; T2 = const int&]'
 		#if !defined(EA_COMPILER_GNUC)
-			template <typename TT2 = T2, typename = eastl::enable_if_t<eastl::is_default_constructible_v<TT2>>>
+			template <typename TT2 = T2, typename = stl::enable_if_t<stl::is_default_constructible_v<TT2>>>
 			EA_CPP14_CONSTEXPR pair(T1&& x)
-				: first(eastl::move(x)), second()
+				: first(stl::move(x)), second()
 			{
 			}
 		#endif
@@ -415,7 +415,7 @@ namespace eastl
 	// https://bugs.llvm.org/show_bug.cgi?id=38374
 	#if !defined(EA_COMPILER_CLANG)
 		template<typename T>
-		using single_pair_ctor_sfinae = eastl::enable_if_t<eastl::is_default_constructible_v<T>>;
+		using single_pair_ctor_sfinae = stl::enable_if_t<stl::is_default_constructible_v<T>>;
 	#else
 		template<typename>
 		using single_pair_ctor_sfinae = void;
@@ -430,12 +430,12 @@ namespace eastl
 		// GCC has a bug with overloading rvalue and lvalue function templates.	
 		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54425	
 		//	
-		// error: 'eastl::pair<T1, T2>::pair(T1&&) [with T1 = const int&; T2 = const int&]' cannot be overloaded	
-		// error: with 'eastl::pair<T1, T2>::pair(const T1&) [with T1 = const int&; T2 = const int&]'
+		// error: 'stl::pair<T1, T2>::pair(T1&&) [with T1 = const int&; T2 = const int&]' cannot be overloaded	
+		// error: with 'stl::pair<T1, T2>::pair(const T1&) [with T1 = const int&; T2 = const int&]'
 		#if !defined(EA_COMPILER_GNUC)
 			template <typename TT2 = T2, typename = single_pair_ctor_sfinae<TT2>>
 			EA_CPP14_CONSTEXPR pair(pair_first_construct_t, T1&& x)
-				: first(eastl::move(x)), second()
+				: first(stl::move(x)), second()
 			{
 			}
 		#endif
@@ -443,7 +443,7 @@ namespace eastl
 		template <
 		    typename TT1 = T1,
 		    typename TT2 = T2,
-		    class = eastl::enable_if_t<eastl::is_copy_constructible_v<TT1> && eastl::is_copy_constructible_v<TT2>>>
+		    class = stl::enable_if_t<stl::is_copy_constructible_v<TT1> && stl::is_copy_constructible_v<TT2>>>
 		EA_CPP14_CONSTEXPR pair(const T1& x, const T2& y)
 		    : first(x), second(y)
 		{
@@ -455,7 +455,7 @@ namespace eastl
 		template <
 		    typename U,
 		    typename V,
-		    class = eastl::enable_if_t<eastl::is_convertible_v<const U&, T1> && eastl::is_convertible_v<const V&, T2>>>
+		    class = stl::enable_if_t<stl::is_convertible_v<const U&, T1> && stl::is_convertible_v<const V&, T2>>>
 		EA_CPP14_CONSTEXPR pair(const pair<U, V>& p)
 		    : first(p.first), second(p.second)
 		{
@@ -463,29 +463,29 @@ namespace eastl
 
 		template <typename U,
 		          typename V,
-		          typename = eastl::enable_if_t<eastl::is_convertible_v<U, T1> && eastl::is_convertible_v<V, T2>>>
+		          typename = stl::enable_if_t<stl::is_convertible_v<U, T1> && stl::is_convertible_v<V, T2>>>
 		EA_CPP14_CONSTEXPR pair(U&& u, V&& v)
-		    : first(eastl::forward<U>(u)), second(eastl::forward<V>(v))
+		    : first(stl::forward<U>(u)), second(stl::forward<V>(v))
 		{
 		}
 
-		template <typename U, typename = eastl::enable_if_t<eastl::is_convertible_v<U, T1>>>
+		template <typename U, typename = stl::enable_if_t<stl::is_convertible_v<U, T1>>>
 		EA_CPP14_CONSTEXPR pair(U&& x, const T2& y)
-			: first(eastl::forward<U>(x)), second(y)
+			: first(stl::forward<U>(x)), second(y)
 		{
 		}
 
-		template <typename V, typename = eastl::enable_if_t<eastl::is_convertible_v<V, T2>>>
+		template <typename V, typename = stl::enable_if_t<stl::is_convertible_v<V, T2>>>
 		EA_CPP14_CONSTEXPR pair(const T1& x, V&& y)
-			: first(x), second(eastl::forward<V>(y))
+			: first(x), second(stl::forward<V>(y))
 		{
 		}
 
 		template <typename U,
 		          typename V,
-		          typename = eastl::enable_if_t<eastl::is_convertible_v<U, T1> && eastl::is_convertible_v<V, T2>>>
+		          typename = stl::enable_if_t<stl::is_convertible_v<U, T1> && stl::is_convertible_v<V, T2>>>
 		EA_CPP14_CONSTEXPR pair(pair<U, V>&& p)
-		    : first(eastl::forward<U>(p.first)), second(eastl::forward<V>(p.second))
+		    : first(stl::forward<U>(p.first)), second(stl::forward<V>(p.second))
 		{
 		}
 
@@ -493,33 +493,33 @@ namespace eastl
 		// initializes second with arguments of types Args2... obtained by forwarding the elements of second_args.
 		template <class... Args1,
 		          class... Args2,
-		          typename = eastl::enable_if_t<eastl::is_constructible_v<first_type, Args1&&...> &&
-		                                        eastl::is_constructible_v<second_type, Args2&&...>>>
-		pair(eastl::piecewise_construct_t pwc, eastl::tuple<Args1...> first_args, eastl::tuple<Args2...> second_args)
+		          typename = stl::enable_if_t<stl::is_constructible_v<first_type, Args1&&...> &&
+		                                        stl::is_constructible_v<second_type, Args2&&...>>>
+		pair(stl::piecewise_construct_t pwc, stl::tuple<Args1...> first_args, stl::tuple<Args2...> second_args)
 		    : pair(pwc,
-		           eastl::move(first_args),
-		           eastl::move(second_args),
-		           eastl::make_index_sequence<sizeof...(Args1)>(),
-		           eastl::make_index_sequence<sizeof...(Args2)>())
+		           stl::move(first_args),
+		           stl::move(second_args),
+		           stl::make_index_sequence<sizeof...(Args1)>(),
+		           stl::make_index_sequence<sizeof...(Args2)>())
 		{
 		}
 
 	private:
 		// NOTE(rparolin): Internal constructor used to expand the index_sequence required to expand the tuple elements.
 		template <class... Args1, class... Args2, size_t... I1, size_t... I2>
-		pair(eastl::piecewise_construct_t,
-			 eastl::tuple<Args1...> first_args,
-			 eastl::tuple<Args2...> second_args,
-			 eastl::index_sequence<I1...>,
-			 eastl::index_sequence<I2...>)
-			: first(eastl::forward<Args1>(eastl::get<I1>(first_args))...)
-			, second(eastl::forward<Args2>(eastl::get<I2>(second_args))...)
+		pair(stl::piecewise_construct_t,
+			 stl::tuple<Args1...> first_args,
+			 stl::tuple<Args2...> second_args,
+			 stl::index_sequence<I1...>,
+			 stl::index_sequence<I2...>)
+			: first(stl::forward<Args1>(stl::get<I1>(first_args))...)
+			, second(stl::forward<Args2>(stl::get<I2>(second_args))...)
 		{
 		}
 
 	public:
 		pair& operator=(const pair& p)
-		    EA_NOEXCEPT_IF(eastl::is_nothrow_copy_assignable_v<T1>&& eastl::is_nothrow_copy_assignable_v<T2>)
+		    EA_NOEXCEPT_IF(stl::is_nothrow_copy_assignable_v<T1>&& stl::is_nothrow_copy_assignable_v<T2>)
 		{
 			first = p.first;
 			second = p.second;
@@ -528,7 +528,7 @@ namespace eastl
 
 		template <typename U,
 		          typename V,
-		          typename = eastl::enable_if_t<eastl::is_convertible_v<U, T1> && eastl::is_convertible_v<V, T2>>>
+		          typename = stl::enable_if_t<stl::is_convertible_v<U, T1> && stl::is_convertible_v<V, T2>>>
 		pair& operator=(const pair<U, V>& p)
 		{
 			first = p.first;
@@ -537,27 +537,27 @@ namespace eastl
 		}
 
 		pair& operator=(pair&& p)
-		    EA_NOEXCEPT_IF(eastl::is_nothrow_move_assignable_v<T1>&& eastl::is_nothrow_move_assignable_v<T2>)
+		    EA_NOEXCEPT_IF(stl::is_nothrow_move_assignable_v<T1>&& stl::is_nothrow_move_assignable_v<T2>)
 		{
-			first = eastl::forward<T1>(p.first);
-			second = eastl::forward<T2>(p.second);
+			first = stl::forward<T1>(p.first);
+			second = stl::forward<T2>(p.second);
 			return *this;
 		}
 
 		template <typename U,
 		          typename V,
-		          typename = eastl::enable_if_t<eastl::is_convertible_v<U, T1> && eastl::is_convertible_v<V, T2>>>
+		          typename = stl::enable_if_t<stl::is_convertible_v<U, T1> && stl::is_convertible_v<V, T2>>>
 		pair& operator=(pair<U, V>&& p)
 		{
-			first = eastl::forward<U>(p.first);
-			second = eastl::forward<V>(p.second);
+			first = stl::forward<U>(p.first);
+			second = stl::forward<V>(p.second);
 			return *this;
 		}
 
-		void swap(pair& p) EA_NOEXCEPT_IF(eastl::is_nothrow_swappable_v<T1>&& eastl::is_nothrow_swappable_v<T2>)
+		void swap(pair& p) EA_NOEXCEPT_IF(stl::is_nothrow_swappable_v<T1>&& stl::is_nothrow_swappable_v<T2>)
 		{
-			eastl::iter_swap(&first, &p.first);
-			eastl::iter_swap(&second, &p.second);
+			stl::iter_swap(&first, &p.first);
+			stl::iter_swap(&second, &p.second);
 		}
 	};
 
@@ -689,18 +689,18 @@ namespace eastl
 	///     return pair<char*, char*>(charPtr, charPtr);
 	///
 	template <typename T1, typename T2>
-	EA_CPP14_CONSTEXPR inline pair<typename eastl::remove_reference_wrapper<typename eastl::decay<T1>::type>::type, 
-								   typename eastl::remove_reference_wrapper<typename eastl::decay<T2>::type>::type>
+	EA_CPP14_CONSTEXPR inline pair<typename stl::remove_reference_wrapper<typename stl::decay<T1>::type>::type, 
+								   typename stl::remove_reference_wrapper<typename stl::decay<T2>::type>::type>
 	make_pair(T1&& a, T2&& b)
 	{
-		typedef typename eastl::remove_reference_wrapper<typename eastl::decay<T1>::type>::type T1Type;
-		typedef typename eastl::remove_reference_wrapper<typename eastl::decay<T2>::type>::type T2Type;
+		typedef typename stl::remove_reference_wrapper<typename stl::decay<T1>::type>::type T1Type;
+		typedef typename stl::remove_reference_wrapper<typename stl::decay<T2>::type>::type T2Type;
 
-		return eastl::pair<T1Type, T2Type>(eastl::forward<T1>(a), eastl::forward<T2>(b));
+		return stl::pair<T1Type, T2Type>(stl::forward<T1>(a), stl::forward<T2>(b));
 	}
 
 
-	// Without the following, VC++ fails to compile code like this: pair<const char*, int> p = eastl::make_pair<const char*, int>("hello", 0);
+	// Without the following, VC++ fails to compile code like this: pair<const char*, int> p = stl::make_pair<const char*, int>("hello", 0);
 	// We define a const reference version alternative to the above. "hello" is of type char const(&)[6] (array of 6 const chars), 
 	// but VC++ decays it to const char* and allows this make_pair to be called with that. VC++ fails below with make_pair("hello", "people") 
 	// because you can't assign arrays and until we have a better solution we just disable this make_pair specialization for when T1 or T2 
@@ -710,22 +710,22 @@ namespace eastl
 		EA_CPP14_CONSTEXPR inline pair<T1, T2> make_pair(
 			const T1& a,
 			const T2& b,
-			typename eastl::enable_if<!eastl::is_array<T1>::value && !eastl::is_array<T2>::value>::type* = 0)
+			typename stl::enable_if<!stl::is_array<T1>::value && !stl::is_array<T2>::value>::type* = 0)
 		{
-			return eastl::pair<T1, T2>(a, b);
+			return stl::pair<T1, T2>(a, b);
 		}
     #endif
 
 	// For backwards compatibility
 	template <typename T1, typename T2>
-	EA_CPP14_CONSTEXPR inline pair<typename eastl::remove_reference_wrapper<typename eastl::decay<T1>::type>::type, 
-								   typename eastl::remove_reference_wrapper<typename eastl::decay<T2>::type>::type>
+	EA_CPP14_CONSTEXPR inline pair<typename stl::remove_reference_wrapper<typename stl::decay<T1>::type>::type, 
+								   typename stl::remove_reference_wrapper<typename stl::decay<T2>::type>::type>
 	make_pair_ref(T1&& a, T2&& b)
 	{
-		typedef typename eastl::remove_reference_wrapper<typename eastl::decay<T1>::type>::type T1Type;
-		typedef typename eastl::remove_reference_wrapper<typename eastl::decay<T2>::type>::type T2Type;
+		typedef typename stl::remove_reference_wrapper<typename stl::decay<T1>::type>::type T1Type;
+		typedef typename stl::remove_reference_wrapper<typename stl::decay<T2>::type>::type T2Type;
 
-		return eastl::pair<T1Type, T2Type>(eastl::forward<T1>(a), eastl::forward<T2>(b));
+		return stl::pair<T1Type, T2Type>(stl::forward<T1>(a), stl::forward<T2>(b));
 	}
 
 #if EASTL_TUPLE_ENABLED
@@ -836,7 +836,7 @@ namespace eastl
 #endif  // EASTL_TUPLE_ENABLED
 
 
-}  // namespace eastl
+}  // namespace stl
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

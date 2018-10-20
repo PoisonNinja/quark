@@ -33,14 +33,14 @@
 	#pragma once // Some compilers (e.g. VC++) benefit significantly from using this. We've measured 3-4% build speed improvements in apps as a result.
 #endif
 
-namespace eastl
+namespace stl
 {
 	/// EASTL_TUPLE_VECTOR_DEFAULT_NAME
 	///
 	/// Defines a default container name in the absence of a user-provided name.
 	///
 	#ifndef EASTL_TUPLE_VECTOR_DEFAULT_NAME
-	#define EASTL_TUPLE_VECTOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " tuple-vector" // Unless the user overrides something, this is "EASTL tuple-vector".
+	#define EASTL_TUPLE_VECTOR_DEFAULT_NAME EASTL_DEFAULT_NAME_PREFIX " tuple-vector" // Unless the user overrides something, this is "stl tuple-vector".
 	#endif
 
 
@@ -222,8 +222,8 @@ struct TupleVecLeaf
 	{
 		T* pBegin = mpData + begin;
 		T* pEnd = mpData + end;
-		eastl::uninitialized_move_ptr_if_noexcept(pBegin, pEnd, pDest);
-		eastl::destruct(pBegin, pEnd);
+		stl::uninitialized_move_ptr_if_noexcept(pBegin, pEnd, pDest);
+		stl::destruct(pBegin, pEnd);
 	}
 
 	void DoInsertAndFill(size_type pos, size_type n, size_type numElements, const T& arg)
@@ -234,15 +234,15 @@ struct TupleVecLeaf
 		const size_type nExtra = (numElements - pos);
 		if (n < nExtra) // If the inserted values are entirely within initialized memory (i.e. are before mpEnd)...
 		{
-			eastl::uninitialized_move_ptr(pDataEnd - n, pDataEnd, pDataEnd);
-			eastl::move_backward(pDest, pDataEnd - n, pDataEnd); // We need move_backward because of potential overlap issues.
-			eastl::fill(pDest, pDest + n, temp);
+			stl::uninitialized_move_ptr(pDataEnd - n, pDataEnd, pDataEnd);
+			stl::move_backward(pDest, pDataEnd - n, pDataEnd); // We need move_backward because of potential overlap issues.
+			stl::fill(pDest, pDest + n, temp);
 		}
 		else
 		{
-			eastl::uninitialized_fill_n_ptr(pDataEnd, n - nExtra, temp);
-			eastl::uninitialized_move_ptr(pDest, pDataEnd, pDataEnd + n - nExtra);
-			eastl::fill(pDest, pDataEnd, temp);
+			stl::uninitialized_fill_n_ptr(pDataEnd, n - nExtra, temp);
+			stl::uninitialized_move_ptr(pDest, pDataEnd, pDataEnd + n - nExtra);
+			stl::fill(pDest, pDataEnd, temp);
 		}
 	}
 
@@ -254,15 +254,15 @@ struct TupleVecLeaf
 		const size_type nExtra = numDataElements - pos;
 		if (n < nExtra) // If the inserted values are entirely within initialized memory (i.e. are before mpEnd)...
 		{
-			eastl::uninitialized_move_ptr(pDataEnd - n, pDataEnd, pDataEnd);
-			eastl::move_backward(pDestBegin, pDataEnd - n, pDataEnd); // We need move_backward because of potential overlap issues.
-			eastl::copy(pSrcBegin, pSrcEnd, pDestBegin);
+			stl::uninitialized_move_ptr(pDataEnd - n, pDataEnd, pDataEnd);
+			stl::move_backward(pDestBegin, pDataEnd - n, pDataEnd); // We need move_backward because of potential overlap issues.
+			stl::copy(pSrcBegin, pSrcEnd, pDestBegin);
 		}
 		else
 		{
-			eastl::uninitialized_copy(pSrcEnd - (n - nExtra), pSrcEnd, pDataEnd);
-			eastl::uninitialized_move_ptr(pDestBegin, pDataEnd, pDataEnd + n - nExtra);
-			eastl::copy(pSrcBegin, pSrcEnd - (n - nExtra), pDestBegin);
+			stl::uninitialized_copy(pSrcEnd - (n - nExtra), pSrcEnd, pDataEnd);
+			stl::uninitialized_move_ptr(pDestBegin, pDataEnd, pDataEnd + n - nExtra);
+			stl::copy(pSrcBegin, pSrcEnd - (n - nExtra), pDestBegin);
 		}
 	}
 
@@ -271,10 +271,10 @@ struct TupleVecLeaf
 		T* pDest = mpData + pos;
 		T* pDataEnd = mpData + numElements;
 
-		eastl::uninitialized_move_ptr(pDataEnd - 1, pDataEnd, pDataEnd);
-		eastl::move_backward(pDest, pDataEnd - 1, pDataEnd); // We need move_backward because of potential overlap issues.
-		eastl::destruct(pDest);
-		::new (pDest) T(eastl::forward<T>(arg));
+		stl::uninitialized_move_ptr(pDataEnd - 1, pDataEnd, pDataEnd);
+		stl::move_backward(pDest, pDataEnd - 1, pDataEnd); // We need move_backward because of potential overlap issues.
+		stl::destruct(pDest);
+		::new (pDest) T(stl::forward<T>(arg));
 	}
 
 	T* mpData = nullptr;
@@ -445,15 +445,15 @@ class TupleVecImpl<Allocator, integer_sequence<size_t, Indices...>, Ts...> : pub
 public:
 	typedef TupleVecInternal::TupleVecIter<index_sequence_type, Ts...> iterator;
 	typedef TupleVecInternal::TupleVecIter<index_sequence_type, const Ts...> const_iterator;
-	typedef eastl::reverse_iterator<iterator> reverse_iterator;
-	typedef eastl::reverse_iterator<const_iterator> const_reverse_iterator;
+	typedef stl::reverse_iterator<iterator> reverse_iterator;
+	typedef stl::reverse_iterator<const_iterator> const_reverse_iterator;
 	typedef eastl_size_t size_type;
-	typedef eastl::tuple<Ts...> value_tuple;
-	typedef eastl::tuple<Ts&...> reference_tuple;
-	typedef eastl::tuple<const Ts&...> const_reference_tuple;
-	typedef eastl::tuple<Ts*...> ptr_tuple;
-	typedef eastl::tuple<const Ts*...> const_ptr_tuple;
-	typedef eastl::tuple<Ts&&...> rvalue_tuple;
+	typedef stl::tuple<Ts...> value_tuple;
+	typedef stl::tuple<Ts&...> reference_tuple;
+	typedef stl::tuple<const Ts&...> const_reference_tuple;
+	typedef stl::tuple<Ts*...> ptr_tuple;
+	typedef stl::tuple<const Ts*...> const_ptr_tuple;
+	typedef stl::tuple<Ts&&...> rvalue_tuple;
 
 	TupleVecImpl()
 		: mDataSizeAndAllocator(0, EASTL_TUPLE_VECTOR_DEFAULT_ALLOCATOR)
@@ -464,7 +464,7 @@ public:
 	{}
 
 	TupleVecImpl(this_type&& x)
-		: mDataSizeAndAllocator(0, eastl::move(x.internalAllocator()))
+		: mDataSizeAndAllocator(0, stl::move(x.internalAllocator()))
 	{
 		swap(x);
 	}
@@ -478,7 +478,7 @@ public:
 		}
 		else
 		{
-			this_type temp(eastl::move(*this));
+			this_type temp(stl::move(*this));
 			temp.swap(x);
 		}
 	}
@@ -556,7 +556,7 @@ protected:
 public:
 	~TupleVecImpl()
 	{ 
-		swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + mNumElements), 0)...);
+		swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + mNumElements), 0)...);
 		if (mpData)
 			EASTLFree(internalAllocator(), mpData, internalDataSize()); 
 	}
@@ -571,14 +571,14 @@ public:
 		else if (n > mNumElements) // If n > mNumElements ...
 		{
 			size_type oldNumElements = mNumElements;
-			swallow((eastl::fill(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + oldNumElements, args), 0)...);
-			swallow((eastl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
+			swallow((stl::fill(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + oldNumElements, args), 0)...);
+			swallow((stl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
 					                       TupleVecLeaf<Indices, Ts>::mpData + n, args), 0)...);
 			mNumElements = n;
 		}
 		else // else 0 <= n <= mNumElements
 		{
-			swallow((eastl::fill(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + n, args), 0)...);
+			swallow((stl::fill(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + n, args), 0)...);
 			erase(begin() + n, end());
 		}
 	}
@@ -603,17 +603,17 @@ public:
 			if (newNumElements > mNumElements) // If n > mNumElements ...
 			{
 				size_type oldNumElements = mNumElements;
-				swallow((eastl::copy((Ts*)(ppOtherData[Indices]) + firstIdx,
+				swallow((stl::copy((Ts*)(ppOtherData[Indices]) + firstIdx,
 						       (Ts*)(ppOtherData[Indices]) + firstIdx + oldNumElements,
 						       TupleVecLeaf<Indices, Ts>::mpData), 0)...);
-				swallow((eastl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + firstIdx + oldNumElements,
+				swallow((stl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + firstIdx + oldNumElements,
 						                       (Ts*)(ppOtherData[Indices]) + lastIdx,
 						                       TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 				mNumElements = newNumElements;
 			}
 			else // else 0 <= n <= mNumElements
 			{
-				swallow((eastl::copy((Ts*)(ppOtherData[Indices]) + firstIdx, (Ts*)(ppOtherData[Indices]) + lastIdx,
+				swallow((stl::copy((Ts*)(ppOtherData[Indices]) + firstIdx, (Ts*)(ppOtherData[Indices]) + lastIdx,
 						       TupleVecLeaf<Indices, Ts>::mpData), 0)...);
 				erase(begin() + newNumElements, end());
 			}
@@ -687,7 +687,7 @@ public:
 		size_type oldNumCapacity = mNumCapacity;
 		mNumElements = newNumElements;
 		DoGrow(oldNumElements, oldNumCapacity, newNumElements);
-		swallow(::new(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements) Ts(eastl::forward<Ts>(args))...);
+		swallow(::new(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements) Ts(stl::forward<Ts>(args))...);
 		return back();
 	}
 
@@ -716,7 +716,7 @@ public:
 					0, firstIdx, (Ts*)ppNewLeaf[Indices]), 0)...);
 				swallow((TupleVecLeaf<Indices, Ts>::DoUninitializedMoveAndDestruct(
 					firstIdx, oldNumElements, (Ts*)ppNewLeaf[Indices] + firstIdx + 1), 0)...);
-				swallow(::new ((Ts*)ppNewLeaf[Indices] + firstIdx) Ts(eastl::forward<Ts>(args))...);
+				swallow(::new ((Ts*)ppNewLeaf[Indices] + firstIdx) Ts(stl::forward<Ts>(args))...);
 				swallow(TupleVecLeaf<Indices, Ts>::mpData = (Ts*)ppNewLeaf[Indices]...);
 
 				EASTLFree(internalAllocator(), mpData, internalDataSize());
@@ -726,12 +726,12 @@ public:
 			}
 			else
 			{
-				swallow((TupleVecLeaf<Indices, Ts>::DoInsertValue(firstIdx, oldNumElements, eastl::forward<Ts>(args)), 0)...);
+				swallow((TupleVecLeaf<Indices, Ts>::DoInsertValue(firstIdx, oldNumElements, stl::forward<Ts>(args)), 0)...);
 			}
 		}
 		else
 		{
-			swallow(::new (TupleVecLeaf<Indices, Ts>::mpData + oldNumElements) Ts(eastl::forward<Ts>(args))...);
+			swallow(::new (TupleVecLeaf<Indices, Ts>::mpData + oldNumElements) Ts(stl::forward<Ts>(args))...);
 		}
 		return begin() + firstIdx;
 	}
@@ -762,7 +762,7 @@ public:
 					0, firstIdx, (Ts*)ppNewLeaf[Indices]), 0)...);
 				swallow((TupleVecLeaf<Indices, Ts>::DoUninitializedMoveAndDestruct(
 					firstIdx, oldNumElements, (Ts*)ppNewLeaf[Indices] + lastIdx), 0)...);
-				swallow((eastl::uninitialized_fill_ptr((Ts*)ppNewLeaf[Indices] + firstIdx, (Ts*)ppNewLeaf[Indices] + lastIdx, args), 0)...);
+				swallow((stl::uninitialized_fill_ptr((Ts*)ppNewLeaf[Indices] + firstIdx, (Ts*)ppNewLeaf[Indices] + lastIdx, args), 0)...);
 				swallow(TupleVecLeaf<Indices, Ts>::mpData = (Ts*)ppNewLeaf[Indices]...);
 		
 				EASTLFree(internalAllocator(), mpData, internalDataSize());
@@ -777,7 +777,7 @@ public:
 		}
 		else
 		{
-			swallow((eastl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
+			swallow((stl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
 					                       TupleVecLeaf<Indices, Ts>::mpData + newNumElements, args), 0)...);
 		}
 		return begin() + firstIdx;
@@ -814,7 +814,7 @@ public:
 					0, posIdx, (Ts*)ppNewLeaf[Indices]), 0)...);
 				swallow((TupleVecLeaf<Indices, Ts>::DoUninitializedMoveAndDestruct(
 					posIdx, oldNumElements, (Ts*)ppNewLeaf[Indices] + posIdx + numToInsert), 0)...);
-				swallow((eastl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + firstIdx,
+				swallow((stl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + firstIdx,
 						                       (Ts*)(ppOtherData[Indices]) + lastIdx,
 						                       (Ts*)ppNewLeaf[Indices] + posIdx), 0)...);
 				swallow(TupleVecLeaf<Indices, Ts>::mpData = (Ts*)ppNewLeaf[Indices]...);
@@ -833,7 +833,7 @@ public:
 		}
 		else
 		{
-			swallow((eastl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + firstIdx,
+			swallow((stl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + firstIdx,
 					                       (Ts*)(ppOtherData[Indices]) + lastIdx,
 					                       TupleVecLeaf<Indices, Ts>::mpData + posIdx), 0)...);
 		}
@@ -886,10 +886,10 @@ public:
 				void* ppDataBegin[sizeof...(Ts)] = { (void*)(TupleVecLeaf<Indices, Ts>::mpData + posIdx)... };
 				if (numToInsert < nExtra) // If the inserted values are entirely within initialized memory (i.e. are before mpEnd)...
 				{
-					swallow((eastl::uninitialized_move_ptr((Ts*)ppDataEnd[Indices] - numToInsert,
+					swallow((stl::uninitialized_move_ptr((Ts*)ppDataEnd[Indices] - numToInsert,
 						(Ts*)ppDataEnd[Indices], (Ts*)ppDataEnd[Indices]), 0)...);
 					// We need move_backward because of potential overlap issues.
-					swallow((eastl::move_backward((Ts*)ppDataBegin[Indices],
+					swallow((stl::move_backward((Ts*)ppDataBegin[Indices],
 						(Ts*)ppDataEnd[Indices] - numToInsert, (Ts*)ppDataEnd[Indices]), 0)...); 
 					
 					DoCopyFromTupleArray(pos, pos + numToInsert, first);
@@ -897,7 +897,7 @@ public:
 				else
 				{
 					size_type numToInitialize = numToInsert - nExtra;
-					swallow((eastl::uninitialized_move_ptr((Ts*)ppDataBegin[Indices],
+					swallow((stl::uninitialized_move_ptr((Ts*)ppDataBegin[Indices],
 						(Ts*)ppDataEnd[Indices], (Ts*)ppDataEnd[Indices] + numToInitialize), 0)...);
 					
 					DoCopyFromTupleArray(pos, begin() + oldNumElements, first);
@@ -927,10 +927,10 @@ public:
 			size_type oldNumElements = mNumElements;
 			size_type newNumElements = oldNumElements - (lastIdx - firstIdx);
 			mNumElements = newNumElements;
-			swallow((eastl::move(TupleVecLeaf<Indices, Ts>::mpData + lastIdx,
+			swallow((stl::move(TupleVecLeaf<Indices, Ts>::mpData + lastIdx,
 					       TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
 					       TupleVecLeaf<Indices, Ts>::mpData + firstIdx), 0)...);
-			swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData + newNumElements,
+			swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData + newNumElements,
 					           TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 		}
 		return begin() + first.mIndex;
@@ -945,10 +945,10 @@ public:
 		size_type oldNumElements = mNumElements;
 		size_type newNumElements = oldNumElements - 1;
 		mNumElements = newNumElements;
-		swallow((eastl::move(TupleVecLeaf<Indices, Ts>::mpData + newNumElements,
+		swallow((stl::move(TupleVecLeaf<Indices, Ts>::mpData + newNumElements,
 				       TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
 				       TupleVecLeaf<Indices, Ts>::mpData + (pos - begin())), 0)...);
-		swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData + newNumElements,
+		swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData + newNumElements,
 				           TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 		return begin() + pos.mIndex;
 	}
@@ -962,13 +962,13 @@ public:
 		{
 			if (n > oldNumCapacity)
 			{
-				DoReallocate(oldNumElements, eastl::max<size_type>(GetNewCapacity(oldNumCapacity), n));
+				DoReallocate(oldNumElements, stl::max<size_type>(GetNewCapacity(oldNumCapacity), n));
 			}
-			swallow((eastl::uninitialized_default_fill_n(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements, n - oldNumElements), 0)...);
+			swallow((stl::uninitialized_default_fill_n(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements, n - oldNumElements), 0)...);
 		}
 		else
 		{
-			swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData + n,
+			swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData + n,
 					           TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 		}
 	}
@@ -982,14 +982,14 @@ public:
 		{
 			if (n > oldNumCapacity)
 			{
-				DoReallocate(oldNumElements, eastl::max<size_type>(GetNewCapacity(oldNumCapacity), n));
+				DoReallocate(oldNumElements, stl::max<size_type>(GetNewCapacity(oldNumCapacity), n));
 			} 
-			swallow((eastl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
+			swallow((stl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements,
 					                       TupleVecLeaf<Indices, Ts>::mpData + n, args), 0)...);
 		}
 		else
 		{
-			swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData + n,
+			swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData + n,
 					           TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 		}
 	}
@@ -1009,7 +1009,7 @@ public:
 	{
 		size_type oldNumElements = mNumElements;
 		mNumElements = 0;
-		swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
+		swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 	}
 
 	void pop_back()
@@ -1019,35 +1019,35 @@ public:
 			EASTL_FAIL_MSG("tuple_vector::pop_back -- container is empty");
 #endif
 		size_type oldNumElements = mNumElements--;
-		swallow((eastl::destruct(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements - 1,
+		swallow((stl::destruct(TupleVecLeaf<Indices, Ts>::mpData + oldNumElements - 1,
 				           TupleVecLeaf<Indices, Ts>::mpData + oldNumElements), 0)...);
 	}
 
 	void swap(this_type& x)
 	{
-		swallow((eastl::swap(TupleVecLeaf<Indices, Ts>::mpData, x.TupleVecLeaf<Indices, Ts>::mpData), 0)...);
-		eastl::swap(mpData, x.mpData);
-		eastl::swap(mNumElements, x.mNumElements);
-		eastl::swap(mNumCapacity, x.mNumCapacity);
-		eastl::swap(internalAllocator(), x.internalAllocator());
-		eastl::swap(internalDataSize(), x.internalDataSize());
+		swallow((stl::swap(TupleVecLeaf<Indices, Ts>::mpData, x.TupleVecLeaf<Indices, Ts>::mpData), 0)...);
+		stl::swap(mpData, x.mpData);
+		stl::swap(mNumElements, x.mNumElements);
+		stl::swap(mNumCapacity, x.mNumCapacity);
+		stl::swap(internalAllocator(), x.internalAllocator());
+		stl::swap(internalDataSize(), x.internalDataSize());
 	}
 
-	void assign(size_type n, const_reference_tuple tup) { assign(n, eastl::get<Indices>(tup)...); }
+	void assign(size_type n, const_reference_tuple tup) { assign(n, stl::get<Indices>(tup)...); }
 	void assign(std::initializer_list<value_tuple> iList) { assign(iList.begin(), iList.end()); }
 
-	void push_back(Ts&&... args) { emplace_back(eastl::forward<Ts>(args)...); }
-	void push_back(const_reference_tuple tup) { push_back(eastl::get<Indices>(tup)...); }
-	void push_back(rvalue_tuple tup) { emplace_back(eastl::forward<Ts>(eastl::get<Indices>(tup))...); }
+	void push_back(Ts&&... args) { emplace_back(stl::forward<Ts>(args)...); }
+	void push_back(const_reference_tuple tup) { push_back(stl::get<Indices>(tup)...); }
+	void push_back(rvalue_tuple tup) { emplace_back(stl::forward<Ts>(stl::get<Indices>(tup))...); }
 
-	void emplace_back(rvalue_tuple tup) { emplace_back(eastl::forward<Ts>(eastl::get<Indices>(tup))...); }
-	void emplace(const_iterator pos, rvalue_tuple tup) { emplace(pos, eastl::forward<Ts>(eastl::get<Indices>(tup))...); }
+	void emplace_back(rvalue_tuple tup) { emplace_back(stl::forward<Ts>(stl::get<Indices>(tup))...); }
+	void emplace(const_iterator pos, rvalue_tuple tup) { emplace(pos, stl::forward<Ts>(stl::get<Indices>(tup))...); }
 
 	iterator insert(const_iterator pos, const Ts&... args) { return insert(pos, 1, args...); }
-	iterator insert(const_iterator pos, Ts&&... args) { return emplace(pos, eastl::forward<Ts>(args)...); }
-	iterator insert(const_iterator pos, rvalue_tuple tup) { return emplace(pos, eastl::forward<Ts>(eastl::get<Indices>(tup))...); }
-	iterator insert(const_iterator pos, const_reference_tuple tup) { return insert(pos, eastl::get<Indices>(tup)...); }
-	iterator insert(const_iterator pos, size_type n, const_reference_tuple tup) { return insert(pos, n, eastl::get<Indices>(tup)...); }
+	iterator insert(const_iterator pos, Ts&&... args) { return emplace(pos, stl::forward<Ts>(args)...); }
+	iterator insert(const_iterator pos, rvalue_tuple tup) { return emplace(pos, stl::forward<Ts>(stl::get<Indices>(tup))...); }
+	iterator insert(const_iterator pos, const_reference_tuple tup) { return insert(pos, stl::get<Indices>(tup)...); }
+	iterator insert(const_iterator pos, size_type n, const_reference_tuple tup) { return insert(pos, n, stl::get<Indices>(tup)...); }
 	iterator insert(const_iterator pos, std::initializer_list<value_tuple> iList) { return insert(pos, iList.begin(), iList.end()); }
 
 	iterator erase(const_iterator pos) { return erase(pos, pos + 1); }
@@ -1055,7 +1055,7 @@ public:
 	reverse_iterator erase(const_reverse_iterator first, const_reverse_iterator last) { return reverse_iterator(erase((last).base(), (first).base())); }
 	reverse_iterator erase_unsorted(const_reverse_iterator pos) { return reverse_iterator(erase_unsorted((pos + 1).base())); }
 
-	void resize(size_type n, const_reference_tuple tup) { resize(n, eastl::get<Indices>(tup)...); }
+	void resize(size_type n, const_reference_tuple tup) { resize(n, stl::get<Indices>(tup)...); }
 
 	bool empty() const EA_NOEXCEPT { return mNumElements == 0; }
 	size_type size() const EA_NOEXCEPT { return mNumElements; }
@@ -1266,8 +1266,8 @@ protected:
 		size_type endIdx = end.base().mIndex;
 		DoConditionalReallocate(0, mNumCapacity, newNumElements);
 		mNumElements = newNumElements;
-		swallow((eastl::uninitialized_move_ptr(eastl::move_iterator<Ts*>((Ts*)(ppOtherData[Indices]) + beginIdx),
-				                       eastl::move_iterator<Ts*>((Ts*)(ppOtherData[Indices]) + endIdx),
+		swallow((stl::uninitialized_move_ptr(stl::move_iterator<Ts*>((Ts*)(ppOtherData[Indices]) + beginIdx),
+				                       stl::move_iterator<Ts*>((Ts*)(ppOtherData[Indices]) + endIdx),
 				                       TupleVecLeaf<Indices, Ts>::mpData), 0)...);
 	}
 
@@ -1283,25 +1283,25 @@ protected:
 		size_type endIdx = end.mIndex;
 		DoConditionalReallocate(0, mNumCapacity, newNumElements);
 		mNumElements = newNumElements;
-		swallow((eastl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + beginIdx,
+		swallow((stl::uninitialized_copy_ptr((Ts*)(ppOtherData[Indices]) + beginIdx,
 				                       (Ts*)(ppOtherData[Indices]) + endIdx,
 				                       TupleVecLeaf<Indices, Ts>::mpData), 0)...);
 	}
 
-	void DoInitFillTuple(size_type n, const_reference_tuple tup) { DoInitFillArgs(n, eastl::get<Indices>(tup)...); }
+	void DoInitFillTuple(size_type n, const_reference_tuple tup) { DoInitFillArgs(n, stl::get<Indices>(tup)...); }
 
 	void DoInitFillArgs(size_type n, const Ts&... args)
 	{
 		DoConditionalReallocate(0, mNumCapacity, n);
 		mNumElements = n;
-		swallow((eastl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + n, args), 0)...);
+		swallow((stl::uninitialized_fill_ptr(TupleVecLeaf<Indices, Ts>::mpData, TupleVecLeaf<Indices, Ts>::mpData + n, args), 0)...);
 	}
 
 	void DoInitDefaultFill(size_type n)
 	{
 		DoConditionalReallocate(0, mNumCapacity, n);
 		mNumElements = n;
-		swallow((eastl::uninitialized_default_fill_n(TupleVecLeaf<Indices, Ts>::mpData, n), 0)...);
+		swallow((stl::uninitialized_default_fill_n(TupleVecLeaf<Indices, Ts>::mpData, n), 0)...);
 	}
 
 	void DoInitFromTupleArray(const value_tuple* first, const value_tuple* last)
@@ -1332,7 +1332,7 @@ protected:
 		// placement-new/copy-ctor to unconstructed regions
 		while (destPos < destEnd)
 		{
-			swallow(::new(eastl::get<Indices>(destPos.MakePointer())) Ts(eastl::get<Indices>(*srcTuple))...);
+			swallow(::new(stl::get<Indices>(destPos.MakePointer())) Ts(stl::get<Indices>(*srcTuple))...);
 			++destPos;
 			++srcTuple;
 		}
@@ -1404,7 +1404,7 @@ public:
 	move_iterator(const move_iterator<U>& mi) : mIterator(mi.base()) {}
 
 	iterator_type base() const { return mIterator; }
-	reference operator*() const { return eastl::move(MakeReference()); }
+	reference operator*() const { return stl::move(MakeReference()); }
 	pointer operator->() const { return mIterator; }
 
 	this_type& operator++() { ++mIterator; return *this; }
@@ -1441,7 +1441,7 @@ public:
 private:
 	reference MakeReference() const 
 	{
-		return reference(eastl::move(((Ts*)mIterator.mpData[Indices])[mIterator.mIndex])...);
+		return reference(stl::move(((Ts*)mIterator.mpData[Indices])[mIterator.mIndex])...);
 	}
 };
 
@@ -1529,6 +1529,6 @@ public:
 	}
 };
 
-}  // namespace eastl
+}  // namespace stl
 
 #endif  // EASTL_TUPLEVECTOR_H

@@ -21,7 +21,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 	///////////////////////////////////////////////////////////////////////
 	// Primary C++ functions
@@ -41,8 +41,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) + eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) + eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) + stl::forward<B>(b))
+			{ return stl::forward<A>(a) + stl::forward<B>(b); }
 	};
 
 	template <typename T = void>
@@ -59,8 +59,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) - eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) - eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) - stl::forward<B>(b))
+			{ return stl::forward<A>(a) - stl::forward<B>(b); }
 	};
 
 	template <typename T = void>
@@ -77,8 +77,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) * eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) * eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) * stl::forward<B>(b))
+			{ return stl::forward<A>(a) * stl::forward<B>(b); }
 	};
 
     template <typename T = void>
@@ -95,8 +95,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) / eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) / eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) / stl::forward<B>(b))
+			{ return stl::forward<A>(a) / stl::forward<B>(b); }
 	};
 
     template <typename T = void>
@@ -113,8 +113,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) % eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) % eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) % stl::forward<B>(b))
+			{ return stl::forward<A>(a) % stl::forward<B>(b); }
 	};
 
     template <typename T = void>
@@ -131,8 +131,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename T>
 		EA_CPP14_CONSTEXPR auto operator()(T&& t) const
-			-> decltype(-eastl::forward<T>(t))
-			{ return -eastl::forward<T>(t); }
+			-> decltype(-stl::forward<T>(t))
+			{ return -stl::forward<T>(t); }
 	};
 
 	template <typename T = void>
@@ -149,8 +149,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) == eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) == eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) == stl::forward<B>(b))
+			{ return stl::forward<A>(a) == stl::forward<B>(b); }
 	};
 
 	template <typename T, typename Compare>
@@ -173,8 +173,8 @@ namespace eastl
 		typedef int is_transparent;
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) != eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) != eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) != stl::forward<B>(b))
+			{ return stl::forward<A>(a) != stl::forward<B>(b); }
 	};
 
 	template <typename T, typename Compare>
@@ -228,8 +228,8 @@ namespace eastl
 	{
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) > eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) > eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) > stl::forward<B>(b))
+			{ return stl::forward<A>(a) > stl::forward<B>(b); }
 	};
 
 	template <typename T, typename Compare>
@@ -300,8 +300,8 @@ namespace eastl
 	{
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) >= eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) >= eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) >= stl::forward<B>(b))
+			{ return stl::forward<A>(a) >= stl::forward<B>(b); }
 	};
 
 	template <typename T, typename Compare>
@@ -323,8 +323,8 @@ namespace eastl
 	{
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) <= eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) <= eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) <= stl::forward<B>(b))
+			{ return stl::forward<A>(a) <= stl::forward<B>(b); }
 	};
 
 	template <typename T, typename Compare>
@@ -346,8 +346,8 @@ namespace eastl
 	{
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) && eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) && eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) && stl::forward<B>(b))
+			{ return stl::forward<A>(a) && stl::forward<B>(b); }
 	};
 
     template <typename T = void>
@@ -363,8 +363,8 @@ namespace eastl
 	{
 		template<typename A, typename B>
 		EA_CPP14_CONSTEXPR auto operator()(A&& a, B&& b) const
-			-> decltype(eastl::forward<A>(a) || eastl::forward<B>(b))
-			{ return eastl::forward<A>(a) || eastl::forward<B>(b); }
+			-> decltype(stl::forward<A>(a) || stl::forward<B>(b))
+			{ return stl::forward<A>(a) || stl::forward<B>(b); }
 	};
 
     template <typename T = void>
@@ -380,8 +380,8 @@ namespace eastl
 	{
 		template<typename T>
 		EA_CPP14_CONSTEXPR auto operator()(T&& t) const
-			-> decltype(!eastl::forward<T>(t))
-			{ return !eastl::forward<T>(t); }
+			-> decltype(!stl::forward<T>(t))
+			{ return !stl::forward<T>(t); }
 	};
 
 
@@ -779,28 +779,28 @@ namespace eastl
 	inline mem_fun_t<Result, T>
 	mem_fun(Result (T::*MemberFunction)())
 	{
-		return eastl::mem_fun_t<Result, T>(MemberFunction);
+		return stl::mem_fun_t<Result, T>(MemberFunction);
 	}
 
 	template <typename Result, typename T, typename Argument>
 	inline mem_fun1_t<Result, T, Argument>
 	mem_fun(Result (T::*MemberFunction)(Argument))
 	{
-		return eastl::mem_fun1_t<Result, T, Argument>(MemberFunction);
+		return stl::mem_fun1_t<Result, T, Argument>(MemberFunction);
 	}
 
 	template <typename Result, typename T>
 	inline const_mem_fun_t<Result, T>
 	mem_fun(Result (T::*MemberFunction)() const)
 	{
-		return eastl::const_mem_fun_t<Result, T>(MemberFunction);
+		return stl::const_mem_fun_t<Result, T>(MemberFunction);
 	}
 
 	template <typename Result, typename T, typename Argument>
 	inline const_mem_fun1_t<Result, T, Argument>
 	mem_fun(Result (T::*MemberFunction)(Argument) const)
 	{
-		return eastl::const_mem_fun1_t<Result, T, Argument>(MemberFunction);
+		return stl::const_mem_fun1_t<Result, T, Argument>(MemberFunction);
 	}
 
 
@@ -921,33 +921,33 @@ namespace eastl
 	inline mem_fun_ref_t<Result, T>
 	mem_fun_ref(Result (T::*MemberFunction)())
 	{
-		return eastl::mem_fun_ref_t<Result, T>(MemberFunction);
+		return stl::mem_fun_ref_t<Result, T>(MemberFunction);
 	}
 
 	template <typename Result, typename T, typename Argument>
 	inline mem_fun1_ref_t<Result, T, Argument>
 	mem_fun_ref(Result (T::*MemberFunction)(Argument))
 	{
-		return eastl::mem_fun1_ref_t<Result, T, Argument>(MemberFunction);
+		return stl::mem_fun1_ref_t<Result, T, Argument>(MemberFunction);
 	}
 
 	template <typename Result, typename T>
 	inline const_mem_fun_ref_t<Result, T>
 	mem_fun_ref(Result (T::*MemberFunction)() const)
 	{
-		return eastl::const_mem_fun_ref_t<Result, T>(MemberFunction);
+		return stl::const_mem_fun_ref_t<Result, T>(MemberFunction);
 	}
 
 	template <typename Result, typename T, typename Argument>
 	inline const_mem_fun1_ref_t<Result, T, Argument>
 	mem_fun_ref(Result (T::*MemberFunction)(Argument) const)
 	{
-		return eastl::const_mem_fun1_ref_t<Result, T, Argument>(MemberFunction);
+		return stl::const_mem_fun1_ref_t<Result, T, Argument>(MemberFunction);
 	}
 
 
 	// not_fn_ret
-	// not_fn_ret is a implementation specified return type of eastl::not_fn.
+	// not_fn_ret is a implementation specified return type of stl::not_fn.
 	// The type name is not specified but it does have mandated functions that conforming implementations must support.
 	//
 	// http://en.cppreference.com/w/cpp/utility/functional/not_fn
@@ -955,51 +955,51 @@ namespace eastl
 	template <typename F>
 	struct not_fn_ret
 	{
-		explicit not_fn_ret(F&& f) : mDecayF(eastl::forward<F>(f)) {}
+		explicit not_fn_ret(F&& f) : mDecayF(stl::forward<F>(f)) {}
 		not_fn_ret(not_fn_ret&& f) = default;
 		not_fn_ret(const not_fn_ret& f) = default;
 
 		// overloads for lvalues
 		template <class... Args>
 		auto operator()(Args&&... args) &
-		    -> decltype(!eastl::declval<eastl::invoke_result_t<eastl::decay_t<F>&, Args...>>())
-		{ return !eastl::invoke(mDecayF, eastl::forward<Args>(args)...); }
+		    -> decltype(!stl::declval<stl::invoke_result_t<stl::decay_t<F>&, Args...>>())
+		{ return !stl::invoke(mDecayF, stl::forward<Args>(args)...); }
 
 		template <class... Args>
 		auto operator()(Args&&... args) const &
-		    -> decltype(!eastl::declval<eastl::invoke_result_t<eastl::decay_t<F> const&, Args...>>())
-		{ return !eastl::invoke(mDecayF, eastl::forward<Args>(args)...); }
+		    -> decltype(!stl::declval<stl::invoke_result_t<stl::decay_t<F> const&, Args...>>())
+		{ return !stl::invoke(mDecayF, stl::forward<Args>(args)...); }
 
 		// overloads for rvalues
 		template <class... Args>
 		auto operator()(Args&&... args) &&
-		    -> decltype(!eastl::declval<eastl::invoke_result_t<eastl::decay_t<F>, Args...>>())
-		{ return !eastl::invoke(eastl::move(mDecayF), eastl::forward<Args>(args)...); }
+		    -> decltype(!stl::declval<stl::invoke_result_t<stl::decay_t<F>, Args...>>())
+		{ return !stl::invoke(stl::move(mDecayF), stl::forward<Args>(args)...); }
 
 		template <class... Args>
 		auto operator()(Args&&... args) const &&
-		    -> decltype(!eastl::declval<eastl::invoke_result_t<eastl::decay_t<F> const, Args...>>())
-		{ return !eastl::invoke(eastl::move(mDecayF), eastl::forward<Args>(args)...); }
+		    -> decltype(!stl::declval<stl::invoke_result_t<stl::decay_t<F> const, Args...>>())
+		{ return !stl::invoke(stl::move(mDecayF), stl::forward<Args>(args)...); }
 
-		eastl::decay_t<F> mDecayF;
+		stl::decay_t<F> mDecayF;
 	};
 
 	/// not_fn
 	///
 	/// Creates an implementation specified functor that returns the complement of the callable object it was passed.
-	/// not_fn is intended to replace the C++03-era negators eastl::not1 and eastl::not2.
+	/// not_fn is intended to replace the C++03-era negators stl::not1 and stl::not2.
 	///
 	/// http://en.cppreference.com/w/cpp/utility/functional/not_fn
 	///
 	/// Example usage:
 	///
-	///		auto nf = eastl::not_fn([]{ return false; });
+	///		auto nf = stl::not_fn([]{ return false; });
 	///     assert(nf());  // return true
 	///
 	template <class F>
 	inline not_fn_ret<F> not_fn(F&& f)
 	{
-		return not_fn_ret<F>(eastl::forward<F>(f));
+		return not_fn_ret<F>(stl::forward<F>(f));
 	}
 
 
@@ -1178,17 +1178,17 @@ namespace eastl
 
 	/// string_hash
 	///
-	/// Defines a generic string hash for an arbitrary EASTL basic_string container.
+	/// Defines a generic string hash for an arbitrary stl basic_string container.
 	///
 	/// Example usage:
-	///    eastl::hash_set<MyString, eastl::string_hash<MyString> > hashSet;
+	///    stl::hash_set<MyString, stl::string_hash<MyString> > hashSet;
 	///
 	template <typename String>
 	struct string_hash
 	{
 		typedef String                                         string_type;
 		typedef typename String::value_type                    value_type;
-		typedef typename eastl::add_unsigned<value_type>::type unsigned_value_type;
+		typedef typename stl::add_unsigned<value_type>::type unsigned_value_type;
 
 		size_t operator()(const string_type& s) const
 		{
@@ -1201,7 +1201,7 @@ namespace eastl
 	};
 
 
-} // namespace eastl
+} // namespace stl
 
 #include <stl/internal/function.h>
 

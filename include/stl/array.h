@@ -38,7 +38,7 @@
 
 
 
-namespace eastl
+namespace stl
 {
 
 	///////////////////////////////////////////////////////////////////////
@@ -68,8 +68,8 @@ namespace eastl
 		typedef const value_type&                             const_reference;
 		typedef value_type*                                   iterator;
 		typedef const value_type*                             const_iterator;
-		typedef eastl::reverse_iterator<iterator>             reverse_iterator;
-		typedef eastl::reverse_iterator<const_iterator>       const_reverse_iterator;
+		typedef stl::reverse_iterator<iterator>             reverse_iterator;
+		typedef stl::reverse_iterator<const_iterator>       const_reverse_iterator;
 		typedef eastl_size_t                                  size_type;        // See config.h for the definition of eastl_size_t, which defaults to uint32_t.
 		typedef ptrdiff_t                                     difference_type;
 
@@ -91,7 +91,7 @@ namespace eastl
 
 		// Unlike the swap function for other containers, array::swap takes linear time, 
 		// may exit via an exception, and does not cause iterators to become associated with the other container.
-		void swap(this_type& x) EA_NOEXCEPT_IF(eastl::is_nothrow_swappable<value_type>::value); 
+		void swap(this_type& x) EA_NOEXCEPT_IF(stl::is_nothrow_swappable<value_type>::value); 
 
 		iterator       begin() EA_NOEXCEPT;
 		const_iterator begin() const EA_NOEXCEPT;
@@ -143,14 +143,14 @@ namespace eastl
 	template <typename T, size_t N>
 	inline void array<T, N>::fill(const value_type& value)
 	{
-		eastl::fill_n(&mValue[0], N, value);
+		stl::fill_n(&mValue[0], N, value);
 	}
 
 
 	template <typename T, size_t N>
-	inline void array<T, N>::swap(this_type& x) EA_NOEXCEPT_IF(eastl::is_nothrow_swappable<value_type>::value)
+	inline void array<T, N>::swap(this_type& x) EA_NOEXCEPT_IF(stl::is_nothrow_swappable<value_type>::value)
 	{
-		eastl::swap_ranges(&mValue[0], &mValue[N], &x.mValue[0]);
+		stl::swap_ranges(&mValue[0], &mValue[N], &x.mValue[0]);
 	}
 
 
@@ -434,53 +434,53 @@ namespace eastl
 	template <typename T, size_t N>
 	inline bool operator==(const array<T, N>& a, const array<T, N>& b)
 	{
-		return eastl::equal(&a.mValue[0], &a.mValue[N], &b.mValue[0]);
+		return stl::equal(&a.mValue[0], &a.mValue[N], &b.mValue[0]);
 	}
 
 
 	template <typename T, size_t N>
 	inline bool operator<(const array<T, N>& a, const array<T, N>& b)
 	{
-		return eastl::lexicographical_compare(&a.mValue[0], &a.mValue[N], &b.mValue[0], &b.mValue[N]);
+		return stl::lexicographical_compare(&a.mValue[0], &a.mValue[N], &b.mValue[0], &b.mValue[N]);
 	}
 
 
 	template <typename T, size_t N>
 	inline bool operator!=(const array<T, N>& a, const array<T, N>& b)
 	{
-		return !eastl::equal(&a.mValue[0], &a.mValue[N], &b.mValue[0]);
+		return !stl::equal(&a.mValue[0], &a.mValue[N], &b.mValue[0]);
 	}
 
 
 	template <typename T, size_t N>
 	inline bool operator>(const array<T, N>& a, const array<T, N>& b)
 	{
-		return eastl::lexicographical_compare(&b.mValue[0], &b.mValue[N], &a.mValue[0], &a.mValue[N]);
+		return stl::lexicographical_compare(&b.mValue[0], &b.mValue[N], &a.mValue[0], &a.mValue[N]);
 	}
 
 
 	template <typename T, size_t N>
 	inline bool operator<=(const array<T, N>& a, const array<T, N>& b)
 	{
-		return !eastl::lexicographical_compare(&b.mValue[0], &b.mValue[N], &a.mValue[0], &a.mValue[N]);
+		return !stl::lexicographical_compare(&b.mValue[0], &b.mValue[N], &a.mValue[0], &a.mValue[N]);
 	}
 
 
 	template <typename T, size_t N>
 	inline bool  operator>=(const array<T, N>& a, const array<T, N>& b)
 	{
-		return !eastl::lexicographical_compare(&a.mValue[0], &a.mValue[N], &b.mValue[0], &b.mValue[N]);
+		return !stl::lexicographical_compare(&a.mValue[0], &a.mValue[N], &b.mValue[0], &b.mValue[N]);
 	}
 
 
 	template <typename T, size_t N>
 	inline void swap(array<T, N>& a, array<T, N>& b)
 	{
-		eastl::swap_ranges(&a.mValue[0], &a.mValue[N], &b.mValue[0]);
+		stl::swap_ranges(&a.mValue[0], &a.mValue[N], &b.mValue[0]);
 	}
 
 
-} // namespace eastl
+} // namespace stl
 
 
 #endif // Header include guard

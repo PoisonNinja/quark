@@ -25,6 +25,8 @@ public:
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
                           void* cookie)                                 = 0;
     virtual int stat(struct stat* st)                                   = 0;
+
+    virtual bool seekable() = 0;
 };
 
 class BaseInode : public Inode
@@ -44,6 +46,7 @@ public:
                           void* cookie);
     virtual int stat(struct stat* st);
 
+    virtual bool seekable();
 protected:
     size_t size;
     uid_t uid;

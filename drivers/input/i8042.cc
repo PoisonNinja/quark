@@ -20,6 +20,8 @@ public:
     virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
                           void* cookie) override;
 
+    virtual bool seekable() override;
+
 private:
     static void handler(int, void*, struct InterruptContext*);
     char buffer[buffer_size];
@@ -60,6 +62,11 @@ void i8042Driver::handler(int, void* dev_id, struct InterruptContext*)
     i8042Driver* driver = reinterpret_cast<i8042Driver*>(dev_id);
     driver->buffer[driver->head++ % buffer_size] = inb(0x60);
     driver->queue.wakeup();
+}
+
+bool i8042Driver::seekable()
+{
+    return false;
 }
 } // namespace
 

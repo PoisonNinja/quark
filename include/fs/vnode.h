@@ -29,6 +29,8 @@ public:
     ssize_t write(uint8_t* buffer, size_t count, off_t offset, void* cookie);
     int stat(struct stat* st);
 
+    bool seekable();
+
     // VFS operations
     int mount(Mount* mt);
 

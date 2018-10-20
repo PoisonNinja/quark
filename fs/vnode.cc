@@ -122,4 +122,11 @@ int Vnode::stat(struct stat* st)
     return inode->stat(st);
 }
 
+bool Vnode::seekable()
+{
+    if (this->kdev) {
+        return this->kdev->seekable();
+    }
+    return this->inode->seekable();
+}
 } // namespace Filesystem

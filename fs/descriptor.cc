@@ -238,10 +238,7 @@ ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
 
 bool Descriptor::seekable()
 {
-    if (S_ISCHR(this->vnode->mode)) {
-        return false;
-    }
-    return true;
+    return this->vnode->seekable();
 }
 
 ssize_t Descriptor::read(uint8_t* buffer, size_t count)
@@ -271,7 +268,8 @@ ssize_t Descriptor::write(uint8_t* buffer, size_t count)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    ssize_t ret = pwrite(buffer, count, current_offset);
+    ssize_t ret =
+        this->vnode->write(buffer, count, current_offset, this->cookie);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
         current_offset += ret;

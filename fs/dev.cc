@@ -149,4 +149,9 @@ ssize_t KDevice::write(uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }
+
+bool KDevice::seekable()
+{
+    return true;
+}
 } // namespace Filesystem

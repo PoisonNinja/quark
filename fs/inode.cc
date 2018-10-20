@@ -66,4 +66,8 @@ int BaseInode::stat(struct stat* st)
     return 0;
 }
 
+bool BaseInode::seekable()
+{
+    return true;
+}
 } // namespace Filesystem

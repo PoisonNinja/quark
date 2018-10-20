@@ -262,6 +262,8 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.fs  = reinterpret_cast<uint64_t>(uthread);
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     ctx.rflags        = 0x200;
+    // TODO: INSECURE! This allows all programs IOPORT access!
+    ctx.rflags |= 0x3000;
 #else
     ctx.eip = entry;
     ctx.cs  = 0x18 | 3;

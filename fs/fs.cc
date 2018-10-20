@@ -24,7 +24,9 @@ void init()
     FTable::add("ptsfs", new PTSFS());
 
     TTY::VGATTY* vga = new TTY::VGATTY();
-    TTY::register_tty(0, vga);
+    auto vga_major   = Filesystem::locate_class(Filesystem::CHR);
+    register_class(CHR, vga_major);
+    register_kdevice(CHR, vga_major, vga);
 
     // Initialize the root filesystem
     Superblock* rootsb = new Superblock();

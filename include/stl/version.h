@@ -5,9 +5,9 @@
 #ifndef EASTL_VERSION_H
 #define EASTL_VERSION_H
 
-#include <EABase/eabase.h>
+#include <stl/EABase/eabase.h>
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)
-	#pragma once
+#pragma once
 #endif
 
 #include <stl/internal/config.h>

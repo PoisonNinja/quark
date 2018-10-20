@@ -5,7 +5,7 @@
 #ifndef EASTL_INTEGER_SEQUENCE_H
 #define EASTL_INTEGER_SEQUENCE_H
 
-#include <EABase/config/eacompiler.h>
+#include <stl/EABase/config/eacompiler.h>
 #include <stl/internal/config.h>
 #include <stl/type_traits.h>
 

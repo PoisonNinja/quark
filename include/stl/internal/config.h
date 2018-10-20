@@ -60,9 +60,9 @@
 #define EASTL_EABASE_DISABLED 1
 
 #ifndef EASTL_EABASE_DISABLED
-	#include <EABase/eabase.h>
+	#include <stl/EABase/eabase.h>
 #endif
-#include <EABase/eahave.h>
+#include <stl/EABase/eahave.h>
 
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)
 	#pragma once

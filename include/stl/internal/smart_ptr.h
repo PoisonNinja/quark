@@ -7,7 +7,7 @@
 #define EASTL_INTERNAL_SMART_PTR_H
 
 
-#include <EABase/eabase.h>
+#include <stl/EABase/eabase.h>
 #include <stl/type_traits.h>
 #include <stl/memory.h>
 #if defined(EA_PRAGMA_ONCE_SUPPORTED)

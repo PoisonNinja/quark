@@ -187,7 +187,7 @@
 #ifndef INCLUDED_eacompiler_H
 #define INCLUDED_eacompiler_H
 
-	#include <EABase/config/eaplatform.h>
+	#include <stl/EABase/config/eaplatform.h>
 
 	// Note: This is used to generate the EA_COMPILER_STRING macros
 	#ifndef INTERNAL_STRINGIZE
@@ -905,7 +905,7 @@
 	// EA_COMPILER_NO_NULLPTR
 	//
 	// Refers to C++11 nullptr (which is a built in type). std::nullptr_t is defined in C++11 <cstddef>.
-	// Note that <EABase/nullptr.h> implements a portable nullptr implementation.
+	// Note that <stl/EABase/nullptr.h> implements a portable nullptr implementation.
 	//
 	#if !defined(EA_COMPILER_NO_NULLPTR)
 		#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) && defined(EA_COMPILER_CPP11_ENABLED)

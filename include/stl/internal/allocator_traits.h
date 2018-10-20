@@ -15,7 +15,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <EABase/eabase.h>
+#include <stl/EABase/eabase.h>
 #include <stl/internal/config.h>
 
 namespace stl

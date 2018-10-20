@@ -2,6 +2,7 @@
 
 #include <fs/tty.h>
 #include <lib/list.h>
+#include <proc/sched.h>
 
 namespace Filesystem
 {
@@ -24,7 +25,12 @@ public:
 
 private:
     char mbuf[1024];
+    size_t mhead, mtail;
+    Scheduler::WaitQueue mqueue;
+
     char sbuf[1024];
+    size_t shead, stail;
+    Scheduler::WaitQueue squeue;
 
     int idx;
 };

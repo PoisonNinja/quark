@@ -493,6 +493,20 @@ void *operator new[](size_t size)
     return ::operator new(size);
 }
 
+void *operator new[](size_t size, const char *name, int flags,
+                     unsigned debugFlags, const char *file, int line)
+{
+    return ::operator new(size);
+}
+
+void *operator new[](size_t size, size_t alignment, size_t alignmentOffset,
+                     const char *pName, int flags, unsigned debugFlags,
+                     const char *file, int line)
+{
+    // TODO: Fix alignment requirements
+    return ::operator new(size);
+}
+
 void operator delete(void *p)
 {
     free(p);

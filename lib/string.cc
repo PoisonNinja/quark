@@ -67,7 +67,7 @@ int memcmp(const void *str1, const void *str2, size_t n)
 
 void *__attribute__((weak)) memcpy(void *dest, const void *src, size_t n)
 {
-    uint8_t *a = (uint8_t *)dest;
+    uint8_t *a       = (uint8_t *)dest;
     const uint8_t *b = (uint8_t *)src;
     while (n--) {
         *a++ = *b++;
@@ -80,7 +80,7 @@ void *memmove(void *dest, const void *src, size_t n)
     if (dest < src)
         return memcpy(dest, src, n);
     else {
-        uint8_t *a = (uint8_t *)dest + n - 1;
+        uint8_t *a       = (uint8_t *)dest + n - 1;
         const uint8_t *b = (uint8_t *)src + n - 1;
         while (n--) {
             *a-- = *b--;
@@ -170,7 +170,7 @@ char *strncpy(char *dest, const char *src, size_t n)
 char *strdup(const char *str)
 {
     size_t size = strlen(str) + 1;
-    char *ret = new char[size];
+    char *ret   = new char[size];
     memcpy(ret, str, size);
     return ret;
 }
@@ -240,4 +240,27 @@ char *strtok_r(char *s, const char *delimiters, char **lasts)
 
     return sbegin;
 }
-}  // namespace String
+} // namespace String
+
+extern "C" {
+size_t strlen(const char *str)
+{
+    return String::strlen(str);
+}
+
+void *__attribute__((weak)) memcpy(void *dest, const void *src, size_t n)
+{
+    return String::memcpy(dest, src, n);
+}
+
+void *memmove(void *dest, const void *src, size_t n)
+{
+    return String::memmove(dest, src, n);
+}
+
+void *__attribute__((weak)) memset(void *str, int c, size_t n)
+{
+    // Trampoline into the optimized code
+    return String::memset(str, c, n);
+}
+}

@@ -311,10 +311,10 @@ namespace std _GLIBCXX_VISIBILITY(default)
 
         size_type _M_check(size_type __pos, const char* __s) const
         {
-            if (__pos > this->size())
-                __throw_out_of_range_fmt(__N("%s: __pos (which is %zu) > "
-                                             "this->size() (which is %zu)"),
-                                         __s, __pos, this->size());
+            // if (__pos > this->size())
+            //     __throw_out_of_range_fmt(__N("%s: __pos (which is %zu) > "
+            //                                  "this->size() (which is %zu)"),
+            //                              __s, __pos, this->size());
             return __pos;
         }
 

@@ -186,9 +186,9 @@ namespace std _GLIBCXX_VISIBILITY(default)
         _InIterator __beg, _InIterator __end, std::forward_iterator_tag)
     {
         // NB: Not required, but considered best practice.
-        if (__gnu_cxx::__is_null_pointer(__beg) && __beg != __end)
-            std::__throw_logic_error(__N("basic_string::"
-                                         "_M_construct null not valid"));
+        // if (__gnu_cxx::__is_null_pointer(__beg) && __beg != __end)
+        //     std::__throw_logic_error(__N("basic_string::"
+        //                                  "_M_construct null not valid"));
 
         size_type __dnew = static_cast<size_type>(std::distance(__beg, __end));
 

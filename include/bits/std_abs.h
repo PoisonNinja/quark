@@ -68,23 +68,6 @@ namespace std _GLIBCXX_VISIBILITY(default)
     // 2192. Validity and return type of std::abs(0u) is unclear
     // 2294. <cstdlib> should declare abs(double)
 
-#ifndef __CORRECT_ISO_CPP_MATH_H_PROTO
-    inline _GLIBCXX_CONSTEXPR double abs(double __x)
-    {
-        return __builtin_fabs(__x);
-    }
-
-    inline _GLIBCXX_CONSTEXPR float abs(float __x)
-    {
-        return __builtin_fabsf(__x);
-    }
-
-    inline _GLIBCXX_CONSTEXPR long double abs(long double __x)
-    {
-        return __builtin_fabsl(__x);
-    }
-#endif
-
 #if defined(__GLIBCXX_TYPE_INT_N_0)
     inline _GLIBCXX_CONSTEXPR __GLIBCXX_TYPE_INT_N_0 abs(
         __GLIBCXX_TYPE_INT_N_0 __x)
@@ -111,13 +94,6 @@ namespace std _GLIBCXX_VISIBILITY(default)
         __GLIBCXX_TYPE_INT_N_3 __x)
     {
         return __x >= 0 ? __x : -__x;
-    }
-#endif
-
-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_FLOAT128)
-    inline _GLIBCXX_CONSTEXPR __float128 abs(__float128 __x)
-    {
-        return __x < 0 ? -__x : __x;
     }
 #endif
 

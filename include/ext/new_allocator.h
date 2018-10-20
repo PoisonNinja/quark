@@ -109,8 +109,8 @@ namespace __gnu_cxx _GLIBCXX_VISIBILITY(default)
         pointer allocate(size_type __n,
                          const void* = static_cast<const void*>(0))
         {
-            // if (__n > this->max_size())
-            //   std::__throw_bad_alloc();
+            if (__n > this->max_size())
+                std::__throw_bad_alloc();
 
 #if __cpp_aligned_new
             if (alignof(_Tp) > __STDCPP_DEFAULT_NEW_ALIGNMENT__) {

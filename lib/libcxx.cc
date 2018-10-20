@@ -23,6 +23,11 @@ __attribute__((noreturn)) void __cxa_pure_virtual()
     Kernel::panic("__cxa_pure_virtual encountered!\n");
 }
 
+__attribute__((noreturn)) void abort()
+{
+    Kernel::panic("abort() from libstdc++\n");
+}
+
 static constexpr size_t ATEXIT_MAX_FUNCS = 128;
 
 typedef unsigned uarch_t;

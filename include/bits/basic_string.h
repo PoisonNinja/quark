@@ -311,18 +311,18 @@ namespace std _GLIBCXX_VISIBILITY(default)
 
         size_type _M_check(size_type __pos, const char* __s) const
         {
-            // if (__pos > this->size())
-            //     __throw_out_of_range_fmt(__N("%s: __pos (which is %zu) > "
-            //                                  "this->size() (which is %zu)"),
-            //                              __s, __pos, this->size());
+            if (__pos > this->size())
+                __throw_out_of_range_fmt(__N("%s: __pos (which is %zu) > "
+                                             "this->size() (which is %zu)"),
+                                         __s, __pos, this->size());
             return __pos;
         }
 
         void _M_check_length(size_type __n1, size_type __n2,
                              const char* __s) const
         {
-            // if (this->max_size() - (this->size() - __n1) < __n2)
-            //     __throw_length_error(__N(__s));
+            if (this->max_size() - (this->size() - __n1) < __n2)
+                __throw_length_error(__N(__s));
         }
 
         // NB: _M_limit doesn't check for a bad __pos value.

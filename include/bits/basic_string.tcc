@@ -121,8 +121,8 @@ namespace std _GLIBCXX_VISIBILITY(default)
     {
         // _GLIBCXX_RESOLVE_LIB_DEFECTS
         // 83.  String::npos vs. string::max_size()
-        // if (__capacity > max_size())
-        //     std::__throw_length_error(__N("basic_string::_M_create"));
+        if (__capacity > max_size())
+            std::__throw_length_error(__N("basic_string::_M_create"));
 
         // The below implements an exponential growth policy, necessary to
         // meet amortized linear time requirements of the library: see
@@ -186,9 +186,9 @@ namespace std _GLIBCXX_VISIBILITY(default)
         _InIterator __beg, _InIterator __end, std::forward_iterator_tag)
     {
         // NB: Not required, but considered best practice.
-        // if (__gnu_cxx::__is_null_pointer(__beg) && __beg != __end)
-        //     std::__throw_logic_error(__N("basic_string::"
-        //                                  "_M_construct null not valid"));
+        if (__gnu_cxx::__is_null_pointer(__beg) && __beg != __end)
+            std::__throw_logic_error(__N("basic_string::"
+                                         "_M_construct null not valid"));
 
         size_type __dnew = static_cast<size_type>(std::distance(__beg, __end));
 

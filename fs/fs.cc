@@ -33,7 +33,7 @@ void init()
     FTable::get("tmpfs")->mount(rootsb);
 
     Ref<Vnode> vroot(new Vnode(rootsb, rootsb->root));
-    Ref<Descriptor> droot(new Descriptor(vroot));
+    Ref<Descriptor> droot(new Descriptor(vroot, F_READ | F_WRITE));
     vroot->link(".", vroot);
     vroot->link("..", vroot);
 

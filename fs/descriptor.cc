@@ -66,11 +66,12 @@ char* basename(const char* path)
     }
 }
 
-Descriptor::Descriptor(Ref<Vnode> vnode)
+Descriptor::Descriptor(Ref<Vnode> vnode, int flags)
 {
     this->vnode          = vnode;
     this->cookie         = nullptr;
     this->current_offset = 0;
+    this->flags          = flags;
 }
 
 int Descriptor::ioctl(unsigned long request, char* argp)
@@ -203,7 +204,8 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
             return Ref<Descriptor>(nullptr);
         }
     }
-    ret                    = Ref<Descriptor>(new Descriptor(curr_vnode));
+    ret = Ref<Descriptor>(
+        new Descriptor(curr_vnode, oflags_to_descriptor(flags)));
     auto [status, _cookie] = curr_vnode->open(name);
     if (!status) {
         ret->cookie = _cookie;
@@ -216,11 +218,21 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 
 ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
 {
+    if (!(this->flags & F_READ)) {
+        Log::printk(Log::LogLevel::WARNING,
+                    "Program tried to read without declaring F_READ\n");
+        return -EBADF;
+    }
     return vnode->read(buffer, count, offset, this->cookie);
 }
 
 ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
 {
+    if (!(this->flags & F_WRITE)) {
+        Log::printk(Log::LogLevel::WARNING,
+                    "Program tried to read without declaring F_READ\n");
+        return -EBADF;
+    }
     return vnode->write(buffer, count, offset, this->cookie);
 }
 
@@ -234,6 +246,11 @@ bool Descriptor::seekable()
 
 ssize_t Descriptor::read(uint8_t* buffer, size_t count)
 {
+    if (!(this->flags & F_READ)) {
+        Log::printk(Log::LogLevel::WARNING,
+                    "Program tried to read without declaring F_READ\n");
+        return -EBADF;
+    }
     ssize_t ret = pread(buffer, count, current_offset);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
@@ -249,6 +266,11 @@ int Descriptor::stat(struct stat* st)
 
 ssize_t Descriptor::write(uint8_t* buffer, size_t count)
 {
+    if (!(this->flags & F_WRITE)) {
+        Log::printk(Log::LogLevel::WARNING,
+                    "Program tried to read without declaring F_READ\n");
+        return -EBADF;
+    }
     ssize_t ret = pwrite(buffer, count, current_offset);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows

@@ -6,10 +6,21 @@
 
 namespace Filesystem
 {
+
+enum DescriptorFlags {
+    F_READ  = 0x1,
+    F_WRITE = 0x2,
+};
+
+constexpr int oflags_to_descriptor(int o_flag)
+{
+    return o_flag + 1;
+}
+
 class Descriptor : public RefcountBase
 {
 public:
-    Descriptor(Ref<Vnode> vnode);
+    Descriptor(Ref<Vnode> vnode, int flags);
     int ioctl(unsigned long request, char* argp);
     int link(const char* name, Ref<Descriptor> node);
     off_t lseek(off_t offset, int whence);
@@ -28,6 +39,7 @@ public:
 private:
     Ref<Vnode> vnode;
     off_t current_offset;
+    int flags;
     void* cookie;
 };
 } // namespace Filesystem

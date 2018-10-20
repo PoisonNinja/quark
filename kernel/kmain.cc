@@ -19,7 +19,7 @@ void init_stage2(void*)
 {
     Process* parent                  = Scheduler::get_current_process();
     Ref<Filesystem::Descriptor> root = parent->get_root();
-    Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
+    Ref<Filesystem::Descriptor> init = root->open("/sbin/init", O_RDONLY, 0);
     if (!init) {
         Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)

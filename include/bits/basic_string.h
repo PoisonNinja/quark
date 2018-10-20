@@ -321,8 +321,8 @@ namespace std _GLIBCXX_VISIBILITY(default)
         void _M_check_length(size_type __n1, size_type __n2,
                              const char* __s) const
         {
-            if (this->max_size() - (this->size() - __n1) < __n2)
-                __throw_length_error(__N(__s));
+            // if (this->max_size() - (this->size() - __n1) < __n2)
+            //     __throw_length_error(__N(__s));
         }
 
         // NB: _M_limit doesn't check for a bad __pos value.

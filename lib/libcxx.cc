@@ -1,5 +1,6 @@
 #include <kernel.h>
 #include <lib/libcxx.h>
+#include <memory>
 
 namespace libcxx
 {
@@ -9,7 +10,7 @@ void constructors_initialize(void *__constructors_start,
                              void *__constructors_end)
 {
     constructor_t *start = (constructor_t *)__constructors_start;
-    constructor_t *end = (constructor_t *)__constructors_end;
+    constructor_t *end   = (constructor_t *)__constructors_end;
 
     for (constructor_t *current = start; current != end; ++current) {
         (*current)();
@@ -42,8 +43,8 @@ void __cxa_finalize(void *f);
 atexit_func_entry_t __atexit_funcs[ATEXIT_MAX_FUNCS];
 uarch_t __atexit_func_count = 0;
 
-void *__dso_handle = 0;  // Attention! Optimally, you should remove the '= 0'
-                         // part and define this in your asm script.
+void *__dso_handle = 0; // Attention! Optimally, you should remove the '= 0'
+                        // part and define this in your asm script.
 
 int __cxa_atexit(void (*f)(void *), void *objptr, void *dso)
 {
@@ -51,8 +52,8 @@ int __cxa_atexit(void (*f)(void *), void *objptr, void *dso)
         return -1;
     };
     __atexit_funcs[__atexit_func_count].destructor_func = f;
-    __atexit_funcs[__atexit_func_count].obj_ptr = objptr;
-    __atexit_funcs[__atexit_func_count].dso_handle = dso;
+    __atexit_funcs[__atexit_func_count].obj_ptr         = objptr;
+    __atexit_funcs[__atexit_func_count].dso_handle      = dso;
     __atexit_func_count++;
     return 0; /*I would prefer if functions returned 1 on success, but the ABI
                  says...*/
@@ -142,3 +143,9 @@ void __cxa_finalize(void *f)
 };
 }
 } // namespace libcxx
+
+namespace std
+{
+template class allocator<char>;
+template class allocator<wchar_t>;
+} // namespace std

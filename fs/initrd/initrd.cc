@@ -9,7 +9,7 @@
 
 namespace
 {
-constexpr const char* tar_magic = "ustar\0";
+constexpr const char* tar_magic = "ustar";
 }
 
 namespace Filesystem

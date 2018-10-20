@@ -17,11 +17,8 @@ public:
 
 private:
     volatile uint16_t* vga_buffer;
-    int x;
-    int y;
-    int color;
 
-    static void update_cursor(int col, int row);
+    void update_cursor(int col, int row);
 };
 } // namespace TTY
 } // namespace Filesystem

@@ -28,8 +28,6 @@ VGATTY::VGATTY()
         return;
     }
     vga_buffer = reinterpret_cast<uint16_t *>(virt);
-    x = y = 0;
-    color = 15;
 }
 
 VGATTY::~VGATTY()
@@ -37,63 +35,11 @@ VGATTY::~VGATTY()
     Memory::Valloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGATTY::write(uint8_t *buffer, size_t size, off_t offset, void *cookie)
+ssize_t VGATTY::write(uint8_t *buffer, size_t size, off_t offset,
+                      void * /* cookie */)
 {
-    size_t length = size;
-    char *string  = reinterpret_cast<char *>(buffer);
-    while (length) {
-        if (*string == '\n') {
-            x = 0;
-            y++;
-            string++;
-            length--;
-        } else if (*string == '\e') {
-            string += 3;
-            length -= 3;
-            switch (*string) {
-                case '1':
-                    color = 12; // Light Red
-                    break;
-                case '2':
-                    color = 10; // Light Green
-                    break;
-                case '3':
-                    color = 14; // Yellow
-                    break;
-                case '6':
-                    color = 11; // Light Blue
-                    break;
-                case '9':
-                    color = 15; // Reset to white
-                    break;
-                default:
-                    color = 15;
-                    break;
-            }
-            string += 2;
-            length -= 2;
-        } else {
-            size_t index      = y * VGA_WIDTH + x++;
-            vga_buffer[index] = *string++ | (color << 8);
-            length--;
-        }
-        if (x == VGA_WIDTH) {
-            x = 0;
-            y++;
-        }
-        if (y == VGA_HEIGHT) {
-            for (int ny = 1; ny < VGA_HEIGHT; ny++) {
-                String::memcpy((void *)&vga_buffer[(ny - 1) * VGA_WIDTH],
-                               (void *)&vga_buffer[ny * VGA_WIDTH],
-                               2 * VGA_WIDTH);
-            }
-            String::memset((void *)&vga_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH], 0,
-                           2 * VGA_WIDTH);
-            y = VGA_HEIGHT - 1;
-        }
-    }
-    update_cursor(x, y);
-    return size - length;
+    String::memcpy((void *)((uint8_t *)vga_buffer + offset), buffer, size);
+    return size;
 }
 
 void VGATTY::update_cursor(int col, int row)

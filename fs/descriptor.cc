@@ -5,33 +5,34 @@
 #include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
+#include <memory>
 
 namespace Filesystem
 {
-char* dirname(const char* path)
+std::unique_ptr<char[]> dirname(const char* path)
 {
     const char* slash = String::strrchr(path, '/');
     if (slash) {
         if (*(slash + 1) == '\0') {
             if (slash == path) {
-                return String::strdup("/");
+                return std::unique_ptr<char[]>(String::strdup("/"));
             }
             slash = (const char*)String::memrchr(path, '/', slash - path);
         }
         size_t diff = slash - path;
         if (!diff || !slash) {
-            return String::strdup(".");
+            return std::unique_ptr<char[]>(String::strdup("."));
         }
-        char* ret = new char[diff + 1];
-        String::memcpy(ret, path, diff);
+        auto ret = std::unique_ptr<char[]>(new char[diff + 1]);
+        String::memcpy(ret.get(), path, diff);
         ret[diff] = '\0';
         return ret;
     } else {
-        return String::strdup(".");
+        return std::unique_ptr<char[]>(String::strdup("."));
     }
 }
 
-char* basename(const char* path)
+std::unique_ptr<char[]> basename(const char* path)
 {
     // Locate the last slash
     const char* slash = String::strrchr(path, '/');
@@ -48,21 +49,21 @@ char* basename(const char* path)
              * entire string was just /) and return /
              */
             if (terminate == path) {
-                return String::strdup(".");
+                return std::unique_ptr<char[]>(String::strdup("."));
             }
             // Set the location of the new slash
             slash = (const char*)String::memrchr(path, '/', terminate - path);
         }
         // Allocate the return buffer
-        char* ret = new char[terminate - slash + 1];
+        auto ret = std::unique_ptr<char[]>(new char[terminate - slash + 1]);
         // Copy from slash + 1 (to avoid /) to terminate
-        String::memcpy(ret, slash + 1, terminate - slash);
+        String::memcpy(ret.get(), slash + 1, terminate - slash);
         // Null terminate
         ret[terminate - slash] = '\0';
         return ret;
     } else {
         // No slash, the entire path is a filename
-        return String::strdup(path);
+        return std::unique_ptr<char[]>(String::strdup(path));
     }
 }
 
@@ -81,17 +82,13 @@ int Descriptor::ioctl(unsigned long request, char* argp)
 
 int Descriptor::link(const char* name, Ref<Descriptor> node)
 {
-    const char* dir           = dirname(name);
-    const char* file          = basename(name);
-    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+    auto dir                  = dirname(name);
+    auto file                 = basename(name);
+    Ref<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
     if (!directory) {
-        delete[] dir;
-        delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->link(file, node->vnode);
-    delete[] dir;
-    delete[] file;
+    int ret = directory->vnode->link(file.get(), node->vnode);
     return ret;
 }
 
@@ -116,37 +113,29 @@ off_t Descriptor::lseek(off_t offset, int whence)
 
 int Descriptor::mkdir(const char* name, mode_t mode)
 {
-    const char* dir  = dirname(name);
-    const char* file = basename(name);
+    auto dir  = dirname(name);
+    auto file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
-                dir, file);
-    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+                dir.get(), file.get());
+    Ref<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
     if (!directory) {
-        delete[] dir;
-        delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->mkdir(file, mode);
-    delete[] dir;
-    delete[] file;
+    int ret = directory->vnode->mkdir(file.get(), mode);
     return ret;
 }
 
 int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    const char* dir  = dirname(name);
-    const char* file = basename(name);
+    auto dir  = dirname(name);
+    auto file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
-                dir, file);
-    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+                dir.get(), file.get());
+    Ref<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
     if (!directory) {
-        delete[] dir;
-        delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->mknod(file, mode, dev);
-    delete[] dir;
-    delete[] file;
+    int ret = directory->vnode->mknod(file.get(), mode, dev);
     return ret;
 }
 
@@ -186,14 +175,14 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
 {
     char* path = String::strdup(name);
     char* current;
-    char* filename = basename(name);
+    auto filename = basename(name);
     Ref<Descriptor> ret(nullptr);
     Ref<Vnode> curr_vnode = this->vnode;
     while ((current = String::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags   = flags;
         mode_t checked_mode = mode;
-        if (String::strcmp(current, filename)) {
+        if (String::strcmp(current, filename.get())) {
             checked_flags = O_RDONLY;
             mode          = 0;
         }

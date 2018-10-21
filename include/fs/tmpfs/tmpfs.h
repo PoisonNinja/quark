@@ -2,7 +2,7 @@
 
 #include <fs/driver.h>
 #include <fs/inode.h>
-#include <lib/list.h>
+#include <list>
 
 namespace Filesystem
 {
@@ -22,7 +22,6 @@ struct InitFSNode {
     ~InitFSNode();
     std::shared_ptr<Inode> inode;
     char* name;
-    Node<InitFSNode> node;
 };
 
 class File : public BaseInode
@@ -53,7 +52,7 @@ public:
 
 private:
     std::shared_ptr<Inode> find_child(const char* name);
-    List<InitFSNode, &InitFSNode::node> children;
+    std::list<InitFSNode> children;
 };
 } // namespace InitFS
 } // namespace Filesystem

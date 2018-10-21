@@ -136,16 +136,14 @@ int Directory::mkdir(const char* name, mode_t mode)
     std::shared_ptr<Directory> dir(new Directory(0, 0, mode));
     dir->link(".", dir);
     dir->link("..", std::shared_ptr<Directory>(this));
-    InitFSNode* node = new InitFSNode(dir, name);
-    children.push_back(*node);
+    children.push_back(InitFSNode(dir, name));
     return 0;
 }
 
 int Directory::mknod(const char* name, mode_t mode, dev_t dev)
 {
     std::shared_ptr<File> child(new File(0, dev, mode));
-    InitFSNode* node = new InitFSNode(child, name);
-    children.push_back(*node);
+    children.push_back(InitFSNode(child, name));
     return 0;
 }
 

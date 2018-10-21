@@ -162,6 +162,7 @@ install(TARGETS quark.kernel DESTINATION "${SYSROOT}/boot")
 # Ensure that quark.kernel links with libgcc for certain things like 64-bit
 # arithmetic on 32-bit platforms.
 target_link_libraries(quark.kernel gcc)
+target_link_libraries(quark.kernel supc++)
 
 # Process the configuration file and generate it into a C header
 configure_file(config.h.in ${CMAKE_SOURCE_DIR}/include/config.h @ONLY)

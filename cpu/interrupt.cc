@@ -76,4 +76,4 @@ void init()
 {
     Interrupt::arch_init();
 }
-}  // namespace Interrupt
+} // namespace Interrupt

@@ -1,29 +1,33 @@
 #pragma once
 
 #include <arch/cpu/registers.h>
+#include <functional>
 #include <lib/list.h>
 #include <types.h>
 
 namespace Interrupt
 {
-constexpr size_t max = 256;  // TODO: Move this to architecture folder
+constexpr size_t max = 256; // TODO: Move this to architecture folder
 
 inline int interrupt_to_irq(int interrupt_no)
 {
-    return interrupt_no - 32;  // TODO: Make this architecture independant
+    return interrupt_no - 32; // TODO: Make this architecture independant
 }
 
 inline int irq_to_interrupt(int irq)
 {
-    return irq + 32;  // TODO: Make this architecture independant
+    return irq + 32; // TODO: Make this architecture independant
 }
 
 typedef void (*interrupt_handler_t)(int, void *, struct InterruptContext *);
 
 struct Handler {
-    Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
-        : handler(handler), dev_name(dev_name), dev_id(dev_id){};
-    interrupt_handler_t handler;
+    Handler(std::function<void(int, void *, struct InterruptContext *)> handler,
+            const char *dev_name, void *dev_id)
+        : handler(handler)
+        , dev_name(dev_name)
+        , dev_id(dev_id){};
+    std::function<void(int, void *, struct InterruptContext *)> handler;
     const char *dev_name;
     void *dev_id;
     Node<Handler> node;
@@ -48,4 +52,4 @@ bool register_handler(uint32_t int_no, Interrupt::Handler &handler);
 bool unregister_handler(uint32_t int_no, const Interrupt::Handler &handler);
 
 void init();
-}  // namespace Interrupt
+} // namespace Interrupt

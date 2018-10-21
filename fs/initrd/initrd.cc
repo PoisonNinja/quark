@@ -28,9 +28,10 @@ size_t decode_octal(char size[12])
 
 bool parse(addr_t initrd)
 {
-    addr_t current       = initrd;
-    Ref<Descriptor> root = Scheduler::get_current_process()->get_root();
-    Ref<Descriptor> file;
+    addr_t current = initrd;
+    std::shared_ptr<Descriptor> root =
+        Scheduler::get_current_process()->get_root();
+    std::shared_ptr<Descriptor> file;
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =
             reinterpret_cast<Filesystem::Initrd::Tar::Header*>(current);

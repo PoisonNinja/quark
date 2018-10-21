@@ -80,11 +80,11 @@ int Descriptor::ioctl(unsigned long request, char* argp)
     return this->vnode->ioctl(request, argp, this->cookie);
 }
 
-int Descriptor::link(const char* name, Ref<Descriptor> node)
+int Descriptor::link(const char* name, std::shared_ptr<Descriptor> node)
 {
-    auto dir                  = dirname(name);
-    auto file                 = basename(name);
-    Ref<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
+    auto dir                              = dirname(name);
+    auto file                             = basename(name);
+    std::shared_ptr<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
     if (!directory) {
         return -ENOENT;
     }
@@ -117,7 +117,7 @@ int Descriptor::mkdir(const char* name, mode_t mode)
     auto file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
                 dir.get(), file.get());
-    Ref<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
+    std::shared_ptr<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
     if (!directory) {
         return -ENOENT;
     }
@@ -131,7 +131,7 @@ int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
     auto file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
                 dir.get(), file.get());
-    Ref<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
+    std::shared_ptr<Descriptor> directory = this->open(dir.get(), O_RDONLY, 0);
     if (!directory) {
         return -ENOENT;
     }
@@ -152,11 +152,11 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
                     type);
         return -EINVAL;
     }
-    Ref<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
+    std::shared_ptr<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
     if (!target_desc) {
         return -ENOENT;
     }
-    Ref<Descriptor> source_desc = this->open(source, O_RDONLY, 0);
+    std::shared_ptr<Descriptor> source_desc = this->open(source, O_RDONLY, 0);
     if (!source_desc && !(driver->flags() & driver_pseudo)) {
         return -ENOENT;
     }
@@ -171,12 +171,13 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
     return 0;
 }
 
-Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
+std::shared_ptr<Descriptor> Descriptor::open(const char* name, int flags,
+                                             mode_t mode)
 {
     char* path = String::strdup(name);
     char* current;
     auto filename = basename(name);
-    Ref<Descriptor> ret(nullptr);
+    std::shared_ptr<Descriptor> ret(nullptr);
     std::shared_ptr<Vnode> curr_vnode = this->vnode;
     while ((current = String::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
@@ -190,10 +191,10 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
         if (!curr_vnode) {
             Log::printk(Log::LogLevel::ERROR,
                         "[descriptor->open] Failed to open %s\n", current);
-            return Ref<Descriptor>(nullptr);
+            return std::shared_ptr<Descriptor>(nullptr);
         }
     }
-    ret = Ref<Descriptor>(
+    ret = std::shared_ptr<Descriptor>(
         new Descriptor(curr_vnode, oflags_to_descriptor(flags)));
     auto [status, _cookie] = curr_vnode->open(name);
     if (!status) {

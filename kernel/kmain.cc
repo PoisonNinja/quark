@@ -17,9 +17,10 @@
 
 void init_stage2(void*)
 {
-    Process* parent                  = Scheduler::get_current_process();
-    Ref<Filesystem::Descriptor> root = parent->get_root();
-    Ref<Filesystem::Descriptor> init = root->open("/sbin/init", O_RDONLY, 0);
+    Process* parent = Scheduler::get_current_process();
+    std::shared_ptr<Filesystem::Descriptor> root = parent->get_root();
+    std::shared_ptr<Filesystem::Descriptor> init =
+        root->open("/sbin/init", O_RDONLY, 0);
     if (!init) {
         Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)
@@ -58,7 +59,8 @@ void init_stage1()
     Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());
     initp->set_cwd(Scheduler::get_current_process()->get_cwd());
-    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
+    initp->set_dtable(
+        std::shared_ptr<Filesystem::DTable>(new Filesystem::DTable));
     initp->address_space = cloned;
 
     Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);

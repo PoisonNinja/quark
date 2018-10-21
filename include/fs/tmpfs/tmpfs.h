@@ -18,9 +18,9 @@ public:
 namespace InitFS
 {
 struct InitFSNode {
-    InitFSNode(Ref<Inode> inode, const char* name);
+    InitFSNode(std::shared_ptr<Inode> inode, const char* name);
     ~InitFSNode();
-    Ref<Inode> inode;
+    std::shared_ptr<Inode> inode;
     char* name;
     Node<InitFSNode> node;
 };
@@ -45,14 +45,14 @@ class Directory : public BaseInode
 public:
     Directory(ino_t ino, dev_t rdev, mode_t mode);
     virtual ~Directory();
-    virtual int link(const char* name, Ref<Inode> node) override;
-    virtual Ref<Inode> lookup(const char* name, int flags,
-                              mode_t mode) override;
+    virtual int link(const char* name, std::shared_ptr<Inode> node) override;
+    virtual std::shared_ptr<Inode> lookup(const char* name, int flags,
+                                          mode_t mode) override;
     virtual int mkdir(const char* name, mode_t mode) override;
     virtual int mknod(const char* name, mode_t mode, dev_t dev) override;
 
 private:
-    Ref<Inode> find_child(const char* name);
+    std::shared_ptr<Inode> find_child(const char* name);
     List<InitFSNode, &InitFSNode::node> children;
 };
 } // namespace InitFS

@@ -57,7 +57,7 @@ PTSFS::PTSFS()
 
 bool PTSFS::mount(Superblock* sb)
 {
-    sb->root = Ref<Inode>(this->root);
+    sb->root = std::shared_ptr<Inode>(this->root);
     return true;
 }
 

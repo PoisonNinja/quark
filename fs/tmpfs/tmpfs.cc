@@ -17,7 +17,7 @@ TmpFS::~TmpFS()
 
 bool TmpFS::mount(Superblock* sb)
 {
-    sb->root = Ref<Inode>(new InitFS::Directory(0, 0, 0755));
+    sb->root = std::shared_ptr<Inode>(new InitFS::Directory(0, 0, 0755));
     return true;
 }
 
@@ -28,7 +28,7 @@ uint32_t TmpFS::flags()
 
 namespace InitFS
 {
-InitFSNode::InitFSNode(Ref<Inode> inode, const char* name)
+InitFSNode::InitFSNode(std::shared_ptr<Inode> inode, const char* name)
 {
     this->inode = inode;
     this->name  = String::strdup(name);
@@ -101,9 +101,9 @@ Directory::~Directory()
     }
 }
 
-int Directory::link(const char* name, Ref<Inode> node)
+int Directory::link(const char* name, std::shared_ptr<Inode> node)
 {
-    Ref<Inode> child = find_child(name);
+    std::shared_ptr<Inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
@@ -112,15 +112,16 @@ int Directory::link(const char* name, Ref<Inode> node)
     return 0;
 }
 
-Ref<Inode> Directory::lookup(const char* name, int flags, mode_t mode)
+std::shared_ptr<Inode> Directory::lookup(const char* name, int flags,
+                                         mode_t mode)
 {
-    Ref<Inode> ret = find_child(name);
+    std::shared_ptr<Inode> ret = find_child(name);
     if (ret) {
         return ret;
     } else if (!ret && !(flags & O_CREAT)) {
-        return Ref<Inode>(nullptr);
+        return std::shared_ptr<Inode>(nullptr);
     }
-    Ref<File> child(new File(0, 0, mode));
+    std::shared_ptr<File> child(new File(0, 0, mode));
     InitFSNode* node = new InitFSNode(child, name);
     children.push_back(*node);
     return child;
@@ -128,13 +129,13 @@ Ref<Inode> Directory::lookup(const char* name, int flags, mode_t mode)
 
 int Directory::mkdir(const char* name, mode_t mode)
 {
-    Ref<Inode> child = find_child(name);
+    std::shared_ptr<Inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
-    Ref<Directory> dir(new Directory(0, 0, mode));
+    std::shared_ptr<Directory> dir(new Directory(0, 0, mode));
     dir->link(".", dir);
-    dir->link("..", Ref<Directory>(this));
+    dir->link("..", std::shared_ptr<Directory>(this));
     InitFSNode* node = new InitFSNode(dir, name);
     children.push_back(*node);
     return 0;
@@ -142,20 +143,20 @@ int Directory::mkdir(const char* name, mode_t mode)
 
 int Directory::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    Ref<File> child(new File(0, dev, mode));
+    std::shared_ptr<File> child(new File(0, dev, mode));
     InitFSNode* node = new InitFSNode(child, name);
     children.push_back(*node);
     return 0;
 }
 
-Ref<Inode> Directory::find_child(const char* name)
+std::shared_ptr<Inode> Directory::find_child(const char* name)
 {
     for (auto& i : children) {
         if (!String::strcmp(i.name, name)) {
             return i.inode;
         }
     }
-    return Ref<Inode>(nullptr);
+    return std::shared_ptr<Inode>(nullptr);
 }
 } // namespace InitFS
 } // namespace Filesystem

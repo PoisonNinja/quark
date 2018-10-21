@@ -2,7 +2,6 @@
 
 #include <fs/inode.h>
 #include <fs/vnode.h>
-#include <lib/refcount.h>
 #include <memory>
 
 namespace Filesystem
@@ -18,18 +17,18 @@ constexpr int oflags_to_descriptor(int o_flag)
     return o_flag + 1;
 }
 
-class Descriptor : public RefcountBase
+class Descriptor
 {
 public:
     Descriptor(std::shared_ptr<Vnode> vnode, int flags);
     int ioctl(unsigned long request, char* argp);
-    int link(const char* name, Ref<Descriptor> node);
+    int link(const char* name, std::shared_ptr<Descriptor> node);
     off_t lseek(off_t offset, int whence);
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
     int mount(const char* source, const char* target, const char* type,
               unsigned long flags);
-    Ref<Descriptor> open(const char* name, int flags, mode_t mode);
+    std::shared_ptr<Descriptor> open(const char* name, int flags, mode_t mode);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
     ssize_t read(uint8_t* buffer, size_t count);

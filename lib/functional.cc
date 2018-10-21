@@ -34,6 +34,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
         _GLIBCXX_THROW_OR_ABORT(bad_function_call());
     }
 
+    // Disabled to prevent trying to instantiate the class
 #if 0
     bad_function_call::~bad_function_call() noexcept = default;
 

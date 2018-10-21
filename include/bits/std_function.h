@@ -53,15 +53,13 @@ namespace std _GLIBCXX_VISIBILITY(default)
      *  operator() is called with an empty target.
      *  @ingroup exceptions
      */
-#if 0
-  class bad_function_call : public std::exception
-  {
-  public:
-    virtual ~bad_function_call() noexcept;
+    class bad_function_call : public std::exception
+    {
+    public:
+        virtual ~bad_function_call() noexcept;
 
-    const char* what() const noexcept;
-  };
-#endif
+        const char* what() const noexcept;
+    };
 
     /**
      *  Trait identifying "location-invariant" types, meaning that the

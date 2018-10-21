@@ -1,9 +1,9 @@
 #include <arch/mm/layout.h>
 #include <kernel.h>
-#include <lib/bitset.h>
 #include <lib/string.h>
 #include <mm/buddy.h>
 #include <mm/virtual.h>
+#include <vector>
 
 namespace
 {
@@ -19,7 +19,7 @@ constexpr addr_t buddy_index(addr_t x, int order)
 
 struct BuddyOrder {
     Stack* stack;
-    Bitset* bitset;
+    std::vector<bool> bitset;
 };
 
 Buddy::Buddy(size_t s, size_t min, size_t max)
@@ -35,8 +35,7 @@ Buddy::Buddy(size_t s, size_t min, size_t max)
             new Stack(reinterpret_cast<addr_t*>(STACK_START + stack_offset));
         stack_offset += Memory::Virtual::align_up(
             stack_overhead(this->size, Math::pow_2(i)));
-        this->orders[i].bitset =
-            new Bitset(this->size / Math::pow_2(i), bitset_full);
+        this->orders[i].bitset = std::vector(this->size / Math::pow_2(i), true);
     }
 }
 
@@ -65,14 +64,14 @@ addr_t Buddy::alloc(size_t size)
         }
         addr_t addr = this->orders[order].stack->pop();
         for (; order > original_order; order--) {
-            this->orders[order].bitset->set(buddy_index(addr, order));
-            this->orders[order - 1].bitset->set(buddy_index(addr, order - 1));
+            this->orders[order].bitset[buddy_index(addr, order)]         = true;
+            this->orders[order - 1].bitset[buddy_index(addr, order - 1)] = true;
             this->orders[order - 1].stack->push(buddy_address(addr, order - 1));
         }
         return addr;
     } else {
         addr_t addr = this->orders[order].stack->pop();
-        this->orders[order].bitset->set(buddy_index(addr, order));
+        this->orders[order].bitset[buddy_index(addr, order)];
         return addr;
     }
 }
@@ -81,9 +80,9 @@ void Buddy::free(addr_t addr, size_t size)
 {
     uint32_t order = Math::log_2(size);
     for (; order <= this->max_order; order++) {
-        this->orders[order].bitset->unset(buddy_index(addr, order));
+        this->orders[order].bitset[buddy_index(addr, order)] = false;
         addr_t buddy_addr = buddy_address(addr, order);
-        if (this->orders[order].bitset->test(buddy_index(buddy_addr, order)) ||
+        if (this->orders[order].bitset[buddy_index(buddy_addr, order)] ||
             order == this->max_order) {
             this->orders[order].stack->push(addr);
             break;

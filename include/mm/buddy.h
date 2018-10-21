@@ -1,6 +1,5 @@
 #pragma once
 
-#include <lib/bitset.h>
 #include <mm/stack.h>
 #include <types.h>
 

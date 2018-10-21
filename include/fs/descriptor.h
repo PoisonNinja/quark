@@ -3,6 +3,7 @@
 #include <fs/inode.h>
 #include <fs/vnode.h>
 #include <lib/refcount.h>
+#include <memory>
 
 namespace Filesystem
 {
@@ -20,7 +21,7 @@ constexpr int oflags_to_descriptor(int o_flag)
 class Descriptor : public RefcountBase
 {
 public:
-    Descriptor(Ref<Vnode> vnode, int flags);
+    Descriptor(std::shared_ptr<Vnode> vnode, int flags);
     int ioctl(unsigned long request, char* argp);
     int link(const char* name, Ref<Descriptor> node);
     off_t lseek(off_t offset, int whence);
@@ -37,7 +38,7 @@ public:
     ssize_t write(uint8_t* buffer, size_t count);
 
 private:
-    Ref<Vnode> vnode;
+    std::shared_ptr<Vnode> vnode;
     off_t current_offset;
     int flags;
     void* cookie;

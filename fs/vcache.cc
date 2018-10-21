@@ -36,14 +36,14 @@ struct Hash {
     }
 };
 
-Hashmap<Key, Ref<Vnode>, vcache_size, Hash> vcache_hash;
+Hashmap<Key, std::shared_ptr<Vnode>, vcache_size, Hash> vcache_hash;
 } // namespace
 
 namespace VCache
 {
-bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
+bool add(ino_t ino, dev_t dev, std::shared_ptr<Vnode> vnode)
 {
-    Ref<Vnode> dummy(nullptr);
+    std::shared_ptr<Vnode> dummy(nullptr);
     Key key(ino, dev);
     if (vcache_hash.get(key, dummy)) {
         Log::printk(Log::LogLevel::WARNING,
@@ -54,12 +54,12 @@ bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
     return true;
 }
 
-Ref<Vnode> get(ino_t ino, dev_t dev)
+std::shared_ptr<Vnode> get(ino_t ino, dev_t dev)
 {
-    Ref<Vnode> dummy = Ref<Vnode>(nullptr);
+    std::shared_ptr<Vnode> dummy = std::shared_ptr<Vnode>(nullptr);
     Key key(ino, dev);
     if (!vcache_hash.get(key, dummy)) {
-        return Ref<Vnode>(nullptr);
+        return std::shared_ptr<Vnode>(nullptr);
     }
     return dummy;
 }

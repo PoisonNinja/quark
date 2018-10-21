@@ -5,11 +5,11 @@
 #include <fs/mount.h>
 #include <lib/list.h>
 #include <lib/pair.h>
-#include <lib/refcount.h>
+#include <memory>
 
 namespace Filesystem
 {
-class Vnode : public RefcountBase
+class Vnode
 {
 public:
     dev_t rdev;  // Device # if special file, ignored otherwise
@@ -20,8 +20,8 @@ public:
 
     // Standard file operations
     int ioctl(unsigned long request, char* argp, void* cookie);
-    int link(const char* name, Ref<Vnode> node);
-    Ref<Vnode> lookup(const char* name, int flags, mode_t mode);
+    int link(const char* name, std::shared_ptr<Vnode> node);
+    std::shared_ptr<Vnode> lookup(const char* name, int flags, mode_t mode);
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
     virtual Pair<int, void*> open(const char* name);

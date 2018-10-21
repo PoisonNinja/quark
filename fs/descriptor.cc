@@ -67,7 +67,7 @@ std::unique_ptr<char[]> basename(const char* path)
     }
 }
 
-Descriptor::Descriptor(Ref<Vnode> vnode, int flags)
+Descriptor::Descriptor(std::shared_ptr<Vnode> vnode, int flags)
 {
     this->vnode          = vnode;
     this->cookie         = nullptr;
@@ -177,7 +177,7 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
     char* current;
     auto filename = basename(name);
     Ref<Descriptor> ret(nullptr);
-    Ref<Vnode> curr_vnode = this->vnode;
+    std::shared_ptr<Vnode> curr_vnode = this->vnode;
     while ((current = String::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags   = flags;

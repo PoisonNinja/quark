@@ -258,4 +258,9 @@ void *memset(void *str, int c, size_t n)
 {
     return String::memset(str, c, n);
 }
+
+int memcmp(const void *str1, const void *str2, size_t n)
+{
+    return String::memcmp(str1, str2, n);
+}
 }

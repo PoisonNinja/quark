@@ -120,6 +120,8 @@ message(STATUS "ASMFLAGS: " ${CMAKE_ASM_NASM_FLAGS})
 # Set the kernel include directory as a search path
 set(INCLUDE_DIRS "${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include/")
 include_directories(${INCLUDE_DIRS})
+# Set libstdc++ as a search path
+include_directories("${CMAKE_SOURCE_DIR}/include/libstdc++/")
 message(STATUS "Include directories: " ${INCLUDE_DIRS})
 
 # Command to create symlink from architecture include to include/arch so

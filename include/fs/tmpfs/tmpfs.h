@@ -17,12 +17,14 @@ public:
 
 namespace InitFS
 {
-struct InitFSNode {
-    InitFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name);
-    ~InitFSNode();
+struct TmpFSNode {
+    TmpFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name);
+    TmpFSNode(const struct TmpFSNode& other);
+    TmpFSNode& operator=(const struct TmpFSNode& other);
+    ~TmpFSNode();
     libcxx::intrusive_ptr<Inode> inode;
-    char* name;
-    libcxx::node<InitFSNode> node;
+    const char* name;
+    libcxx::node<TmpFSNode> node;
 };
 
 class File : public BaseInode
@@ -54,7 +56,7 @@ public:
 
 private:
     libcxx::intrusive_ptr<Inode> find_child(const char* name);
-    libcxx::list<InitFSNode, &InitFSNode::node> children;
+    libcxx::list<TmpFSNode, &TmpFSNode::node> children;
 };
 } // namespace InitFS
 } // namespace Filesystem

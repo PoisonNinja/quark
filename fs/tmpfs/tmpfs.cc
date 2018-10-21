@@ -28,13 +28,27 @@ uint32_t TmpFS::flags()
 
 namespace InitFS
 {
-InitFSNode::InitFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name)
+TmpFSNode::TmpFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name)
 {
     this->inode = inode;
     this->name  = String::strdup(name);
 }
 
-InitFSNode::~InitFSNode()
+TmpFSNode::TmpFSNode(const struct TmpFSNode& other)
+{
+    this->inode = other.inode;
+    this->name  = String::strdup(other.name);
+}
+
+TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
+{
+    this->inode         = other.inode;
+    const char* newname = String::strdup(other.name);
+    libcxx::swap(this->name, newname);
+    return *this;
+}
+
+TmpFSNode::~TmpFSNode()
 {
     delete[] this->name;
 }
@@ -107,8 +121,7 @@ int Directory::link(const char* name, libcxx::intrusive_ptr<Inode> node)
     if (child) {
         return -EEXIST;
     }
-    InitFSNode* wrapper = new InitFSNode(node, name);
-    children.push_back(*wrapper);
+    children.push_back(*(new TmpFSNode(node, name)));
     return 0;
 }
 
@@ -124,7 +137,7 @@ libcxx::intrusive_ptr<Inode> Directory::lookup(const char* name, int flags,
         return libcxx::intrusive_ptr<Inode>(nullptr);
     }
     libcxx::intrusive_ptr<File> child(new File(0, 0, mode));
-    InitFSNode* node = new InitFSNode(child, name);
+    TmpFSNode* node = new TmpFSNode(child, name);
     children.push_back(*node);
     return child;
 }
@@ -138,7 +151,7 @@ int Directory::mkdir(const char* name, mode_t mode)
     libcxx::intrusive_ptr<Directory> dir(new Directory(0, 0, mode));
     dir->link(".", dir);
     dir->link("..", libcxx::intrusive_ptr<Directory>(this));
-    InitFSNode* node = new InitFSNode(dir, name);
+    TmpFSNode* node = new TmpFSNode(dir, name);
     children.push_back(*node);
     return 0;
 }
@@ -146,7 +159,7 @@ int Directory::mkdir(const char* name, mode_t mode)
 int Directory::mknod(const char* name, mode_t mode, dev_t dev)
 {
     libcxx::intrusive_ptr<File> child(new File(0, dev, mode));
-    InitFSNode* node = new InitFSNode(child, name);
+    TmpFSNode* node = new TmpFSNode(child, name);
     children.push_back(*node);
     return 0;
 }

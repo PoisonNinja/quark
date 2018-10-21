@@ -20,10 +20,10 @@ void arch_do_stack_trace()
         if (!bp)
             break;
         auto [name, offset] = Symbols::resolve_addr_fuzzy(rip);
-        if (!name) {
+        if (name.empty()) {
             break;
         }
         Log::printk(Log::LogLevel::ERROR, "Frame #%d: %s+%llX\n", frame++,
-                    name, offset);
+                    name.c_str(), offset);
     }
 }

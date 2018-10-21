@@ -28,13 +28,27 @@ uint32_t TmpFS::flags()
 
 namespace InitFS
 {
-InitFSNode::InitFSNode(std::shared_ptr<Inode> inode, const char* name)
+TmpFSNode::TmpFSNode(std::shared_ptr<Inode> inode, const char* name)
 {
     this->inode = inode;
     this->name  = String::strdup(name);
 }
 
-InitFSNode::~InitFSNode()
+TmpFSNode::TmpFSNode(const struct TmpFSNode& other)
+{
+    this->inode = other.inode;
+    this->name  = String::strdup(other.name);
+}
+
+TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
+{
+    this->inode         = other.inode;
+    const char* newname = String::strdup(other.name);
+    std::swap(this->name, newname);
+    return *this;
+}
+
+TmpFSNode::~TmpFSNode()
 {
     delete[] this->name;
 }
@@ -107,8 +121,7 @@ int Directory::link(const char* name, std::shared_ptr<Inode> node)
     if (child) {
         return -EEXIST;
     }
-    InitFSNode* wrapper = new InitFSNode(node, name);
-    children.push_back(*wrapper);
+    children.push_back(TmpFSNode(node, name));
     return 0;
 }
 
@@ -122,8 +135,7 @@ std::shared_ptr<Inode> Directory::lookup(const char* name, int flags,
         return std::shared_ptr<Inode>(nullptr);
     }
     std::shared_ptr<File> child(new File(0, 0, mode));
-    InitFSNode* node = new InitFSNode(child, name);
-    children.push_back(*node);
+    children.push_back(TmpFSNode(child, name));
     return child;
 }
 
@@ -136,14 +148,14 @@ int Directory::mkdir(const char* name, mode_t mode)
     std::shared_ptr<Directory> dir(new Directory(0, 0, mode));
     dir->link(".", dir);
     dir->link("..", std::shared_ptr<Directory>(this));
-    children.push_back(InitFSNode(dir, name));
+    children.push_back(TmpFSNode(dir, name));
     return 0;
 }
 
 int Directory::mknod(const char* name, mode_t mode, dev_t dev)
 {
     std::shared_ptr<File> child(new File(0, dev, mode));
-    children.push_back(InitFSNode(child, name));
+    children.push_back(TmpFSNode(child, name));
     return 0;
 }
 

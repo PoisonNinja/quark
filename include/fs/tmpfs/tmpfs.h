@@ -17,11 +17,13 @@ public:
 
 namespace InitFS
 {
-struct InitFSNode {
-    InitFSNode(std::shared_ptr<Inode> inode, const char* name);
-    ~InitFSNode();
+struct TmpFSNode {
+    TmpFSNode(std::shared_ptr<Inode> inode, const char* name);
+    TmpFSNode(const struct TmpFSNode& other);
+    TmpFSNode& operator=(const struct TmpFSNode& other);
+    ~TmpFSNode();
     std::shared_ptr<Inode> inode;
-    char* name;
+    const char* name;
 };
 
 class File : public BaseInode
@@ -52,7 +54,7 @@ public:
 
 private:
     std::shared_ptr<Inode> find_child(const char* name);
-    std::list<InitFSNode> children;
+    std::list<TmpFSNode> children;
 };
 } // namespace InitFS
 } // namespace Filesystem

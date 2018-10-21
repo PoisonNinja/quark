@@ -471,17 +471,16 @@ namespace std _GLIBCXX_VISIBILITY(default)
     struct _Prime_rehash_policy {
         using __has_load_factor = std::true_type;
 
-        _Prime_rehash_policy(float __z = 1.0) noexcept
+        _Prime_rehash_policy(int __z = 1.0) noexcept
             : _M_max_load_factor(__z)
             , _M_next_resize(0)
         {
         }
-#if 0
-        float max_load_factor() const noexcept
+
+        int max_load_factor() const noexcept
         {
             return _M_max_load_factor;
         }
-#endif
 
         // Return a bucket size no smaller than n.
         std::size_t _M_next_bkt(std::size_t __n) const;
@@ -489,7 +488,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
         // Return a bucket count appropriate for n elements
         std::size_t _M_bkt_for_elements(std::size_t __n) const
         {
-            return __builtin_ceil(__n / (long double)_M_max_load_factor);
+            return (__n + (_M_max_load_factor - 1)) / _M_max_load_factor;
         }
 
         // __n_bkt is current bucket count, __n_elt is current element count,
@@ -519,7 +518,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
 
         static const std::size_t _S_growth_factor = 2;
 
-        float _M_max_load_factor;
+        int _M_max_load_factor;
         mutable std::size_t _M_next_resize;
     };
 
@@ -563,18 +562,16 @@ namespace std _GLIBCXX_VISIBILITY(default)
     struct _Power2_rehash_policy {
         using __has_load_factor = std::true_type;
 
-        _Power2_rehash_policy(float __z = 1.0) noexcept
+        _Power2_rehash_policy(int __z = 1.0) noexcept
             : _M_max_load_factor(__z)
             , _M_next_resize(0)
         {
         }
 
-#if 0
-        float max_load_factor() const noexcept
+        int max_load_factor() const noexcept
         {
             return _M_max_load_factor;
         }
-#endif
 
         // Return a bucket size no smaller than n (as long as n is not above the
         // highest power of 2).
@@ -598,8 +595,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
                 // being respected.
                 _M_next_resize = std::size_t(-1);
             else
-                _M_next_resize =
-                    __builtin_ceil(__res * (long double)_M_max_load_factor);
+                _M_next_resize = __res * _M_max_load_factor;
 
             return __res;
         }
@@ -607,7 +603,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
         // Return a bucket count appropriate for n elements
         std::size_t _M_bkt_for_elements(std::size_t __n) const noexcept
         {
-            return __builtin_ceil(__n / (long double)_M_max_load_factor);
+            return (__n + _M_max_load_factor - 1) / _M_max_load_factor;
         }
 
         // __n_bkt is current bucket count, __n_elt is current element count,
@@ -619,16 +615,14 @@ namespace std _GLIBCXX_VISIBILITY(default)
                        std::size_t __n_ins) noexcept
         {
             if (__n_elt + __n_ins >= _M_next_resize) {
-                long double __min_bkts =
-                    (__n_elt + __n_ins) / (long double)_M_max_load_factor;
+                std::size_t __min_bkts =
+                    (__n_elt + __n_ins) / _M_max_load_factor;
                 if (__min_bkts >= __n_bkt)
-                    return std::make_pair(true,
-                                          _M_next_bkt(std::max<std::size_t>(
-                                              __builtin_floor(__min_bkts) + 1,
-                                              __n_bkt * _S_growth_factor)));
+                    return std::make_pair(
+                        true, _M_next_bkt(std::max<std::size_t>(
+                                  __min_bkts + 1, __n_bkt * _S_growth_factor)));
 
-                _M_next_resize =
-                    __builtin_floor(__n_bkt * (long double)_M_max_load_factor);
+                _M_next_resize = __n_bkt * _M_max_load_factor;
                 return std::make_pair(false, 0);
             } else
                 return std::make_pair(false, 0);
@@ -653,7 +647,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
 
         static const std::size_t _S_growth_factor = 2;
 
-        float _M_max_load_factor;
+        int _M_max_load_factor;
         std::size_t _M_next_resize;
     };
 
@@ -1082,7 +1076,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
         void reserve(std::size_t __n)
         {
             __hashtable* __this = static_cast<__hashtable*>(this);
-            __this->rehash(__builtin_ceil(__n / max_load_factor()));
+            __this->rehash((__n + max_load_factor() - 1) / max_load_factor());
         }
     };
 

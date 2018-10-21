@@ -4,6 +4,7 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/funcexcept.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/functional.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/libcxx.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/list.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/murmur.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/placeholders.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/printf.cc

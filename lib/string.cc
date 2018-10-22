@@ -263,4 +263,9 @@ int memcmp(const void *str1, const void *str2, size_t n)
 {
     return String::memcmp(str1, str2, n);
 }
+
+size_t strlen(const char *str)
+{
+    return String::strlen(str);
+}
 }

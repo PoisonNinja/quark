@@ -8,8 +8,8 @@ namespace Time
 static libcxx::list<Clock, &Clock::node> clock_list;
 static Clock* current_ticker = nullptr;
 static Clock* current_clock  = nullptr;
-static struct timespec current_time;
-static time_t last = 0;
+static volatile struct timespec current_time;
+static volatile time_t last = 0;
 
 extern void arch_init();
 
@@ -105,7 +105,10 @@ void update()
 struct timespec now()
 {
     Time::update();
-    return current_time;
+    Time::timespec tm;
+    tm.tv_sec  = tm.tv_sec;
+    tm.tv_nsec = tm.tv_nsec;
+    return tm;
 }
 
 void init()

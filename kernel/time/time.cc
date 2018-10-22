@@ -106,8 +106,8 @@ struct timespec now()
 {
     Time::update();
     Time::timespec tm;
-    tm.tv_sec  = tm.tv_sec;
-    tm.tv_nsec = tm.tv_nsec;
+    tm.tv_sec  = current_time.tv_sec;
+    tm.tv_nsec = current_time.tv_nsec;
     return tm;
 }
 

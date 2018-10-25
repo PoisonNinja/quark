@@ -106,6 +106,8 @@ off_t Descriptor::lseek(off_t offset, int whence)
         struct Filesystem::stat st;
         stat(&st);
         start = st.st_size;
+    } else {
+        return -EINVAL;
     }
     off_t result = 0;
     if (__builtin_add_overflow(start, offset, &result)) {

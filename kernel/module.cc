@@ -134,8 +134,8 @@ bool load_module(void* binary)
     Log::printk(Log::LogLevel::DEBUG, "[load_module] String table at %p\n",
                 string_table);
 
-    ELF::Elf_Sym* symtab;
-    size_t num_syms;
+    ELF::Elf_Sym* symtab = nullptr;
+    size_t num_syms      = 0;
     for (uint32_t i = 0; i < header->e_shnum; i++) {
         if (mod->shdrs[i].sh_type == SHT_SYMTAB) {
             symtab   = reinterpret_cast<ELF::Elf_Sym*>(mod->sections[i]);
@@ -151,7 +151,7 @@ bool load_module(void* binary)
     }
 
     ELF::Elf_Sym* sym = symtab;
-    addr_t ctor_start, ctor_end;
+    addr_t ctor_start = 0, ctor_end = 0;
     for (size_t j = 1; j <= num_syms; j++, sym++) {
         // We only want to consider functions
         // if (ELF_ST_TYPE(sym->st_info) != STT_FUNC)

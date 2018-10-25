@@ -2,6 +2,18 @@
 #include <kernel.h>
 #include <lib/string.h>
 
+namespace
+{
+struct cpuid_regs {
+    cpuid_regs()
+        : eax(0)
+        , ebx(0)
+        , ecx(0)
+        , edx(0){};
+    uint32_t eax, ebx, ecx, edx;
+};
+} // namespace
+
 namespace CPU
 {
 namespace X86
@@ -17,9 +29,7 @@ static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
 void detect_intel(Core& cpu)
 {
     // Intel specific CPUID extensions
-    struct {
-        uint32_t eax, ebx, ecx, edx;
-    } regs;
+    struct cpuid_regs regs;
     regs.eax = 0x80000007;
     cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
     if (regs.edx & (1 << 8)) {
@@ -30,9 +40,7 @@ void detect_intel(Core& cpu)
 
 void detect(Core& cpu)
 {
-    struct {
-        uint32_t eax, ebx, ecx, edx;
-    } regs;
+    struct cpuid_regs regs;
 
     // CPU vendor
     regs.eax = 0x00000000;
@@ -45,10 +53,10 @@ void detect(Core& cpu)
 
     regs.eax = 0x00000001;
     cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    cpu.stepping = regs.eax & 0xF;
-    cpu.type = regs.eax & 0x3000;
-    cpu.family = (regs.eax & 0xF00) + (regs.eax & 0xFF00000);
-    cpu.model = ((regs.eax & 0xF0000) << 4) + (regs.eax & 0xF0);
+    cpu.stepping              = regs.eax & 0xF;
+    cpu.type                  = regs.eax & 0x3000;
+    cpu.family                = (regs.eax & 0xF00) + (regs.eax & 0xFF00000);
+    cpu.model                 = ((regs.eax & 0xF0000) << 4) + (regs.eax & 0xF0);
     cpu.features[cpuid_1_edx] = regs.edx;
     cpu.features[cpuid_1_ecx] = regs.ecx;
 
@@ -103,17 +111,17 @@ void detect(Core& cpu)
         } else {
             regs.eax = 0x80000002;
             cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-            *(uint32_t*)&cpu.name[0] = regs.eax;
-            *(uint32_t*)&cpu.name[4] = regs.ebx;
-            *(uint32_t*)&cpu.name[8] = regs.ecx;
+            *(uint32_t*)&cpu.name[0]  = regs.eax;
+            *(uint32_t*)&cpu.name[4]  = regs.ebx;
+            *(uint32_t*)&cpu.name[8]  = regs.ecx;
             *(uint32_t*)&cpu.name[12] = regs.edx;
-            regs.eax = 0x80000003;
+            regs.eax                  = 0x80000003;
             cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
             *(uint32_t*)&cpu.name[16] = regs.eax;
             *(uint32_t*)&cpu.name[20] = regs.ebx;
             *(uint32_t*)&cpu.name[24] = regs.ecx;
             *(uint32_t*)&cpu.name[28] = regs.edx;
-            regs.eax = 0x80000004;
+            regs.eax                  = 0x80000004;
             cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
             *(uint32_t*)&cpu.name[32] = regs.eax;
             *(uint32_t*)&cpu.name[36] = regs.ebx;
@@ -172,5 +180,5 @@ void print(Core& cpu)
     Log::printk(Log::LogLevel::INFO, "CPU Family: %X\n", cpu.family);
     Log::printk(Log::LogLevel::INFO, "CPU Model: %X\n", cpu.model);
 }
-}  // namespace X86
-}  // namespace CPU
+} // namespace X86
+} // namespace CPU

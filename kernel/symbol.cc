@@ -1,9 +1,9 @@
 #include <kernel.h>
 #include <kernel/symbol.h>
-#include <lib/unordered_map.h>
 #include <lib/list.h>
 #include <lib/murmur.h>
 #include <lib/string.h>
+#include <lib/unordered_map.h>
 
 namespace
 {
@@ -16,9 +16,11 @@ struct AddressHash {
     }
 };
 
-libcxx::unordered_map<libcxx::StringKey, addr_t, table_size, libcxx::StringHash<table_size>>
+libcxx::unordered_map<libcxx::StringKey, addr_t, table_size,
+                      libcxx::StringHash<table_size>>
     name_to_address_hash;
-libcxx::unordered_map<addr_t, const char*, table_size, AddressHash> address_to_name_hash;
+libcxx::unordered_map<addr_t, const char*, table_size, AddressHash>
+    address_to_name_hash;
 
 struct Symbol {
     addr_t address;
@@ -72,5 +74,12 @@ void load_symbol(libcxx::pair<const char*, addr_t> symbol)
     symbols.push_back(*s);
     address_to_name_hash.put(symbol.second, s->name);
     name_to_address_hash.put(s->name, symbol.second);
+}
+
+extern void arch_init();
+
+void init()
+{
+    arch_init();
 }
 } // namespace Symbols

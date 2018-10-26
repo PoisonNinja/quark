@@ -10,4 +10,6 @@ const char* resolve_addr(addr_t address);
 addr_t resolve_name(const char* name);
 
 void load_symbol(libcxx::pair<const char*, addr_t> symbol);
+
+void init();
 } // namespace Symbols

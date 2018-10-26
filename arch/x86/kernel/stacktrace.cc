@@ -23,7 +23,7 @@ void arch_do_stack_trace()
         if (!name) {
             break;
         }
-        Log::printk(Log::LogLevel::ERROR, "Frame #%d: %s+%llX\n", frame++,
-                    name, offset);
+        Log::printk(Log::LogLevel::ERROR, "Frame #%d: %s+%zX\n", frame++, name,
+                    offset);
     }
 }

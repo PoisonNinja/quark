@@ -11,4 +11,6 @@ std::string resolve_addr(addr_t address);
 addr_t resolve_name(const char* name);
 
 void load_symbol(Pair<const char*, addr_t> symbol);
+
+void init();
 } // namespace Symbols

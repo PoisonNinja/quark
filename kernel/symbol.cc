@@ -41,4 +41,11 @@ void load_symbol(Pair<const char*, addr_t> symbol)
 {
     name_to_address_hash[symbol.first] = symbol.second;
 }
+
+extern void arch_init();
+
+void init()
+{
+    arch_init();
+}
 } // namespace Symbols

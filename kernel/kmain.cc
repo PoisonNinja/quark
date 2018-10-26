@@ -7,6 +7,7 @@
 #include <fs/stat.h>
 #include <kernel.h>
 #include <kernel/init.h>
+#include <kernel/symbol.h>
 #include <kernel/time/time.h>
 #include <kernel/version.h>
 #include <lib/string.h>
@@ -75,6 +76,7 @@ void kmain(struct Boot::info& info)
     Memory::init(info);
     Interrupt::init();
     Interrupt::enable();
+    Symbols::init();
     Time::init();
     Scheduler::init();
     Signal::init();

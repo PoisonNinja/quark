@@ -277,7 +277,8 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     stack[-2]       = reinterpret_cast<uint32_t>(target_argv);
     stack[-3]       = argc;
     ctx.esp -= 16;
-    ctx.eflags              = 0x200;
+    ctx.eflags = 0x200;
+    ctx.eflags |= 0x3000;
 #endif
     ctx.kernel_stack = CPU::X86::TSS::get_stack();
     return true;

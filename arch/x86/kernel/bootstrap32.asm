@@ -95,23 +95,28 @@ pml1:
 
 align 4096
 page_directory:
-    dd (page_table + 0x7)              ; Identity map
-    times 767 dd 0
-    dd (page_table + 0x7)              ; Higher half mapping
-    times 254 dd 0
-    dd (page_directory + 0x7)          ; Fractal
+    dd (page_table_lower_4mib + 0x7)              ; Identity map
+    dd (page_table_higher_4mib + 0x7)             ; Identity map
+    times 766 dd 0
+    dd (page_table_lower_4mib + 0x7)              ; Higher half mapping
+    dd (page_table_higher_4mib + 0x7)
+    times 253 dd 0
+    dd (page_directory + 0x7)                     ; Fractal
 
 align 4096
-page_table:
+page_table_lower_4mib:
     %assign i 0
-    %rep 512*25
+    %rep 1024
     dd (i << 12) | 0x083
     %assign i i+1
     %endrep
 
-page_table_phys:
-    dd (page_phys + 0x083)
-    times 1023 dd 0
+page_table_higher_4mib:
+    %assign i 1024
+    %rep 1024
+    dd (i << 12) | 0x083
+    %assign i i+1
+    %endrep
 
 page_phys:
     times 1024 dd 0

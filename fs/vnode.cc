@@ -62,7 +62,7 @@ libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
     if (!retvnode) {
         struct KDevice* kdev = get_kdevice(retinode->mode, retinode->rdev);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
-            Log::printk(Log::LogLevel::INFO,
+            Log::printk(Log::LogLevel::DEBUG,
                         "kdev: Looking for mode %X and dev %p\n",
                         retinode->mode, retinode->rdev);
             if (!kdev) {
@@ -70,8 +70,7 @@ libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
                 return libcxx::intrusive_ptr<Vnode>(nullptr);
             }
         }
-        Log::printk(Log::LogLevel::WARNING, "Failed to find %s in cache\n",
-                    name);
+        Log::printk(Log::LogLevel::DEBUG, "Failed to find %s in cache\n", name);
         retvnode =
             libcxx::intrusive_ptr<Vnode>(new Vnode(this->sb, retinode, 0));
         VCache::add(retinode->ino, this->sb->rdev, retvnode);
@@ -83,7 +82,7 @@ libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
         // if the vnode was just created
         if (!retvnode->mounts.empty()) {
             Superblock* newsb = retvnode->mounts.front().sb;
-            Log::printk(Log::LogLevel::INFO,
+            Log::printk(Log::LogLevel::DEBUG,
                         "Transitioning mountpoints, superblock at %p\n", newsb);
             return libcxx::intrusive_ptr<Vnode>(
                 new Vnode(newsb, newsb->root, 0));

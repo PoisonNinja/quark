@@ -22,7 +22,6 @@ PTMX::~PTMX()
 
 Pair<int, void*> PTMX::open(const char* name)
 {
-    Log::printk(Log::LogLevel::INFO, "ptmx: Opening!\n");
     // TODO: Perhaps have PTSFS generate this?
     PTY* pty = new PTY(next_pty_number++);
     static_cast<PTSFS*>(FTable::get("ptsfs"))->register_pty(pty);

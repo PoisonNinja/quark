@@ -61,7 +61,7 @@ std::shared_ptr<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
     if (!retvnode) {
         struct KDevice* kdev = get_kdevice(retinode->mode, retinode->rdev);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
-            Log::printk(Log::LogLevel::INFO,
+            Log::printk(Log::LogLevel::DEBUG,
                         "kdev: Looking for mode %X and dev %p\n",
                         retinode->mode, retinode->rdev);
             if (!kdev) {
@@ -69,8 +69,7 @@ std::shared_ptr<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
                 return std::shared_ptr<Vnode>(nullptr);
             }
         }
-        Log::printk(Log::LogLevel::WARNING, "Failed to find %s in cache\n",
-                    name);
+        Log::printk(Log::LogLevel::DEBUG, "Failed to find %s in cache\n", name);
         retvnode = std::shared_ptr<Vnode>(new Vnode(this->sb, retinode, 0));
         VCache::add(retinode->ino, this->sb->rdev, retvnode);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
@@ -81,7 +80,7 @@ std::shared_ptr<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
         // if the vnode was just created
         if (!retvnode->mounts.empty()) {
             Superblock* newsb = retvnode->mounts.front().sb;
-            Log::printk(Log::LogLevel::INFO,
+            Log::printk(Log::LogLevel::DEBUG,
                         "Transitioning mountpoints, superblock at %p\n", newsb);
             return std::shared_ptr<Vnode>(new Vnode(newsb, newsb->root, 0));
         }

@@ -32,10 +32,22 @@ bool parse(addr_t initrd)
     std::shared_ptr<Descriptor> root =
         Scheduler::get_current_process()->get_root();
     std::shared_ptr<Descriptor> file;
+    struct Filesystem::Initrd::Tar::Header term;
+    String::memset(&term, 0, sizeof(term));
+    int terminator = 0;
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =
             reinterpret_cast<Filesystem::Initrd::Tar::Header*>(current);
         if (String::memcmp(header->magic, tar_magic, 6)) {
+            if (!String::memcmp(header, &term, sizeof(*header))) {
+                if (++terminator == 2) {
+                    Log::printk(Log::LogLevel::INFO,
+                                "initrd: Found second terminator, done!\n");
+                    return true;
+                }
+                current += sizeof(*header);
+                continue;
+            }
             Log::printk(Log::LogLevel::ERROR, "initrd: Bad tar magic\n");
             return false;
         }

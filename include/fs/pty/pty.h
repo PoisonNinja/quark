@@ -8,6 +8,8 @@ namespace Filesystem
 {
 namespace TTY
 {
+constexpr size_t pty_size = 4096;
+
 class PTY
 {
 public:
@@ -24,11 +26,11 @@ public:
     Node<PTY> node;
 
 private:
-    char mbuf[1024];
+    char mbuf[pty_size];
     size_t mhead, mtail;
     Scheduler::WaitQueue mqueue;
 
-    char sbuf[1024];
+    char sbuf[pty_size];
     size_t shead, stail;
     Scheduler::WaitQueue squeue;
 

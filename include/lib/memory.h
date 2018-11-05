@@ -88,7 +88,23 @@ public:
             this->ref->intrusive_ptr_release();
         }
     }
-    intrusive_ptr<T>& operator=(const intrusive_ptr<T>& r)
+    intrusive_ptr& operator=(const intrusive_ptr<T>& r)
+    {
+        if (this->ref) {
+            if (this->ref == r.get()) {
+                return *this;
+            } else {
+                this->ref->intrusive_ptr_release();
+            }
+        }
+        this->ref = r.get();
+        if (this->ref) {
+            this->ref->intrusive_ptr_add_ref();
+        }
+        return *this;
+    }
+    template <class U>
+    intrusive_ptr& operator=(const intrusive_ptr<U>& r)
     {
         if (this->ref) {
             if (this->ref == r.get()) {
@@ -149,6 +165,25 @@ public:
     operator bool() const
     {
         return ref != nullptr;
+    }
+
+    bool operator==(const intrusive_ptr<T>& rhs)
+    {
+        return this->get() == rhs.get();
+    }
+    template <class U>
+    bool operator==(const intrusive_ptr<U>& rhs)
+    {
+        return this->get() == rhs.get();
+    }
+    bool operator!=(const intrusive_ptr<T>& rhs)
+    {
+        return !(*this == rhs);
+    }
+    template <class U>
+    bool operator!=(const intrusive_ptr<U>& rhs)
+    {
+        return !(*this == rhs);
     }
 
 private:

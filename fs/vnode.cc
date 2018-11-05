@@ -28,7 +28,7 @@ int Vnode::ioctl(unsigned long request, char* argp, void* cookie)
     return this->inode->ioctl(request, argp, cookie);
 }
 
-int Vnode::link(const char* name, Ref<Vnode> node)
+int Vnode::link(const char* name, libcxx::intrusive_ptr<Vnode> node)
 {
     return inode->link(name, node->inode);
 }
@@ -50,13 +50,15 @@ int Vnode::mount(Mount* mt)
     return 0;
 }
 
-Ref<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
+libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
+                                           mode_t mode)
 {
     libcxx::intrusive_ptr<Inode> retinode = inode->lookup(name, flags, mode);
     if (!retinode) {
-        return Ref<Vnode>(nullptr);
+        return libcxx::intrusive_ptr<Vnode>(nullptr);
     }
-    Ref<Vnode> retvnode = VCache::get(retinode->ino, this->sb->rdev);
+    libcxx::intrusive_ptr<Vnode> retvnode =
+        VCache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
         struct KDevice* kdev = get_kdevice(retinode->mode, retinode->rdev);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
@@ -65,12 +67,13 @@ Ref<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
                         retinode->mode, retinode->rdev);
             if (!kdev) {
                 // TODO: Return -ENXIO
-                return Ref<Vnode>(nullptr);
+                return libcxx::intrusive_ptr<Vnode>(nullptr);
             }
         }
         Log::printk(Log::LogLevel::WARNING, "Failed to find %s in cache\n",
                     name);
-        retvnode = Ref<Vnode>(new Vnode(this->sb, retinode, 0));
+        retvnode =
+            libcxx::intrusive_ptr<Vnode>(new Vnode(this->sb, retinode, 0));
         VCache::add(retinode->ino, this->sb->rdev, retvnode);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
             retvnode->kdev = kdev;
@@ -82,7 +85,8 @@ Ref<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
             Superblock* newsb = retvnode->mounts.front().sb;
             Log::printk(Log::LogLevel::INFO,
                         "Transitioning mountpoints, superblock at %p\n", newsb);
-            return Ref<Vnode>(new Vnode(newsb, newsb->root, 0));
+            return libcxx::intrusive_ptr<Vnode>(
+                new Vnode(newsb, newsb->root, 0));
         }
     }
     return retvnode;

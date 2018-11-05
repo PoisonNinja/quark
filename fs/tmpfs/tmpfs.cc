@@ -116,6 +116,8 @@ libcxx::intrusive_ptr<Inode> Directory::lookup(const char* name, int flags,
                                                mode_t mode)
 {
     libcxx::intrusive_ptr<Inode> ret = find_child(name);
+    if (ret == nullptr) {
+    }
     if (ret) {
         return ret;
     } else if (!ret && !(flags & O_CREAT)) {

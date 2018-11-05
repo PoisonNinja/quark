@@ -16,13 +16,13 @@ public:
     void add_thread(Thread* thread);
     void remove_thread(Thread* thread);
 
-    void set_cwd(Ref<Filesystem::Descriptor> desc);
-    void set_root(Ref<Filesystem::Descriptor> desc);
-    void set_dtable(Ref<Filesystem::DTable> table);
+    void set_cwd(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
+    void set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
+    void set_dtable(libcxx::intrusive_ptr<Filesystem::DTable> table);
 
-    Ref<Filesystem::Descriptor> get_cwd();
-    Ref<Filesystem::Descriptor> get_root();
-    Ref<Filesystem::DTable> get_dtable();
+    libcxx::intrusive_ptr<Filesystem::Descriptor> get_cwd();
+    libcxx::intrusive_ptr<Filesystem::Descriptor> get_root();
+    libcxx::intrusive_ptr<Filesystem::DTable> get_dtable();
 
     // TLS stuff
     addr_t tls_base;
@@ -44,9 +44,9 @@ public:
     addr_t sigreturn;
 
 private:
-    Ref<Filesystem::Descriptor> cwd;
-    Ref<Filesystem::Descriptor> root;
-    Ref<Filesystem::DTable> fds;
+    libcxx::intrusive_ptr<Filesystem::Descriptor> cwd;
+    libcxx::intrusive_ptr<Filesystem::Descriptor> root;
+    libcxx::intrusive_ptr<Filesystem::DTable> fds;
 
     Process* parent;
     List<Process, &Process::child_node> children;

@@ -7,12 +7,12 @@
 
 Process::Process(Process* parent)
 {
-    this->parent = parent;
-    this->pid = Scheduler::get_free_pid();
+    this->parent   = parent;
+    this->pid      = Scheduler::get_free_pid();
     this->sections = new Memory::SectionManager(USER_START, USER_END);
     for (int i = 1; i < NSIGS; i++) {
         this->signal_actions[i].sa_handler = SIG_DFL;
-        this->signal_actions[i].sa_flags = 0;
+        this->signal_actions[i].sa_flags   = 0;
     }
 }
 
@@ -20,32 +20,32 @@ Process::~Process()
 {
 }
 
-void Process::set_cwd(Ref<Filesystem::Descriptor> desc)
+void Process::set_cwd(libcxx::intrusive_ptr<Filesystem::Descriptor> desc)
 {
     cwd = desc;
 }
 
-void Process::set_root(Ref<Filesystem::Descriptor> desc)
+void Process::set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc)
 {
     root = desc;
 }
 
-void Process::set_dtable(Ref<Filesystem::DTable> table)
+void Process::set_dtable(libcxx::intrusive_ptr<Filesystem::DTable> table)
 {
     fds = table;
 }
 
-Ref<Filesystem::Descriptor> Process::get_cwd()
+libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_cwd()
 {
     return cwd;
 }
 
-Ref<Filesystem::Descriptor> Process::get_root()
+libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_root()
 {
     return root;
 }
 
-Ref<Filesystem::DTable> Process::get_dtable()
+libcxx::intrusive_ptr<Filesystem::DTable> Process::get_dtable()
 {
     return fds;
 }
@@ -72,8 +72,8 @@ void Process::remove_thread(Thread* thread)
         }
     }
     if (threads.empty()) {
-        Log::printk(Log::LogLevel::DEBUG, "Last thread exiting, process %d terminating\n",
-                    this->pid);
+        Log::printk(Log::LogLevel::DEBUG,
+                    "Last thread exiting, process %d terminating\n", this->pid);
         this->exit();
     }
 }
@@ -84,11 +84,11 @@ Process* Process::fork()
     Scheduler::add_process(child);
     this->children.push_back(*child);
     addr_t cloned = Memory::Virtual::fork();
-    child->set_dtable(
-        Ref<Filesystem::DTable>(new Filesystem::DTable(*this->fds)));
+    child->set_dtable(libcxx::intrusive_ptr<Filesystem::DTable>(
+        new Filesystem::DTable(*this->fds)));
     child->set_root(this->get_root());
     child->set_cwd(this->get_cwd());
-    child->sections = new Memory::SectionManager(*this->sections);
+    child->sections      = new Memory::SectionManager(*this->sections);
     child->address_space = cloned;
     return child;
 }

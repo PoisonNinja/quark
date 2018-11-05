@@ -66,7 +66,7 @@ char* basename(const char* path)
     }
 }
 
-Descriptor::Descriptor(Ref<Vnode> vnode, int flags)
+Descriptor::Descriptor(libcxx::intrusive_ptr<Vnode> vnode, int flags)
 {
     this->vnode          = vnode;
     this->cookie         = nullptr;
@@ -79,11 +79,11 @@ int Descriptor::ioctl(unsigned long request, char* argp)
     return this->vnode->ioctl(request, argp, this->cookie);
 }
 
-int Descriptor::link(const char* name, Ref<Descriptor> node)
+int Descriptor::link(const char* name, libcxx::intrusive_ptr<Descriptor> node)
 {
-    const char* dir           = dirname(name);
-    const char* file          = basename(name);
-    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+    const char* dir                             = dirname(name);
+    const char* file                            = basename(name);
+    libcxx::intrusive_ptr<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
         delete[] file;
@@ -120,7 +120,7 @@ int Descriptor::mkdir(const char* name, mode_t mode)
     const char* file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
                 dir, file);
-    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+    libcxx::intrusive_ptr<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
         delete[] file;
@@ -138,7 +138,7 @@ int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
     const char* file = basename(name);
     Log::printk(Log::LogLevel::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
                 dir, file);
-    Ref<Descriptor> directory = this->open(dir, O_RDONLY, 0);
+    libcxx::intrusive_ptr<Descriptor> directory = this->open(dir, O_RDONLY, 0);
     if (!directory) {
         delete[] dir;
         delete[] file;
@@ -163,11 +163,13 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
                     type);
         return -EINVAL;
     }
-    Ref<Descriptor> target_desc = this->open(target, O_RDONLY, 0);
+    libcxx::intrusive_ptr<Descriptor> target_desc =
+        this->open(target, O_RDONLY, 0);
     if (!target_desc) {
         return -ENOENT;
     }
-    Ref<Descriptor> source_desc = this->open(source, O_RDONLY, 0);
+    libcxx::intrusive_ptr<Descriptor> source_desc =
+        this->open(source, O_RDONLY, 0);
     if (!source_desc && !(driver->flags() & driver_pseudo)) {
         return -ENOENT;
     }
@@ -182,13 +184,14 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
     return 0;
 }
 
-Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
+libcxx::intrusive_ptr<Descriptor> Descriptor::open(const char* name, int flags,
+                                                   mode_t mode)
 {
     char* path = String::strdup(name);
     char* current;
     char* filename = basename(name);
-    Ref<Descriptor> ret(nullptr);
-    Ref<Vnode> curr_vnode = this->vnode;
+    libcxx::intrusive_ptr<Descriptor> ret(nullptr);
+    libcxx::intrusive_ptr<Vnode> curr_vnode = this->vnode;
     while ((current = String::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags   = flags;
@@ -201,10 +204,10 @@ Ref<Descriptor> Descriptor::open(const char* name, int flags, mode_t mode)
         if (!curr_vnode) {
             Log::printk(Log::LogLevel::ERROR,
                         "[descriptor->open] Failed to open %s\n", current);
-            return Ref<Descriptor>(nullptr);
+            return libcxx::intrusive_ptr<Descriptor>(nullptr);
         }
     }
-    ret = Ref<Descriptor>(
+    ret = libcxx::intrusive_ptr<Descriptor>(
         new Descriptor(curr_vnode, oflags_to_descriptor(flags)));
     auto [status, _cookie] = curr_vnode->open(name);
     if (!status) {

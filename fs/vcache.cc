@@ -36,14 +36,14 @@ struct Hash {
     }
 };
 
-Hashmap<Key, Ref<Vnode>, vcache_size, Hash> vcache_hash;
+Hashmap<Key, libcxx::intrusive_ptr<Vnode>, vcache_size, Hash> vcache_hash;
 } // namespace
 
 namespace VCache
 {
-bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
+bool add(ino_t ino, dev_t dev, libcxx::intrusive_ptr<Vnode> vnode)
 {
-    Ref<Vnode> dummy(nullptr);
+    libcxx::intrusive_ptr<Vnode> dummy(nullptr);
     Key key(ino, dev);
     if (vcache_hash.get(key, dummy)) {
         Log::printk(Log::LogLevel::WARNING,
@@ -54,12 +54,12 @@ bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
     return true;
 }
 
-Ref<Vnode> get(ino_t ino, dev_t dev)
+libcxx::intrusive_ptr<Vnode> get(ino_t ino, dev_t dev)
 {
-    Ref<Vnode> dummy = Ref<Vnode>(nullptr);
+    libcxx::intrusive_ptr<Vnode> dummy = libcxx::intrusive_ptr<Vnode>(nullptr);
     Key key(ino, dev);
     if (!vcache_hash.get(key, dummy)) {
-        return Ref<Vnode>(nullptr);
+        return libcxx::intrusive_ptr<Vnode>(nullptr);
     }
     return dummy;
 }

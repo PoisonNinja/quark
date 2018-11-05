@@ -32,8 +32,9 @@ void init()
     Superblock* rootsb = new Superblock();
     FTable::get("tmpfs")->mount(rootsb);
 
-    Ref<Vnode> vroot(new Vnode(rootsb, rootsb->root));
-    Ref<Descriptor> droot(new Descriptor(vroot, F_READ | F_WRITE));
+    libcxx::intrusive_ptr<Vnode> vroot(new Vnode(rootsb, rootsb->root));
+    libcxx::intrusive_ptr<Descriptor> droot(
+        new Descriptor(vroot, F_READ | F_WRITE));
     vroot->link(".", vroot);
     vroot->link("..", vroot);
 

@@ -12,9 +12,9 @@ void* syscall_table[256];
 
 namespace
 {
-Ref<Filesystem::Descriptor> get_start(const char* path)
+libcxx::intrusive_ptr<Filesystem::Descriptor> get_start(const char* path)
 {
-    Ref<Filesystem::Descriptor> start(nullptr);
+    libcxx::intrusive_ptr<Filesystem::Descriptor> start(nullptr);
     if (*path == '/') {
         start = Scheduler::get_current_process()->get_root();
     } else {
@@ -52,7 +52,8 @@ static long sys_open(const char* path, int flags, mode_t mode)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
-    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, flags, mode);
+    libcxx::intrusive_ptr<Filesystem::Descriptor> file =
+        get_start(path)->open(path, flags, mode);
     if (!file) {
         return -ENOENT;
     }
@@ -78,7 +79,8 @@ static long sys_close(int fd)
 static long sys_stat(const char* path, struct Filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %s, %p\n", path, st);
-    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
+    libcxx::intrusive_ptr<Filesystem::Descriptor> file =
+        get_start(path)->open(path, 0, 0);
     return file->stat(st);
 }
 
@@ -283,7 +285,8 @@ static long sys_execve(const char* path, const char* old_argv[],
         envp[i] = new char[String::strlen(old_envp[i])];
         String::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
-    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
+    libcxx::intrusive_ptr<Filesystem::Descriptor> file =
+        get_start(path)->open(path, 0, 0);
     if (!file) {
         delete[] envp;
         delete[] argv;

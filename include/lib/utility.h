@@ -10,6 +10,23 @@ struct pair {
 
     M first;
     N second;
+
+    pair& operator=(const pair& other)
+    {
+        this->first  = other.first;
+        this->second = other.second;
+        return *this;
+    }
+
+    constexpr bool operator==(const pair<M, N>& rhs)
+    {
+        return ((this->first == rhs.first) && (this->second == rhs.second));
+    }
+
+    constexpr bool operator!=(const pair<M, N>& rhs)
+    {
+        return !(*this == rhs);
+    }
 };
 
 template <typename M, typename N>

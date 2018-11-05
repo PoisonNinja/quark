@@ -6,12 +6,12 @@
 
 namespace Filesystem
 {
-Vnode::Vnode(Superblock* sb, Ref<Inode> inode)
+Vnode::Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode)
     : Vnode(sb, inode, inode->rdev)
 {
 }
 
-Vnode::Vnode(Superblock* sb, Ref<Inode> inode, dev_t rdev)
+Vnode::Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode, dev_t rdev)
 {
     this->sb    = sb;
     this->inode = inode;
@@ -52,7 +52,7 @@ int Vnode::mount(Mount* mt)
 
 Ref<Vnode> Vnode::lookup(const char* name, int flags, mode_t mode)
 {
-    Ref<Inode> retinode = inode->lookup(name, flags, mode);
+    libcxx::intrusive_ptr<Inode> retinode = inode->lookup(name, flags, mode);
     if (!retinode) {
         return Ref<Vnode>(nullptr);
     }

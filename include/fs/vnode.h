@@ -15,8 +15,8 @@ public:
     dev_t rdev;  // Device # if special file, ignored otherwise
     mode_t mode; // Mode of the file
 
-    Vnode(Superblock* sb, Ref<Inode> inode);
-    Vnode(Superblock* sb, Ref<Inode> inode, dev_t rdev);
+    Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode);
+    Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode, dev_t rdev);
 
     // Standard file operations
     int ioctl(unsigned long request, char* argp, void* cookie);
@@ -38,6 +38,6 @@ private:
     List<Mount, &Mount::node> mounts;
     KDevice* kdev;
     Superblock* sb;
-    Ref<Inode> inode;
+    libcxx::intrusive_ptr<Inode> inode;
 };
 } // namespace Filesystem

@@ -5,7 +5,7 @@
 #include <fs/mount.h>
 #include <lib/list.h>
 #include <lib/memory.h>
-#include <lib/pair.h>
+#include <lib/utility.h>
 
 namespace Filesystem
 {
@@ -25,7 +25,7 @@ public:
                                         mode_t mode);
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
-    virtual Pair<int, void*> open(const char* name);
+    virtual libcxx::pair<int, void*> open(const char* name);
     ssize_t read(uint8_t* buffer, size_t count, off_t offset, void* cookie);
     ssize_t write(uint8_t* buffer, size_t count, off_t offset, void* cookie);
     int stat(struct stat* st);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boot/info.h>
-#include <lib/pair.h>
+#include <lib/utility.h>
 #include <types.h>
 
 namespace Memory
@@ -20,7 +20,7 @@ void free(addr_t address, size_t size);
  * Returns a pair, with first element the address and second element size of the
  * block
  */
-Pair<addr_t, size_t> try_allocate(size_t max_size);
+libcxx::pair<addr_t, size_t> try_allocate(size_t max_size);
 
 void init(Boot::info& info);
 void finalize();

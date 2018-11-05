@@ -130,9 +130,9 @@ KDevice* get_kdevice(mode_t mode, dev_t dev)
     }
 }
 
-Pair<int, void*> KDevice::open(const char*)
+libcxx::pair<int, void*> KDevice::open(const char*)
 {
-    return Pair<int, void*>(0, nullptr);
+    return libcxx::pair<int, void*>(0, nullptr);
 }
 
 int KDevice::ioctl(unsigned long, char*, void* cookie)

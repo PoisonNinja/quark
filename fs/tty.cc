@@ -21,9 +21,9 @@ TTY::~TTY()
 {
 }
 
-Pair<int, void*> TTY::open(const char* name)
+libcxx::pair<int, void*> TTY::open(const char* name)
 {
-    return Pair<int, void*>(0, nullptr);
+    return libcxx::pair<int, void*>(0, nullptr);
 }
 
 int TTY::ioctl(unsigned long request, char* argp, void* cookie)
@@ -48,7 +48,7 @@ public:
 
     int ioctl(unsigned long request, char* argp, void* cookie) override;
 
-    Pair<int, void*> open(const char* name) override;
+    libcxx::pair<int, void*> open(const char* name) override;
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                  void* cookie) override;
@@ -70,7 +70,7 @@ int TTYDevice::ioctl(unsigned long request, char* argp, void* cookie)
     return this->tty->ioctl(request, argp, cookie);
 }
 
-Pair<int, void*> TTYDevice::open(const char* name)
+libcxx::pair<int, void*> TTYDevice::open(const char* name)
 {
     return this->tty->open(name);
 }

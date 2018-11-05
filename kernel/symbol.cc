@@ -30,7 +30,7 @@ List<Symbol, &Symbol::node> symbols;
 
 namespace Symbols
 {
-Pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
+libcxx::pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
 {
     size_t best     = ~0;
     const char* ret = nullptr;
@@ -43,7 +43,7 @@ Pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
             }
         }
     }
-    return make_pair(ret, best);
+    return libcxx::make_pair(ret, best);
 }
 
 const char* resolve_addr(addr_t address)
@@ -63,7 +63,7 @@ addr_t resolve_name(const char* name)
     return address;
 }
 
-void load_symbol(Pair<const char*, addr_t> symbol)
+void load_symbol(libcxx::pair<const char*, addr_t> symbol)
 {
     Symbol* s  = new Symbol;
     s->address = symbol.second;

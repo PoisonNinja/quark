@@ -92,7 +92,7 @@ libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
     return retvnode;
 }
 
-Pair<int, void*> Vnode::open(const char* name)
+libcxx::pair<int, void*> Vnode::open(const char* name)
 {
     if (this->kdev) {
         return this->kdev->open(name);

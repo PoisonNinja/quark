@@ -9,14 +9,14 @@
 
 namespace ELF
 {
-Pair<bool, addr_t> load(addr_t binary)
+libcxx::pair<bool, addr_t> load(addr_t binary)
 {
     Process* process = Scheduler::get_current_process();
     Elf_Ehdr* header = reinterpret_cast<Elf_Ehdr*>(binary);
     if (String::memcmp(header->e_ident, ELFMAG, 4)) {
         Log::printk(Log::LogLevel::ERROR,
                     "Binary passed in is not an ELF file!\n");
-        return Pair<bool, addr_t>(false, 0);
+        return libcxx::pair<bool, addr_t>(false, 0);
     }
     Log::printk(Log::LogLevel::DEBUG, "Section header offset: %p\n",
                 header->e_shoff);
@@ -33,13 +33,13 @@ Pair<bool, addr_t> load(addr_t binary)
                                                      phdr->p_memsz)) {
                     Log::printk(Log::LogLevel::ERROR,
                                 "Failed to locate section\n");
-                    return Pair<bool, addr_t>(false, 0);
+                    return libcxx::pair<bool, addr_t>(false, 0);
                 }
                 Log::printk(Log::LogLevel::DEBUG, "TLS section will be at %p\n",
                             phdr->p_vaddr);
-                process->tls_base = phdr->p_vaddr;
-                process->tls_filesz = phdr->p_filesz;
-                process->tls_memsz = phdr->p_memsz;
+                process->tls_base      = phdr->p_vaddr;
+                process->tls_filesz    = phdr->p_filesz;
+                process->tls_memsz     = phdr->p_memsz;
                 process->tls_alignment = phdr->p_align;
             }
             Log::printk(Log::LogLevel::DEBUG, "Flags:            %X\n",
@@ -58,7 +58,7 @@ Pair<bool, addr_t> load(addr_t binary)
                         phdr->p_align);
             if (!process->sections->add_section(phdr->p_vaddr, phdr->p_memsz)) {
                 Log::printk(Log::LogLevel::ERROR, "Failed to add section\n");
-                return Pair<bool, addr_t>(false, 0);
+                return libcxx::pair<bool, addr_t>(false, 0);
             }
             int flags = PAGE_USER | PAGE_WRITABLE; /*
                                                     * Writable by default so
@@ -66,7 +66,7 @@ Pair<bool, addr_t> load(addr_t binary)
                                                     * update this later
                                                     */
             if (!(phdr->p_flags & PF_X)) {
-                flags |= PAGE_NX;  // Set NX bit if requested
+                flags |= PAGE_NX; // Set NX bit if requested
             }
             Memory::Virtual::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
 
@@ -96,6 +96,6 @@ Pair<bool, addr_t> load(addr_t binary)
     }
     Log::printk(Log::LogLevel::DEBUG, "Entry point: %p\n", header->e_entry);
     // TODO: More sanity checks
-    return make_pair(true, header->e_entry);
+    return libcxx::make_pair(true, header->e_entry);
 }
-}  // namespace ELF
+} // namespace ELF

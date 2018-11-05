@@ -1,9 +1,9 @@
 #pragma once
 
-#include <lib/pair.h>
+#include <climits>
+#include <lib/utility.h>
 #include <proc/thread.h>
 #include <types.h>
-#include <climits>
 
 namespace ELF
 {
@@ -175,8 +175,8 @@ typedef struct {
 #define R_X86_64_GLOB_DAT 6  /* Create GOT entry */
 #define R_X86_64_JUMP_SLOT 7 /* Create PLT entry */
 #define R_X86_64_RELATIVE 8  /* Adjust by program base */
-#define R_X86_64_GOTPCREL                                 \
-    9                        /* 32 bit signed PC relative \
+#define R_X86_64_GOTPCREL                                                      \
+    9                        /* 32 bit signed PC relative                      \
                     offset to GOT */
 #define R_X86_64_32 10       /* Direct 32 bit zero extended */
 #define R_X86_64_32S 11      /* Direct 32 bit sign extended */
@@ -187,36 +187,36 @@ typedef struct {
 #define R_X86_64_DTPMOD64 16 /* ID of module containing symbol */
 #define R_X86_64_DTPOFF64 17 /* Offset in module's TLS block */
 #define R_X86_64_TPOFF64 18  /* Offset in initial TLS block */
-#define R_X86_64_TLSGD                     \
-    19 /* 32 bit signed PC relative offset \
+#define R_X86_64_TLSGD                                                         \
+    19 /* 32 bit signed PC relative offset                                     \
 to two GOT entries for GD symbol */
-#define R_X86_64_TLSLD                                           \
-    20                       /* 32 bit signed PC relative offset \
+#define R_X86_64_TLSLD                                                         \
+    20                       /* 32 bit signed PC relative offset               \
                     to two GOT entries for LD symbol */
 #define R_X86_64_DTPOFF32 21 /* Offset in TLS block */
-#define R_X86_64_GOTTPOFF                                        \
-    22                       /* 32 bit signed PC relative offset \
+#define R_X86_64_GOTTPOFF                                                      \
+    22                       /* 32 bit signed PC relative offset               \
                     to GOT entry for IE symbol */
 #define R_X86_64_TPOFF32 23  /* Offset in initial TLS block */
 #define R_X86_64_PC64 24     /* PC relative 64 bit */
 #define R_X86_64_GOTOFF64 25 /* 64 bit offset to GOT */
-#define R_X86_64_GOTPC32                               \
-    26                    /* 32 bit signed pc relative \
+#define R_X86_64_GOTPC32                                                       \
+    26                    /* 32 bit signed pc relative                         \
                  offset to GOT */
 #define R_X86_64_GOT64 27 /* 64-bit GOT entry offset */
-#define R_X86_64_GOTPCREL64                               \
-    28                       /* 64-bit PC relative offset \
+#define R_X86_64_GOTPCREL64                                                    \
+    28                       /* 64-bit PC relative offset                      \
                     to GOT entry */
 #define R_X86_64_GOTPC64 29  /* 64-bit PC relative offset to GOT */
 #define R_X86_64_GOTPLT64 30 /* like GOT64, says PLT entry needed */
-#define R_X86_64_PLTOFF64                                         \
-    31                              /* 64-bit GOT relative offset \
+#define R_X86_64_PLTOFF64                                                      \
+    31                              /* 64-bit GOT relative offset              \
                            to PLT entry */
 #define R_X86_64_SIZE32 32          /* Size of symbol plus 32-bit addend */
 #define R_X86_64_SIZE64 33          /* Size of symbol plus 64-bit addend */
 #define R_X86_64_GOTPC32_TLSDESC 34 /* GOT offset for TLS descriptor.  */
-#define R_X86_64_TLSDESC_CALL                                \
-    35                        /* Marker for call through TLS \
+#define R_X86_64_TLSDESC_CALL                                                  \
+    35                        /* Marker for call through TLS                   \
                  descriptor.  */
 #define R_X86_64_TLSDESC 36   /* TLS descriptor.  */
 #define R_X86_64_IRELATIVE 37 /* Adjust indirectly by program base */
@@ -457,8 +457,8 @@ typedef struct elf64_shdr {
 #define NT_PPC_TM_SPR 0x10c    /* TM Special Purpose Registers */
 #define NT_PPC_TM_CTAR 0x10d   /* TM checkpointed Target Address Register */
 #define NT_PPC_TM_CPPR 0x10e   /* TM checkpointed Program Priority Register */
-#define NT_PPC_TM_CDSCR                                                     \
-    0x10f                   /* TM checkpointed Data Stream Control Register \
+#define NT_PPC_TM_CDSCR                                                        \
+    0x10f                   /* TM checkpointed Data Stream Control Register    \
                              */
 #define NT_386_TLS 0x200    /* i386 TLS slots (struct user_desc) */
 #define NT_386_IOPERM 0x201 /* x86 io permission bitmap (1=deny) */
@@ -500,7 +500,7 @@ typedef struct elf64_note {
     Elf64_Word n_type;   /* Content type */
 } Elf64_Nhdr;
 
-Pair<bool, addr_t> load(addr_t binary);
+libcxx::pair<bool, addr_t> load(addr_t binary);
 
 #if BITS == 64
 typedef Elf64_Sym Elf_Sym;
@@ -523,4 +523,4 @@ typedef Elf32_Addr Elf_Addr;
 #else
 #error "Unsupported processor word size. Add support for it here"
 #endif
-}  // namespace ELF
+} // namespace ELF

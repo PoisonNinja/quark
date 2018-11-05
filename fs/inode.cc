@@ -35,10 +35,10 @@ int BaseInode::mknod(const char*, mode_t, dev_t)
     return -EBADF;
 }
 
-Pair<int, void*> BaseInode::open(const char*)
+libcxx::pair<int, void*> BaseInode::open(const char*)
 {
     // Can't use make_pair here
-    return Pair<int, void*>(0, nullptr);
+    return libcxx::pair<int, void*>(0, nullptr);
 }
 
 libcxx::intrusive_ptr<Inode> BaseInode::lookup(const char*, int, mode_t)

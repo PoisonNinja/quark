@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <lib/utility.h>
 #include <types.h>
 
 namespace libcxx

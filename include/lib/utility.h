@@ -2,6 +2,33 @@
 
 namespace libcxx
 {
+template <class T>
+struct remove_reference {
+    typedef T type;
+};
+template <class T>
+struct remove_reference<T&> {
+    typedef T type;
+};
+template <class T>
+struct remove_reference<T&&> {
+    typedef T type;
+};
+
+template <class T>
+constexpr typename libcxx::remove_reference<T>::type&& move(T&& t)
+{
+    return static_cast<typename libcxx::remove_reference<T>::type&&>(t);
+}
+
+template <class T>
+constexpr void swap(T& a, T& b)
+{
+    T t = libcxx::move(a);
+    a   = libcxx::move(b);
+    b   = libcxx::move(t);
+}
+
 template <typename M, typename N>
 struct pair {
     pair(M m, N n)
@@ -33,24 +60,5 @@ template <typename M, typename N>
 libcxx::pair<M, N> make_pair(M m, N n)
 {
     return libcxx::pair<M, N>(m, n);
-}
-
-template <class T>
-struct remove_reference {
-    typedef T type;
-};
-template <class T>
-struct remove_reference<T&> {
-    typedef T type;
-};
-template <class T>
-struct remove_reference<T&&> {
-    typedef T type;
-};
-
-template <class T>
-constexpr typename libcxx::remove_reference<T>::type&& move(T&& t)
-{
-    return static_cast<typename libcxx::remove_reference<T>::type&&>(t);
 }
 } // namespace libcxx

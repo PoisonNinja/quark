@@ -45,6 +45,13 @@ struct pair {
         return *this;
     }
 
+    pair& operator=(const pair&& other)
+    {
+        libcxx::swap(this->first, other.first);
+        libcxx::swap(this->second, other.second);
+        return *this;
+    }
+
     constexpr bool operator==(const pair<M, N>& rhs)
     {
         return ((this->first == rhs.first) && (this->second == rhs.second));

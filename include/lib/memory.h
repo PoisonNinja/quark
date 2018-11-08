@@ -1,9 +1,10 @@
 /*
- * Homemade implementations of shared_ptr and unique_ptr
+ * Homemade implementations of intrusive_ptr and unique_ptr
  */
 
 #pragma once
 
+#include <lib/utility.h>
 #include <types.h>
 
 namespace libcxx
@@ -138,9 +139,7 @@ public:
     void swap(intrusive_ptr<T>& r)
     {
         // TODO: Replace with std::swap?
-        auto tmp  = r.ref;
-        r.ref     = this->ref;
-        this->ref = tmp;
+        std::swap(this->ref, r.ref);
     }
     T* get() const
     {

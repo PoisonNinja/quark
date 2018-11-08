@@ -34,4 +34,23 @@ libcxx::pair<M, N> make_pair(M m, N n)
 {
     return libcxx::pair<M, N>(m, n);
 }
+
+template <class T>
+struct remove_reference {
+    typedef T type;
+};
+template <class T>
+struct remove_reference<T&> {
+    typedef T type;
+};
+template <class T>
+struct remove_reference<T&&> {
+    typedef T type;
+};
+
+template <class T>
+constexpr typename libcxx::remove_reference<T>::type&& move(T&& t)
+{
+    return static_cast<typename libcxx::remove_reference<T>::type&&>(t);
+}
 } // namespace libcxx

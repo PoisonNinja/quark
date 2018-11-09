@@ -22,6 +22,8 @@
 #include <lib/string.h>
 #include <types.h>
 
+namespace libcxx {
+
 template <typename K, size_t tableSize>
 struct KeyHash {
     unsigned long operator()(const K &key) const
@@ -103,16 +105,16 @@ private:
 // Hash map class template
 template <typename K, typename V, size_t tableSize,
           typename F = KeyHash<K, tableSize>>
-class Hashmap
+class unordered_map
 {
 public:
-    Hashmap()
+    unordered_map()
         : table()
         , hash()
     {
     }
 
-    ~Hashmap()
+    ~unordered_map()
     {
         // destroy all buckets one by one
         for (size_t i = 0; i < tableSize; ++i) {
@@ -202,9 +204,10 @@ public:
     }
 
 private:
-    Hashmap(const Hashmap &other);
-    const Hashmap &operator=(const Hashmap &other);
+    unordered_map(const unordered_map &other);
+    const unordered_map &operator=(const unordered_map &other);
     // hash table
     HashNode<K, V> *table[tableSize];
     F hash;
 };
+}

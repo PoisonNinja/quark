@@ -36,7 +36,7 @@ struct Hash {
     }
 };
 
-Hashmap<Key, libcxx::intrusive_ptr<Vnode>, vcache_size, Hash> vcache_hash;
+libcxx::unordered_map<Key, libcxx::intrusive_ptr<Vnode>, vcache_size, Hash> vcache_hash;
 } // namespace
 
 namespace VCache

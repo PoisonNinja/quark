@@ -7,7 +7,7 @@ namespace
 {
 constexpr size_t ftable_size = 1024;
 
-Hashmap<StringKey, Filesystem::Driver*, ftable_size, StringHash<ftable_size>>
+libcxx::unordered_map<libcxx::StringKey, Filesystem::Driver*, ftable_size, libcxx::StringHash<ftable_size>>
     ftable_hash;
 } // namespace
 

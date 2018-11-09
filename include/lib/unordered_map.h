@@ -18,20 +18,13 @@
 
 #pragma once
 
+#include <lib/functional.h>
 #include <lib/murmur.h>
 #include <lib/string.h>
 #include <types.h>
 
-namespace libcxx {
-
-template <typename K, size_t tableSize>
-struct KeyHash {
-    unsigned long operator()(const K &key) const
-    {
-        return reinterpret_cast<unsigned long>(key) % tableSize;
-    }
-};
-
+namespace libcxx
+{
 struct StringKey {
     StringKey(const char *s)
         : value(s){};
@@ -103,8 +96,7 @@ private:
 };
 
 // Hash map class template
-template <typename K, typename V, size_t tableSize,
-          typename F = KeyHash<K, tableSize>>
+template <class Key, class T, size_t tableSize, class Hash = libcxx::hash<Key>>
 class unordered_map
 {
 public:
@@ -118,11 +110,11 @@ public:
     {
         // destroy all buckets one by one
         for (size_t i = 0; i < tableSize; ++i) {
-            HashNode<K, V> *entry = table[i];
+            HashNode<Key, T> *entry = table[i];
 
             while (entry != nullptr) {
-                HashNode<K, V> *prev = entry;
-                entry                = entry->next();
+                HashNode<Key, T> *prev = entry;
+                entry                  = entry->next();
                 delete prev;
             }
 
@@ -130,10 +122,10 @@ public:
         }
     }
 
-    bool get(const K &key, V &value)
+    bool get(const Key &key, T &value)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *entry   = table[hashValue];
+        HashNode<Key, T> *entry = table[hashValue];
 
         while (entry != nullptr) {
             if (entry->key() == key) {
@@ -147,11 +139,11 @@ public:
         return false;
     }
 
-    void put(const K &key, const V &value)
+    void put(const Key &key, const T &value)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev    = nullptr;
-        HashNode<K, V> *entry   = table[hashValue];
+        HashNode<Key, T> *prev  = nullptr;
+        HashNode<Key, T> *entry = table[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -159,7 +151,7 @@ public:
         }
 
         if (entry == nullptr) {
-            entry = new HashNode<K, V>(key, value);
+            entry = new HashNode<Key, T>(key, value);
 
             if (prev == nullptr) {
                 // insert as first bucket
@@ -175,11 +167,11 @@ public:
         }
     }
 
-    void remove(const K &key)
+    void remove(const Key &key)
     {
         unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev    = nullptr;
-        HashNode<K, V> *entry   = table[hashValue];
+        HashNode<Key, T> *prev  = nullptr;
+        HashNode<Key, T> *entry = table[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -207,7 +199,7 @@ private:
     unordered_map(const unordered_map &other);
     const unordered_map &operator=(const unordered_map &other);
     // hash table
-    HashNode<K, V> *table[tableSize];
-    F hash;
+    HashNode<Key, T> *table[tableSize];
+    Hash hash;
 };
-}
+} // namespace libcxx

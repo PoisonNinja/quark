@@ -116,11 +116,11 @@ public:
     {
         // destroy all buckets one by one
         for (size_t i = 0; i < tableSize; ++i) {
-            HashNode<K, V> *entry = table[i];
+            Hashlibcxx::Node<K, V> *entry = table[i];
 
             while (entry != nullptr) {
-                HashNode<K, V> *prev = entry;
-                entry                = entry->next();
+                Hashlibcxx::Node<K, V> *prev = entry;
+                entry                        = entry->next();
                 delete prev;
             }
 
@@ -130,8 +130,8 @@ public:
 
     bool get(const K &key, V &value)
     {
-        unsigned long hashValue = hash(key);
-        HashNode<K, V> *entry   = table[hashValue];
+        unsigned long hashValue       = hash(key);
+        Hashlibcxx::Node<K, V> *entry = table[hashValue];
 
         while (entry != nullptr) {
             if (entry->key() == key) {
@@ -147,9 +147,9 @@ public:
 
     void put(const K &key, const V &value)
     {
-        unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev    = nullptr;
-        HashNode<K, V> *entry   = table[hashValue];
+        unsigned long hashValue       = hash(key);
+        Hashlibcxx::Node<K, V> *prev  = nullptr;
+        Hashlibcxx::Node<K, V> *entry = table[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -157,7 +157,7 @@ public:
         }
 
         if (entry == nullptr) {
-            entry = new HashNode<K, V>(key, value);
+            entry = new Hashlibcxx::Node<K, V>(key, value);
 
             if (prev == nullptr) {
                 // insert as first bucket
@@ -175,9 +175,9 @@ public:
 
     void remove(const K &key)
     {
-        unsigned long hashValue = hash(key);
-        HashNode<K, V> *prev    = nullptr;
-        HashNode<K, V> *entry   = table[hashValue];
+        unsigned long hashValue       = hash(key);
+        Hashlibcxx::Node<K, V> *prev  = nullptr;
+        Hashlibcxx::Node<K, V> *entry = table[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -205,6 +205,6 @@ private:
     Hashmap(const Hashmap &other);
     const Hashmap &operator=(const Hashmap &other);
     // hash table
-    HashNode<K, V> *table[tableSize];
+    Hashlibcxx::Node<K, V> *table[tableSize];
     F hash;
 };

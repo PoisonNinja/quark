@@ -22,7 +22,7 @@ struct InitFSNode {
     ~InitFSNode();
     libcxx::intrusive_ptr<Inode> inode;
     char* name;
-    Node<InitFSNode> node;
+    libcxx::Node<InitFSNode> node;
 };
 
 class File : public BaseInode
@@ -54,7 +54,7 @@ public:
 
 private:
     libcxx::intrusive_ptr<Inode> find_child(const char* name);
-    List<InitFSNode, &InitFSNode::node> children;
+    libcxx::List<InitFSNode, &InitFSNode::node> children;
 };
 } // namespace InitFS
 } // namespace Filesystem

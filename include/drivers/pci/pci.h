@@ -64,7 +64,7 @@ public:
     void claim();
     void unclaim();
 
-    Node<Device> node;
+    libcxx::Node<Device> node;
 
 private:
     bool claimed = false;
@@ -80,7 +80,7 @@ public:
     virtual bool probe(Device* dev) = 0;
     virtual const char* name()      = 0;
     virtual const Filter* filter()  = 0;
-    Node<Driver> node;
+    libcxx::Node<Driver> node;
 };
 
 constexpr uint8_t pci_vendor_id = 0x00;

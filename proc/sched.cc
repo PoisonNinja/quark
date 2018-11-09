@@ -11,7 +11,7 @@ namespace Scheduler
 {
 namespace
 {
-List<Thread, &Thread::scheduler_node> run_queue;
+libcxx::List<Thread, &Thread::scheduler_node> run_queue;
 Thread* current_thread;
 Process* kernel_process;
 Thread* kidle;

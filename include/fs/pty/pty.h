@@ -21,7 +21,7 @@ public:
     ssize_t sread(uint8_t* buffer, size_t count);
     ssize_t swrite(uint8_t* buffer, size_t count);
 
-    Node<PTY> node;
+    libcxx::Node<PTY> node;
 
 private:
     char mbuf[1024];

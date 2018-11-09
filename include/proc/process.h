@@ -36,7 +36,7 @@ public:
 
     Memory::SectionManager* sections;
 
-    Node<Process> child_node;
+    libcxx::Node<Process> child_node;
 
     void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];
@@ -49,6 +49,6 @@ private:
     libcxx::intrusive_ptr<Filesystem::DTable> fds;
 
     Process* parent;
-    List<Process, &Process::child_node> children;
-    List<Thread, &Thread::process_node> threads;
+    libcxx::List<Process, &Process::child_node> children;
+    libcxx::List<Thread, &Thread::process_node> threads;
 };

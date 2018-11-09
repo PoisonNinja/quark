@@ -7,10 +7,10 @@
 struct Module {
     Module()
     {
-        shdrs = nullptr;
+        shdrs    = nullptr;
         sections = nullptr;
-        init = nullptr;
-        fini = nullptr;
+        init     = nullptr;
+        fini     = nullptr;
         name = description = version = author = nullptr;
     }
 
@@ -26,12 +26,12 @@ struct Module {
     int (*init)();
     int (*fini)();
 
-    Node<Module> node;
+    libcxx::Node<Module> node;
 };
 
 // Each key can only be defined once
-#define __define_modinfo(key, value)                                          \
-    const char __modinfo_##key[] __attribute__((section(".modinfo"), used)) = \
+#define __define_modinfo(key, value)                                           \
+    const char __modinfo_##key[] __attribute__((section(".modinfo"), used)) =  \
         #key "=" value
 
 #define MODULE_AUTHOR(who) __define_modinfo(author, who)

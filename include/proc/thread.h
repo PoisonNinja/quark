@@ -30,8 +30,8 @@ public:
     tid_t tid;
     ThreadState state;
     struct ThreadContext tcontext; // Thread execution state
-    Node<Thread> process_node;
-    Node<Thread> scheduler_node;
+    libcxx::Node<Thread> process_node;
+    libcxx::Node<Thread> scheduler_node;
     Process *parent;
 
     // Signals

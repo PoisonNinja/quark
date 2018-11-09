@@ -6,7 +6,7 @@
 
 namespace
 {
-List<Module, &Module::node> modules;
+libcxx::List<Module, &Module::node> modules;
 
 // A ghetto version of strtok that accepts \0
 const char* next_token(const char* string, const char* end)

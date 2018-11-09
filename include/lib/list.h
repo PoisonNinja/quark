@@ -33,6 +33,9 @@
 
 #include <types.h>
 
+namespace libcxx
+{
+
 /*
  * Taken from https://stackoverflow.com/a/34142739/8108655, with minor
  * modifications to fix some bugs and match the requirements of Quark.
@@ -47,16 +50,18 @@
 template <typename T>
 class Node
 {
-    template <typename S, Node<S> S::*>
+    template <typename S, libcxx::Node<S> S::*>
     friend class List;
-    template <typename S, Node<S> S::*>
+    template <typename S, libcxx::Node<S> S::*>
     friend class iterator;
 
     T* next;
-    Node<T>* prev;
+    libcxx::Node<T>* prev;
 
 public:
-    Node() : next(nullptr), prev(nullptr)
+    Node()
+        : next(nullptr)
+        , prev(nullptr)
     {
     }
     Node(Node const&)
@@ -69,15 +74,16 @@ public:
     }
 };
 
-template <typename T, Node<T> T::*Link>
+template <typename T, libcxx::Node<T> T::*Link>
 class iterator
 {
-    template <typename S, Node<S> S::*>
+    template <typename S, libcxx::Node<S> S::*>
     friend class List;
-    Node<T>* current;
+    libcxx::Node<T>* current;
 
 public:
-    explicit iterator(Node<T>* current) : current(current)
+    explicit iterator(libcxx::Node<T>* current)
+        : current(current)
     {
     }
     T& operator*()
@@ -120,10 +126,10 @@ public:
     }
 };
 
-template <typename T, Node<T> T::*Link>
+template <typename T, libcxx::Node<T> T::*Link>
 class List
 {
-    Node<T> content;
+    libcxx::Node<T> content;
 
 public:
     List()
@@ -161,17 +167,17 @@ public:
     }
     void insert(iterator<T, Link> pos, T& Node)
     {
-        (Node.*Link).next = pos.current->next;
-        ((Node.*Link).next ? (pos.current->next->*Link).prev :
-                             this->content.prev) = &(Node.*Link);
-        (Node.*Link).prev = pos.current;
-        pos.current->next = &Node;
+        (Node.*Link).next                        = pos.current->next;
+        ((Node.*Link).next ? (pos.current->next->*Link).prev
+                           : this->content.prev) = &(Node.*Link);
+        (Node.*Link).prev                        = pos.current;
+        pos.current->next                        = &Node;
     }
     iterator<T, Link> erase(iterator<T, Link> it)
     {
         it.current->next = (it.current->next->*Link).next;
-        (it.current->next ? (it.current->next->*Link).prev :
-                            this->content.prev) = it.current;
+        (it.current->next ? (it.current->next->*Link).prev
+                          : this->content.prev) = it.current;
         return it;
     }
     iterator<T, Link> iterator_to(T& value)
@@ -180,7 +186,8 @@ public:
     }
     void reset()
     {
-        this->content = Node<T>();
+        this->content      = libcxx::Node<T>();
         this->content.prev = &this->content;
     }
 };
+} // namespace libcxx

@@ -40,13 +40,13 @@ namespace Log
 {
 constexpr size_t printk_max = CONFIG_PRINTK_MAX;
 
-static List<LogOutput, &LogOutput::node> output;
+static libcxx::List<LogOutput, &LogOutput::node> output;
 
 static const char* colors[] = {
-    "\e[36m",  // Blue for debug
-    "\e[32m",  // Green for info
-    "\e[33m",  // Yellow for warning
-    "\e[31m",  // Red for error
+    "\e[36m", // Blue for debug
+    "\e[32m", // Green for info
+    "\e[33m", // Yellow for warning
+    "\e[31m", // Red for error
 };
 
 static char printk_buffer[Log::printk_max];
@@ -87,4 +87,4 @@ void register_log_output(LogOutput& device)
 {
     output.push_back(device);
 }
-}  // namespace Log
+} // namespace Log

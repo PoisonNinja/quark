@@ -7,7 +7,8 @@
 
 namespace Interrupt
 {
-static List<Interrupt::Handler, &Interrupt::Handler::node> handlers[max];
+static libcxx::List<Interrupt::Handler, &Interrupt::Handler::node>
+    handlers[max];
 
 extern void arch_init();
 
@@ -76,4 +77,4 @@ void init()
 {
     Interrupt::arch_init();
 }
-}  // namespace Interrupt
+} // namespace Interrupt

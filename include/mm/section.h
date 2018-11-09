@@ -35,8 +35,8 @@ public:
 
     void reset();
 
-    libcxx::iterator<Section, &Section::node> begin();
-    libcxx::iterator<Section, &Section::node> end();
+    libcxx::List<Section, &Section::node>::iterator begin();
+    libcxx::List<Section, &Section::node>::iterator end();
 
 private:
     addr_t start, _end;

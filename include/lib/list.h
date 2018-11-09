@@ -75,74 +75,73 @@ public:
 };
 
 template <typename T, libcxx::Node<T> T::*Link>
-class iterator
-{
-    template <typename S, libcxx::Node<S> S::*>
-    friend class List;
-    libcxx::Node<T>* current;
-
-public:
-    explicit iterator(libcxx::Node<T>* current)
-        : current(current)
-    {
-    }
-    T& operator*()
-    {
-        return *this->operator->();
-    }
-    T* operator->()
-    {
-        return this->current->next;
-    }
-    bool operator==(iterator const& other) const
-    {
-        return this->current == other.current;
-    }
-    bool operator!=(iterator const& other) const
-    {
-        return !(*this == other);
-    }
-    iterator& operator++()
-    {
-        this->current = &(this->current->next->*Link);
-        return *this;
-    }
-    iterator operator++(int)
-    {
-        iterator rc(*this);
-        this->operator++();
-        return rc;
-    }
-    iterator& operator--()
-    {
-        this->current = this->current->prev;
-        return *this;
-    }
-    iterator operator--(int)
-    {
-        iterator rc(*this);
-        this->operator--();
-        return rc;
-    }
-};
-
-template <typename T, libcxx::Node<T> T::*Link>
 class List
 {
     libcxx::Node<T> content;
 
 public:
+    class iterator
+    {
+        template <typename S, libcxx::Node<S> S::*>
+        friend class List;
+        libcxx::Node<T>* current;
+
+    public:
+        explicit iterator(libcxx::Node<T>* current)
+            : current(current)
+        {
+        }
+        T& operator*()
+        {
+            return *this->operator->();
+        }
+        T* operator->()
+        {
+            return this->current->next;
+        }
+        bool operator==(iterator const& other) const
+        {
+            return this->current == other.current;
+        }
+        bool operator!=(iterator const& other) const
+        {
+            return !(*this == other);
+        }
+        iterator& operator++()
+        {
+            this->current = &(this->current->next->*Link);
+            return *this;
+        }
+        iterator operator++(int)
+        {
+            iterator rc(*this);
+            this->operator++();
+            return rc;
+        }
+        iterator& operator--()
+        {
+            this->current = this->current->prev;
+            return *this;
+        }
+        iterator operator--(int)
+        {
+            iterator rc(*this);
+            this->operator--();
+            return rc;
+        }
+    };
+
     List()
     {
         this->content.prev = &this->content;
     }
-    iterator<T, Link> begin()
+    List<T, Link>::iterator begin()
     {
-        return iterator<T, Link>(&this->content);
+        return List<T, Link>::iterator(&this->content);
     }
-    iterator<T, Link> end()
+    List<T, Link>::iterator end()
     {
-        return iterator<T, Link>(this->content.prev);
+        return List<T, Link>::iterator(this->content.prev);
     }
 
     T& front()
@@ -165,7 +164,7 @@ public:
     {
         this->insert(this->begin(), Node);
     }
-    void insert(iterator<T, Link> pos, T& Node)
+    void insert(List<T, Link>::iterator pos, T& Node)
     {
         (Node.*Link).next                        = pos.current->next;
         ((Node.*Link).next ? (pos.current->next->*Link).prev
@@ -173,16 +172,16 @@ public:
         (Node.*Link).prev                        = pos.current;
         pos.current->next                        = &Node;
     }
-    iterator<T, Link> erase(iterator<T, Link> it)
+    List<T, Link>::iterator erase(List<T, Link>::iterator it)
     {
         it.current->next = (it.current->next->*Link).next;
         (it.current->next ? (it.current->next->*Link).prev
                           : this->content.prev) = it.current;
         return it;
     }
-    iterator<T, Link> iterator_to(T& value)
+    List<T, Link>::iterator iterator_to(T& value)
     {
-        return iterator<T, Link>((value.*Link).prev);
+        return List<T, Link>::iterator((value.*Link).prev);
     }
     void reset()
     {

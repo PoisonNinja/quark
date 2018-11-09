@@ -1,6 +1,6 @@
 #include <fs/vcache.h>
 #include <kernel.h>
-#include <lib/hashmap.h>
+#include <lib/unordered_map.h>
 #include <lib/murmur.h>
 
 namespace Filesystem

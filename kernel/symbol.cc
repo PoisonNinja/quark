@@ -1,6 +1,6 @@
 #include <kernel.h>
 #include <kernel/symbol.h>
-#include <lib/hashmap.h>
+#include <lib/unordered_map.h>
 #include <lib/list.h>
 #include <lib/murmur.h>
 #include <lib/string.h>

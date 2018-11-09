@@ -31,9 +31,17 @@ constexpr void swap(T& a, T& b)
 
 template <typename M, typename N>
 struct pair {
-    pair(M m, N n)
+    constexpr pair()
+    {
+    }
+
+    constexpr pair(M m, N n)
         : first(m)
         , second(n){};
+
+    pair(const pair& p) = default;
+
+    constexpr pair(pair&& p) = default;
 
     M first;
     N second;

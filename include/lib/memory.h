@@ -138,8 +138,7 @@ public:
     }
     void swap(intrusive_ptr<T>& r)
     {
-        // TODO: Replace with std::swap?
-        std::swap(this->ref, r.ref);
+        libcxx::swap(this->ref, r.ref);
     }
     T* get() const
     {

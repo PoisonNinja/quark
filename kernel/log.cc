@@ -40,7 +40,7 @@ namespace Log
 {
 constexpr size_t printk_max = CONFIG_PRINTK_MAX;
 
-static libcxx::List<LogOutput, &LogOutput::node> output;
+static libcxx::list<LogOutput, &LogOutput::node> output;
 
 static const char* colors[] = {
     "\e[36m", // Blue for debug

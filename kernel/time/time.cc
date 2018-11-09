@@ -5,7 +5,7 @@
 
 namespace Time
 {
-static libcxx::List<Clock, &Clock::node> clock_list;
+static libcxx::list<Clock, &Clock::node> clock_list;
 static Clock* current_ticker = nullptr;
 static Clock* current_clock  = nullptr;
 static struct timespec current_time;

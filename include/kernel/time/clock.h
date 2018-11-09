@@ -20,6 +20,6 @@ public:
     virtual bool schedule(time_t interval) = 0;
     virtual bool periodic()                = 0;
     virtual const char* name()             = 0;
-    libcxx::Node<Clock> node;
+    libcxx::node<Clock> node;
 };
 } // namespace Time

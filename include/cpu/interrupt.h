@@ -28,7 +28,7 @@ struct Handler {
     interrupt_handler_t handler;
     const char *dev_name;
     void *dev_id;
-    libcxx::Node<Handler> node;
+    libcxx::node<Handler> node;
 };
 
 void disable();

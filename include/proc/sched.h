@@ -13,7 +13,7 @@ struct WaitQueueNode {
         : thread(t)
         , normal_wake(false){};
     Thread* thread;
-    libcxx::Node<WaitQueueNode> node;
+    libcxx::node<WaitQueueNode> node;
     bool normal_wake;
 };
 
@@ -28,7 +28,7 @@ public:
     void wakeup();
 
 private:
-    libcxx::List<WaitQueueNode, &WaitQueueNode::node> waiters;
+    libcxx::list<WaitQueueNode, &WaitQueueNode::node> waiters;
 };
 
 void idle();

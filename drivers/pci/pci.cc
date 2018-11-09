@@ -9,8 +9,8 @@ namespace PCI
 {
 namespace
 {
-libcxx::List<Driver, &Driver::node> drivers;
-libcxx::List<Device, &Device::node> devices;
+libcxx::list<Driver, &Driver::node> drivers;
+libcxx::list<Device, &Device::node> devices;
 
 bool is_terminator(const Filter& filter)
 {

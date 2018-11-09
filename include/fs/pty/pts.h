@@ -16,7 +16,7 @@ public:
     bool mount(Superblock* sb) override;
 
 private:
-    libcxx::List<TTY::PTY, &TTY::PTY::node> ptys;
+    libcxx::list<TTY::PTY, &TTY::PTY::node> ptys;
     InitFS::Directory* root;
 };
 

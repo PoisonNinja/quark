@@ -48,46 +48,46 @@ namespace libcxx
  * Retrieved: Nov 23 2017 at 17:58
  */
 template <typename T>
-class Node
+class node
 {
-    template <typename S, libcxx::Node<S> S::*>
-    friend class List;
-    template <typename S, libcxx::Node<S> S::*>
+    template <typename S, libcxx::node<S> S::*>
+    friend class list;
+    template <typename S, libcxx::node<S> S::*>
     friend class iterator;
 
     T* next;
-    libcxx::Node<T>* prev;
+    libcxx::node<T>* prev;
 
 public:
-    Node()
+    node()
         : next(nullptr)
         , prev(nullptr)
     {
     }
-    Node(Node const&)
+    node(node const&)
     {
     }
-    void operator=(Node const& n)
+    void operator=(node const& n)
     {
         this->next = n.next;
         this->prev = n.prev;
     }
 };
 
-template <typename T, libcxx::Node<T> T::*Link>
-class List
+template <typename T, libcxx::node<T> T::*Link>
+class list
 {
-    libcxx::Node<T> content;
+    libcxx::node<T> content;
 
 public:
     class iterator
     {
-        template <typename S, libcxx::Node<S> S::*>
-        friend class List;
-        libcxx::Node<T>* current;
+        template <typename S, libcxx::node<S> S::*>
+        friend class list;
+        libcxx::node<T>* current;
 
     public:
-        explicit iterator(libcxx::Node<T>* current)
+        explicit iterator(libcxx::node<T>* current)
             : current(current)
         {
         }
@@ -131,17 +131,17 @@ public:
         }
     };
 
-    List()
+    list()
     {
         this->content.prev = &this->content;
     }
-    List<T, Link>::iterator begin()
+    list<T, Link>::iterator begin()
     {
-        return List<T, Link>::iterator(&this->content);
+        return list<T, Link>::iterator(&this->content);
     }
-    List<T, Link>::iterator end()
+    list<T, Link>::iterator end()
     {
-        return List<T, Link>::iterator(this->content.prev);
+        return list<T, Link>::iterator(this->content.prev);
     }
 
     T& front()
@@ -156,36 +156,36 @@ public:
     {
         return &this->content == this->content.prev;
     }
-    void push_back(T& Node)
+    void push_back(T& node)
     {
-        this->insert(this->end(), Node);
+        this->insert(this->end(), node);
     }
-    void push_front(T& Node)
+    void push_front(T& node)
     {
-        this->insert(this->begin(), Node);
+        this->insert(this->begin(), node);
     }
-    void insert(List<T, Link>::iterator pos, T& Node)
+    void insert(list<T, Link>::iterator pos, T& node)
     {
-        (Node.*Link).next                        = pos.current->next;
-        ((Node.*Link).next ? (pos.current->next->*Link).prev
-                           : this->content.prev) = &(Node.*Link);
-        (Node.*Link).prev                        = pos.current;
-        pos.current->next                        = &Node;
+        (node.*Link).next                        = pos.current->next;
+        ((node.*Link).next ? (pos.current->next->*Link).prev
+                           : this->content.prev) = &(node.*Link);
+        (node.*Link).prev                        = pos.current;
+        pos.current->next                        = &node;
     }
-    List<T, Link>::iterator erase(List<T, Link>::iterator it)
+    list<T, Link>::iterator erase(list<T, Link>::iterator it)
     {
         it.current->next = (it.current->next->*Link).next;
         (it.current->next ? (it.current->next->*Link).prev
                           : this->content.prev) = it.current;
         return it;
     }
-    List<T, Link>::iterator iterator_to(T& value)
+    list<T, Link>::iterator iterator_to(T& value)
     {
-        return List<T, Link>::iterator((value.*Link).prev);
+        return list<T, Link>::iterator((value.*Link).prev);
     }
     void reset()
     {
-        this->content      = libcxx::Node<T>();
+        this->content      = libcxx::node<T>();
         this->content.prev = &this->content;
     }
 };

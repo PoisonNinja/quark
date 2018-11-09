@@ -9,7 +9,7 @@ public:
     PTableWrapper(Process* p)
         : process(p){};
     Process* process;
-    libcxx::Node<PTableWrapper> node;
+    libcxx::node<PTableWrapper> node;
 };
 
 class PTable
@@ -21,6 +21,6 @@ public:
     bool remove(pid_t pid);
 
 private:
-    libcxx::List<PTableWrapper, &PTableWrapper::node> list;
+    libcxx::list<PTableWrapper, &PTableWrapper::node> list;
     size_t size;
 };

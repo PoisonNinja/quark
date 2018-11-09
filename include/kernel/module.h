@@ -26,7 +26,7 @@ struct Module {
     int (*init)();
     int (*fini)();
 
-    libcxx::Node<Module> node;
+    libcxx::node<Module> node;
 };
 
 // Each key can only be defined once

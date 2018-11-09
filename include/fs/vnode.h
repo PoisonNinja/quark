@@ -36,7 +36,7 @@ public:
     int mount(Mount* mt);
 
 private:
-    libcxx::List<Mount, &Mount::node> mounts;
+    libcxx::list<Mount, &Mount::node> mounts;
     KDevice* kdev;
     Superblock* sb;
     libcxx::intrusive_ptr<Inode> inode;

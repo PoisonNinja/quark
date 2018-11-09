@@ -23,9 +23,9 @@ Hashmap<addr_t, const char*, table_size, AddressHash> address_to_name_hash;
 struct Symbol {
     addr_t address;
     char* name;
-    libcxx::Node<Symbol> node;
+    libcxx::node<Symbol> node;
 };
-libcxx::List<Symbol, &Symbol::node> symbols;
+libcxx::list<Symbol, &Symbol::node> symbols;
 } // namespace
 
 namespace Symbols

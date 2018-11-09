@@ -7,7 +7,7 @@ class LogOutput
 {
 public:
     virtual size_t write(const char*, size_t) = 0;
-    libcxx::Node<LogOutput> node;
+    libcxx::node<LogOutput> node;
 };
 
 namespace Log

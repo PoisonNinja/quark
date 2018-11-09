@@ -18,7 +18,7 @@ inline int irq_to_interrupt(int irq)
     return irq + 32; // TODO: Make this architecture independant
 }
 
-typedef void (*interrupt_handler_t)(int, void *, struct InterruptContext *);
+using interrupt_handler_t = void (*)(int, void *, struct InterruptContext *);
 
 struct Handler {
     Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)

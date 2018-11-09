@@ -188,7 +188,7 @@ bool load_module(void* binary)
     /*
      * Iterate through the constructors to initialize them
      */
-    typedef void (*constructor_t)();
+    using constructor_t  = void (*)();
     constructor_t* start = reinterpret_cast<constructor_t*>(ctor_start);
     constructor_t* end   = reinterpret_cast<constructor_t*>(ctor_end);
 

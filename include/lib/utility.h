@@ -4,15 +4,15 @@ namespace libcxx
 {
 template <class T>
 struct remove_reference {
-    typedef T type;
+    using type = T;
 };
 template <class T>
 struct remove_reference<T&> {
-    typedef T type;
+    using type = T;
 };
 template <class T>
 struct remove_reference<T&&> {
-    typedef T type;
+    using type = T;
 };
 
 template <class T>

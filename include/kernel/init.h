@@ -1,6 +1,6 @@
 #pragma once
 
-typedef int (*initcall_t)();
+using initcall_t = int (*)();
 
 enum class InitLevel : int {
     EARLY,
@@ -12,8 +12,8 @@ enum class InitLevel : int {
     LATE,
 };
 
-#define __define_initcall(fn, id)  \
-    initcall_t __initcall_##id##fn \
+#define __define_initcall(fn, id)                                              \
+    initcall_t __initcall_##id##fn                                             \
         __attribute__((section(".initcall" #id), used)) = fn;
 
 #define EARLY_INITCALL(fn) __define_initcall(fn, 1)

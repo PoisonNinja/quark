@@ -17,7 +17,7 @@ enum class BlockRequestType : int {
     WRITE,
 };
 
-typedef uint64_t sector_t;
+using sector_t = uint64_t;
 
 struct BlockRequest {
     BlockRequestType command;

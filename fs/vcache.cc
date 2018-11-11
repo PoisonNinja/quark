@@ -1,14 +1,12 @@
 #include <fs/vcache.h>
 #include <kernel.h>
-#include <lib/unordered_map.h>
 #include <lib/murmur.h>
+#include <lib/unordered_map.h>
 
 namespace Filesystem
 {
 namespace
 {
-constexpr size_t vcache_size = 1024;
-
 class Key
 {
 public:
@@ -32,11 +30,11 @@ private:
 struct Hash {
     unsigned long operator()(const Key& key)
     {
-        return Murmur::hash(&key, sizeof(key)) % vcache_size;
+        return Murmur::hash(&key, sizeof(key));
     }
 };
 
-libcxx::unordered_map<Key, libcxx::intrusive_ptr<Vnode>, vcache_size, Hash> vcache_hash;
+libcxx::unordered_map<Key, libcxx::intrusive_ptr<Vnode>, Hash> vcache_hash;
 } // namespace
 
 namespace VCache

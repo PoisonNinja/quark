@@ -1,13 +1,12 @@
 #include <fs/ftable.h>
-#include <lib/unordered_map.h>
 #include <lib/murmur.h>
 #include <lib/string.h>
+#include <lib/unordered_map.h>
 
 namespace
 {
-constexpr size_t ftable_size = 1024;
-
-libcxx::unordered_map<libcxx::StringKey, Filesystem::Driver*, ftable_size, libcxx::StringHash<ftable_size>>
+libcxx::unordered_map<libcxx::StringKey, Filesystem::Driver*,
+                      libcxx::StringHash>
     ftable_hash;
 } // namespace
 

@@ -7,20 +7,16 @@
 
 namespace
 {
-constexpr size_t table_size = 1024;
-
 struct AddressHash {
     unsigned long operator()(const addr_t key)
     {
-        return key % table_size;
+        return key;
     }
 };
 
-libcxx::unordered_map<libcxx::StringKey, addr_t, table_size,
-                      libcxx::StringHash<table_size>>
+libcxx::unordered_map<libcxx::StringKey, addr_t, libcxx::StringHash>
     name_to_address_hash;
-libcxx::unordered_map<addr_t, const char*, table_size, AddressHash>
-    address_to_name_hash;
+libcxx::unordered_map<addr_t, const char*, AddressHash> address_to_name_hash;
 
 struct Symbol {
     addr_t address;

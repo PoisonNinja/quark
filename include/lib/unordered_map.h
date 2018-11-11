@@ -96,21 +96,25 @@ private:
 };
 
 // Hash map class template
-template <class Key, class T, size_t tableSize, class Hash = libcxx::hash<Key>>
+template <class Key, class T, class Hash = libcxx::hash<Key>>
 class unordered_map
 {
 public:
-    unordered_map()
-        : table()
-        , hash()
+    unordered_map(size_t bucket_count = 16, const Hash &hash = Hash())
+        : num_buckets(bucket_count)
+        , hash(hash)
     {
+        this->buckets = new HashNode<Key, T> *[this->num_buckets];
     }
+
+    unordered_map(const unordered_map &other) = delete;
+    const unordered_map &operator=(const unordered_map &other) = delete;
 
     ~unordered_map()
     {
         // destroy all buckets one by one
-        for (size_t i = 0; i < tableSize; ++i) {
-            HashNode<Key, T> *entry = table[i];
+        for (size_t i = 0; i < this->num_buckets; ++i) {
+            HashNode<Key, T> *entry = buckets[i];
 
             while (entry != nullptr) {
                 HashNode<Key, T> *prev = entry;
@@ -118,14 +122,14 @@ public:
                 delete prev;
             }
 
-            table[i] = nullptr;
+            buckets[i] = nullptr;
         }
     }
 
     bool get(const Key &key, T &value)
     {
-        unsigned long hashValue = hash(key);
-        HashNode<Key, T> *entry = table[hashValue];
+        unsigned long hashValue = hash(key) % this->num_buckets;
+        HashNode<Key, T> *entry = buckets[hashValue];
 
         while (entry != nullptr) {
             if (entry->key() == key) {
@@ -141,9 +145,9 @@ public:
 
     void put(const Key &key, const T &value)
     {
-        unsigned long hashValue = hash(key);
+        unsigned long hashValue = hash(key) % this->num_buckets;
         HashNode<Key, T> *prev  = nullptr;
-        HashNode<Key, T> *entry = table[hashValue];
+        HashNode<Key, T> *entry = buckets[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -155,7 +159,7 @@ public:
 
             if (prev == nullptr) {
                 // insert as first bucket
-                table[hashValue] = entry;
+                buckets[hashValue] = entry;
 
             } else {
                 prev->set_next(entry);
@@ -169,9 +173,9 @@ public:
 
     void remove(const Key &key)
     {
-        unsigned long hashValue = hash(key);
+        unsigned long hashValue = hash(key) % this->bucket_count;
         HashNode<Key, T> *prev  = nullptr;
-        HashNode<Key, T> *entry = table[hashValue];
+        HashNode<Key, T> *entry = buckets[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -185,7 +189,7 @@ public:
         } else {
             if (prev == nullptr) {
                 // remove first bucket of the list
-                table[hashValue] = entry->next();
+                buckets[hashValue] = entry->next();
 
             } else {
                 prev->set_next(entry->next());
@@ -196,10 +200,9 @@ public:
     }
 
 private:
-    unordered_map(const unordered_map &other);
-    const unordered_map &operator=(const unordered_map &other);
     // hash table
-    HashNode<Key, T> *table[tableSize];
+    size_t num_buckets;
+    HashNode<Key, T> **buckets;
     Hash hash;
 };
 } // namespace libcxx

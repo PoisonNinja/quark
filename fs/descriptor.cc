@@ -10,33 +10,33 @@ namespace Filesystem
 {
 char* dirname(const char* path)
 {
-    const char* slash = String::strrchr(path, '/');
+    const char* slash = libcxx::strrchr(path, '/');
     if (slash) {
         if (*(slash + 1) == '\0') {
             if (slash == path) {
-                return String::strdup("/");
+                return libcxx::strdup("/");
             }
-            slash = (const char*)String::memrchr(path, '/', slash - path);
+            slash = (const char*)libcxx::memrchr(path, '/', slash - path);
         }
         size_t diff = slash - path;
         if (!diff || !slash) {
-            return String::strdup(".");
+            return libcxx::strdup(".");
         }
         char* ret = new char[diff + 1];
-        String::memcpy(ret, path, diff);
+        libcxx::memcpy(ret, path, diff);
         ret[diff] = '\0';
         return ret;
     } else {
-        return String::strdup(".");
+        return libcxx::strdup(".");
     }
 }
 
 char* basename(const char* path)
 {
     // Locate the last slash
-    const char* slash = String::strrchr(path, '/');
+    const char* slash = libcxx::strrchr(path, '/');
     // Locate the end of the string we want to return
-    const char* terminate = String::strlen(path) + path;
+    const char* terminate = libcxx::strlen(path) + path;
     if (slash) {
         // Check if this is a trailing slash
         if (*(slash + 1) == '\0') {
@@ -48,21 +48,21 @@ char* basename(const char* path)
              * entire string was just /) and return /
              */
             if (terminate == path) {
-                return String::strdup(".");
+                return libcxx::strdup(".");
             }
             // Set the location of the new slash
-            slash = (const char*)String::memrchr(path, '/', terminate - path);
+            slash = (const char*)libcxx::memrchr(path, '/', terminate - path);
         }
         // Allocate the return buffer
         char* ret = new char[terminate - slash + 1];
         // Copy from slash + 1 (to avoid /) to terminate
-        String::memcpy(ret, slash + 1, terminate - slash);
+        libcxx::memcpy(ret, slash + 1, terminate - slash);
         // Null terminate
         ret[terminate - slash] = '\0';
         return ret;
     } else {
         // No slash, the entire path is a filename
-        return String::strdup(path);
+        return libcxx::strdup(path);
     }
 }
 
@@ -189,16 +189,16 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
 libcxx::intrusive_ptr<Descriptor> Descriptor::open(const char* name, int flags,
                                                    mode_t mode)
 {
-    char* path = String::strdup(name);
+    char* path = libcxx::strdup(name);
     char* current;
     char* filename = basename(name);
     libcxx::intrusive_ptr<Descriptor> ret(nullptr);
     libcxx::intrusive_ptr<Vnode> curr_vnode = this->vnode;
-    while ((current = String::strtok_r(path, "/", &path))) {
+    while ((current = libcxx::strtok_r(path, "/", &path))) {
         Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags   = flags;
         mode_t checked_mode = mode;
-        if (String::strcmp(current, filename)) {
+        if (libcxx::strcmp(current, filename)) {
             checked_flags = O_RDONLY;
             mode          = 0;
         }

@@ -31,7 +31,7 @@ struct StringKey {
     const char *value;
     bool operator==(const struct StringKey &other)
     {
-        return !String::strcmp(this->value, other.value);
+        return !libcxx::strcmp(this->value, other.value);
     }
     bool operator!=(const struct StringKey &other)
     {
@@ -39,11 +39,10 @@ struct StringKey {
     }
 };
 
-template <size_t tableSize>
 struct StringHash {
     unsigned long operator()(const StringKey &k)
     {
-        return Murmur::hash(k.value, String::strlen(k.value)) % tableSize;
+        return Murmur::hash(k.value, libcxx::strlen(k.value));
     }
 };
 

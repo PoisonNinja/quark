@@ -162,10 +162,10 @@ static long sys_sigaction(int signum, struct sigaction* act,
                 act, oldact);
     Process* current = Scheduler::get_current_process();
     if (oldact) {
-        String::memcpy(oldact, &current->signal_actions[signum],
+        libcxx::memcpy(oldact, &current->signal_actions[signum],
                        sizeof(*oldact));
     }
-    String::memcpy(&current->signal_actions[signum], act, sizeof(*act));
+    libcxx::memcpy(&current->signal_actions[signum], act, sizeof(*act));
     return 0;
 }
 
@@ -199,7 +199,7 @@ static void sys_sigreturn(ucontext_t* uctx)
      * tctx to get certain registers (DS, ES, SS) preloaded for us. The
      * rest of the state will get overriden by the stored mcontext
      */
-    String::memcpy(&tctx, &Scheduler::get_current_thread()->tcontext,
+    libcxx::memcpy(&tctx, &Scheduler::get_current_thread()->tcontext,
                    sizeof(tctx));
     // Unset on_stack
     if (Scheduler::get_current_thread()->signal_stack.ss_flags & SS_ONSTACK) {
@@ -249,7 +249,7 @@ static long sys_fork()
     Log::printk(Log::LogLevel::DEBUG, "[sys_fork]\n");
     Process* child = Scheduler::get_current_process()->fork();
     Thread* thread = new Thread(child);
-    String::memcpy(&thread->tcontext,
+    libcxx::memcpy(&thread->tcontext,
                    &Scheduler::get_current_thread()->tcontext,
                    sizeof(thread->tcontext));
     // Child process gets 0 returned from fork
@@ -277,13 +277,13 @@ static long sys_execve(const char* path, const char* old_argv[],
     }
     const char** argv = new const char*[argc];
     for (size_t i = 0; i < argc; i++) {
-        argv[i] = new char[String::strlen(old_argv[i])];
-        String::strcpy(const_cast<char*>(argv[i]), old_argv[i]);
+        argv[i] = new char[libcxx::strlen(old_argv[i])];
+        libcxx::strcpy(const_cast<char*>(argv[i]), old_argv[i]);
     }
     const char** envp = new const char*[envc];
     for (size_t i = 0; i < envc; i++) {
-        envp[i] = new char[String::strlen(old_envp[i])];
-        String::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
+        envp[i] = new char[libcxx::strlen(old_envp[i])];
+        libcxx::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
     libcxx::intrusive_ptr<Filesystem::Descriptor> file =
         get_start(path)->open(path, 0, 0);
@@ -375,11 +375,11 @@ static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
     if (oldss) {
-        String::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
+        libcxx::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
                        sizeof(*oldss));
     }
     if (ss) {
-        String::memcpy(&Scheduler::get_current_thread()->signal_stack, ss,
+        libcxx::memcpy(&Scheduler::get_current_thread()->signal_stack, ss,
                        sizeof(*ss));
     }
     return 0;

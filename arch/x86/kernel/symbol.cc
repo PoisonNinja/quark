@@ -33,13 +33,13 @@ void relocate(struct multiboot_tag_elf_sections *tag)
     for (uint32_t i = 0; i < tag->num; i++) {
         ELF::Elf_Shdr *shdr = (ELF::Elf_Shdr *)sections + i;
         if (shdr->sh_type == SHT_STRTAB &&
-            !String::strcmp(".strtab", s_string_table + shdr->sh_name)) {
+            !libcxx::strcmp(".strtab", s_string_table + shdr->sh_name)) {
             string_table_header =
                 reinterpret_cast<ELF::Elf_Shdr *>(sections) + i;
             temp_string_table =
                 reinterpret_cast<char *>(string_table_header->sh_addr + VMA);
             string_table = new char[string_table_header->sh_size];
-            String::memcpy(string_table, temp_string_table,
+            libcxx::memcpy(string_table, temp_string_table,
                            string_table_header->sh_size);
         }
     }
@@ -57,7 +57,7 @@ void relocate(struct multiboot_tag_elf_sections *tag)
             temp_symtab = reinterpret_cast<ELF::Elf_Sym *>(shdr->sh_addr + VMA);
             num_syms    = shdr->sh_size / shdr->sh_entsize;
             symtab      = new ELF::Elf_Sym[shdr->sh_size];
-            String::memcpy(symtab, temp_symtab, shdr->sh_size);
+            libcxx::memcpy(symtab, temp_symtab, shdr->sh_size);
         }
     }
 }

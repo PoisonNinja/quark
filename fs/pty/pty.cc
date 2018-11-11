@@ -8,8 +8,8 @@ namespace TTY
 {
 PTY::PTY(int index)
 {
-    String::memset(mbuf, 0, pty_size);
-    String::memset(sbuf, 0, pty_size);
+    libcxx::memset(mbuf, 0, pty_size);
+    libcxx::memset(sbuf, 0, pty_size);
     this->mhead = this->mtail = this->shead = this->stail = 0;
     this->idx                                             = index;
 }

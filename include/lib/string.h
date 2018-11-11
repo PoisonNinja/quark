@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace String
+namespace libcxx
 {
 void *memchr(const void *str, int c, size_t n);
 void *memrchr(const void *str, int c, size_t n);
@@ -23,4 +23,4 @@ char *strdup(const char *str);
 char *strrchr(const char *str, int c);
 char *strstr(const char *haystack, const char *needle);
 char *strtok_r(char *str, const char *delim, char **lasts);
-}  // namespace String
+} // namespace libcxx

@@ -31,19 +31,19 @@ namespace InitFS
 TmpFSNode::TmpFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name)
 {
     this->inode = inode;
-    this->name  = String::strdup(name);
+    this->name  = libcxx::strdup(name);
 }
 
 TmpFSNode::TmpFSNode(const struct TmpFSNode& other)
 {
     this->inode = other.inode;
-    this->name  = String::strdup(other.name);
+    this->name  = libcxx::strdup(other.name);
 }
 
 TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
 {
     this->inode         = other.inode;
-    const char* newname = String::strdup(other.name);
+    const char* newname = libcxx::strdup(other.name);
     libcxx::swap(this->name, newname);
     return *this;
 }
@@ -79,7 +79,7 @@ ssize_t File::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
     if (count + offset > buffer_size) {
         count = buffer_size - offset;
     }
-    String::memcpy(buffer, data + offset, count);
+    libcxx::memcpy(buffer, data + offset, count);
     return count;
 }
 
@@ -89,14 +89,14 @@ ssize_t File::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
         size_t new_buffer_size = count + offset;
         uint8_t* new_buffer    = new uint8_t[new_buffer_size];
         if (data) {
-            String::memcpy(new_buffer, data, buffer_size);
+            libcxx::memcpy(new_buffer, data, buffer_size);
             delete[] data;
         }
         buffer_size = new_buffer_size;
         data        = new_buffer;
     }
     this->size = buffer_size;
-    String::memcpy(data + offset, buffer, count);
+    libcxx::memcpy(data + offset, buffer, count);
     return count;
 }
 
@@ -167,7 +167,7 @@ int Directory::mknod(const char* name, mode_t mode, dev_t dev)
 libcxx::intrusive_ptr<Inode> Directory::find_child(const char* name)
 {
     for (auto& i : children) {
-        if (!String::strcmp(i.name, name)) {
+        if (!libcxx::strcmp(i.name, name)) {
             return i.inode;
         }
     }

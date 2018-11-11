@@ -15,7 +15,7 @@ static char panic_buffer[Kernel::panic_max];
 void __attribute__((noreturn)) panic(const char* format, ...)
 {
     Interrupt::disable();
-    String::memset(panic_buffer, 0, Kernel::panic_max);
+    libcxx::memset(panic_buffer, 0, Kernel::panic_max);
     va_list args;
     va_start(args, format);
     vsnprintf(panic_buffer, Kernel::panic_max, format, args);

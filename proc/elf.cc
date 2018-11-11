@@ -13,7 +13,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
 {
     Process* process = Scheduler::get_current_process();
     Elf_Ehdr* header = reinterpret_cast<Elf_Ehdr*>(binary);
-    if (String::memcmp(header->e_ident, ELFMAG, 4)) {
+    if (libcxx::memcmp(header->e_ident, ELFMAG, 4)) {
         Log::printk(Log::LogLevel::ERROR,
                     "Binary passed in is not an ELF file!\n");
         return libcxx::pair<bool, addr_t>(false, 0);
@@ -73,7 +73,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             Log::printk(Log::LogLevel::DEBUG,
                         "Copying from %p -> %p, size %X\n",
                         binary + phdr->p_offset, phdr->p_vaddr, phdr->p_filesz);
-            String::memcpy(reinterpret_cast<void*>(phdr->p_vaddr),
+            libcxx::memcpy(reinterpret_cast<void*>(phdr->p_vaddr),
                            reinterpret_cast<void*>(binary + phdr->p_offset),
                            phdr->p_filesz);
             if (phdr->p_filesz < phdr->p_memsz) {
@@ -83,7 +83,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                 Log::printk(Log::LogLevel::DEBUG, "Zeroing %p, size 0x%X\n",
                             phdr->p_filesz + phdr->p_vaddr,
                             phdr->p_memsz - phdr->p_filesz);
-                String::memset(
+                libcxx::memset(
                     reinterpret_cast<void*>(phdr->p_filesz + phdr->p_vaddr), 0,
                     phdr->p_memsz - phdr->p_filesz);
             }

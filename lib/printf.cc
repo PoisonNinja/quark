@@ -63,7 +63,7 @@ static void puts(struct parameters *params, struct printf_data *data,
                  const char *message)
 {
     const char *tmp = message;
-    int n = params->padding;
+    int n           = params->padding;
     while (*tmp++ && n)
         n--;
     if (!params->zero) {
@@ -84,7 +84,7 @@ static void ull2a(unsigned long long num, struct parameters *params)
     char *buffer = params->buffer;
     if (params->is_negative)
         *buffer++ = '-';
-    int n = 0;
+    int n                = 0;
     unsigned long long d = 1;
     while (num / d >= params->base)
         d *= params->base;
@@ -104,7 +104,7 @@ static void ull2a(unsigned long long num, struct parameters *params)
 static void ll2a(int num, struct parameters *p)
 {
     if (num < 0) {
-        num = -num;
+        num            = -num;
         p->is_negative = true;
     }
     ull2a(num, p);
@@ -115,7 +115,7 @@ static void ul2a(unsigned long num, struct parameters *params)
     char *buffer = params->buffer;
     if (params->is_negative)
         *buffer++ = '-';
-    int n = 0;
+    int n           = 0;
     unsigned long d = 1;
     while (num / d >= params->base)
         d *= params->base;
@@ -135,7 +135,7 @@ static void ul2a(unsigned long num, struct parameters *params)
 static void l2a(int num, struct parameters *p)
 {
     if (num < 0) {
-        num = -num;
+        num            = -num;
         p->is_negative = true;
     }
     ul2a(num, p);
@@ -146,7 +146,7 @@ static void ui2a(unsigned int num, struct parameters *params)
     char *buffer = params->buffer;
     if (params->is_negative)
         *buffer++ = '-';
-    int n = 0;
+    int n          = 0;
     unsigned int d = 1;
     while (num / d >= params->base)
         d *= params->base;
@@ -166,7 +166,7 @@ static void ui2a(unsigned int num, struct parameters *params)
 static void i2a(int num, struct parameters *p)
 {
     if (num < 0) {
-        num = -num;
+        num            = -num;
         p->is_negative = true;
     }
     ui2a(num, p);
@@ -188,14 +188,14 @@ static void printf_format(struct printf_data *data, const char *format,
                           va_list arg)
 {
     struct parameters params;
-    String::memset(&params, 0, sizeof(struct parameters));
+    libcxx::memset(&params, 0, sizeof(struct parameters));
     const char *pos = format;
     while (*pos) {
         if (*pos == '%') {
             // 22 chars for max value of long long in octal + 1 for null
             char buffer[23];
             params.buffer = buffer;
-            String::memset(buffer, 0, 23);
+            libcxx::memset(buffer, 0, 23);
             uint8_t lng = 0;
             pos++;
             if (*pos == '0') {
@@ -205,7 +205,7 @@ static void printf_format(struct printf_data *data, const char *format,
             if (*pos >= '0' && *pos <= '9') {
                 int i = 0;
                 char padding[5];
-                String::memset(padding, 0, 5);
+                libcxx::memset(padding, 0, 5);
                 while (*pos >= '0' && *pos <= '9') {
                     padding[i++] = *pos++;
                 }
@@ -267,13 +267,13 @@ static void printf_format(struct printf_data *data, const char *format,
                     params.zero = 1;
 #if __SIZEOF_POINTER__ <= __SIZEOF_INT__
                     params.padding = 8;
-                    lng = 0;
+                    lng            = 0;
 #elif __SIZEOF_POINTER__ <= __SIZEOF_LONG__
                     params.padding = 16;
-                    lng = 1;
+                    lng            = 1;
 #elif __SIZEOF_POINTER__ <= __SIZEOF_LONG_LONG__
                     params.padding = 16;
-                    lng = 2;
+                    lng            = 2;
 #endif
                     [[fallthrough]];
                 case 'X':
@@ -293,7 +293,7 @@ static void printf_format(struct printf_data *data, const char *format,
                     data->putcf(data, '%');
                     break;
             }
-            String::memset(&params, 0, sizeof(struct parameters));
+            libcxx::memset(&params, 0, sizeof(struct parameters));
         } else {
             data->putcf(data, *pos++);
         }
@@ -304,9 +304,9 @@ int vsprintf(char *s, const char *format, va_list arg)
 {
     struct printf_data data = {
         .buffer = s,
-        .max = 0,
-        .used = 0,
-        .putcf = sprintf_putcf,
+        .max    = 0,
+        .used   = 0,
+        .putcf  = sprintf_putcf,
     };
     printf_format(&data, format, arg);
     s[data.used] = '\0';
@@ -327,9 +327,9 @@ int vsnprintf(char *s, size_t size, const char *format, va_list arg)
 {
     struct printf_data data = {
         .buffer = s,
-        .max = size,
-        .used = 0,
-        .putcf = snprintf_putcf,
+        .max    = size,
+        .used   = 0,
+        .putcf  = snprintf_putcf,
     };
     printf_format(&data, format, arg);
     s[data.used] = '\0';

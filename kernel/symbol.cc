@@ -65,8 +65,8 @@ void load_symbol(libcxx::pair<const char*, addr_t> symbol)
 {
     Symbol* s  = new Symbol;
     s->address = symbol.second;
-    s->name    = new char[String::strlen(symbol.first) + 1];
-    String::strcpy(s->name, symbol.first);
+    s->name    = new char[libcxx::strlen(symbol.first) + 1];
+    libcxx::strcpy(s->name, symbol.first);
     symbols.push_back(*s);
     address_to_name_hash.put(symbol.second, s->name);
     name_to_address_hash.put(s->name, symbol.second);

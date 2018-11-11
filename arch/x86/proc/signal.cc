@@ -20,7 +20,7 @@ void Thread::setup_signal(struct ksignal* ksig,
                           struct ThreadContext* original_state,
                           struct ThreadContext* new_state)
 {
-    String::memcpy(new_state, original_state, sizeof(*new_state));
+    libcxx::memcpy(new_state, original_state, sizeof(*new_state));
     addr_t stack_location;
     if (ksig->use_altstack) {
         stack_location = reinterpret_cast<addr_t>(this->signal_stack.ss_sp) +
@@ -46,12 +46,12 @@ void Thread::setup_signal(struct ksignal* ksig,
     struct stack_frame* frame = (struct stack_frame*)new_state->esp;
 #endif
 
-    String::memcpy(&frame->siginfo, ksig->siginfo, sizeof(frame->siginfo));
-    String::memcpy(&frame->ucontext, ksig->ucontext, sizeof(frame->ucontext));
+    libcxx::memcpy(&frame->siginfo, ksig->siginfo, sizeof(frame->siginfo));
+    libcxx::memcpy(&frame->ucontext, ksig->ucontext, sizeof(frame->ucontext));
     frame->ret_location = this->parent->sigreturn;
 #ifndef X86_64
-    frame->signum = ksig->signum;
-    frame->siginfo_address = &frame->siginfo;
+    frame->signum           = ksig->signum;
+    frame->siginfo_address  = &frame->siginfo;
     frame->ucontext_address = &frame->ucontext;
 #endif
 
@@ -82,8 +82,8 @@ namespace Signal
 void encode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
 {
 #ifdef X86_64
-    mctx->gregs[REG_R8] = ctx->r8;
-    mctx->gregs[REG_R9] = ctx->r9;
+    mctx->gregs[REG_R8]  = ctx->r8;
+    mctx->gregs[REG_R9]  = ctx->r9;
     mctx->gregs[REG_R10] = ctx->r10;
     mctx->gregs[REG_R11] = ctx->r11;
     mctx->gregs[REG_R12] = ctx->r12;
@@ -121,23 +121,23 @@ void encode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
 void decode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
 {
 #ifdef X86_64
-    ctx->r8 = mctx->gregs[REG_R8];
-    ctx->r9 = mctx->gregs[REG_R9];
-    ctx->r10 = mctx->gregs[REG_R10];
-    ctx->r11 = mctx->gregs[REG_R11];
-    ctx->r12 = mctx->gregs[REG_R12];
-    ctx->r13 = mctx->gregs[REG_R13];
-    ctx->r14 = mctx->gregs[REG_R14];
-    ctx->r15 = mctx->gregs[REG_R15];
-    ctx->rdi = mctx->gregs[REG_RDI];
-    ctx->rsi = mctx->gregs[REG_RSI];
-    ctx->rbp = mctx->gregs[REG_RBP];
-    ctx->rbx = mctx->gregs[REG_RBX];
-    ctx->rdx = mctx->gregs[REG_RDX];
-    ctx->rax = mctx->gregs[REG_RAX];
-    ctx->rcx = mctx->gregs[REG_RCX];
-    ctx->rsp = mctx->gregs[REG_RSP];
-    ctx->rip = mctx->gregs[REG_RIP];
+    ctx->r8     = mctx->gregs[REG_R8];
+    ctx->r9     = mctx->gregs[REG_R9];
+    ctx->r10    = mctx->gregs[REG_R10];
+    ctx->r11    = mctx->gregs[REG_R11];
+    ctx->r12    = mctx->gregs[REG_R12];
+    ctx->r13    = mctx->gregs[REG_R13];
+    ctx->r14    = mctx->gregs[REG_R14];
+    ctx->r15    = mctx->gregs[REG_R15];
+    ctx->rdi    = mctx->gregs[REG_RDI];
+    ctx->rsi    = mctx->gregs[REG_RSI];
+    ctx->rbp    = mctx->gregs[REG_RBP];
+    ctx->rbx    = mctx->gregs[REG_RBX];
+    ctx->rdx    = mctx->gregs[REG_RDX];
+    ctx->rax    = mctx->gregs[REG_RAX];
+    ctx->rcx    = mctx->gregs[REG_RCX];
+    ctx->rsp    = mctx->gregs[REG_RSP];
+    ctx->rip    = mctx->gregs[REG_RIP];
     ctx->rflags = mctx->gregs[REG_EFL];
 // TODO: Decode CS, GS, and FS
 #else
@@ -154,4 +154,4 @@ void decode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
 // // TODO: Decode CS, GS, and FS
 #endif
 }
-}  // namespace Signal
+} // namespace Signal

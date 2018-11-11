@@ -74,7 +74,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
                         Math::round_down(current, blkdev->sector_size());
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Block offset 0x%zX\n", distance);
-                    String::memcpy(
+                    libcxx::memcpy(
                         buffer + processed,
                         reinterpret_cast<void*>(region.virtual_base + distance),
                         region.size - distance);
@@ -83,7 +83,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
                 } else {
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Aligned disk read :)\n");
-                    String::memcpy(buffer + processed,
+                    libcxx::memcpy(buffer + processed,
                                    reinterpret_cast<void*>(region.virtual_base),
                                    region.size);
                     processed += region.size;

@@ -35,7 +35,7 @@ bool parse(addr_t initrd)
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =
             reinterpret_cast<Filesystem::Initrd::Tar::Header*>(current);
-        if (String::memcmp(header->magic, tar_magic, 6)) {
+        if (libcxx::memcmp(header->magic, tar_magic, 6)) {
             Log::printk(Log::LogLevel::ERROR, "initrd: Bad tar magic\n");
             return false;
         }

@@ -161,7 +161,7 @@ void detect(Core& cpu)
     }
 
     // Vendor specific CPUID extensions
-    if (!String::strncmp("GenuineIntel", cpu.vendor, 13)) {
+    if (!libcxx::strncmp("GenuineIntel", cpu.vendor, 13)) {
         Log::printk(Log::LogLevel::INFO, "Found supported CPU vendor\n");
         detect_intel(cpu);
     } else {

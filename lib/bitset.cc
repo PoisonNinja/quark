@@ -5,7 +5,7 @@ Bitset::Bitset(size_t size, uint8_t initial)
 {
     this->allocated = Math::div_round_up(size, 8);
     this->bitset    = new uint8_t[this->allocated];
-    String::memset(this->bitset, initial, this->allocated);
+    libcxx::memset(this->bitset, initial, this->allocated);
 }
 
 Bitset::Bitset(size_t size)

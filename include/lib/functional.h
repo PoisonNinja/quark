@@ -22,9 +22,28 @@ struct hash<Key*> {
     }
 };
 
+/*
+ * Integer specialization
+ */
 template <>
 struct hash<bool> {
     size_t operator()(bool k) const
+    {
+        return static_cast<size_t>(k);
+    }
+};
+
+template <>
+struct hash<unsigned long> {
+    size_t operator()(unsigned long k) const
+    {
+        return static_cast<size_t>(k);
+    }
+};
+
+template <>
+struct hash<unsigned long long> {
+    size_t operator()(unsigned long long k) const
     {
         return static_cast<size_t>(k);
     }

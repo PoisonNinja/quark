@@ -19,6 +19,7 @@
 #pragma once
 
 #include <lib/functional.h>
+#include <lib/math.h>
 #include <lib/murmur.h>
 #include <lib/string.h>
 #include <types.h>
@@ -95,15 +96,15 @@ private:
 };
 
 // Hash map class template
-template <class Key, class T, class Hash = libcxx::hash<Key>>
+template <class Key, class T, size_t bucket_count,
+          class Hash = libcxx::hash<Key>>
 class unordered_map
 {
 public:
-    unordered_map(size_t bucket_count = 16, const Hash &hash = Hash())
-        : num_buckets(bucket_count)
+    unordered_map(const Hash &hash = Hash())
+        : num_buckets(Math::log_2(bucket_count))
         , hash(hash)
     {
-        this->buckets = new HashNode<Key, T> *[this->num_buckets];
     }
 
     unordered_map(const unordered_map &other) = delete;
@@ -172,7 +173,7 @@ public:
 
     void remove(const Key &key)
     {
-        unsigned long hashValue = hash(key) % this->bucket_count;
+        unsigned long hashValue = hash(key) % this->num_buckets;
         HashNode<Key, T> *prev  = nullptr;
         HashNode<Key, T> *entry = buckets[hashValue];
 
@@ -199,9 +200,8 @@ public:
     }
 
 private:
-    // hash table
     size_t num_buckets;
-    HashNode<Key, T> **buckets;
+    HashNode<Key, T> *buckets[Math::log_2(bucket_count)];
     Hash hash;
 };
 } // namespace libcxx

@@ -14,9 +14,13 @@ struct AddressHash {
     }
 };
 
-libcxx::unordered_map<libcxx::StringKey, addr_t, libcxx::StringHash>
+constexpr size_t symbol_size = 4096;
+
+libcxx::unordered_map<libcxx::StringKey, addr_t, symbol_size,
+                      libcxx::StringHash>
     name_to_address_hash;
-libcxx::unordered_map<addr_t, const char*, AddressHash> address_to_name_hash;
+libcxx::unordered_map<addr_t, const char*, symbol_size, AddressHash>
+    address_to_name_hash;
 
 struct Symbol {
     addr_t address;

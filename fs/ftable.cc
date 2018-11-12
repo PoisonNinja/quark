@@ -5,7 +5,9 @@
 
 namespace
 {
-libcxx::unordered_map<libcxx::StringKey, Filesystem::Driver*,
+constexpr size_t ftable_size = 128;
+
+libcxx::unordered_map<libcxx::StringKey, Filesystem::Driver*, ftable_size,
                       libcxx::StringHash>
     ftable_hash;
 } // namespace

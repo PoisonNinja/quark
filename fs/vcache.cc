@@ -34,7 +34,10 @@ struct Hash {
     }
 };
 
-libcxx::unordered_map<Key, libcxx::intrusive_ptr<Vnode>, Hash> vcache_hash;
+constexpr size_t vcache_size = 1024;
+
+libcxx::unordered_map<Key, libcxx::intrusive_ptr<Vnode>, vcache_size, Hash>
+    vcache_hash;
 } // namespace
 
 namespace VCache

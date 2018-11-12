@@ -126,7 +126,7 @@ public:
         }
     }
 
-    bool get(const Key &key, T &value)
+    bool at(const Key &key, T &value)
     {
         unsigned long hashValue = hash(key) % this->num_buckets;
         HashNode<Key, T> *entry = buckets[hashValue];
@@ -143,7 +143,7 @@ public:
         return false;
     }
 
-    void put(const Key &key, const T &value)
+    void insert(const Key &key, const T &value)
     {
         unsigned long hashValue = hash(key) % this->num_buckets;
         HashNode<Key, T> *prev  = nullptr;
@@ -171,7 +171,7 @@ public:
         }
     }
 
-    void remove(const Key &key)
+    size_t erase(const Key &key)
     {
         unsigned long hashValue = hash(key) % this->num_buckets;
         HashNode<Key, T> *prev  = nullptr;
@@ -184,7 +184,7 @@ public:
 
         if (entry == nullptr) {
             // key not found
-            return;
+            return 0;
 
         } else {
             if (prev == nullptr) {
@@ -196,6 +196,7 @@ public:
             }
 
             delete entry;
+            return 1;
         }
     }
 

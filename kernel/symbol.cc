@@ -51,7 +51,7 @@ libcxx::pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
 const char* resolve_addr(addr_t address)
 {
     const char* name = nullptr;
-    if (!address_to_name_hash.get(address, name)) {
+    if (!address_to_name_hash.at(address, name)) {
         return nullptr;
     }
     return name;
@@ -59,7 +59,7 @@ const char* resolve_addr(addr_t address)
 addr_t resolve_name(const char* name)
 {
     addr_t address = 0;
-    if (!name_to_address_hash.get(name, address)) {
+    if (!name_to_address_hash.at(name, address)) {
         return 0;
     }
     return address;
@@ -72,8 +72,8 @@ void load_symbol(libcxx::pair<const char*, addr_t> symbol)
     s->name    = new char[libcxx::strlen(symbol.first) + 1];
     libcxx::strcpy(s->name, symbol.first);
     symbols.push_back(*s);
-    address_to_name_hash.put(symbol.second, s->name);
-    name_to_address_hash.put(s->name, symbol.second);
+    address_to_name_hash.insert(symbol.second, s->name);
+    name_to_address_hash.insert(s->name, symbol.second);
 }
 
 extern void arch_init();

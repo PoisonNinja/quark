@@ -46,12 +46,12 @@ bool add(ino_t ino, dev_t dev, libcxx::intrusive_ptr<Vnode> vnode)
 {
     libcxx::intrusive_ptr<Vnode> dummy(nullptr);
     Key key(ino, dev);
-    if (vcache_hash.get(key, dummy)) {
+    if (vcache_hash.at(key, dummy)) {
         Log::printk(Log::LogLevel::WARNING,
                     "Vnode cache already has this vnode, discarding\n");
         return false;
     }
-    vcache_hash.put(key, vnode);
+    vcache_hash.insert(key, vnode);
     return true;
 }
 
@@ -59,7 +59,7 @@ libcxx::intrusive_ptr<Vnode> get(ino_t ino, dev_t dev)
 {
     libcxx::intrusive_ptr<Vnode> dummy = libcxx::intrusive_ptr<Vnode>(nullptr);
     Key key(ino, dev);
-    if (!vcache_hash.get(key, dummy)) {
+    if (!vcache_hash.at(key, dummy)) {
         return libcxx::intrusive_ptr<Vnode>(nullptr);
     }
     return dummy;

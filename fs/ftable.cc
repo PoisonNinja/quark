@@ -19,14 +19,14 @@ namespace FTable
 
 bool add(const char* name, Driver* driver)
 {
-    ftable_hash.put(name, driver);
+    ftable_hash.insert(name, driver);
     return true;
 }
 
 Driver* get(const char* name)
 {
     Driver* driver;
-    if (!ftable_hash.get(name, driver)) {
+    if (!ftable_hash.at(name, driver)) {
         return nullptr;
     } else {
         return driver;

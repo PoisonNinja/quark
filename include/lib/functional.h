@@ -6,7 +6,7 @@ namespace libcxx
 {
 template <class Key>
 struct hash {
-    size_t operator()(Key k) const;
+    size_t operator()(const Key k) const;
 };
 
 /*
@@ -16,7 +16,7 @@ struct hash {
  */
 template <class Key>
 struct hash<Key*> {
-    size_t operator()(Key* k) const
+    size_t operator()(const Key* k) const
     {
         return reinterpret_cast<size_t>(k);
     }
@@ -27,7 +27,7 @@ struct hash<Key*> {
  */
 template <>
 struct hash<bool> {
-    size_t operator()(bool k) const
+    size_t operator()(const bool k) const
     {
         return static_cast<size_t>(k);
     }
@@ -35,7 +35,7 @@ struct hash<bool> {
 
 template <>
 struct hash<unsigned long> {
-    size_t operator()(unsigned long k) const
+    size_t operator()(const unsigned long k) const
     {
         return static_cast<size_t>(k);
     }
@@ -43,7 +43,7 @@ struct hash<unsigned long> {
 
 template <>
 struct hash<unsigned long long> {
-    size_t operator()(unsigned long long k) const
+    size_t operator()(const unsigned long long k) const
     {
         return static_cast<size_t>(k);
     }

@@ -67,10 +67,11 @@ public:
     node(node const&)
     {
     }
-    void operator=(node const& n)
+    node& operator=(node const& n)
     {
         this->next = n.next;
         this->prev = n.prev;
+        return *this;
     }
 };
 

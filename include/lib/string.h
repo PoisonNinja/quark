@@ -1,7 +1,9 @@
 #pragma once
 
+#include <kernel.h>
 #include <lib/functional.h>
 #include <lib/murmur.h>
+#include <lib/utility.h>
 #include <types.h>
 
 namespace libcxx
@@ -44,17 +46,44 @@ public:
     {
     }
     string(const char *s)
+        : string()
     {
         this->cstr_to_int(s);
     }
     string(const string &s)
+        : string()
     {
         this->cstr_to_int(s.buffer);
+    }
+    string(string &&s)
+        : string()
+    {
+        if (s.size > 15) {
+            libcxx::swap(this->large_buffer, s.large_buffer);
+            libcxx::swap(this->capacity, s.capacity);
+        } else {
+            libcxx::strncpy(this->small_buffer, s.small_buffer, 16);
+        }
+        libcxx::swap(this->size, s.size);
+        libcxx::swap(this->buffer, s.buffer);
     }
 
     string &operator=(const libcxx::string &other)
     {
         this->cstr_to_int(other.buffer);
+        return *this;
+    }
+
+    string &operator=(libcxx::string &&s)
+    {
+        if (s.size > 15) {
+            libcxx::swap(this->large_buffer, s.large_buffer);
+            libcxx::swap(this->capacity, s.capacity);
+        } else {
+            libcxx::strncpy(this->small_buffer, s.small_buffer, 16);
+        }
+        libcxx::swap(this->size, s.size);
+        libcxx::swap(this->buffer, s.buffer);
         return *this;
     }
 
@@ -76,8 +105,8 @@ private:
     ssize_t cstr_to_int(const char *s)
     {
         if (this->size > 15) {
-            if (this->buffer) {
-                delete[] this->buffer;
+            if (this->large_buffer) {
+                delete[] this->large_buffer;
                 this->capacity = 0;
             }
         }
@@ -86,11 +115,12 @@ private:
             libcxx::strncpy(this->small_buffer, s, 16);
             this->buffer = this->small_buffer;
         } else {
-            this->buffer = new char[s_size + 1];
-            libcxx::strcpy(this->buffer, s);
+            this->large_buffer = new char[s_size + 1];
+            libcxx::strcpy(this->large_buffer, s);
             this->capacity = s_size;
             this->buffer   = this->large_buffer;
         }
+        this->size = s_size;
         return s_size;
     }
     union {

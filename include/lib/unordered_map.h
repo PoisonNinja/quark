@@ -26,27 +26,6 @@
 
 namespace libcxx
 {
-struct StringKey {
-    StringKey(const char *s)
-        : value(s){};
-    const char *value;
-    bool operator==(const struct StringKey &other)
-    {
-        return !libcxx::strcmp(this->value, other.value);
-    }
-    bool operator!=(const struct StringKey &other)
-    {
-        return !(*this == other);
-    }
-};
-
-struct StringHash {
-    unsigned long operator()(const StringKey &k)
-    {
-        return Murmur::hash(k.value, libcxx::strlen(k.value));
-    }
-};
-
 // Hash node class template
 template <typename K, typename V>
 class HashNode
@@ -58,6 +37,10 @@ public:
         , _next(nullptr)
     {
     }
+
+    // disallow copy and assignment
+    HashNode(const HashNode &) = delete;
+    HashNode &operator=(const HashNode &) = delete;
 
     K key() const
     {
@@ -90,9 +73,6 @@ private:
     V _value;
     // next bucket with the same key
     HashNode *_next;
-    // disallow copy and assignment
-    HashNode(const HashNode &);
-    HashNode &operator=(const HashNode &);
 };
 
 // Hash map class template
@@ -128,7 +108,7 @@ public:
 
     bool at(const Key &key, T &value)
     {
-        unsigned long hashValue = hash(key) % this->num_buckets;
+        size_t hashValue        = hash(key) % this->num_buckets;
         HashNode<Key, T> *entry = buckets[hashValue];
 
         while (entry != nullptr) {
@@ -136,7 +116,6 @@ public:
                 value = entry->value();
                 return true;
             }
-
             entry = entry->next();
         }
 
@@ -145,7 +124,7 @@ public:
 
     void insert(const Key &key, const T &value)
     {
-        unsigned long hashValue = hash(key) % this->num_buckets;
+        size_t hashValue        = hash(key) % this->num_buckets;
         HashNode<Key, T> *prev  = nullptr;
         HashNode<Key, T> *entry = buckets[hashValue];
 
@@ -160,7 +139,6 @@ public:
             if (prev == nullptr) {
                 // insert as first bucket
                 buckets[hashValue] = entry;
-
             } else {
                 prev->set_next(entry);
             }
@@ -173,7 +151,7 @@ public:
 
     size_t erase(const Key &key)
     {
-        unsigned long hashValue = hash(key) % this->num_buckets;
+        size_t hashValue        = hash(key) % this->num_buckets;
         HashNode<Key, T> *prev  = nullptr;
         HashNode<Key, T> *entry = buckets[hashValue];
 

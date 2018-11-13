@@ -51,7 +51,7 @@ int DTable::add(libcxx::intrusive_ptr<Descriptor> desc)
 
 bool DTable::remove(int fd)
 {
-    if (fd >= size || !fds[fd]) {
+    if (fd >= size || fd < 0 || !fds[fd]) {
         return false;
     } else {
         fds[fd] = libcxx::intrusive_ptr<Filesystem::Descriptor>(nullptr);
@@ -61,7 +61,7 @@ bool DTable::remove(int fd)
 
 libcxx::intrusive_ptr<Descriptor> DTable::get(int index)
 {
-    if (index >= size) {
+    if (index >= size || index < 0) {
         return libcxx::intrusive_ptr<Descriptor>(nullptr);
     }
     return fds[index];

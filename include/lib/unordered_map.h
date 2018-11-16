@@ -13,15 +13,13 @@
  * limitations under the License.
  *
  * Borrowed from https://github.com/aozturk/HashMap
- *
  */
 
 #pragma once
 
 #include <lib/functional.h>
+#include <lib/list.h>
 #include <lib/math.h>
-#include <lib/murmur.h>
-#include <lib/string.h>
 #include <types.h>
 
 namespace libcxx
@@ -39,7 +37,6 @@ public:
         node(const Key &key, const T &value)
             : _key(key)
             , _value(value)
-            , _next(nullptr)
         {
         }
 
@@ -62,22 +59,13 @@ public:
             _value = value;
         }
 
-        node *next() const
-        {
-            return _next;
-        }
-
-        void set_next(node *next)
-        {
-            _next = next;
-        }
+        libcxx::node<typename unordered_map<Key, T, bucket_count>::node>
+            bucket_node;
 
     private:
         // key-value pair
         const Key _key;
         T _value;
-        // next bucket with the same key
-        node *_next;
     };
 
 public:
@@ -92,34 +80,24 @@ public:
 
     ~unordered_map()
     {
-        // destroy all buckets one by one
+        // Destroy all buckets one by one
         for (size_t i = 0; i < this->num_buckets; ++i) {
-            typename unordered_map<Key, T, bucket_count>::node *entry =
-                buckets[i];
-
-            while (entry != nullptr) {
-                typename unordered_map<Key, T, bucket_count>::node *prev =
-                    entry;
-                entry = entry->next();
-                delete prev;
+            for (auto it = buckets[i].begin(); it != buckets[i].end();) {
+                auto &obj = *it;
+                delete &obj;
+                it = buckets[i].erase(it);
             }
-
-            buckets[i] = nullptr;
         }
     }
 
     bool at(const Key &key, T &value)
     {
-        size_t hashValue = hash(key) % this->num_buckets;
-        typename unordered_map<Key, T, bucket_count>::node *entry =
-            buckets[hashValue];
-
-        while (entry != nullptr) {
-            if (entry->key() == key) {
-                value = entry->value();
+        size_t hash_value = hash(key) % this->num_buckets;
+        for (auto &node : buckets[hash_value]) {
+            if (node.key() == key) {
+                value = node.value();
                 return true;
             }
-            entry = entry->next();
         }
 
         return false;
@@ -127,67 +105,38 @@ public:
 
     void insert(const Key &key, const T &value)
     {
-        size_t hashValue = hash(key) % this->num_buckets;
-        typename unordered_map<Key, T, bucket_count>::node *prev = nullptr;
-        typename unordered_map<Key, T, bucket_count>::node *entry =
-            buckets[hashValue];
+        size_t hash_value = hash(key) % this->num_buckets;
 
-        while (entry != nullptr && entry->key() != key) {
-            prev  = entry;
-            entry = entry->next();
-        }
-
-        if (entry == nullptr) {
-            entry = new
-                typename unordered_map<Key, T, bucket_count>::node(key, value);
-
-            if (prev == nullptr) {
-                // insert as first bucket
-                buckets[hashValue] = entry;
-            } else {
-                prev->set_next(entry);
+        for (auto &node : buckets[hash_value]) {
+            if (node.key() == key) {
+                return;
             }
-
-        } else {
-            // just update the value
-            entry->set_value(value);
         }
+
+        typename unordered_map<Key, T, bucket_count>::node *entry =
+            new typename unordered_map<Key, T, bucket_count>::node(key, value);
+        buckets[hash_value].push_back(*entry);
     }
 
     size_t erase(const Key &key)
     {
-        size_t hashValue = hash(key) % this->num_buckets;
-        typename unordered_map<Key, T, bucket_count>::node *prev = nullptr;
-        typename unordered_map<Key, T, bucket_count>::node *entry =
-            buckets[hashValue];
+        size_t hash_value = hash(key) % this->num_buckets;
 
-        while (entry != nullptr && entry->key() != key) {
-            prev  = entry;
-            entry = entry->next();
-        }
-
-        if (entry == nullptr) {
-            // key not found
-            return 0;
-
-        } else {
-            if (prev == nullptr) {
-                // remove first bucket of the list
-                buckets[hashValue] = entry->next();
-
-            } else {
-                prev->set_next(entry->next());
+        for (auto it = buckets[hash_value].begin();
+             it != buckets[hash_value].end();) {
+            if (*it.key() == key) {
+                buckets[hash_value].erase(it);
+                return 1;
             }
-
-            delete entry;
-            return 1;
         }
+        return 0;
     }
 
 private:
     size_t num_buckets;
-    typename unordered_map<Key, T, bucket_count>::node
-        *buckets[Math::log_2(bucket_count)];
+    libcxx::list<typename unordered_map<Key, T, bucket_count>::node,
+                 &unordered_map<Key, T, bucket_count>::node::bucket_node>
+        buckets[Math::log_2(bucket_count)];
     Hash hash;
 };
 } // namespace libcxx

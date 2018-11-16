@@ -26,60 +26,60 @@
 
 namespace libcxx
 {
-// Hash node class template
-template <typename K, typename V>
-class HashNode
-{
-public:
-    HashNode(const K &key, const V &value)
-        : _key(key)
-        , _value(value)
-        , _next(nullptr)
-    {
-    }
-
-    // disallow copy and assignment
-    HashNode(const HashNode &) = delete;
-    HashNode &operator=(const HashNode &) = delete;
-
-    K key() const
-    {
-        return _key;
-    }
-
-    V value() const
-    {
-        return _value;
-    }
-
-    void set_value(V value)
-    {
-        _value = value;
-    }
-
-    HashNode *next() const
-    {
-        return _next;
-    }
-
-    void set_next(HashNode *next)
-    {
-        _next = next;
-    }
-
-private:
-    // key-value pair
-    const K _key;
-    V _value;
-    // next bucket with the same key
-    HashNode *_next;
-};
-
 // Hash map class template
 template <class Key, class T, size_t bucket_count,
           class Hash = libcxx::hash<Key>>
 class unordered_map
 {
+public:
+    // Hash node class template
+    class node
+    {
+    public:
+        node(const Key &key, const T &value)
+            : _key(key)
+            , _value(value)
+            , _next(nullptr)
+        {
+        }
+
+        // disallow copy and assignment
+        node(const node &) = delete;
+        node &operator=(const node &) = delete;
+
+        Key key() const
+        {
+            return _key;
+        }
+
+        T value() const
+        {
+            return _value;
+        }
+
+        void set_value(T value)
+        {
+            _value = value;
+        }
+
+        node *next() const
+        {
+            return _next;
+        }
+
+        void set_next(node *next)
+        {
+            _next = next;
+        }
+
+    private:
+        // key-value pair
+        const Key _key;
+        T _value;
+        // next bucket with the same key
+        node *_next;
+    };
+
 public:
     unordered_map(const Hash &hash = Hash())
         : num_buckets(Math::log_2(bucket_count))
@@ -94,11 +94,13 @@ public:
     {
         // destroy all buckets one by one
         for (size_t i = 0; i < this->num_buckets; ++i) {
-            HashNode<Key, T> *entry = buckets[i];
+            typename unordered_map<Key, T, bucket_count>::node *entry =
+                buckets[i];
 
             while (entry != nullptr) {
-                HashNode<Key, T> *prev = entry;
-                entry                  = entry->next();
+                typename unordered_map<Key, T, bucket_count>::node *prev =
+                    entry;
+                entry = entry->next();
                 delete prev;
             }
 
@@ -108,8 +110,9 @@ public:
 
     bool at(const Key &key, T &value)
     {
-        size_t hashValue        = hash(key) % this->num_buckets;
-        HashNode<Key, T> *entry = buckets[hashValue];
+        size_t hashValue = hash(key) % this->num_buckets;
+        typename unordered_map<Key, T, bucket_count>::node *entry =
+            buckets[hashValue];
 
         while (entry != nullptr) {
             if (entry->key() == key) {
@@ -124,9 +127,10 @@ public:
 
     void insert(const Key &key, const T &value)
     {
-        size_t hashValue        = hash(key) % this->num_buckets;
-        HashNode<Key, T> *prev  = nullptr;
-        HashNode<Key, T> *entry = buckets[hashValue];
+        size_t hashValue = hash(key) % this->num_buckets;
+        typename unordered_map<Key, T, bucket_count>::node *prev = nullptr;
+        typename unordered_map<Key, T, bucket_count>::node *entry =
+            buckets[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -134,7 +138,8 @@ public:
         }
 
         if (entry == nullptr) {
-            entry = new HashNode<Key, T>(key, value);
+            entry = new
+                typename unordered_map<Key, T, bucket_count>::node(key, value);
 
             if (prev == nullptr) {
                 // insert as first bucket
@@ -151,9 +156,10 @@ public:
 
     size_t erase(const Key &key)
     {
-        size_t hashValue        = hash(key) % this->num_buckets;
-        HashNode<Key, T> *prev  = nullptr;
-        HashNode<Key, T> *entry = buckets[hashValue];
+        size_t hashValue = hash(key) % this->num_buckets;
+        typename unordered_map<Key, T, bucket_count>::node *prev = nullptr;
+        typename unordered_map<Key, T, bucket_count>::node *entry =
+            buckets[hashValue];
 
         while (entry != nullptr && entry->key() != key) {
             prev  = entry;
@@ -180,7 +186,8 @@ public:
 
 private:
     size_t num_buckets;
-    HashNode<Key, T> *buckets[Math::log_2(bucket_count)];
+    typename unordered_map<Key, T, bucket_count>::node
+        *buckets[Math::log_2(bucket_count)];
     Hash hash;
 };
 } // namespace libcxx

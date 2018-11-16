@@ -20,9 +20,7 @@ void *map_heap(size_t size)
 void free_heap(void *start, size_t size)
 {
     size *= Memory::Virtual::PAGE_SIZE;
-    for (size_t i = 0; i < size; i += Memory::Virtual::PAGE_SIZE) {
-        Memory::Virtual::unmap_range(reinterpret_cast<addr_t>(start), size);
-    }
+    Memory::Virtual::unmap_range(reinterpret_cast<addr_t>(start), size);
 }
 
 int liballoc_lock(void)
@@ -41,8 +39,7 @@ int liballoc_unlock(void)
 #define VERSION "1.1"
 #define ALIGNMENT                                                              \
     16ul // 4ul				///< This is the byte alignment that memory must
-         // be
-         // allocated on. IMPORTANT for GTK and other stuff.
+         // be allocated on. IMPORTANT for GTK and other stuff.
 
 #define ALIGN_TYPE char /// unsigned char[16] /// unsigned short
 #define ALIGN_INFO                                                             \

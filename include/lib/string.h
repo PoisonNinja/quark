@@ -88,6 +88,14 @@ public:
         libcxx::swap(this->size, s.size);
         return *this;
     }
+    ~string()
+    {
+        if (this->size > 15) {
+            if (this->large_buffer) {
+                delete[] this->large_buffer;
+            }
+        }
+    }
 
     bool operator==(const libcxx::string &other)
     {

@@ -39,11 +39,11 @@ class string
 {
 public:
     string()
-        : large_buffer(nullptr)
-        , capacity(0)
-        , buffer(nullptr)
-        , size(0)
     {
+        data.buffer   = nullptr;
+        data.capacity = 0;
+        buffer        = nullptr;
+        size          = 0;
     }
     string(const char *s)
         : string()
@@ -58,10 +58,10 @@ public:
     string(string &&s)
         : string()
     {
-        if (s.size > 15) {
-            libcxx::swap(this->large_buffer, s.large_buffer);
-            libcxx::swap(this->capacity, s.capacity);
-            this->buffer = this->large_buffer;
+        if (s.size > sizeof(data) - 1) {
+            libcxx::swap(this->data.buffer, s.data.buffer);
+            libcxx::swap(this->data.capacity, s.data.capacity);
+            this->buffer = this->data.buffer;
         } else {
             libcxx::strncpy(this->small_buffer, s.small_buffer, 16);
             this->buffer = this->small_buffer;
@@ -77,10 +77,10 @@ public:
 
     string &operator=(libcxx::string &&s)
     {
-        if (s.size > 15) {
-            libcxx::swap(this->large_buffer, s.large_buffer);
-            libcxx::swap(this->capacity, s.capacity);
-            this->buffer = this->large_buffer;
+        if (s.size > sizeof(data) - 1) {
+            libcxx::swap(this->data.buffer, s.data.buffer);
+            libcxx::swap(this->data.capacity, s.data.capacity);
+            this->buffer = this->data.buffer;
         } else {
             libcxx::strncpy(this->small_buffer, s.small_buffer, 16);
             this->buffer = this->small_buffer;
@@ -90,9 +90,9 @@ public:
     }
     ~string()
     {
-        if (this->size > 15) {
-            if (this->large_buffer) {
-                delete[] this->large_buffer;
+        if (this->size > sizeof(data) - 1) {
+            if (this->data.buffer) {
+                delete[] this->data.buffer;
             }
         }
     }
@@ -114,31 +114,31 @@ public:
 private:
     ssize_t cstr_to_int(const char *s)
     {
-        if (this->size > 15) {
-            if (this->large_buffer) {
-                delete[] this->large_buffer;
-                this->capacity = 0;
+        if (this->size > sizeof(data)) {
+            if (this->data.buffer) {
+                delete[] this->data.buffer;
+                this->data.capacity = 0;
             }
         }
         size_t s_size = libcxx::strlen(s);
-        if (s_size <= 15) {
+        if (s_size <= sizeof(data) - 1) {
             libcxx::strncpy(this->small_buffer, s, 16);
             this->buffer = this->small_buffer;
         } else {
-            this->large_buffer = new char[s_size + 1];
-            libcxx::strcpy(this->large_buffer, s);
-            this->capacity = s_size;
-            this->buffer   = this->large_buffer;
+            this->data.buffer = new char[s_size + 1];
+            libcxx::strcpy(this->data.buffer, s);
+            this->data.capacity = s_size;
+            this->buffer        = this->data.buffer;
         }
         this->size = s_size;
         return s_size;
     }
     union {
         struct {
-            char *large_buffer;
+            char *buffer;
             size_t capacity;
-        };
-        char small_buffer[16];
+        } data;
+        char small_buffer[sizeof(data)];
     };
     char *buffer;
     size_t size;

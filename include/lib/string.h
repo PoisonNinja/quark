@@ -61,11 +61,12 @@ public:
         if (s.size > 15) {
             libcxx::swap(this->large_buffer, s.large_buffer);
             libcxx::swap(this->capacity, s.capacity);
+            this->buffer = this->large_buffer;
         } else {
             libcxx::strncpy(this->small_buffer, s.small_buffer, 16);
+            this->buffer = this->small_buffer;
         }
         libcxx::swap(this->size, s.size);
-        libcxx::swap(this->buffer, s.buffer);
     }
 
     string &operator=(const libcxx::string &other)
@@ -79,11 +80,12 @@ public:
         if (s.size > 15) {
             libcxx::swap(this->large_buffer, s.large_buffer);
             libcxx::swap(this->capacity, s.capacity);
+            this->buffer = this->large_buffer;
         } else {
             libcxx::strncpy(this->small_buffer, s.small_buffer, 16);
+            this->buffer = this->small_buffer;
         }
         libcxx::swap(this->size, s.size);
-        libcxx::swap(this->buffer, s.buffer);
         return *this;
     }
 

@@ -64,7 +64,7 @@ bool TSC::periodic()
     return false;
 }
 
-const char* TSC::name()
+const libcxx::string TSC::name()
 {
     return "x86 TSC";
 }

@@ -11,8 +11,7 @@ namespace
 constexpr size_t symbol_size = 4096;
 
 libcxx::unordered_map<libcxx::string, addr_t, symbol_size> name_to_address_hash;
-libcxx::unordered_map<addr_t, libcxx::string*, symbol_size>
-    address_to_name_hash;
+libcxx::unordered_map<addr_t, libcxx::string, symbol_size> address_to_name_hash;
 
 struct Symbol {
     addr_t address;
@@ -40,13 +39,13 @@ libcxx::pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
     return libcxx::make_pair(ret, best);
 }
 
-const char* resolve_addr(addr_t address)
+libcxx::string resolve_addr(addr_t address)
 {
-    libcxx::string* name = nullptr;
+    libcxx::string name;
     if (!address_to_name_hash.at(address, name)) {
         return nullptr;
     }
-    return name->c_str();
+    return name;
 }
 addr_t resolve_name(const char* name)
 {
@@ -63,7 +62,7 @@ void load_symbol(libcxx::pair<const char*, addr_t> symbol)
     s->address = symbol.second;
     s->name    = libcxx::move(libcxx::string(symbol.first));
     symbols.push_back(*s);
-    address_to_name_hash.insert(symbol.second, &s->name);
+    address_to_name_hash.insert(symbol.second, s->name);
     name_to_address_hash.insert(s->name, symbol.second);
 }
 

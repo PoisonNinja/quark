@@ -8,7 +8,7 @@
 namespace
 {
 
-constexpr size_t symbol_size = 4096;
+constexpr size_t symbol_size = 2048;
 
 libcxx::unordered_map<libcxx::string, addr_t, symbol_size> name_to_address_hash;
 libcxx::unordered_map<addr_t, libcxx::string, symbol_size> address_to_name_hash;

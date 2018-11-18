@@ -60,8 +60,6 @@ void init_stage1()
     Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());
     initp->set_cwd(Scheduler::get_current_process()->get_cwd());
-    initp->set_dtable(
-        libcxx::intrusive_ptr<Filesystem::DTable>(new Filesystem::DTable));
     initp->address_space = cloned;
 
     Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);

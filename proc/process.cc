@@ -30,11 +30,6 @@ void Process::set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc)
     root = desc;
 }
 
-void Process::set_dtable(libcxx::intrusive_ptr<Filesystem::DTable> table)
-{
-    fds = table;
-}
-
 libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_cwd()
 {
     return cwd;
@@ -43,11 +38,6 @@ libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_cwd()
 libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_root()
 {
     return root;
-}
-
-libcxx::intrusive_ptr<Filesystem::DTable> Process::get_dtable()
-{
-    return fds;
 }
 
 void Process::add_thread(Thread* thread)
@@ -84,8 +74,7 @@ Process* Process::fork()
     Scheduler::add_process(child);
     this->children.push_back(*child);
     addr_t cloned = Memory::Virtual::fork();
-    child->set_dtable(libcxx::intrusive_ptr<Filesystem::DTable>(
-        new Filesystem::DTable(*this->fds)));
+    child->fds    = this->fds;
     child->set_root(this->get_root());
     child->set_cwd(this->get_cwd());
     child->sections      = new Memory::SectionManager(*this->sections);

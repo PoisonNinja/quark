@@ -2,13 +2,14 @@
 
 #include <fs/descriptor.h>
 #include <lib/memory.h>
+#include <lib/vector.h>
 
 namespace Filesystem
 {
-class DTable : public libcxx::intrusive_ref_counter
+class DTable
 {
 public:
-    DTable(int s = 4);
+    DTable();
     DTable(const DTable& other);
     ~DTable();
 
@@ -18,9 +19,6 @@ public:
     bool remove(int fd);
 
 private:
-    void resize();
-    libcxx::intrusive_ptr<Descriptor>* fds;
-    int size;
-    int step_size;
+    libcxx::vector<libcxx::intrusive_ptr<Descriptor>> fds;
 };
 } // namespace Filesystem

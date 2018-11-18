@@ -18,11 +18,10 @@ public:
 
     void set_cwd(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
     void set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
-    void set_dtable(libcxx::intrusive_ptr<Filesystem::DTable> table);
 
     libcxx::intrusive_ptr<Filesystem::Descriptor> get_cwd();
     libcxx::intrusive_ptr<Filesystem::Descriptor> get_root();
-    libcxx::intrusive_ptr<Filesystem::DTable> get_dtable();
+    Filesystem::DTable fds;
 
     // TLS stuff
     addr_t tls_base;
@@ -46,7 +45,6 @@ public:
 private:
     libcxx::intrusive_ptr<Filesystem::Descriptor> cwd;
     libcxx::intrusive_ptr<Filesystem::Descriptor> root;
-    libcxx::intrusive_ptr<Filesystem::DTable> fds;
 
     Process* parent;
     libcxx::list<Process, &Process::child_node> children;

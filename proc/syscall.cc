@@ -30,10 +30,10 @@ static long sys_read(int fd, const void* buffer, size_t count)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_read] = %d, %p, %p\n", fd, buffer,
                 count);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->read(
+    return Scheduler::get_current_process()->fds.get(fd)->read(
         const_cast<uint8_t*>(static_cast<const uint8_t*>(buffer)), count);
 }
 
@@ -41,10 +41,10 @@ static long sys_write(int fd, const void* buffer, size_t count)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer,
                 count);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->write(
+    return Scheduler::get_current_process()->fds.get(fd)->write(
         const_cast<uint8_t*>(static_cast<const uint8_t*>(buffer)), count);
 }
 
@@ -57,8 +57,8 @@ static long sys_open(const char* path, int flags, mode_t mode)
     if (!file) {
         return -ENOENT;
     }
-    int ret = Scheduler::get_current_process()->get_dtable()->add(file);
-    if (Scheduler::get_current_process()->get_dtable()->get(ret) != file) {
+    int ret = Scheduler::get_current_process()->fds.add(file);
+    if (Scheduler::get_current_process()->fds.get(ret) != file) {
         Log::printk(Log::LogLevel::ERROR,
                     "WTF, someone is lying about the file descriptor...\n");
         return -1;
@@ -69,7 +69,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
 static long sys_close(int fd)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_close] = %d\n", fd);
-    if (!Scheduler::get_current_process()->get_dtable()->remove(fd)) {
+    if (!Scheduler::get_current_process()->fds.remove(fd)) {
         return -1;
     } else {
         return 0;
@@ -87,21 +87,20 @@ static long sys_stat(const char* path, struct Filesystem::stat* st)
 static long sys_fstat(int fd, struct Filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->stat(st);
+    return Scheduler::get_current_process()->fds.get(fd)->stat(st);
 }
 
 static long sys_lseek(int fd, off_t offset, int whence)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_lseek] = %d, %llu, %d\n", fd,
                 offset, whence);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->lseek(
-        offset, whence);
+    return Scheduler::get_current_process()->fds.get(fd)->lseek(offset, whence);
 }
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
@@ -215,27 +214,26 @@ static long sys_ioctl(int fd, unsigned long request, char* argp)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_ioctl] = %d, 0x%lX, %p\n", fd,
                 request, argp);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->ioctl(
-        request, argp);
+    return Scheduler::get_current_process()->fds.get(fd)->ioctl(request, argp);
 }
 
 static long sys_dup(int oldfd)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_dup] = %d\n", oldfd);
-    auto desc = Scheduler::get_current_process()->get_dtable()->get(oldfd);
+    auto desc = Scheduler::get_current_process()->fds.get(oldfd);
     if (!desc) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->add(desc);
+    return Scheduler::get_current_process()->fds.add(desc);
 }
 
 static long sys_dup2(int oldfd, int newfd)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_dup2] = %d %d\n", oldfd, newfd);
-    return Scheduler::get_current_process()->get_dtable()->copy(oldfd, newfd);
+    return Scheduler::get_current_process()->fds.copy(oldfd, newfd);
 }
 
 static long sys_getpid()

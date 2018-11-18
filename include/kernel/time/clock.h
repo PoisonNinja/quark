@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/list.h>
-#include <lib/string.h>
 #include <types.h>
 
 namespace Time
@@ -20,7 +19,7 @@ public:
     virtual bool disable()                 = 0;
     virtual bool schedule(time_t interval) = 0;
     virtual bool periodic()                = 0;
-    virtual const libcxx::string name()    = 0;
+    virtual const char* name()             = 0;
     libcxx::node<Clock> node;
 };
 } // namespace Time

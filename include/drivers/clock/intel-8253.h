@@ -18,6 +18,6 @@ public:
     bool disable() override;
     bool schedule(time_t interval) override;
     bool periodic() override;
-    const libcxx::string name() override;
+    const char* name() override;
 };
-} // namespace Time
+}  // namespace Time

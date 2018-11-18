@@ -2,7 +2,6 @@
 
 #include <arch/cpu/registers.h>
 #include <lib/list.h>
-#include <lib/string.h>
 #include <types.h>
 
 namespace Interrupt
@@ -22,13 +21,12 @@ inline int irq_to_interrupt(int irq)
 using interrupt_handler_t = void (*)(int, void *, struct InterruptContext *);
 
 struct Handler {
-    Handler(interrupt_handler_t handler, const libcxx::string dev_name,
-            void *dev_id)
+    Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
         : handler(handler)
         , dev_name(dev_name)
         , dev_id(dev_id){};
     interrupt_handler_t handler;
-    const libcxx::string dev_name;
+    const char *dev_name;
     void *dev_id;
     libcxx::node<Handler> node;
 };

@@ -20,8 +20,8 @@ void init()
     TTY::init();
 
     // Register the filesystem drivers
-    FTable::add("tmpfs", new TmpFS());
-    FTable::add("ptsfs", new PTSFS());
+    Drivers::add("tmpfs", new TmpFS());
+    Drivers::add("ptsfs", new PTSFS());
 
     TTY::VGATTY* vga = new TTY::VGATTY();
     auto vga_major   = Filesystem::locate_class(Filesystem::CHR);
@@ -30,7 +30,7 @@ void init()
 
     // Initialize the root filesystem
     Superblock* rootsb = new Superblock();
-    FTable::get("tmpfs")->mount(rootsb);
+    Drivers::get("tmpfs")->mount(rootsb);
 
     libcxx::intrusive_ptr<Vnode> vroot(new Vnode(rootsb, rootsb->root));
     libcxx::intrusive_ptr<Descriptor> droot(

@@ -159,7 +159,7 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
      * Retrieve the driver first so we can check if the driver actually wants
      * a real block device or doesn't care (e.g. procfs)
      */
-    Driver* driver = FTable::get(type);
+    Driver* driver = Drivers::get(type);
     if (!driver) {
         Log::printk(Log::LogLevel::WARNING, "Failed to locate driver for %s\n",
                     type);

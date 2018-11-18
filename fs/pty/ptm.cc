@@ -24,7 +24,7 @@ libcxx::pair<int, void*> PTMX::open(const char* name)
 {
     // TODO: Perhaps have PTSFS generate this?
     PTY* pty = new PTY(next_pty_number++);
-    static_cast<PTSFS*>(FTable::get("ptsfs"))->register_pty(pty);
+    static_cast<PTSFS*>(Drivers::get("ptsfs"))->register_pty(pty);
     return libcxx::pair<int, void*>(0, pty);
 }
 

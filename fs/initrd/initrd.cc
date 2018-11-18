@@ -39,11 +39,12 @@ bool parse(addr_t initrd)
             reinterpret_cast<Filesystem::Initrd::Tar::Header*>(current);
         if (libcxx::memcmp(header->magic, tar_magic, 6)) {
             if (!libcxx::memcmp(header, &null_header, sizeof(header))) {
-                if (++null_seen) {
+                if (++null_seen == 2) {
                     Log::printk(Log::LogLevel::INFO,
                                 "initrd: Encountered null terminator, done!\n");
                     return true;
                 }
+                continue;
             } else {
                 Log::printk(Log::LogLevel::ERROR, "initrd: Bad tar magic\n");
                 return false;

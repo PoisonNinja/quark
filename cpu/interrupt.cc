@@ -40,7 +40,11 @@ void dispatch(int int_no, struct InterruptContext* ctx)
         }
     } else {
         for (auto& handler : handlers[int_no]) {
-            handler.handler(int_no, handler.dev_id, ctx);
+            if (handler.handler) {
+                handler.handler(int_no, handler.dev_id, ctx);
+            } else {
+                handler.handler_v2(int_no, handler.dev_id, ctx);
+            }
         }
     }
     if (!is_exception(int_no)) {

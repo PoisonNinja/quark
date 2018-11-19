@@ -1,6 +1,7 @@
 #pragma once
 
 #include <arch/cpu/registers.h>
+#include <lib/functional.h>
 #include <lib/list.h>
 #include <types.h>
 
@@ -26,6 +27,7 @@ struct Handler {
         , dev_name(dev_name)
         , dev_id(dev_id){};
     interrupt_handler_t handler;
+    libcxx::function<void(int, void *, struct InterruptContext *)> handler_v2;
     const char *dev_name;
     void *dev_id;
     libcxx::node<Handler> node;

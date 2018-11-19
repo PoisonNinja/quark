@@ -1,5 +1,7 @@
 #pragma once
 
+#include <lib/utility.h>
+#include <type_traits>
 #include <types.h>
 
 namespace libcxx
@@ -143,7 +145,7 @@ public:
         if (f)
             return (*f)(args...);
         else
-            return Result{};
+            return Result();
     }
     ~function()
     {

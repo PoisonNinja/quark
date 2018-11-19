@@ -22,6 +22,18 @@ constexpr typename libcxx::remove_reference<T>::type&& move(T&& t)
 }
 
 template <class T>
+constexpr T&& forward(typename libcxx::remove_reference<T>::type& t) noexcept
+{
+    return static_cast<T&&>(t);
+}
+
+template <class T>
+constexpr T&& forward(typename libcxx::remove_reference<T>::type&& t) noexcept
+{
+    return static_cast<T&&>(t);
+};
+
+template <class T>
 constexpr void swap(T& a, T& b)
 {
     T t = libcxx::move(a);
@@ -76,4 +88,10 @@ libcxx::pair<M, N> make_pair(M m, N n)
 {
     return libcxx::pair<M, N>(m, n);
 }
+
+template <class _Arg, class _Result>
+struct unary_function {
+    typedef _Arg argument_type;
+    typedef _Result result_type;
+};
 } // namespace libcxx

@@ -22,6 +22,9 @@ struct remove_reference<T &&> {
     using type = T;
 };
 
+template <class T>
+using remove_reference_t = typename remove_reference<T>::type;
+
 template <class...>
 using void_t = void;
 
@@ -47,6 +50,9 @@ struct enable_if<true, T> {
     typedef T type;
 };
 
+template <bool B, class T = void>
+using enable_if_t = typename enable_if<B, T>::type;
+
 template <class T, T v>
 struct integral_constant {
     static constexpr T value = v;
@@ -64,9 +70,6 @@ struct integral_constant {
 
 using true_type  = libcxx::integral_constant<bool, true>;
 using false_type = libcxx::integral_constant<bool, false>;
-
-template <size_t n>
-using index_constant = libcxx::integral_constant<size_t, n>;
 
 /*
  * From
@@ -205,6 +208,9 @@ template <class T>
 struct remove_pointer<T *const volatile> {
     typedef T type;
 };
+
+template <class T>
+using remove_pointer_t = typename remove_pointer<T>::type;
 
 // primary template
 template <class>

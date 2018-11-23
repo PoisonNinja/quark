@@ -190,4 +190,10 @@ private:
     template <class U>
     friend class intrusive_ptr;
 };
+
+template <class _Tp>
+inline constexpr _Tp* addressof(_Tp& __x)
+{
+    return __builtin_addressof(__x);
+}
 } // namespace libcxx

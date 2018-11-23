@@ -137,6 +137,9 @@ struct remove_const<const T> {
 };
 
 template <class T>
+using remove_const_t = typename remove_const<T>::type;
+
+template <class T>
 struct remove_volatile {
     typedef T type;
 };
@@ -146,10 +149,16 @@ struct remove_volatile<volatile T> {
 };
 
 template <class T>
+using remove_volatile_t = typename remove_volatile<T>::type;
+
+template <class T>
 struct remove_cv {
     typedef typename libcxx::remove_volatile<
         typename libcxx::remove_const<T>::type>::type type;
 };
+
+template <class T>
+using remove_cv_t = typename remove_cv<T>::type;
 
 /*
  * From libcxx - Licensed under MIT license
@@ -442,6 +451,50 @@ struct is_class
                                           !libcxx::is_union<T>::value> {
 };
 
+template <class T>
+struct is_member_pointer_helper : libcxx::false_type {
+};
+
+template <class T, class U>
+struct is_member_pointer_helper<T U::*> : libcxx::true_type {
+};
+
+template <class T>
+struct is_member_pointer
+    : is_member_pointer_helper<typename libcxx::remove_cv<T>::type> {
+};
+
+template <class T>
+inline constexpr bool is_member_pointer_v = is_member_pointer<T>::value;
+
+template <class T>
+struct is_member_function_pointer_helper : libcxx::false_type {
+};
+
+template <class T, class U>
+struct is_member_function_pointer_helper<T U::*> : libcxx::is_function<T> {
+};
+
+template <class T>
+struct is_member_function_pointer
+    : is_member_function_pointer_helper<libcxx::remove_cv_t<T>> {
+};
+
+template <class T>
+inline constexpr bool is_member_function_pointer_v =
+    is_member_function_pointer<T>::value;
+
+template <class T>
+struct is_member_object_pointer
+    : libcxx::integral_constant<
+          bool, libcxx::is_member_pointer<T>::value &&
+                    !libcxx::is_member_function_pointer<T>::value> {
+};
+
+template <class T>
+inline constexpr bool is_member_object_pointer_v =
+    is_member_object_pointer<T>::value;
+
 /*
  * From Boost - Licensed under Boost Software License
  */
@@ -487,6 +540,9 @@ public:
             typename libcxx::remove_cv<U>::type>::type>::type type;
 };
 
+template <class T>
+using decay_t = typename decay<T>::type;
+
 namespace details
 {
 template <typename Base>
@@ -519,4 +575,7 @@ struct is_base_of
           libcxx::is_class<Base>::value && libcxx::is_class<Derived>::value,
           details::pre_is_base_of2<Base, Derived>, libcxx::false_type> {
 };
+
+template <class Base, class Derived>
+inline constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
 } // namespace libcxx

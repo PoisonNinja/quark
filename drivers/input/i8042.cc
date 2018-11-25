@@ -4,7 +4,10 @@
 #include <fs/dev.h>
 #include <kernel.h>
 #include <kernel/init.h>
+#include <lib/functional.h>
 #include <proc/sched.h>
+
+using namespace libcxx::placeholders;
 
 namespace
 {
@@ -35,11 +38,8 @@ i8042Driver::i8042Driver()
     , tail(0)
 {
     Interrupt::Handler* h = new Interrupt::Handler(
-        nullptr, "keyboard", reinterpret_cast<void*>(this));
-    h->handler_v2 = [this](int int_no, void* dev_id,
-                           struct InterruptContext* ctx) {
-        this->handler(int_no, dev_id, ctx);
-    };
+        libcxx::bind(&i8042Driver::handler, this, _1, _2, _3), "keyboard",
+        reinterpret_cast<void*>(this));
     Interrupt::register_handler(Interrupt::irq_to_interrupt(1), *h);
 }
 

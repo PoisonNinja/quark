@@ -19,7 +19,8 @@ inline int irq_to_interrupt(int irq)
     return irq + 32; // TODO: Make this architecture independant
 }
 
-using interrupt_handler_t = void (*)(int, void *, struct InterruptContext *);
+using interrupt_handler_t =
+    libcxx::function<void(int, void *, struct InterruptContext *), 64>;
 
 struct Handler {
     Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
@@ -27,7 +28,6 @@ struct Handler {
         , dev_name(dev_name)
         , dev_id(dev_id){};
     interrupt_handler_t handler;
-    libcxx::function<void(int, void *, struct InterruptContext *)> handler_v2;
     const char *dev_name;
     void *dev_id;
     libcxx::node<Handler> node;

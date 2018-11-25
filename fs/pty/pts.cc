@@ -66,7 +66,7 @@ bool PTSFS::register_pty(TTY::PTY* pty)
     char name[128];
     TTY::PTS* pts = new TTY::PTS(pty);
     TTY::register_tty(134, pts);
-    sprintf(name, "pts%d", pty->index());
+    libcxx::sprintf(name, "pts%d", pty->index());
     this->root->mknod(name, S_IFCHR | 0644, mkdev(134, pty->index()));
     return true;
 }

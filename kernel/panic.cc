@@ -18,7 +18,7 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     libcxx::memset(panic_buffer, 0, Kernel::panic_max);
     va_list args;
     va_start(args, format);
-    vsnprintf(panic_buffer, Kernel::panic_max, format, args);
+    libcxx::vsnprintf(panic_buffer, Kernel::panic_max, format, args);
     va_end(args);
     Log::printk(Log::LogLevel::ERROR, "%s", panic_buffer);
     do_stack_trace();

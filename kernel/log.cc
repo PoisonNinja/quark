@@ -60,9 +60,10 @@ size_t printk(LogLevel level, const char* format, ...)
         if (level < Log::LogLevel::CONTINUE) {
             libcxx::memset(printk_buffer, 0, Log::printk_max);
             struct Time::timespec spec = Time::now();
-            r = snprintf(printk_buffer, Log::printk_max, "%s[%05llu.%09llu]%s ",
-                         colors[static_cast<int>(level)], spec.tv_sec,
-                         spec.tv_nsec, "\e[39m");
+            r = libcxx::snprintf(printk_buffer, Log::printk_max,
+                                 "%s[%05llu.%09llu]%s ",
+                                 colors[static_cast<int>(level)], spec.tv_sec,
+                                 spec.tv_nsec, "\e[39m");
             for (auto& i : output) {
                 i.write(printk_buffer, r);
             }
@@ -70,7 +71,7 @@ size_t printk(LogLevel level, const char* format, ...)
         libcxx::memset(printk_buffer, 0, Log::printk_max);
         va_list args;
         va_start(args, format);
-        r = vsnprintf(printk_buffer, Log::printk_max, format, args);
+        r = libcxx::vsnprintf(printk_buffer, Log::printk_max, format, args);
         va_end(args);
         for (auto& i : output) {
             i.write(printk_buffer, r);

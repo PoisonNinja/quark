@@ -32,6 +32,10 @@
 #include <lib/printf.h>
 #include <lib/string.h>
 
+namespace libcxx
+{
+namespace
+{
 struct parameters {
     char *buffer;
     uint8_t base;
@@ -299,6 +303,7 @@ static void printf_format(struct printf_data *data, const char *format,
         }
     }
 }
+} // namespace
 
 int vsprintf(char *s, const char *format, va_list arg)
 {
@@ -345,3 +350,4 @@ int snprintf(char *s, size_t size, const char *format, ...)
     va_end(args);
     return ret;
 }
+} // namespace libcxx

@@ -9,6 +9,11 @@
 
 namespace libcxx
 {
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC0
+ */
 template <class T>
 struct remove_reference {
     using type = T;
@@ -127,6 +132,11 @@ using make_integer_sequence =
 template <size_t N>
 using make_index_sequence = make_integer_sequence<size_t, N>;
 
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC0
+ */
 template <class T>
 struct remove_const {
     typedef T type;
@@ -161,7 +171,9 @@ template <class T>
 using remove_cv_t = typename remove_cv<T>::type;
 
 /*
- * From libcxx - Licensed under MIT license
+ * From libcxx
+ *
+ * Licensed under MIT license
  */
 template <class _Tp>
 struct __libcpp_union : public false_type {
@@ -182,6 +194,11 @@ template <class T, size_t N>
 struct is_array<T[N]> : libcxx::true_type {
 };
 
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC0
+ */
 template <class T>
 struct remove_extent {
     typedef T type;
@@ -496,7 +513,9 @@ inline constexpr bool is_member_object_pointer_v =
     is_member_object_pointer<T>::value;
 
 /*
- * From Boost - Licensed under Boost Software License
+ * From Boost
+ *
+ * Licensed under Boost Software License
  */
 namespace detail
 {

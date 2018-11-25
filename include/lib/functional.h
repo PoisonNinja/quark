@@ -75,6 +75,11 @@ struct is_reference_wrapper<libcxx::reference_wrapper<U>> : libcxx::true_type {
 template <class T>
 constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
 
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC0
+ */
 template <class T, class Type, class T1, class... Args>
 decltype(auto) INVOKE(Type T::*f, T1 &&t1, Args &&... args)
 {
@@ -338,7 +343,7 @@ struct vtable {
     destructor_ptr{[](storage_ptr_t src_ptr) noexcept->void{
         static_cast<C *>(src_ptr)->~C();
 } // namespace libcxx
-}
+} // namespace libcxx
 {
 }
 
@@ -567,6 +572,8 @@ private:
  * Take from https://gist.github.com/Redchards/c5be14c2998f1ca1d757
  */
 
+// Comment below is from original source code
+//
 // Actually, a subtle bug may arise when the function is using index_constant as
 // parameter. For this reason, a more correct implementation should define a
 // specialized class, hidden in a namespace, and forbid the use in other places.

@@ -4,6 +4,11 @@
 
 namespace libcxx
 {
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC0
+ */
 template <class T>
 constexpr typename libcxx::remove_reference<T>::type&& move(T&& t)
 {
@@ -30,6 +35,12 @@ constexpr void swap(T& a, T& b)
     b   = libcxx::move(t);
 }
 
+/*
+ * Tuple implementation based on
+ * https://codereview.stackexchange.com/questions/52272/standard-layout-tuple-implementation
+ *
+ * Licensed under CC0
+ */
 template <class... Ts>
 struct tuple;
 
@@ -139,6 +150,11 @@ get(const tuple<Ts...>& t)
     return detail::tuple_accessor<i>::get(t);
 }
 
+/*
+ * Mine :)
+ *
+ * TODO: Probably just specialize tuple - This was implemented before tuple
+ */
 template <typename M, typename N>
 struct pair {
     constexpr pair()
@@ -187,6 +203,11 @@ libcxx::pair<M, N> make_pair(M m, N n)
     return libcxx::pair<M, N>(m, n);
 }
 
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC0
+ */
 template <class _Arg, class _Result>
 struct unary_function {
     typedef _Arg argument_type;

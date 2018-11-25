@@ -7,10 +7,10 @@
 
 namespace
 {
-multiboot_memory_map_t *mmap = nullptr;
-struct multiboot_tag *mmap_tag;
+multiboot_memory_map_t *mmap      = nullptr;
+struct multiboot_tag *mmap_tag    = nullptr;
 struct multiboot_fixed *multiboot = nullptr;
-struct Boot::info *info;
+struct Boot::info *info           = nullptr;
 } // namespace
 
 namespace Memory
@@ -61,6 +61,10 @@ void init_early_alloc(struct Boot::info *b)
 
 addr_t early_allocate()
 {
+    if (!info) {
+        Kernel::panic("Attempted to allocate memory without initializing the "
+                      "early memory allocator!\n");
+    }
     /*
      * Iterate through the memory ranges. mmap will be set to the first free
      * range, whether set by the initial set up or incremented in the loop

@@ -7,7 +7,7 @@ namespace libcxx
 /*
  * From cppreference.com
  *
- * Licensed under CC0
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
  */
 template <class T>
 constexpr typename libcxx::remove_reference<T>::type&& move(T&& t)
@@ -39,7 +39,7 @@ constexpr void swap(T& a, T& b)
  * Tuple implementation based on
  * https://codereview.stackexchange.com/questions/52272/standard-layout-tuple-implementation
  *
- * Licensed under CC0
+ * Licensed under CC-BY-SA 3.0
  */
 template <class... Ts>
 struct tuple;
@@ -206,7 +206,7 @@ libcxx::pair<M, N> make_pair(M m, N n)
 /*
  * From cppreference.com
  *
- * Licensed under CC0
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
  */
 template <class _Arg, class _Result>
 struct unary_function {

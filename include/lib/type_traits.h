@@ -1,8 +1,3 @@
-/*
- * Unless otherwise explicitly stated, the code was taken from cppreference.com
- * which licensed the code as of 11/18/2018 under the CC license.
- */
-
 #pragma once
 
 #include <cstddef>
@@ -12,7 +7,7 @@ namespace libcxx
 /*
  * From cppreference.com
  *
- * Licensed under CC0
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
  */
 template <class T>
 struct remove_reference {
@@ -80,6 +75,8 @@ using false_type = libcxx::integral_constant<bool, false>;
  * From
  * https://stackoverflow.com/questions/17424477/implementation-c14-make-integer-sequence
  * by joki
+ *
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
  */
 template <typename Int, Int... Ints>
 struct integer_sequence {
@@ -135,7 +132,7 @@ using make_index_sequence = make_integer_sequence<size_t, N>;
 /*
  * From cppreference.com
  *
- * Licensed under CC0
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
  */
 template <class T>
 struct remove_const {
@@ -197,7 +194,7 @@ struct is_array<T[N]> : libcxx::true_type {
 /*
  * From cppreference.com
  *
- * Licensed under CC0
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for
  */
 template <class T>
 struct remove_extent {
@@ -515,7 +512,7 @@ inline constexpr bool is_member_object_pointer_v =
 /*
  * From Boost
  *
- * Licensed under Boost Software License
+ * Licensed under Boost Software License - See LICENSE for more details
  */
 namespace detail
 {
@@ -545,6 +542,11 @@ struct add_rvalue_reference {
 template <class T>
 typename libcxx::add_rvalue_reference<T>::type declval();
 
+/*
+ * From cppreference.com
+ *
+ * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
+ */
 template <class T>
 struct decay {
 private:
@@ -615,6 +617,11 @@ struct alignment_of : libcxx::integral_constant<size_t, alignof(T)> {
 template <class T>
 inline constexpr size_t alignment_of_v = alignment_of<T>::value;
 
+/*
+ * From libcxx
+ *
+ * Licensed under MIT license - See LICENSE for more details
+ */
 namespace __is_convertible_imp
 {
 template <class _Tp>

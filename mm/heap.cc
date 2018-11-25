@@ -1,6 +1,7 @@
 #include <arch/mm/layout.h>
 #include <arch/mm/mm.h>
 #include <kernel.h>
+#include <lib/new.h>
 #include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>

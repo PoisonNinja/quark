@@ -192,4 +192,12 @@ struct unary_function {
     typedef _Arg argument_type;
     typedef _Result result_type;
 };
+
+template <class T, class U = T>
+T exchange(T& obj, U&& new_value)
+{
+    T old_value = libcxx::move(obj);
+    obj         = libcxx::forward<U>(new_value);
+    return old_value;
+}
 } // namespace libcxx

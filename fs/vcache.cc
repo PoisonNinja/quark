@@ -30,7 +30,7 @@ private:
 struct Hash {
     unsigned long operator()(const Key& key)
     {
-        return Murmur::hash(&key, sizeof(key));
+        return libcxx::murmur::hash(&key, sizeof(key));
     }
 };
 

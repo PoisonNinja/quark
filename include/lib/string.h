@@ -149,6 +149,6 @@ private:
 
 inline size_t hash<libcxx::string>::operator()(const libcxx::string &s) const
 {
-    return Murmur::hash(s.buffer, s.size);
+    return libcxx::murmur::hash(s.buffer, s.size);
 }
 } // namespace libcxx

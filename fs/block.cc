@@ -57,7 +57,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         Filesystem::BlockRequest request;
         request.command     = Filesystem::BlockRequestType::READ;
         request.num_sectors = sglist->total_size / blkdev->sector_size();
-        request.start       = Math::round_down(current, blkdev->sector_size()) /
+        request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
         request.sglist = sglist;
         Log::printk(Log::LogLevel::INFO, "block: 0x%zX sectors, 0x%zX start\n",
@@ -66,12 +66,12 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         if (blkdev->request(&request)) {
             for (auto& region : sglist->list) {
                 if (current >
-                    Math::round_down(current, blkdev->sector_size())) {
+                    libcxx::round_down(current, blkdev->sector_size())) {
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Unaligned disk read :(\n");
                     size_t distance =
                         current -
-                        Math::round_down(current, blkdev->sector_size());
+                        libcxx::round_down(current, blkdev->sector_size());
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Block offset 0x%zX\n", distance);
                     libcxx::memcpy(

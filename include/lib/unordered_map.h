@@ -52,7 +52,7 @@ public:
 
 public:
     unordered_map(const Hash &hash = Hash())
-        : num_buckets(Math::log_2(bucket_count))
+        : num_buckets(libcxx::log2(bucket_count))
         , hash(hash)
     {
     }
@@ -118,7 +118,7 @@ private:
     size_t num_buckets;
     libcxx::list<typename unordered_map<Key, T, bucket_count>::node,
                  &unordered_map<Key, T, bucket_count>::node::bucket_node>
-        buckets[Math::log_2(bucket_count)];
+        buckets[libcxx::log2(bucket_count)];
     Hash hash;
 };
 } // namespace libcxx

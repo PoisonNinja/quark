@@ -58,7 +58,7 @@ bool bitset::reference::value() const
 
 bitset::bitset(size_t size, bool initial)
 {
-    this->allocated = Math::div_round_up(size, 8);
+    this->allocated = libcxx::div_round_up(size, 8);
     this->data      = new uint8_t[this->allocated];
     uint8_t val     = (initial) ? 0xFF : 0x00;
     libcxx::memset(this->data, val, this->allocated);

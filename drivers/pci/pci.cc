@@ -9,8 +9,8 @@ namespace PCI
 {
 namespace
 {
-List<Driver, &Driver::node> drivers;
-List<Device, &Device::node> devices;
+libcxx::list<Driver, &Driver::node> drivers;
+libcxx::list<Device, &Device::node> devices;
 
 bool is_terminator(const Filter& filter)
 {
@@ -270,11 +270,11 @@ bool register_driver(Driver& d)
     return true;
 }
 
-Pair<bool, addr_t> map(addr_t phys, size_t size)
+libcxx::pair<bool, addr_t> map(addr_t phys, size_t size)
 {
     addr_t v = Memory::Valloc::allocate(size);
     Memory::Virtual::map_range(v, phys, size, PAGE_WRITABLE | PAGE_HARDWARE);
-    return make_pair(true, v);
+    return libcxx::make_pair(true, v);
 }
 
 void init()

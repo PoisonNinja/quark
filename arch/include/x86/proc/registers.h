@@ -30,9 +30,9 @@ struct ThreadContext {
     uint64_t kernel_stack;
 };
 
-typedef uint64_t greg_t;
+using greg_t = uint64_t;
 #define NGREG 20
-typedef greg_t gregset_t[NGREG];
+using gregset_t = greg_t[NGREG];
 
 enum {
     REG_R8 = 0,
@@ -96,9 +96,9 @@ struct ThreadContext {
     uint32_t kernel_stack;
 };
 
-typedef uint32_t greg_t;
+using greg_t    = uint32_t;
 #define NGREG 16
-typedef greg_t gregset_t[NGREG];
+using gregset_t = greg_t[NGREG];
 
 enum {
     REG_GS = 0,

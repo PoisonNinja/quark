@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/list.h>
-#include <lib/pair.h>
+#include <lib/utility.h>
 #include <types.h>
 
 namespace PCI
@@ -64,7 +64,7 @@ public:
     void claim();
     void unclaim();
 
-    Node<Device> node;
+    libcxx::node<Device> node;
 
 private:
     bool claimed = false;
@@ -80,7 +80,7 @@ public:
     virtual bool probe(Device* dev) = 0;
     virtual const char* name()      = 0;
     virtual const Filter* filter()  = 0;
-    Node<Driver> node;
+    libcxx::node<Driver> node;
 };
 
 constexpr uint8_t pci_vendor_id = 0x00;
@@ -135,6 +135,6 @@ constexpr uint8_t pci_bridge_control          = 0x3E;
 
 bool register_driver(Driver& d);
 
-Pair<bool, addr_t> map(addr_t phys, size_t size);
+libcxx::pair<bool, addr_t> map(addr_t phys, size_t size);
 void init();
 } // namespace PCI

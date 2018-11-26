@@ -20,7 +20,7 @@ int BaseInode::ioctl(unsigned long request, char* argp, void* cookie)
     return -EBADF;
 }
 
-int BaseInode::link(const char*, Ref<Inode>)
+int BaseInode::link(const char*, libcxx::intrusive_ptr<Inode>)
 {
     return -EBADF;
 }
@@ -35,15 +35,15 @@ int BaseInode::mknod(const char*, mode_t, dev_t)
     return -EBADF;
 }
 
-Pair<int, void*> BaseInode::open(const char*)
+libcxx::pair<int, void*> BaseInode::open(const char*)
 {
     // Can't use make_pair here
-    return Pair<int, void*>(0, nullptr);
+    return libcxx::pair<int, void*>(0, nullptr);
 }
 
-Ref<Inode> BaseInode::lookup(const char*, int, mode_t)
+libcxx::intrusive_ptr<Inode> BaseInode::lookup(const char*, int, mode_t)
 {
-    return Ref<Inode>(nullptr);
+    return libcxx::intrusive_ptr<Inode>(nullptr);
 }
 
 ssize_t BaseInode::read(uint8_t*, size_t, off_t, void*)

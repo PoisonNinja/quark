@@ -13,7 +13,7 @@ public:
     PTMX();
     virtual ~PTMX();
 
-    virtual Pair<int, void*> open(const char* name) override;
+    virtual libcxx::pair<int, void*> open(const char* name) override;
     virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
 
     virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;

@@ -1,14 +1,12 @@
 #include <fs/vcache.h>
 #include <kernel.h>
-#include <lib/hashmap.h>
 #include <lib/murmur.h>
+#include <lib/unordered_map.h>
 
 namespace Filesystem
 {
 namespace
 {
-constexpr size_t vcache_size = 1024;
-
 class Key
 {
 public:
@@ -32,34 +30,37 @@ private:
 struct Hash {
     unsigned long operator()(const Key& key)
     {
-        return Murmur::hash(&key, sizeof(key)) % vcache_size;
+        return libcxx::murmur::hash(&key, sizeof(key));
     }
 };
 
-Hashmap<Key, Ref<Vnode>, vcache_size, Hash> vcache_hash;
+constexpr size_t vcache_size = 1024;
+
+libcxx::unordered_map<Key, libcxx::intrusive_ptr<Vnode>, vcache_size, Hash>
+    vcache_hash;
 } // namespace
 
 namespace VCache
 {
-bool add(ino_t ino, dev_t dev, Ref<Vnode> vnode)
+bool add(ino_t ino, dev_t dev, libcxx::intrusive_ptr<Vnode> vnode)
 {
-    Ref<Vnode> dummy(nullptr);
+    libcxx::intrusive_ptr<Vnode> dummy(nullptr);
     Key key(ino, dev);
-    if (vcache_hash.get(key, dummy)) {
+    if (vcache_hash.at(key, dummy)) {
         Log::printk(Log::LogLevel::WARNING,
                     "Vnode cache already has this vnode, discarding\n");
         return false;
     }
-    vcache_hash.put(key, vnode);
+    vcache_hash.insert(key, vnode);
     return true;
 }
 
-Ref<Vnode> get(ino_t ino, dev_t dev)
+libcxx::intrusive_ptr<Vnode> get(ino_t ino, dev_t dev)
 {
-    Ref<Vnode> dummy = Ref<Vnode>(nullptr);
+    libcxx::intrusive_ptr<Vnode> dummy = libcxx::intrusive_ptr<Vnode>(nullptr);
     Key key(ino, dev);
-    if (!vcache_hash.get(key, dummy)) {
-        return Ref<Vnode>(nullptr);
+    if (!vcache_hash.at(key, dummy)) {
+        return libcxx::intrusive_ptr<Vnode>(nullptr);
     }
     return dummy;
 }

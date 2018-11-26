@@ -4,7 +4,10 @@
 #include <fs/dev.h>
 #include <kernel.h>
 #include <kernel/init.h>
+#include <lib/functional.h>
 #include <proc/sched.h>
+
+using namespace libcxx::placeholders;
 
 namespace
 {
@@ -23,7 +26,7 @@ public:
     virtual bool seekable() override;
 
 private:
-    static void handler(int, void*, struct InterruptContext*);
+    void handler(int, void*, struct InterruptContext*);
     char buffer[buffer_size];
     size_t head, tail;
     Scheduler::WaitQueue queue;
@@ -35,7 +38,8 @@ i8042Driver::i8042Driver()
     , tail(0)
 {
     Interrupt::Handler* h = new Interrupt::Handler(
-        handler, "keyboard", reinterpret_cast<void*>(this));
+        libcxx::bind(&i8042Driver::handler, this, _1, _2, _3), "keyboard",
+        reinterpret_cast<void*>(this));
     Interrupt::register_handler(Interrupt::irq_to_interrupt(1), *h);
 }
 
@@ -59,9 +63,9 @@ ssize_t i8042Driver::write(uint8_t*, size_t, off_t, void*)
 
 void i8042Driver::handler(int, void* dev_id, struct InterruptContext*)
 {
-    i8042Driver* driver = reinterpret_cast<i8042Driver*>(dev_id);
-    driver->buffer[driver->head++ % buffer_size] = inb(0x60);
-    driver->queue.wakeup();
+    this->buffer[this->head++ % buffer_size] = inb(0x60);
+    Log::printk(Log::LogLevel::INFO, "Key event, %p\n", this);
+    this->queue.wakeup();
 }
 
 bool i8042Driver::seekable()

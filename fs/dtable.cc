@@ -3,65 +3,46 @@
 
 namespace Filesystem
 {
-DTable::DTable(int s)
+DTable::DTable()
 {
-    fds  = new Ref<Descriptor>[s];
-    size = step_size = s;
 }
 
 DTable::DTable(const DTable& other)
 {
-    size      = other.size;
-    step_size = other.step_size;
-    fds       = new Ref<Descriptor>[other.size];
-    for (int i = 0; i < size; i++) {
-        fds[i] = other.fds[i];
-    }
+    this->fds = other.fds;
 }
 
 DTable::~DTable()
 {
-    delete[] fds;
 }
 
-void DTable::resize()
+int DTable::add(libcxx::intrusive_ptr<Descriptor> desc)
 {
-    Ref<Descriptor>* tmp = new Ref<Descriptor>[size + step_size];
-    for (int i = 0; i < size; i++) {
-        tmp[i] = fds[i];
-    }
-    delete[] fds;
-    fds = tmp;
-    this->size += step_size;
-}
-
-int DTable::add(Ref<Descriptor> desc)
-{
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < fds.size(); i++) {
         if (!fds[i]) {
             fds[i] = desc;
             return i;
         }
     }
-    resize();
-    fds[size - step_size] = desc;
-    return size - step_size;
+
+    fds.push_back(desc);
+    return fds.size() - 1;
 }
 
 bool DTable::remove(int fd)
 {
-    if (fd >= size || !fds[fd]) {
+    if (fd >= fds.size() || fd < 0 || !fds[fd]) {
         return false;
     } else {
-        fds[fd] = Ref<Filesystem::Descriptor>(nullptr);
+        fds[fd] = libcxx::intrusive_ptr<Filesystem::Descriptor>(nullptr);
         return true;
     }
 }
 
-Ref<Descriptor> DTable::get(int index)
+libcxx::intrusive_ptr<Descriptor> DTable::get(int index)
 {
-    if (index >= size) {
-        return Ref<Descriptor>(nullptr);
+    if (index >= fds.size() || index < 0) {
+        return libcxx::intrusive_ptr<Descriptor>(nullptr);
     }
     return fds[index];
 }

@@ -89,20 +89,20 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     siginfo.si_signo = signum;
 
     ucontext_t ucontext = {
-        .uc_link = nullptr,
+        .uc_link    = nullptr,
         .uc_sigmask = this->signal_mask,
     };
 
-    String::memcpy(&ucontext.uc_stack, &this->signal_stack,
+    libcxx::memcpy(&ucontext.uc_stack, &this->signal_stack,
                    sizeof(this->signal_stack));
     Signal::encode_mcontext(&ucontext.uc_mcontext, &original_state);
 
     struct ksignal ksig = {
-        .signum = signum,
+        .signum       = signum,
         .use_altstack = use_altstack,
-        .sa = action,
-        .siginfo = &siginfo,
-        .ucontext = &ucontext,
+        .sa           = action,
+        .siginfo      = &siginfo,
+        .ucontext     = &ucontext,
     };
 
     // Mask out current signal if SA_NODEFER is not passed in
@@ -250,4 +250,4 @@ void init()
     sigaddset(&unblockable_signals, SIGKILL);
     sigaddset(&unblockable_signals, SIGSTOP);
 }
-}  // namespace Signal
+} // namespace Signal

@@ -8,8 +8,8 @@ namespace TTY
 {
 PTY::PTY(int index)
 {
-    String::memset(mbuf, 0, 1024);
-    String::memset(sbuf, 0, 1024);
+    libcxx::memset(mbuf, 0, pty_size);
+    libcxx::memset(sbuf, 0, pty_size);
     this->mhead = this->mtail = this->shead = this->stail = 0;
     this->idx                                             = index;
 }
@@ -26,7 +26,7 @@ ssize_t PTY::mread(uint8_t* buffer, size_t count)
         if (this->mhead == this->mtail) {
             this->mqueue.wait(Scheduler::wait_interruptible);
         }
-        buffer[read++] = this->mbuf[this->mtail++ % 1024];
+        buffer[read++] = this->mbuf[this->mtail++ % pty_size];
     }
     return count;
 }
@@ -34,7 +34,7 @@ ssize_t PTY::mread(uint8_t* buffer, size_t count)
 ssize_t PTY::mwrite(uint8_t* buffer, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
-        this->sbuf[this->shead++ % 1024] = buffer[i];
+        this->sbuf[this->shead++ % pty_size] = buffer[i];
     }
     this->squeue.wakeup();
     return count;
@@ -47,7 +47,7 @@ ssize_t PTY::sread(uint8_t* buffer, size_t count)
         if (this->shead == this->stail) {
             this->squeue.wait(Scheduler::wait_interruptible);
         }
-        buffer[read++] = this->sbuf[this->stail++ % 1024];
+        buffer[read++] = this->sbuf[this->stail++ % pty_size];
     }
     return count;
 }
@@ -55,7 +55,7 @@ ssize_t PTY::sread(uint8_t* buffer, size_t count)
 ssize_t PTY::swrite(uint8_t* buffer, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
-        this->mbuf[this->mhead++ % 1024] = buffer[i];
+        this->mbuf[this->mhead++ % pty_size] = buffer[i];
     }
     this->mqueue.wakeup();
     return count;

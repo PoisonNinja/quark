@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/pair.h>
+#include <lib/utility.h>
 #include <types.h>
 
 namespace Filesystem
@@ -32,7 +32,7 @@ public:
     const char* name;
 
     // A subset of Inode operations
-    virtual Pair<int, void*> open(const char* name);
+    virtual libcxx::pair<int, void*> open(const char* name);
     virtual int ioctl(unsigned long request, char* argp, void* cookie);
 
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,

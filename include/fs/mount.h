@@ -10,6 +10,6 @@ class Vnode;
 
 struct Mount {
     Superblock* sb;
-    Node<Mount> node;
+    libcxx::node<Mount> node;
 };
-}  // namespace Filesystem
+} // namespace Filesystem

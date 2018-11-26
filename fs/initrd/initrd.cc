@@ -9,8 +9,9 @@
 
 namespace
 {
-constexpr const char* tar_magic = "ustar";
-}
+constexpr const char* tar_magic                                    = "ustar";
+constexpr const struct Filesystem::Initrd::Tar::Header null_header = {0};
+} // namespace
 
 namespace Filesystem
 {
@@ -28,15 +29,26 @@ size_t decode_octal(char size[12])
 
 bool parse(addr_t initrd)
 {
-    addr_t current       = initrd;
-    Ref<Descriptor> root = Scheduler::get_current_process()->get_root();
-    Ref<Descriptor> file;
+    addr_t current = initrd;
+    libcxx::intrusive_ptr<Descriptor> root =
+        Scheduler::get_current_process()->get_root();
+    libcxx::intrusive_ptr<Descriptor> file;
+    int null_seen = 0;
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =
             reinterpret_cast<Filesystem::Initrd::Tar::Header*>(current);
-        if (String::memcmp(header->magic, tar_magic, 6)) {
-            Log::printk(Log::LogLevel::ERROR, "initrd: Bad tar magic\n");
-            return false;
+        if (libcxx::memcmp(header->magic, tar_magic, 6)) {
+            if (!libcxx::memcmp(header, &null_header, sizeof(header))) {
+                if (++null_seen == 2) {
+                    Log::printk(Log::LogLevel::INFO,
+                                "initrd: Encountered null terminator, done!\n");
+                    return true;
+                }
+                continue;
+            } else {
+                Log::printk(Log::LogLevel::ERROR, "initrd: Bad tar magic\n");
+                return false;
+            }
         }
         size_t size = decode_octal(header->size);
         Log::printk(Log::LogLevel::INFO,

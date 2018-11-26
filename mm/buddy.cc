@@ -19,7 +19,7 @@ constexpr addr_t buddy_index(addr_t x, int order)
 
 struct BuddyOrder {
     Stack* stack;
-    Bitset* bitset;
+    libcxx::bitset* bitset;
 };
 
 Buddy::Buddy(size_t s, size_t min, size_t max)
@@ -36,7 +36,7 @@ Buddy::Buddy(size_t s, size_t min, size_t max)
         stack_offset += Memory::Virtual::align_up(
             stack_overhead(this->size, Math::pow_2(i)));
         this->orders[i].bitset =
-            new Bitset(this->size / Math::pow_2(i), bitset_full);
+            new libcxx::bitset(this->size / Math::pow_2(i), true);
     }
 }
 

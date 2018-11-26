@@ -47,26 +47,35 @@ bool unmap(addr_t v)
     if (!pt->pages[Memory::X86::pt_index(v)].hardware) {
         Memory::Physical::free(pt->pages[Memory::X86::pt_index(v)].address *
                                0x1000);
+        Memory::X86::invlpg(reinterpret_cast<addr_t>(v));
     }
     pt->pages[Memory::X86::pt_index(v)].present = 0;
     if (__table_is_empty(pt)) {
         Memory::Physical::free(pd->pages[Memory::X86::pd_index(v)].address *
                                0x1000);
         pd->pages[Memory::X86::pd_index(v)].present = 0;
+        /*
+         * TODO: This unconditionally invalidates the mapping even if
+         * nothing changed. Perhaps, we should only do this if the mapping or
+         * flags changed.
+         */
+        Memory::X86::invlpg(reinterpret_cast<addr_t>(pt));
 #ifdef X86_64
         if (__table_is_empty(pd)) {
             Memory::Physical::free(
                 pdpt->pages[Memory::X86::pdpt_index(v)].address * 0x1000);
             pdpt->pages[Memory::X86::pdpt_index(v)].present = 0;
+            Memory::X86::invlpg(reinterpret_cast<addr_t>(pd));
             if (__table_is_empty(pdpt)) {
                 Memory::Physical::free(
                     pml4->pages[Memory::X86::pml4_index(v)].address * 0x1000);
                 pml4->pages[Memory::X86::pml4_index(v)].present = 0;
+                Memory::X86::invlpg(reinterpret_cast<addr_t>(pdpt));
             }
         }
 #endif
     }
     return true;
 }
-}  // namespace Virtual
-}  // namespace Memory
+} // namespace Virtual
+} // namespace Memory

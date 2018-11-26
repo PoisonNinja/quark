@@ -20,13 +20,12 @@ PTMX::~PTMX()
 {
 }
 
-Pair<int, void*> PTMX::open(const char* name)
+libcxx::pair<int, void*> PTMX::open(const char* name)
 {
-    Log::printk(Log::LogLevel::INFO, "ptmx: Opening!\n");
     // TODO: Perhaps have PTSFS generate this?
     PTY* pty = new PTY(next_pty_number++);
-    static_cast<PTSFS*>(FTable::get("ptsfs"))->register_pty(pty);
-    return Pair<int, void*>(0, pty);
+    static_cast<PTSFS*>(Drivers::get("ptsfs"))->register_pty(pty);
+    return libcxx::pair<int, void*>(0, pty);
 }
 
 int PTMX::ioctl(unsigned long request, char* argp, void* cookie)

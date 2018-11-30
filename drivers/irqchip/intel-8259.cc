@@ -3,25 +3,19 @@
 
 namespace IrqChip
 {
-namespace
-{
-constexpr int PIC1_COMMAND = 0x20;
-constexpr int PIC1_DATA    = 0x21;
-constexpr int PIC2_COMMAND = 0xA0;
-constexpr int PIC2_DATA    = 0xA1;
+static const int PIC1_COMMAND = 0x20;
+static const int PIC1_DATA = 0x21;
+static const int PIC2_COMMAND = 0xA0;
+static const int PIC2_DATA = 0xA1;
 
-constexpr int PIC1_OFFSET = 0x20; // 32
-constexpr int PIC2_OFFSET = 0x28; // 40
+static const int PIC1_OFFSET = 0x20;  // 32
+static const int PIC2_OFFSET = 0x28;  // 40
 
-constexpr int COMMAND_EOI  = 0x20;
-constexpr int COMMAND_INIT = 0x10; /* Initialization - required! */
+static const int COMMAND_EOI = 0x20;
+static const int COMMAND_INIT = 0x10; /* Initialization - required! */
 
-constexpr int COMMAND_IRR = 0x0A;
-constexpr int COMMAND_ISR = 0x0b;
-
-constexpr int CONFIG_ICW4 = 0x01; /* ICW4 (not) needed */
-constexpr int CONFIG_8086 = 0x01; /* 8086/88 (MCS-80/85) mode */
-} // namespace
+static const int CONFIG_ICW4 = 0x01; /* ICW4 (not) needed */
+static const int CONFIG_8086 = 0x01; /* 8086/88 (MCS-80/85) mode */
 
 bool Intel8259::enable()
 {
@@ -94,4 +88,10 @@ bool Intel8259::ack(uint32_t irq)
     outb(PIC1_COMMAND, COMMAND_EOI);
     return true;
 }
-} // namespace IrqChip
+
+bool Intel8259::spurious()
+{
+    // TODO: Implement
+    return false;
+}
+}  // namespace IrqChip

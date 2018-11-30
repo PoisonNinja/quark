@@ -1,12 +1,11 @@
 #include <cpu/interrupt.h>
 #include <drivers/irqchip/irqchip.h>
-#include <kernel.h>
 
 namespace IrqChip
 {
-static IrqChip* current_chip               = nullptr;
-static bool interrupt_mask[Interrupt::max] = {
-    false}; // TODO: Convert to bitfield
+static IrqChip* current_chip = nullptr;
+static uint8_t interrupt_mask[Interrupt::max] = {
+    0};  // TODO: Convert to bitfield
 
 bool mask(uint32_t irq)
 {
@@ -42,13 +41,6 @@ bool ack(uint32_t irq)
     return current_chip->ack(irq);
 }
 
-void spurious(uint32_t irq)
-{
-    Log::printk(Log::LogLevel::WARNING,
-                "irqchip: Spurious interrupt received on line %u\n", irq);
-    // TODO: Track them
-}
-
 bool set_irqchip(IrqChip& chip)
 {
     if (current_chip) {
@@ -65,4 +57,4 @@ bool set_irqchip(IrqChip& chip)
     current_chip->enable();
     return true;
 }
-} // namespace IrqChip
+}

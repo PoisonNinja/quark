@@ -1,6 +1,5 @@
 #include <arch/drivers/io.h>
 #include <cpu/interrupt.h>
-#include <drivers/input/i8042.h>
 #include <fs/dev.h>
 #include <kernel.h>
 #include <kernel/init.h>
@@ -13,10 +12,10 @@ namespace
 {
 constexpr size_t buffer_size = 1024;
 
-class i8042Driver : public Filesystem::KDevice
+class Intel8042 : public Filesystem::KDevice
 {
 public:
-    i8042Driver();
+    Intel8042();
 
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie) override;
@@ -32,19 +31,18 @@ private:
     Scheduler::WaitQueue queue;
 };
 
-i8042Driver::i8042Driver()
+Intel8042::Intel8042()
     : KDevice(Filesystem::CHR)
     , head(0)
     , tail(0)
 {
     Interrupt::Handler* h = new Interrupt::Handler(
-        libcxx::bind(&i8042Driver::handler, this, _1, _2, _3), "keyboard",
+        libcxx::bind(&Intel8042::handler, this, _1, _2, _3), "keyboard",
         reinterpret_cast<void*>(this));
     Interrupt::register_handler(Interrupt::irq_to_interrupt(1), *h);
 }
 
-ssize_t i8042Driver::read(uint8_t* buffer, size_t count, off_t /*offset*/,
-                          void*)
+ssize_t Intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)
 {
     size_t read = 0;
     while (read < count) {
@@ -56,33 +54,33 @@ ssize_t i8042Driver::read(uint8_t* buffer, size_t count, off_t /*offset*/,
     return read;
 }
 
-ssize_t i8042Driver::write(uint8_t*, size_t, off_t, void*)
+ssize_t Intel8042::write(uint8_t*, size_t, off_t, void*)
 {
     return 0;
 }
 
-void i8042Driver::handler(int, void* dev_id, struct InterruptContext*)
+void Intel8042::handler(int, void* dev_id, struct InterruptContext*)
 {
     this->buffer[this->head++ % buffer_size] = inb(0x60);
     Log::printk(Log::LogLevel::INFO, "Key event, %p\n", this);
     this->queue.wakeup();
 }
 
-bool i8042Driver::seekable()
+bool Intel8042::seekable()
 {
     return false;
 }
 } // namespace
 
-namespace i8042
+namespace
 {
 int init()
 {
     dev_t major = Filesystem::locate_class(Filesystem::CHR);
     Filesystem::register_class(Filesystem::CHR, major);
-    i8042Driver* d = new i8042Driver();
+    Intel8042* d = new Intel8042();
     Filesystem::register_kdevice(Filesystem::CHR, major, d);
     return 0;
 }
 DEVICE_INITCALL(init);
-} // namespace i8042
+} // namespace

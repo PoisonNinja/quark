@@ -12,6 +12,5 @@ public:
     bool mask(uint32_t irq) override;
     bool unmask(uint32_t irq) override;
     bool ack(uint32_t irq) override;
-    bool spurious() override;
 };
 }

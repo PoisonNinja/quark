@@ -18,12 +18,12 @@ void arch_init(struct Boot::info &info)
     addr_t multiboot_end = Memory::Virtual::align_up(
         reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");
-    Log::printk(Log::LogLevel::INFO, "Kernel:    %p -> %p\n", info.kernel_start,
-                info.kernel_end);
-    Log::printk(Log::LogLevel::INFO, "Multiboot: %p -> %p\n", multiboot_start,
-                multiboot_end);
-    Log::printk(Log::LogLevel::INFO, "initrd:    %p -> %p\n", info.initrd_start,
-                info.initrd_end);
+    Log::printk(Log::LogLevel::INFO, "    Kernel:    [%p - %p]\n",
+                info.kernel_start, info.kernel_end);
+    Log::printk(Log::LogLevel::INFO, "    Multiboot: [%p - %p]\n",
+                multiboot_start, multiboot_end);
+    Log::printk(Log::LogLevel::INFO, "    initrd:    [%p - %p]\n",
+                info.initrd_start, info.initrd_end);
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
              reinterpret_cast<addr_t>(multiboot) + 8);
@@ -44,10 +44,10 @@ void arch_init(struct Boot::info &info)
                          (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                              ->entry_size)) {
                     Log::printk(Log::LogLevel::INFO,
-                                "    Base = %p, Length = %p, "
-                                "Type = 0x%x\n",
+                                "    [%p - %p] Type: 0x%x\n",
                                 static_cast<addr_t>(mmap->addr),
-                                static_cast<addr_t>(mmap->len),
+                                static_cast<addr_t>(mmap->addr) +
+                                    static_cast<addr_t>(mmap->len),
                                 static_cast<addr_t>(mmap->type));
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;

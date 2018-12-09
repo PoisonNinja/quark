@@ -220,8 +220,7 @@ void probe_device(uint8_t bus, uint8_t dev)
                         pci_device = PciDevTable[i];
                 }
             }
-            Log::printk(Log::LogLevel::INFO,
-                        "pci: Found device: %X:%X (%s %s)\n", vendor_id,
+            Log::printk(Log::LogLevel::INFO, "pci: [%X:%X] %s %s\n", vendor_id,
                         device_id, pci_vendor.VenFull, pci_device.ChipDesc);
             Device* device = new Device(bus, dev, i);
             devices.push_back(*device);

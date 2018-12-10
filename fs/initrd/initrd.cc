@@ -37,7 +37,7 @@ bool parse(addr_t initrd)
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =
             reinterpret_cast<Filesystem::Initrd::Tar::Header*>(current);
-        if (libcxx::memcmp(header->magic, tar_magic, 6)) {
+        if (libcxx::memcmp(header->magic, tar_magic, 5)) {
             if (!libcxx::memcmp(header, &null_header, sizeof(header))) {
                 if (++null_seen == 2) {
                     Log::printk(Log::LogLevel::INFO,

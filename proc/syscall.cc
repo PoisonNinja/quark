@@ -78,9 +78,12 @@ static long sys_close(int fd)
 
 static long sys_stat(const char* path, struct Filesystem::stat* st)
 {
-    Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %s, %p\n", path, st);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_stat] = %s, %p\n", path, st);
     libcxx::intrusive_ptr<Filesystem::Descriptor> file =
         get_start(path)->open(path, 0, 0);
+    if (!file) {
+        return -EBADF;
+    }
     return file->stat(st);
 }
 

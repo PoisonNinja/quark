@@ -1,5 +1,5 @@
 # Required for target_sources
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 
 # Version is set here, similar to how Linux does it in their central Makefile
 #

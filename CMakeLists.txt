@@ -71,7 +71,7 @@ message(STATUS "Sysroot: " ${SYSROOT})
 # Verify that the compiler exists
 #
 # CMake will conduct additional checks that it actually works
-find_program(CMAKE_CXX_COMPILER ${ARCH}-pepper-g++)
+find_program(CMAKE_CXX_COMPILER ${ARCH}-quark-g++)
 if(NOT CMAKE_CXX_COMPILER)
     message(FATAL_ERROR "Compiler not found! Run the \
                          toolchain script in Pepper to build a toolchain. If \

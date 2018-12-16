@@ -52,8 +52,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
-    libcxx::intrusive_ptr<Filesystem::Descriptor> file =
-        get_start(path)->open(path, flags, mode);
+    auto [err, file] = get_start(path)->open(path, flags, mode);
     if (!file) {
         return -ENOENT;
     }
@@ -79,8 +78,7 @@ static long sys_close(int fd)
 static long sys_stat(const char* path, struct Filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_stat] = %s, %p\n", path, st);
-    libcxx::intrusive_ptr<Filesystem::Descriptor> file =
-        get_start(path)->open(path, 0, 0);
+    auto [err, file] = get_start(path)->open(path, 0, 0);
     if (!file) {
         return -EBADF;
     }
@@ -286,8 +284,7 @@ static long sys_execve(const char* path, const char* old_argv[],
         envp[i] = new char[libcxx::strlen(old_envp[i])];
         libcxx::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
-    libcxx::intrusive_ptr<Filesystem::Descriptor> file =
-        get_start(path)->open(path, 0, 0);
+    auto [err, file] = get_start(path)->open(path, 0, 0);
     if (!file) {
         delete[] envp;
         delete[] argv;

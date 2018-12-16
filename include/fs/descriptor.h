@@ -28,8 +28,8 @@ public:
     int mknod(const char* name, mode_t mode, dev_t dev);
     int mount(const char* source, const char* target, const char* type,
               unsigned long flags);
-    libcxx::intrusive_ptr<Descriptor> open(const char* name, int flags,
-                                           mode_t mode);
+    libcxx::pair<int, libcxx::intrusive_ptr<Descriptor>>
+    open(const char* name, int flags, mode_t mode);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
     ssize_t read(uint8_t* buffer, size_t count);

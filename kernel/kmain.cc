@@ -20,9 +20,8 @@ void init_stage2(void*)
 {
     Process* parent = Scheduler::get_current_process();
     libcxx::intrusive_ptr<Filesystem::Descriptor> root = parent->get_root();
-    libcxx::intrusive_ptr<Filesystem::Descriptor> init =
-        root->open("/sbin/init", O_RDONLY, 0);
-    if (!init) {
+    auto [err, init] = root->open("/sbin/init", O_RDONLY, 0);
+    if (err) {
         Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)
             CPU::halt();

@@ -32,7 +32,6 @@ bool parse(addr_t initrd)
     addr_t current = initrd;
     libcxx::intrusive_ptr<Descriptor> root =
         Scheduler::get_current_process()->get_root();
-    libcxx::intrusive_ptr<Descriptor> file;
     int null_seen = 0;
     while (1) {
         struct Filesystem::Initrd::Tar::Header* header =
@@ -55,8 +54,9 @@ bool parse(addr_t initrd)
                     "initrd: Name: %s, Size: %zu, Type: %u\n", header->name,
                     size, header->typeflag);
         switch (header->typeflag) {
-            case '0':
-                file = root->open(header->name, O_CREAT | O_RDWR, 0755);
+            case '0': {
+                auto [err, file] =
+                    root->open(header->name, O_CREAT | O_RDWR, 0755);
                 if (!file) {
                     Log::printk(Log::LogLevel::ERROR,
                                 "initrd: Failed to open file\n");
@@ -64,6 +64,7 @@ bool parse(addr_t initrd)
                 }
                 file->write(reinterpret_cast<uint8_t*>(current + 512), size);
                 break;
+            }
             case '5':
                 root->mkdir(header->name, 0755);
                 break;

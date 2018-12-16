@@ -15,7 +15,12 @@ BaseInode::~BaseInode()
 {
 }
 
-int BaseInode::link(const char*, Ref<Inode>)
+int BaseInode::ioctl(unsigned long request, char* argp, void* cookie)
+{
+    return -EBADF;
+}
+
+int BaseInode::link(const char*, libcxx::intrusive_ptr<Inode>)
 {
     return -EBADF;
 }
@@ -30,22 +35,23 @@ int BaseInode::mknod(const char*, mode_t, dev_t)
     return -EBADF;
 }
 
-int BaseInode::open(const char*, dev_t)
+libcxx::pair<int, void*> BaseInode::open(const char*)
+{
+    // Can't use make_pair here
+    return libcxx::pair<int, void*>(0, nullptr);
+}
+
+libcxx::intrusive_ptr<Inode> BaseInode::lookup(const char*, int, mode_t)
+{
+    return libcxx::intrusive_ptr<Inode>(nullptr);
+}
+
+ssize_t BaseInode::read(uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }
 
-Ref<Inode> BaseInode::lookup(const char*, int, mode_t)
-{
-    return Ref<Inode>(nullptr);
-}
-
-ssize_t BaseInode::read(uint8_t*, size_t, off_t)
-{
-    return -EBADF;
-}
-
-ssize_t BaseInode::write(uint8_t*, size_t, off_t)
+ssize_t BaseInode::write(uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }
@@ -60,4 +66,8 @@ int BaseInode::stat(struct stat* st)
     return 0;
 }
 
+bool BaseInode::seekable()
+{
+    return true;
+}
 } // namespace Filesystem

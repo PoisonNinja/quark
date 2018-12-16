@@ -7,7 +7,7 @@ class LogOutput
 {
 public:
     virtual size_t write(const char*, size_t) = 0;
-    Node<LogOutput> node;
+    libcxx::node<LogOutput> node;
 };
 
 namespace Log
@@ -22,4 +22,4 @@ enum class LogLevel : int {
 size_t printk(LogLevel level, const char* format, ...);
 
 void register_log_output(LogOutput& device);
-}  // namespace Log
+} // namespace Log

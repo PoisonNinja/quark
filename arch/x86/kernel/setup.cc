@@ -12,7 +12,7 @@ extern void kmain(struct Boot::info &info);
 
 namespace Symbols
 {
-void init(struct multiboot_tag_elf_sections *sections);
+void relocate(struct multiboot_tag_elf_sections *sections);
 } // namespace Symbols
 
 namespace Memory
@@ -89,16 +89,18 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
     }
     // Bootstrap the IDT and GDT
     CPU::X86::init();
+
     /*
      * Initialize our physical memory early allocator so we can start using
      * memory immediately.
      */
     Memory::Physical::init_early_alloc(&info);
+
     /*
      * Load the symbols now. We used to do this much later, but the symbols
      * might get overwritten later once we start using more memory.
      */
-    Symbols::init(sections);
+    Symbols::relocate(sections);
     kmain(info);
 }
 
@@ -109,4 +111,4 @@ void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
     X86::init(magic, multiboot);
 }
 }
-}  // namespace X86
+} // namespace X86

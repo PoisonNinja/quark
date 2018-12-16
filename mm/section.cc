@@ -223,12 +223,12 @@ void SectionManager::reset()
     sections.reset();
 }
 
-iterator<Section, &Section::node> SectionManager::begin()
+libcxx::list<Section, &Section::node>::iterator SectionManager::begin()
 {
     return sections.begin();
 }
 
-iterator<Section, &Section::node> SectionManager::end()
+libcxx::list<Section, &Section::node>::iterator SectionManager::end()
 {
     return sections.end();
 }

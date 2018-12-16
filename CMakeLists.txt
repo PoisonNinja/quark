@@ -1,5 +1,5 @@
 # Required for target_sources
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9)
 
 # Version is set here, similar to how Linux does it in their central Makefile
 #
@@ -71,7 +71,7 @@ message(STATUS "Sysroot: " ${SYSROOT})
 # Verify that the compiler exists
 #
 # CMake will conduct additional checks that it actually works
-find_program(CMAKE_CXX_COMPILER ${ARCH}-pepper-g++)
+find_program(CMAKE_CXX_COMPILER ${ARCH}-quark-g++)
 if(NOT CMAKE_CXX_COMPILER)
     message(FATAL_ERROR "Compiler not found! Run the \
                          toolchain script in Pepper to build a toolchain. If \
@@ -84,6 +84,9 @@ message(STATUS "CXX Compiler: " ${CMAKE_CXX_COMPILER})
 project(Quark CXX)
 
 include(${PLATFORM_FILE})
+
+include(CheckIPOSupported)
+check_ipo_supported()
 
 # Enable NASM to compile ASM files
 enable_language(ASM_NASM)
@@ -99,6 +102,9 @@ set(CMAKE_ASM_NASM_FLAGS ${CMAKE_ASM_FLAGS})
 # We want C++17
 set(CMAKE_CXX_STANDARD 17)
 
+# Enable LTO
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 # We must build with -fno-rtti and -fno-exceptions because they require a support library
 #
 # -fdiagnostics-color=always is required for color output because GCC disables
@@ -106,7 +112,7 @@ set(CMAKE_CXX_STANDARD 17)
 #
 # -Wno-missing-field-initializers is necessary to shut up GCC about things like
 # initializing a struct with stuff like {} or {0}
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-missing-field-initializers -ffreestanding -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -fdiagnostics-color=always -mgeneral-regs-only")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-missing-field-initializers -Wno-unused-parameter -ffreestanding -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -fdiagnostics-color=always -mgeneral-regs-only")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -DQUARK_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DQUARK_RELEASE")
 message(STATUS "CXXFLAGS: " ${CMAKE_CXX_FLAGS})

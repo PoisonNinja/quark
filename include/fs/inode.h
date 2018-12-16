@@ -1,11 +1,12 @@
 #pragma once
 
-#include <lib/refcount.h>
+#include <lib/memory.h>
+#include <lib/utility.h>
 #include <types.h>
 
 namespace Filesystem
 {
-class Inode : public RefcountBase
+class Inode : public libcxx::intrusive_ref_counter
 {
 public:
     ino_t ino;
@@ -13,14 +14,20 @@ public:
     mode_t mode;
 
     virtual ~Inode(){};
-    virtual int link(const char* name, Ref<Inode> node)                 = 0;
-    virtual int mkdir(const char* name, mode_t mode)                    = 0;
-    virtual int mknod(const char* name, mode_t mode, dev_t dev)         = 0;
-    virtual int open(const char* name, dev_t dev)                       = 0;
-    virtual Ref<Inode> lookup(const char* name, int flags, mode_t mode) = 0;
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset)   = 0;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset)  = 0;
-    virtual int stat(struct stat* st)                                   = 0;
+    virtual int ioctl(unsigned long request, char* argp, void* cookie)    = 0;
+    virtual int link(const char* name, libcxx::intrusive_ptr<Inode> node) = 0;
+    virtual libcxx::intrusive_ptr<Inode> lookup(const char* name, int flags,
+                                                mode_t mode)              = 0;
+    virtual int mkdir(const char* name, mode_t mode)                      = 0;
+    virtual int mknod(const char* name, mode_t mode, dev_t dev)           = 0;
+    virtual libcxx::pair<int, void*> open(const char* name)               = 0;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie)                                    = 0;
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                          void* cookie)                                   = 0;
+    virtual int stat(struct stat* st)                                     = 0;
+
+    virtual bool seekable() = 0;
 };
 
 class BaseInode : public Inode
@@ -28,14 +35,20 @@ class BaseInode : public Inode
 public:
     BaseInode();
     virtual ~BaseInode();
-    virtual int link(const char* name, Ref<Inode> node);
+    virtual int ioctl(unsigned long request, char* argp, void* cookie);
+    virtual int link(const char* name, libcxx::intrusive_ptr<Inode> node);
     virtual int mkdir(const char* name, mode_t mode);
     virtual int mknod(const char* name, mode_t mode, dev_t dev);
-    virtual int open(const char* name, dev_t dev);
-    virtual Ref<Inode> lookup(const char* name, int flags, mode_t mode);
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset);
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset);
+    virtual libcxx::pair<int, void*> open(const char* name);
+    virtual libcxx::intrusive_ptr<Inode> lookup(const char* name, int flags,
+                                                mode_t mode);
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie);
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                          void* cookie);
     virtual int stat(struct stat* st);
+
+    virtual bool seekable();
 
 protected:
     size_t size;

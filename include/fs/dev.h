@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lib/utility.h>
 #include <types.h>
 
 namespace Filesystem
@@ -31,10 +32,15 @@ public:
     const char* name;
 
     // A subset of Inode operations
-    virtual int open(const char* name, dev_t dev);
+    virtual libcxx::pair<int, void*> open(const char* name);
+    virtual int ioctl(unsigned long request, char* argp, void* cookie);
 
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset)  = 0;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) = 0;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie);
+    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                          void* cookie);
+
+    virtual bool seekable();
 
 protected:
     DeviceClass type;

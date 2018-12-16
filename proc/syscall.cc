@@ -12,9 +12,9 @@ void* syscall_table[256];
 
 namespace
 {
-Ref<Filesystem::Descriptor> get_start(const char* path)
+libcxx::intrusive_ptr<Filesystem::Descriptor> get_start(const char* path)
 {
-    Ref<Filesystem::Descriptor> start(nullptr);
+    libcxx::intrusive_ptr<Filesystem::Descriptor> start(nullptr);
     if (*path == '/') {
         start = Scheduler::get_current_process()->get_root();
     } else {
@@ -30,10 +30,10 @@ static long sys_read(int fd, const void* buffer, size_t count)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_read] = %d, %p, %p\n", fd, buffer,
                 count);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->read(
+    return Scheduler::get_current_process()->fds.get(fd)->read(
         const_cast<uint8_t*>(static_cast<const uint8_t*>(buffer)), count);
 }
 
@@ -41,10 +41,10 @@ static long sys_write(int fd, const void* buffer, size_t count)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer,
                 count);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->write(
+    return Scheduler::get_current_process()->fds.get(fd)->write(
         const_cast<uint8_t*>(static_cast<const uint8_t*>(buffer)), count);
 }
 
@@ -52,9 +52,12 @@ static long sys_open(const char* path, int flags, mode_t mode)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
-    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, flags, mode);
-    int ret = Scheduler::get_current_process()->get_dtable()->add(file);
-    if (Scheduler::get_current_process()->get_dtable()->get(ret) != file) {
+    auto [err, file] = get_start(path)->open(path, flags, mode);
+    if (!file) {
+        return -ENOENT;
+    }
+    int ret = Scheduler::get_current_process()->fds.add(file);
+    if (Scheduler::get_current_process()->fds.get(ret) != file) {
         Log::printk(Log::LogLevel::ERROR,
                     "WTF, someone is lying about the file descriptor...\n");
         return -1;
@@ -65,7 +68,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
 static long sys_close(int fd)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_close] = %d\n", fd);
-    if (!Scheduler::get_current_process()->get_dtable()->remove(fd)) {
+    if (!Scheduler::get_current_process()->fds.remove(fd)) {
         return -1;
     } else {
         return 0;
@@ -74,29 +77,31 @@ static long sys_close(int fd)
 
 static long sys_stat(const char* path, struct Filesystem::stat* st)
 {
-    Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %s, %p\n", path, st);
-    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
+    Log::printk(Log::LogLevel::DEBUG, "[sys_stat] = %s, %p\n", path, st);
+    auto [err, file] = get_start(path)->open(path, 0, 0);
+    if (!file) {
+        return -EBADF;
+    }
     return file->stat(st);
 }
 
 static long sys_fstat(int fd, struct Filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->stat(st);
+    return Scheduler::get_current_process()->fds.get(fd)->stat(st);
 }
 
 static long sys_lseek(int fd, off_t offset, int whence)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_lseek] = %d, %llu, %d\n", fd,
                 offset, whence);
-    if (!Scheduler::get_current_process()->get_dtable()->get(fd)) {
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
         return -EBADF;
     }
-    return Scheduler::get_current_process()->get_dtable()->get(fd)->lseek(
-        offset, whence);
+    return Scheduler::get_current_process()->fds.get(fd)->lseek(offset, whence);
 }
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
@@ -157,10 +162,10 @@ static long sys_sigaction(int signum, struct sigaction* act,
                 act, oldact);
     Process* current = Scheduler::get_current_process();
     if (oldact) {
-        String::memcpy(oldact, &current->signal_actions[signum],
+        libcxx::memcpy(oldact, &current->signal_actions[signum],
                        sizeof(*oldact));
     }
-    String::memcpy(&current->signal_actions[signum], act, sizeof(*act));
+    libcxx::memcpy(&current->signal_actions[signum], act, sizeof(*act));
     return 0;
 }
 
@@ -194,7 +199,7 @@ static void sys_sigreturn(ucontext_t* uctx)
      * tctx to get certain registers (DS, ES, SS) preloaded for us. The
      * rest of the state will get overriden by the stored mcontext
      */
-    String::memcpy(&tctx, &Scheduler::get_current_thread()->tcontext,
+    libcxx::memcpy(&tctx, &Scheduler::get_current_thread()->tcontext,
                    sizeof(tctx));
     // Unset on_stack
     if (Scheduler::get_current_thread()->signal_stack.ss_flags & SS_ONSTACK) {
@@ -204,6 +209,32 @@ static void sys_sigreturn(ucontext_t* uctx)
     Scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
     Signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
     load_registers(tctx);
+}
+
+static long sys_ioctl(int fd, unsigned long request, char* argp)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_ioctl] = %d, 0x%lX, %p\n", fd,
+                request, argp);
+    if (!Scheduler::get_current_process()->fds.get(fd)) {
+        return -EBADF;
+    }
+    return Scheduler::get_current_process()->fds.get(fd)->ioctl(request, argp);
+}
+
+static long sys_dup(int oldfd)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_dup] = %d\n", oldfd);
+    auto desc = Scheduler::get_current_process()->fds.get(oldfd);
+    if (!desc) {
+        return -EBADF;
+    }
+    return Scheduler::get_current_process()->fds.add(desc);
+}
+
+static long sys_dup2(int oldfd, int newfd)
+{
+    Log::printk(Log::LogLevel::DEBUG, "[sys_dup2] = %d %d\n", oldfd, newfd);
+    return Scheduler::get_current_process()->fds.copy(oldfd, newfd);
 }
 
 static long sys_getpid()
@@ -217,7 +248,7 @@ static long sys_fork()
     Log::printk(Log::LogLevel::DEBUG, "[sys_fork]\n");
     Process* child = Scheduler::get_current_process()->fork();
     Thread* thread = new Thread(child);
-    String::memcpy(&thread->tcontext,
+    libcxx::memcpy(&thread->tcontext,
                    &Scheduler::get_current_thread()->tcontext,
                    sizeof(thread->tcontext));
     // Child process gets 0 returned from fork
@@ -245,15 +276,15 @@ static long sys_execve(const char* path, const char* old_argv[],
     }
     const char** argv = new const char*[argc];
     for (size_t i = 0; i < argc; i++) {
-        argv[i] = new char[String::strlen(old_argv[i])];
-        String::strcpy(const_cast<char*>(argv[i]), old_argv[i]);
+        argv[i] = new char[libcxx::strlen(old_argv[i])];
+        libcxx::strcpy(const_cast<char*>(argv[i]), old_argv[i]);
     }
     const char** envp = new const char*[envc];
     for (size_t i = 0; i < envc; i++) {
-        envp[i] = new char[String::strlen(old_envp[i])];
-        String::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
+        envp[i] = new char[libcxx::strlen(old_envp[i])];
+        libcxx::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
-    Ref<Filesystem::Descriptor> file = get_start(path)->open(path, 0, 0);
+    auto [err, file] = get_start(path)->open(path, 0, 0);
     if (!file) {
         delete[] envp;
         delete[] argv;
@@ -342,11 +373,11 @@ static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
     if (oldss) {
-        String::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
+        libcxx::memcpy(oldss, &Scheduler::get_current_thread()->signal_stack,
                        sizeof(*oldss));
     }
     if (ss) {
-        String::memcpy(&Scheduler::get_current_thread()->signal_stack, ss,
+        libcxx::memcpy(&Scheduler::get_current_thread()->signal_stack, ss,
                        sizeof(*ss));
     }
     return 0;
@@ -387,6 +418,9 @@ void init()
     syscall_table[SYS_sigaction]   = reinterpret_cast<void*>(sys_sigaction);
     syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
     syscall_table[SYS_sigreturn]   = reinterpret_cast<void*>(sys_sigreturn);
+    syscall_table[SYS_ioctl]       = reinterpret_cast<void*>(sys_ioctl);
+    syscall_table[SYS_dup]         = reinterpret_cast<void*>(sys_dup),
+    syscall_table[SYS_dup2]        = reinterpret_cast<void*>(sys_dup2),
     syscall_table[SYS_getpid]      = reinterpret_cast<void*>(sys_getpid);
     syscall_table[SYS_fork]        = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);

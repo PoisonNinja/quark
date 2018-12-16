@@ -1,75 +1,48 @@
 #include <kernel.h>
 #include <kernel/symbol.h>
-#include <lib/hashmap.h>
 #include <lib/list.h>
 #include <lib/murmur.h>
 #include <lib/string.h>
+#include <lib/unordered_map.h>
 
 namespace
 {
-constexpr size_t table_size = 1024;
 
-// A wrapper for char*
-struct StringKey {
-    StringKey(const char* s) : value(s){};
-    const char* value;
-    bool operator==(const struct StringKey& other)
-    {
-        return !String::strcmp(this->value, other.value);
-    }
-    bool operator!=(const struct StringKey& other)
-    {
-        return !(*this == other);
-    }
-};
+constexpr size_t symbol_size = 2048;
 
-struct AddressHash {
-    unsigned long operator()(const addr_t key)
-    {
-        return key % table_size;
-    }
-};
-
-struct NameHash {
-    unsigned long operator()(const StringKey& k)
-    {
-        return Murmur::hash(k.value, String::strlen(k.value)) % table_size;
-    }
-};
-
-Hashmap<StringKey, addr_t, table_size, NameHash> name_to_address_hash;
-Hashmap<addr_t, const char*, table_size, AddressHash> address_to_name_hash;
+libcxx::unordered_map<libcxx::string, addr_t, symbol_size> name_to_address_hash;
+libcxx::unordered_map<addr_t, libcxx::string, symbol_size> address_to_name_hash;
 
 struct Symbol {
     addr_t address;
-    char* name;
-    Node<Symbol> node;
+    libcxx::string name;
+    libcxx::node<Symbol> node;
 };
-List<Symbol, &Symbol::node> symbols;
-}  // namespace
+libcxx::list<Symbol, &Symbol::node> symbols;
+} // namespace
 
 namespace Symbols
 {
-Pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
+libcxx::pair<const char*, size_t> resolve_addr_fuzzy(addr_t address)
 {
-    size_t best = ~0;
+    size_t best     = ~0;
     const char* ret = nullptr;
     for (auto& s : symbols) {
         if (s.address <= address) {
             size_t temp = address - s.address;
             if (temp < best) {
-                ret = s.name;
+                ret  = s.name.c_str();
                 best = temp;
             }
         }
     }
-    return make_pair(ret, best);
+    return libcxx::make_pair(ret, best);
 }
 
-const char* resolve_addr(addr_t address)
+libcxx::string resolve_addr(addr_t address)
 {
-    const char* name = nullptr;
-    if (!address_to_name_hash.get(address, name)) {
+    libcxx::string name;
+    if (!address_to_name_hash.at(address, name)) {
         return nullptr;
     }
     return name;
@@ -77,20 +50,26 @@ const char* resolve_addr(addr_t address)
 addr_t resolve_name(const char* name)
 {
     addr_t address = 0;
-    if (!name_to_address_hash.get(name, address)) {
+    if (!name_to_address_hash.at(name, address)) {
         return 0;
     }
     return address;
 }
 
-void load_symbol(Pair<const char*, addr_t> symbol)
+void load_symbol(libcxx::pair<const char*, addr_t> symbol)
 {
-    Symbol* s = new Symbol;
+    Symbol* s  = new Symbol;
     s->address = symbol.second;
-    s->name = new char[String::strlen(symbol.first) + 1];
-    String::strcpy(s->name, symbol.first);
+    s->name    = libcxx::move(libcxx::string(symbol.first));
     symbols.push_back(*s);
-    address_to_name_hash.put(symbol.second, s->name);
-    name_to_address_hash.put(s->name, symbol.second);
+    address_to_name_hash.insert(symbol.second, s->name);
+    name_to_address_hash.insert(s->name, symbol.second);
 }
-}  // namespace Symbols
+
+extern void arch_init();
+
+void init()
+{
+    arch_init();
+}
+} // namespace Symbols

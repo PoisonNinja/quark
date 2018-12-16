@@ -9,7 +9,7 @@ class Section
 public:
     Section(addr_t start, size_t size);
     Section(Section& other);
-    Node<Section> node;
+    libcxx::node<Section> node;
 
     bool operator==(const Section& b);
     bool operator!=(const Section& b);
@@ -35,11 +35,11 @@ public:
 
     void reset();
 
-    iterator<Section, &Section::node> begin();
-    iterator<Section, &Section::node> end();
+    libcxx::list<Section, &Section::node>::iterator begin();
+    libcxx::list<Section, &Section::node>::iterator end();
 
 private:
     addr_t start, _end;
-    List<Section, &Section::node> sections;
+    libcxx::list<Section, &Section::node> sections;
 };
-}
+} // namespace Memory

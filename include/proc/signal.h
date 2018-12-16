@@ -58,7 +58,7 @@
 #define SS_ONSTACK (1 << 0)
 #define SS_DISABLE (1 << 1)
 
-typedef uint32_t sigset_t;
+using sigset_t = uint32_t;
 
 union sigval {       /* Data passed with notification */
     int sival_int;   /* Integer value */
@@ -136,4 +136,4 @@ void sigorset(sigset_t* dest, const sigset_t* source);
 void signotset(sigset_t* dest, const sigset_t* source);
 
 void init();
-}  // namespace Signal
+} // namespace Signal

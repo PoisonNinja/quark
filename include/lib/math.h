@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Math
+namespace libcxx
 {
 template <typename T, typename U>
 constexpr T round_up(T value, U interval)
@@ -23,13 +23,13 @@ constexpr T div_round_up(T x, U y)
     return (x + y - 1) / y;
 }
 
-constexpr size_t pow_2(unsigned int power)
+constexpr size_t pow2(unsigned int power)
 {
     return 1 << power;
 }
 
-constexpr unsigned int log_2(unsigned long long number)
+constexpr unsigned int log2(unsigned long long number)
 {
     return (8 * sizeof(unsigned long long) - __builtin_clzll(number) - 1);
 }
-}  // namespace Math
+} // namespace libcxx

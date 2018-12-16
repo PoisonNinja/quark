@@ -2,47 +2,22 @@
 
 #include <fs/driver.h>
 #include <fs/inode.h>
+#include <fs/pty/pty.h>
+#include <fs/tmpfs/tmpfs.h>
 
 namespace Filesystem
 {
-class PTSFS : public Driver
+class PTSFS : public TmpFS
 {
 public:
     PTSFS();
-    ~PTSFS();
-
+    // Returns minor
+    bool register_pty(TTY::PTY* pty);
     bool mount(Superblock* sb) override;
-    uint32_t flags() override;
-};
-
-class PTSN : public BaseInode
-{
-public:
-    PTSN(ino_t ino, dev_t dev, mode_t mode);
-    virtual ~PTSN();
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
-};
-
-struct PTSNWrapper {
-    PTSNWrapper(Ref<Inode> inode, const char* name);
-    ~PTSNWrapper();
-    Ref<Inode> inode;
-    const char* name;
-    Node<PTSNWrapper> node;
-};
-
-class PTSD : public BaseInode
-{
-public:
-    PTSD(ino_t ino, dev_t dev, mode_t mode);
-    virtual ~PTSD();
-    virtual int link(const char* name, Ref<Inode> node) override;
-    virtual Ref<Inode> lookup(const char* name, int flags,
-                              mode_t mode) override;
 
 private:
-    Ref<Inode> find_child(const char* name);
-    List<PTSNWrapper, &PTSNWrapper::node> children;
+    libcxx::list<TTY::PTY, &TTY::PTY::node> ptys;
+    InitFS::Directory* root;
 };
+
 } // namespace Filesystem

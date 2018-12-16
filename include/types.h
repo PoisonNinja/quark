@@ -2,15 +2,15 @@
 
 #include <arch/types.h>
 
-typedef int32_t pid_t;
-typedef int32_t tid_t;
+using pid_t = int32_t;
+using tid_t = int32_t;
 
-typedef uint64_t time_t;
+using time_t = uint64_t;
 
-typedef uint16_t nlink_t;
-typedef uint32_t mode_t;
-typedef uint32_t uid_t;
-typedef uint32_t gid_t;
-typedef uint64_t dev_t;
-typedef uint64_t ino_t;
-typedef int64_t off_t;
+using nlink_t = uint16_t;
+using mode_t  = uint32_t;
+using uid_t   = uint32_t;
+using gid_t   = uint32_t;
+using dev_t   = uint64_t;
+using ino_t   = uint64_t;
+using off_t   = int64_t;

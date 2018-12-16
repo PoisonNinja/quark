@@ -13,13 +13,13 @@ constexpr addr_t buddy_address(addr_t x, unsigned int order)
 }
 constexpr addr_t buddy_index(addr_t x, int order)
 {
-    return ((x) / (Math::pow_2(order)));
+    return ((x) / (libcxx::pow2(order)));
 }
 } // namespace
 
 struct BuddyOrder {
     Stack* stack;
-    Bitset* bitset;
+    libcxx::bitset* bitset;
 };
 
 Buddy::Buddy(size_t s, size_t min, size_t max)
@@ -34,9 +34,9 @@ Buddy::Buddy(size_t s, size_t min, size_t max)
         this->orders[i].stack =
             new Stack(reinterpret_cast<addr_t*>(STACK_START + stack_offset));
         stack_offset += Memory::Virtual::align_up(
-            stack_overhead(this->size, Math::pow_2(i)));
+            stack_overhead(this->size, libcxx::pow2(i)));
         this->orders[i].bitset =
-            new Bitset(this->size / Math::pow_2(i), bitset_full);
+            new libcxx::bitset(this->size / libcxx::pow2(i), true);
     }
 }
 
@@ -46,7 +46,7 @@ Buddy::~Buddy()
 
 addr_t Buddy::alloc(size_t size)
 {
-    size_t order = Math::log_2(size);
+    size_t order = libcxx::log2(size);
     if (order < this->min_order)
         order = this->min_order;
     if (order > this->max_order)
@@ -79,7 +79,7 @@ addr_t Buddy::alloc(size_t size)
 
 void Buddy::free(addr_t addr, size_t size)
 {
-    uint32_t order = Math::log_2(size);
+    uint32_t order = libcxx::log2(size);
     for (; order <= this->max_order; order++) {
         this->orders[order].bitset->unset(buddy_index(addr, order));
         addr_t buddy_addr = buddy_address(addr, order);
@@ -93,7 +93,7 @@ void Buddy::free(addr_t addr, size_t size)
 
 bool Buddy::available(size_t size)
 {
-    uint32_t order = Math::log_2(size);
+    uint32_t order = libcxx::log2(size);
     for (; order <= this->max_order; order++) {
         if (!this->orders[order].stack->empty()) {
             return true;

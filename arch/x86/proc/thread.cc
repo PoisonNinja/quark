@@ -150,10 +150,10 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     size_t argv_size = sizeof(char*) * (argc + 1); // argv is null terminated
     size_t envp_size = sizeof(char*) * (envc + 1); // envp is null terminated
     for (int i = 0; i < argc; i++) {
-        argv_size += String::strlen(argv[i]) + 1;
+        argv_size += libcxx::strlen(argv[i]) + 1;
     };
     for (int i = 0; i < envc; i++) {
-        envp_size += String::strlen(envp[i]) + 1;
+        envp_size += libcxx::strlen(envp[i]) + 1;
     }
     addr_t argv_zone;
     addr_t envp_zone;
@@ -215,16 +215,16 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     this->parent->sigreturn = sigreturn_zone;
 
     // Copy in sigreturn trampoline code
-    String::memcpy(reinterpret_cast<void*>(sigreturn_zone),
+    libcxx::memcpy(reinterpret_cast<void*>(sigreturn_zone),
                    signal_return_location, 0x1000);
 
     // Make it unwritable
     Memory::Virtual::protect(sigreturn_zone, PAGE_USER);
 
     // Copy TLS data into thread specific data
-    String::memcpy((void*)tls_zone, (void*)parent->tls_base,
+    libcxx::memcpy((void*)tls_zone, (void*)parent->tls_base,
                    parent->tls_filesz);
-    String::memset((void*)(tls_zone + parent->tls_filesz), 0,
+    libcxx::memset((void*)(tls_zone + parent->tls_filesz), 0,
                    parent->tls_memsz - parent->tls_filesz);
 
     struct uthread* uthread =
@@ -235,22 +235,22 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
         reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
     char** target_argv = reinterpret_cast<char**>(argv_zone);
     for (int i = 0; i < argc; i++) {
-        String::strcpy(target, argv[i]);
+        libcxx::strcpy(target, argv[i]);
         target_argv[i] = target;
-        target += String::strlen(argv[i]) + 1;
+        target += libcxx::strlen(argv[i]) + 1;
     }
     target_argv[argc] = 0;
     target = reinterpret_cast<char*>(envp_zone + (sizeof(char*) * (envc + 1)));
     char** target_envp = reinterpret_cast<char**>(envp_zone);
     for (int i = 0; i < envc; i++) {
-        String::strcpy(target, envp[i]);
+        libcxx::strcpy(target, envp[i]);
         target_envp[i] = target;
-        target += String::strlen(envp[i]) + 1;
+        target += libcxx::strlen(envp[i]) + 1;
     }
     target_envp[envc] = 0;
-    String::memset((void*)stack_zone, 0, 0x1000);
+    libcxx::memset((void*)stack_zone, 0, 0x1000);
 
-    String::memset(&ctx, 0, sizeof(ctx));
+    libcxx::memset(&ctx, 0, sizeof(ctx));
 #ifdef X86_64
     ctx.rip = entry;
     ctx.rdi = argc;
@@ -262,6 +262,8 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.fs  = reinterpret_cast<uint64_t>(uthread);
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     ctx.rflags        = 0x200;
+    // TODO: INSECURE! This allows all programs IOPORT access!
+    ctx.rflags |= 0x3000;
 #else
     ctx.eip = entry;
     ctx.cs  = 0x18 | 3;
@@ -275,7 +277,8 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     stack[-2]       = reinterpret_cast<uint32_t>(target_argv);
     stack[-3]       = argc;
     ctx.esp -= 16;
-    ctx.eflags              = 0x200;
+    ctx.eflags = 0x200;
+    ctx.eflags |= 0x3000;
 #endif
     ctx.kernel_stack = CPU::X86::TSS::get_stack();
     return true;
@@ -294,7 +297,7 @@ addr_t get_stack()
 Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
 {
     Thread* thread = new Thread(p);
-    String::memset(&thread->tcontext, 0, sizeof(thread->tcontext));
+    libcxx::memset(&thread->tcontext, 0, sizeof(thread->tcontext));
     addr_t stack =
         reinterpret_cast<addr_t>(new uint8_t[0x1000] + 0x1000) & ~15UL;
 #ifdef X86_64

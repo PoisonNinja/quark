@@ -17,7 +17,7 @@ TmpFS::~TmpFS()
 
 bool TmpFS::mount(Superblock* sb)
 {
-    sb->root = Ref<Inode>(new InitFS::Directory(0, 0, 0755));
+    sb->root = libcxx::intrusive_ptr<Inode>(new InitFS::Directory(0, 0, 0755));
     return true;
 }
 
@@ -28,13 +28,27 @@ uint32_t TmpFS::flags()
 
 namespace InitFS
 {
-InitFSNode::InitFSNode(Ref<Inode> inode, const char* name)
+TmpFSNode::TmpFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name)
 {
     this->inode = inode;
-    this->name  = String::strdup(name);
+    this->name  = libcxx::strdup(name);
 }
 
-InitFSNode::~InitFSNode()
+TmpFSNode::TmpFSNode(const struct TmpFSNode& other)
+{
+    this->inode = other.inode;
+    this->name  = libcxx::strdup(other.name);
+}
+
+TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
+{
+    this->inode         = other.inode;
+    const char* newname = libcxx::strdup(other.name);
+    libcxx::swap(this->name, newname);
+    return *this;
+}
+
+TmpFSNode::~TmpFSNode()
 {
     delete[] this->name;
 }
@@ -59,30 +73,30 @@ File::~File()
     }
 }
 
-ssize_t File::read(uint8_t* buffer, size_t count, off_t offset)
+ssize_t File::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     // Trim out of bound reads
     if (count + offset > buffer_size) {
         count = buffer_size - offset;
     }
-    String::memcpy(buffer, data + offset, count);
+    libcxx::memcpy(buffer, data + offset, count);
     return count;
 }
 
-ssize_t File::write(uint8_t* buffer, size_t count, off_t offset)
+ssize_t File::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     if (count + offset > buffer_size) {
         size_t new_buffer_size = count + offset;
         uint8_t* new_buffer    = new uint8_t[new_buffer_size];
         if (data) {
-            String::memcpy(new_buffer, data, buffer_size);
+            libcxx::memcpy(new_buffer, data, buffer_size);
             delete[] data;
         }
         buffer_size = new_buffer_size;
         data        = new_buffer;
     }
     this->size = buffer_size;
-    String::memcpy(data + offset, buffer, count);
+    libcxx::memcpy(data + offset, buffer, count);
     return count;
 }
 
@@ -101,61 +115,63 @@ Directory::~Directory()
     }
 }
 
-int Directory::link(const char* name, Ref<Inode> node)
+int Directory::link(const char* name, libcxx::intrusive_ptr<Inode> node)
 {
-    Ref<Inode> child = find_child(name);
+    libcxx::intrusive_ptr<Inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
-    InitFSNode* wrapper = new InitFSNode(node, name);
-    children.push_back(*wrapper);
+    children.push_back(*(new TmpFSNode(node, name)));
     return 0;
 }
 
-Ref<Inode> Directory::lookup(const char* name, int flags, mode_t mode)
+libcxx::intrusive_ptr<Inode> Directory::lookup(const char* name, int flags,
+                                               mode_t mode)
 {
-    Ref<Inode> ret = find_child(name);
+    libcxx::intrusive_ptr<Inode> ret = find_child(name);
+    if (ret == nullptr) {
+    }
     if (ret) {
         return ret;
     } else if (!ret && !(flags & O_CREAT)) {
-        return Ref<Inode>(nullptr);
+        return libcxx::intrusive_ptr<Inode>(nullptr);
     }
-    Ref<File> child(new File(0, 0, mode));
-    InitFSNode* node = new InitFSNode(child, name);
+    libcxx::intrusive_ptr<File> child(new File(0, 0, mode));
+    TmpFSNode* node = new TmpFSNode(child, name);
     children.push_back(*node);
     return child;
 }
 
 int Directory::mkdir(const char* name, mode_t mode)
 {
-    Ref<Inode> child = find_child(name);
+    libcxx::intrusive_ptr<Inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
-    Ref<Directory> dir(new Directory(0, 0, mode));
+    libcxx::intrusive_ptr<Directory> dir(new Directory(0, 0, mode));
     dir->link(".", dir);
-    dir->link("..", Ref<Directory>(this));
-    InitFSNode* node = new InitFSNode(dir, name);
+    dir->link("..", libcxx::intrusive_ptr<Directory>(this));
+    TmpFSNode* node = new TmpFSNode(dir, name);
     children.push_back(*node);
     return 0;
 }
 
 int Directory::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    Ref<File> child(new File(0, dev, mode));
-    InitFSNode* node = new InitFSNode(child, name);
+    libcxx::intrusive_ptr<File> child(new File(0, dev, mode));
+    TmpFSNode* node = new TmpFSNode(child, name);
     children.push_back(*node);
     return 0;
 }
 
-Ref<Inode> Directory::find_child(const char* name)
+libcxx::intrusive_ptr<Inode> Directory::find_child(const char* name)
 {
     for (auto& i : children) {
-        if (!String::strcmp(i.name, name)) {
+        if (!libcxx::strcmp(i.name, name)) {
             return i.inode;
         }
     }
-    return Ref<Inode>(nullptr);
+    return libcxx::intrusive_ptr<Inode>(nullptr);
 }
 } // namespace InitFS
 } // namespace Filesystem

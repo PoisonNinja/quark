@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fs/dev.h>
 #include <fs/stat.h>
 #include <kernel.h>
@@ -129,8 +130,28 @@ KDevice* get_kdevice(mode_t mode, dev_t dev)
     }
 }
 
-int KDevice::open(const char* name, dev_t dev)
+libcxx::pair<int, void*> KDevice::open(const char*)
 {
-    return 0;
+    return libcxx::pair<int, void*>(0, nullptr);
+}
+
+int KDevice::ioctl(unsigned long, char*, void* cookie)
+{
+    return -ENOSYS;
+}
+
+ssize_t KDevice::read(uint8_t*, size_t, off_t, void*)
+{
+    return -EBADF;
+}
+
+ssize_t KDevice::write(uint8_t*, size_t, off_t, void*)
+{
+    return -EBADF;
+}
+
+bool KDevice::seekable()
+{
+    return true;
 }
 } // namespace Filesystem

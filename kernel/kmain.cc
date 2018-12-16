@@ -7,6 +7,7 @@
 #include <fs/stat.h>
 #include <kernel.h>
 #include <kernel/init.h>
+#include <kernel/symbol.h>
 #include <kernel/time/time.h>
 #include <kernel/version.h>
 #include <lib/string.h>
@@ -17,10 +18,10 @@
 
 void init_stage2(void*)
 {
-    Process* parent                  = Scheduler::get_current_process();
-    Ref<Filesystem::Descriptor> root = parent->get_root();
-    Ref<Filesystem::Descriptor> init = root->open("/sbin/init", 0, 0);
-    if (!init) {
+    Process* parent = Scheduler::get_current_process();
+    libcxx::intrusive_ptr<Filesystem::Descriptor> root = parent->get_root();
+    auto [err, init] = root->open("/sbin/init", O_RDONLY, 0);
+    if (err) {
         Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)
             CPU::halt();
@@ -58,7 +59,6 @@ void init_stage1()
     Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());
     initp->set_cwd(Scheduler::get_current_process()->get_cwd());
-    initp->set_dtable(Ref<Filesystem::DTable>(new Filesystem::DTable));
     initp->address_space = cloned;
 
     Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
@@ -73,6 +73,7 @@ void kmain(struct Boot::info& info)
     Memory::init(info);
     Interrupt::init();
     Interrupt::enable();
+    Symbols::init();
     Time::init();
     Scheduler::init();
     Signal::init();

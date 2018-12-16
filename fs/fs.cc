@@ -16,26 +16,32 @@ namespace Filesystem
 {
 void init()
 {
-    // Register the filesystem drivers
-    FTable::add("tmpfs", new TmpFS());
-    FTable::add("pts", new PTSFS());
+    // Initialize the TTY layer
+    TTY::init();
 
-    VGATTY* vga = new VGATTY();
-    dev_t major = locate_class(CHR);
-    register_class(CHR, major);
-    register_kdevice(CHR, major, vga);
+    // Register the filesystem drivers
+    Drivers::add("tmpfs", new TmpFS());
+    Drivers::add("ptsfs", new PTSFS());
+
+    TTY::VGATTY* vga = new TTY::VGATTY();
+    auto vga_major   = Filesystem::locate_class(Filesystem::CHR);
+    register_class(CHR, vga_major);
+    register_kdevice(CHR, vga_major, vga);
 
     // Initialize the root filesystem
     Superblock* rootsb = new Superblock();
-    FTable::get("tmpfs")->mount(rootsb);
+    Drivers::get("tmpfs")->mount(rootsb);
 
-    Ref<Vnode> vroot(new Vnode(rootsb, rootsb->root));
-    Ref<Descriptor> droot(new Descriptor(vroot));
+    libcxx::intrusive_ptr<Vnode> vroot(new Vnode(rootsb, rootsb->root));
+    libcxx::intrusive_ptr<Descriptor> droot(
+        new Descriptor(vroot, F_READ | F_WRITE));
     vroot->link(".", vroot);
     vroot->link("..", vroot);
 
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
+    droot->mkdir("dev/pts", 0666);
+    droot->mount("", "dev/pts", "ptsfs", 0);
 
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);

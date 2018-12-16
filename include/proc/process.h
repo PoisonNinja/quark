@@ -16,13 +16,12 @@ public:
     void add_thread(Thread* thread);
     void remove_thread(Thread* thread);
 
-    void set_cwd(Ref<Filesystem::Descriptor> desc);
-    void set_root(Ref<Filesystem::Descriptor> desc);
-    void set_dtable(Ref<Filesystem::DTable> table);
+    void set_cwd(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
+    void set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
 
-    Ref<Filesystem::Descriptor> get_cwd();
-    Ref<Filesystem::Descriptor> get_root();
-    Ref<Filesystem::DTable> get_dtable();
+    libcxx::intrusive_ptr<Filesystem::Descriptor> get_cwd();
+    libcxx::intrusive_ptr<Filesystem::Descriptor> get_root();
+    Filesystem::DTable fds;
 
     // TLS stuff
     addr_t tls_base;
@@ -36,7 +35,7 @@ public:
 
     Memory::SectionManager* sections;
 
-    Node<Process> child_node;
+    libcxx::node<Process> child_node;
 
     void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];
@@ -44,11 +43,10 @@ public:
     addr_t sigreturn;
 
 private:
-    Ref<Filesystem::Descriptor> cwd;
-    Ref<Filesystem::Descriptor> root;
-    Ref<Filesystem::DTable> fds;
+    libcxx::intrusive_ptr<Filesystem::Descriptor> cwd;
+    libcxx::intrusive_ptr<Filesystem::Descriptor> root;
 
     Process* parent;
-    List<Process, &Process::child_node> children;
-    List<Thread, &Thread::process_node> threads;
+    libcxx::list<Process, &Process::child_node> children;
+    libcxx::list<Thread, &Thread::process_node> threads;
 };

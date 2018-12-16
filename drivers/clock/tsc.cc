@@ -72,18 +72,20 @@ const char* TSC::name()
 uint64_t TSC::calibrate()
 {
     time_t t1, t2;
-    time_t nsec = 10 * 1000 * 1000;
+    time_t nsec     = 10 * 1000 * 1000;
     uint64_t lowest = UINT64_MAX;
     for (int i = 0; i < 5; i++) {
         t1 = this->rdtsc();
         // Precalculated nsec to minimize overhead
         Time::ndelay(nsec);
-        t2 = this->rdtsc();
+        t2            = this->rdtsc();
         uint64_t freq = (t2 - t1) / 10;
+        Log::printk(Log::LogLevel::INFO, "tsc: Calibration round %d: %zu\n", i,
+                    freq);
         if (freq < lowest) {
             lowest = freq;
         }
     }
     return lowest;
 }
-}  // namespace Time
+} // namespace Time

@@ -12,8 +12,10 @@ public:
     BlockWrapper(BlockDevice* bd);
     ~BlockWrapper();
 
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
-    ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                 void* cookie) override;
+    ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+                  void* cookie) override;
 
 private:
     // TODO: Request queue
@@ -30,7 +32,8 @@ BlockWrapper::~BlockWrapper()
 {
 }
 
-ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
+ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
+                           void* cookie)
 {
     // TODO: Eventually implement a more intelligent scheduler
     size_t processed = 0;
@@ -54,7 +57,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
         Filesystem::BlockRequest request;
         request.command     = Filesystem::BlockRequestType::READ;
         request.num_sectors = sglist->total_size / blkdev->sector_size();
-        request.start       = Math::round_down(current, blkdev->sector_size()) /
+        request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
         request.sglist = sglist;
         Log::printk(Log::LogLevel::INFO, "block: 0x%zX sectors, 0x%zX start\n",
@@ -63,15 +66,15 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
         if (blkdev->request(&request)) {
             for (auto& region : sglist->list) {
                 if (current >
-                    Math::round_down(current, blkdev->sector_size())) {
+                    libcxx::round_down(current, blkdev->sector_size())) {
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Unaligned disk read :(\n");
                     size_t distance =
                         current -
-                        Math::round_down(current, blkdev->sector_size());
+                        libcxx::round_down(current, blkdev->sector_size());
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Block offset 0x%zX\n", distance);
-                    String::memcpy(
+                    libcxx::memcpy(
                         buffer + processed,
                         reinterpret_cast<void*>(region.virtual_base + distance),
                         region.size - distance);
@@ -80,7 +83,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
                 } else {
                     Log::printk(Log::LogLevel::DEBUG,
                                 "block: Aligned disk read :)\n");
-                    String::memcpy(buffer + processed,
+                    libcxx::memcpy(buffer + processed,
                                    reinterpret_cast<void*>(region.virtual_base),
                                    region.size);
                     processed += region.size;
@@ -97,7 +100,8 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset)
     return count;
 }
 
-ssize_t BlockWrapper::write(uint8_t* buffer, size_t count, off_t offset)
+ssize_t BlockWrapper::write(uint8_t* buffer, size_t count, off_t offset,
+                            void* cookie)
 {
     // TODO: Eventually implement a more intelligent scheduler
     return 0;

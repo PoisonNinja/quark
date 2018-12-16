@@ -40,13 +40,13 @@ namespace Log
 {
 constexpr size_t printk_max = CONFIG_PRINTK_MAX;
 
-static List<LogOutput, &LogOutput::node> output;
+static libcxx::list<LogOutput, &LogOutput::node> output;
 
 static const char* colors[] = {
-    "\e[36m",  // Blue for debug
-    "\e[32m",  // Green for info
-    "\e[33m",  // Yellow for warning
-    "\e[31m",  // Red for error
+    "\e[36m", // Blue for debug
+    "\e[32m", // Green for info
+    "\e[33m", // Yellow for warning
+    "\e[31m", // Red for error
 };
 
 static char printk_buffer[Log::printk_max];
@@ -58,19 +58,20 @@ size_t printk(LogLevel level, const char* format, ...)
 #endif
         size_t r = 0;
         if (level < Log::LogLevel::CONTINUE) {
-            String::memset(printk_buffer, 0, Log::printk_max);
+            libcxx::memset(printk_buffer, 0, Log::printk_max);
             struct Time::timespec spec = Time::now();
-            r = snprintf(printk_buffer, Log::printk_max, "%s[%05llu.%09llu]%s ",
-                         colors[static_cast<int>(level)], spec.tv_sec,
-                         spec.tv_nsec, "\e[39m");
+            r = libcxx::snprintf(printk_buffer, Log::printk_max,
+                                 "%s[%05llu.%09llu]%s ",
+                                 colors[static_cast<int>(level)], spec.tv_sec,
+                                 spec.tv_nsec, "\e[39m");
             for (auto& i : output) {
                 i.write(printk_buffer, r);
             }
         }
-        String::memset(printk_buffer, 0, Log::printk_max);
+        libcxx::memset(printk_buffer, 0, Log::printk_max);
         va_list args;
         va_start(args, format);
-        r = vsnprintf(printk_buffer, Log::printk_max, format, args);
+        r = libcxx::vsnprintf(printk_buffer, Log::printk_max, format, args);
         va_end(args);
         for (auto& i : output) {
             i.write(printk_buffer, r);
@@ -87,4 +88,4 @@ void register_log_output(LogOutput& device)
 {
     output.push_back(device);
 }
-}  // namespace Log
+} // namespace Log

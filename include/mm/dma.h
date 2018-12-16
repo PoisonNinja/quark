@@ -11,7 +11,7 @@ struct Region {
     addr_t virtual_base;
     addr_t physical_base;
     addr_t size;
-    Node<Region> node;
+    libcxx::node<Region> node;
 
     // Please don't touch this
     size_t real_size;
@@ -20,7 +20,7 @@ struct Region {
 struct SGList {
     size_t num_regions;
     size_t total_size;
-    List<Region, &Region::node> list;
+    libcxx::list<Region, &Region::node> list;
 };
 
 bool allocate(size_t size, Region& region);

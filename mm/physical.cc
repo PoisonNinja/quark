@@ -1,5 +1,5 @@
 #include <kernel.h>
-#include <lib/pair.h>
+#include <lib/utility.h>
 #include <mm/buddy.h>
 #include <mm/mm.h>
 #include <mm/physical.h>
@@ -64,14 +64,14 @@ void free(addr_t address, size_t size)
  * the properties of the buddy allocator, so this probably won't even work if
  * we ever change physical memory algorithms.
  */
-Pair<addr_t, size_t> try_allocate(size_t max_size)
+libcxx::pair<addr_t, size_t> try_allocate(size_t max_size)
 {
     if (max_size <= Memory::Virtual::PAGE_SIZE)
         max_size = Memory::Virtual::PAGE_SIZE;
-    size_t rounded_size = Math::pow_2(Math::log_2(max_size));
+    size_t rounded_size = libcxx::pow2(libcxx::log2(max_size));
     while (rounded_size >= Memory::Virtual::PAGE_SIZE) {
         if (buddy->available(rounded_size)) {
-            return make_pair(buddy->alloc(rounded_size), rounded_size);
+            return libcxx::make_pair(buddy->alloc(rounded_size), rounded_size);
         }
         rounded_size /= 2;
     }

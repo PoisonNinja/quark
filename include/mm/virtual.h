@@ -33,12 +33,12 @@ namespace Virtual
 
 inline addr_t align_up(addr_t address)
 {
-    return Math::round_up(address, PAGE_SIZE);
+    return libcxx::round_up(address, PAGE_SIZE);
 }
 
 inline addr_t align_down(addr_t address)
 {
-    return Math::round_down(address, PAGE_SIZE);
+    return libcxx::round_down(address, PAGE_SIZE);
 }
 
 bool map(addr_t v, addr_t p, int flags);
@@ -74,5 +74,5 @@ inline int prot_to_flags(int prot)
 
 addr_t get_address_space_root();
 void set_address_space_root(addr_t root);
-}  // namespace Virtual
-}  // namespace Memory
+} // namespace Virtual
+} // namespace Memory

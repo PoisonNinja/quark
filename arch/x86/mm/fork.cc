@@ -16,12 +16,12 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
                      uint64_t pml4_index, uint64_t pdpt_index,
                      uint64_t pd_index)
 {
-    String::memset(new_pt, 0, sizeof(struct page_table));
+    libcxx::memset(new_pt, 0, sizeof(struct page_table));
     for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (old_pt->pages[i].present) {
-            String::memcpy(&new_pt->pages[i], &old_pt->pages[i],
+            libcxx::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
-            addr_t new_page = Memory::Physical::allocate();
+            addr_t new_page          = Memory::Physical::allocate();
             new_pt->pages[i].address = new_page / 0x1000;
             /*
              * Map the new page into a page that we control so we can copy
@@ -34,7 +34,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
              */
             addr_t source = ((pml4_index << 39) | (pdpt_index << 30) |
                              (pd_index << 21) | (i << 12));
-            String::memcpy(fork_page_pointer, reinterpret_cast<void*>(source),
+            libcxx::memcpy(fork_page_pointer, reinterpret_cast<void*>(source),
                            0x1000);
         }
     }
@@ -43,12 +43,12 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
 void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
                      uint32_t pd_index)
 {
-    String::memset(new_pt, 0, sizeof(struct page_table));
+    libcxx::memset(new_pt, 0, sizeof(struct page_table));
     for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (old_pt->pages[i].present) {
-            String::memcpy(&new_pt->pages[i], &old_pt->pages[i],
+            libcxx::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
-            addr_t new_page = Memory::Physical::allocate();
+            addr_t new_page          = Memory::Physical::allocate();
             new_pt->pages[i].address = new_page / 0x1000;
             /*
              * Map the new page into a page that we control so we can copy
@@ -60,7 +60,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
              * Calculate the virtual address given the indexes for the source
              */
             addr_t source = (pd_index << 22) | (i << 12);
-            String::memcpy(fork_page_pointer, reinterpret_cast<void*>(source),
+            libcxx::memcpy(fork_page_pointer, reinterpret_cast<void*>(source),
                            0x1000);
         }
     }
@@ -69,12 +69,12 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
 void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
                      int pml4_index, int pdpt_index)
 {
-    String::memset(new_pd, 0, sizeof(struct page_table));
+    libcxx::memset(new_pd, 0, sizeof(struct page_table));
     for (size_t i = 0; i < PAGE_SIZE / sizeof(struct page); i++) {
         if (old_pd->pages[i].present) {
-            String::memcpy(&new_pd->pages[i], &old_pd->pages[i],
+            libcxx::memcpy(&new_pd->pages[i], &old_pd->pages[i],
                            sizeof(struct page));
-            addr_t new_pt = Memory::Physical::allocate();
+            addr_t new_pt            = Memory::Physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
             __copy_pt_entry(
                 (struct page_table*)Memory::X86::decode_fractal(
@@ -89,12 +89,12 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
 void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
                        int pml4_index)
 {
-    String::memset(new_pdpt, 0, sizeof(struct page_table));
+    libcxx::memset(new_pdpt, 0, sizeof(struct page_table));
     for (size_t i = 0; i < 512; i++) {
         if (old_pdpt->pages[i].present) {
-            String::memcpy(&new_pdpt->pages[i], &old_pdpt->pages[i],
+            libcxx::memcpy(&new_pdpt->pages[i], &old_pdpt->pages[i],
                            sizeof(struct page));
-            addr_t new_pd = Memory::Physical::allocate();
+            addr_t new_pd              = Memory::Physical::allocate();
             new_pdpt->pages[i].address = new_pd / 0x1000;
             __copy_pd_entry((struct page_table*)Memory::X86::decode_fractal(
                                 Memory::X86::copy_entry,
@@ -151,7 +151,7 @@ addr_t fork()
      * Copy the entire PML4. However, only the kernel pages will remain
      * (e.g. pml4_index(x) >= 256), as we want to duplicate the user pages
      */
-    String::memcpy(fork_page_pointer, old_pml4, sizeof(struct page_table));
+    libcxx::memcpy(fork_page_pointer, old_pml4, sizeof(struct page_table));
 
     // Set up fractal mapping for the new PML4
     fork_page_pointer->pages[Memory::X86::recursive_entry].address =
@@ -159,9 +159,9 @@ addr_t fork()
 
     // Load the new PML4 into the Memory::X86::copy_entry slot of the current
     // PML4
-    old_pml4->pages[Memory::X86::copy_entry].present = 1;
+    old_pml4->pages[Memory::X86::copy_entry].present  = 1;
     old_pml4->pages[Memory::X86::copy_entry].writable = 1;
-    old_pml4->pages[Memory::X86::copy_entry].address = fork_pml4_phys / 0x1000;
+    old_pml4->pages[Memory::X86::copy_entry].address  = fork_pml4_phys / 0x1000;
 
     Memory::X86::invlpg(reinterpret_cast<addr_t>(new_pml4));
 
@@ -174,7 +174,7 @@ addr_t fork()
 #endif
         if (old_pml4->pages[i].present) {
             // Copy the page data
-            String::memcpy(&new_pml4->pages[i], &old_pml4->pages[i],
+            libcxx::memcpy(&new_pml4->pages[i], &old_pml4->pages[i],
                            sizeof(struct page));
             // Allocate a new PDPT
             addr_t new_pdpt = Memory::Physical::allocate();
@@ -200,5 +200,5 @@ addr_t fork()
     }
     return fork_pml4_phys;
 }
-}  // namespace Virtual
-}  // namespace Memory
+} // namespace Virtual
+} // namespace Memory

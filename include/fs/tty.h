@@ -5,17 +5,25 @@
 
 namespace Filesystem
 {
-class TTY : public KDevice
+namespace TTY
+{
+class TTY
 {
 public:
     TTY();
     ~TTY();
 
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset) override;
+    virtual libcxx::pair<int, void*> open(const char* name);
+    virtual int ioctl(unsigned long request, char* argp, void* cookie);
 
-    virtual ssize_t output(uint8_t* buffer, size_t count) = 0;
+    virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie);
+    virtual ssize_t write(uint8_t* buffer, size_t count, void* cookie);
 
 private:
 };
-}  // namespace Filesystem
+
+bool register_tty(dev_t major, TTY* tty);
+
+void init();
+} // namespace TTY
+} // namespace Filesystem

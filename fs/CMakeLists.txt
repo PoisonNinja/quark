@@ -3,9 +3,9 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/block.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/descriptor.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/dev.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/driver.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/dtable.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/fs.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/ftable.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/inode.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tty.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/vcache.cc
@@ -15,4 +15,3 @@ target_sources(quark.kernel
 add_subdirectory(pty)
 add_subdirectory(initrd)
 add_subdirectory(tmpfs)
-

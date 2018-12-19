@@ -14,6 +14,7 @@ constexpr addr_t HEAP_START    = 0xFFFF880000000000; // Slot 256
 constexpr addr_t VMALLOC_START = 0xFFFFFC0000000000; // Slot 504
 constexpr addr_t VMALLOC_END   = 0xFFFFFC8000000000; // Slot 505
 constexpr addr_t DMA_START     = 0xFFFFFC8000000000; // Slot 505
+constexpr addr_t DMA_END       = 0xFFFFFD0000000000; // Slot 506
 // 508 - Copy mapping (for fork)
 constexpr addr_t STACK_START   = 0xFFFFFE8000000000; // Slot 509
 // 510 - Fractal mapping
@@ -24,6 +25,7 @@ constexpr addr_t USER_END      = 0xC0000000; // 3 GB
 constexpr addr_t VMALLOC_START = 0xD0000000; // Slot 832
 constexpr addr_t VMALLOC_END   = 0xD8000000; // Slot 864
 constexpr addr_t DMA_START     = 0xD8000000; // Slot 864
+constexpr addr_t DMA_END       = 0xE0000000; // Slot 896
 constexpr addr_t HEAP_START    = 0xE0000000; // Slot 896
 // 1020 - Copy mapping (for fork)
 constexpr addr_t STACK_START   = 0xFF800000; // Slot 1022

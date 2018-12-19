@@ -2,8 +2,8 @@
 #include <drivers/pci/pci.h>
 #include <drivers/pci/pci_list.h>
 #include <kernel.h>
-#include <mm/valloc.h>
 #include <mm/virtual.h>
+#include <mm/vmalloc.h>
 
 namespace PCI
 {
@@ -271,7 +271,7 @@ bool register_driver(Driver& d)
 
 libcxx::pair<bool, addr_t> map(addr_t phys, size_t size)
 {
-    addr_t v = Memory::Valloc::allocate(size);
+    addr_t v = Memory::vmalloc::allocate(size);
     Memory::Virtual::map_range(v, phys, size, PAGE_WRITABLE | PAGE_HARDWARE);
     return libcxx::make_pair(true, v);
 }

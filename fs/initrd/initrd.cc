@@ -3,8 +3,8 @@
 #include <fs/initrd/tar.h>
 #include <kernel.h>
 #include <lib/string.h>
-#include <mm/valloc.h>
 #include <mm/virtual.h>
+#include <mm/vmalloc.h>
 #include <proc/sched.h>
 
 namespace
@@ -83,7 +83,7 @@ void init(struct Boot::info& info)
     Log::printk(Log::LogLevel::INFO,
                 "initrd: Initrd located at %p - %p, size %p\n",
                 info.initrd_start, info.initrd_end, size);
-    addr_t virt = Memory::Valloc::allocate(size);
+    addr_t virt = Memory::vmalloc::allocate(size);
     if (!Memory::Virtual::map_range(virt, info.initrd_start, size,
                                     PAGE_WRITABLE)) {
         Log::printk(Log::LogLevel::ERROR,

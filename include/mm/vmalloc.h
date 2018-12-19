@@ -4,11 +4,11 @@
 
 namespace Memory
 {
-namespace Valloc
+namespace vmalloc
 {
 addr_t allocate(size_t size);
 void free(addr_t address);
 
 void init();
-} // namespace Valloc
+} // namespace vmalloc
 } // namespace Memory

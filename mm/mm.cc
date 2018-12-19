@@ -1,4 +1,5 @@
 #include <boot/info.h>
+#include <mm/dma.h>
 #include <mm/physical.h>
 
 namespace Memory
@@ -11,4 +12,4 @@ void init(struct Boot::info& info)
     arch_init(info);
     Physical::finalize();
 }
-}  // namespace Memory
+} // namespace Memory

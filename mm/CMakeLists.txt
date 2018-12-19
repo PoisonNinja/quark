@@ -6,7 +6,7 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/mm.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/physical.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/stack.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/valloc.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/virtual.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/vma.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/vmalloc.cc
 )

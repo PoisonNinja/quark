@@ -2,8 +2,8 @@
 #include <drivers/tty/vga.h>
 #include <kernel.h>
 #include <lib/string.h>
-#include <mm/valloc.h>
 #include <mm/virtual.h>
+#include <mm/vmalloc.h>
 
 namespace
 {
@@ -21,7 +21,7 @@ namespace TTY
 VGATTY::VGATTY()
     : KDevice(CHR)
 {
-    addr_t virt = Memory::Valloc::allocate(VGA_BUFFER_SIZE);
+    addr_t virt = Memory::vmalloc::allocate(VGA_BUFFER_SIZE);
     if (!Memory::Virtual::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
                                     PAGE_WRITABLE | PAGE_HARDWARE)) {
         Log::printk(Log::LogLevel::WARNING, "Failed to map VGA buffer\n");
@@ -32,7 +32,7 @@ VGATTY::VGATTY()
 
 VGATTY::~VGATTY()
 {
-    Memory::Valloc::free(reinterpret_cast<addr_t>(vga_buffer));
+    Memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
 ssize_t VGATTY::write(uint8_t *buffer, size_t size, off_t offset,

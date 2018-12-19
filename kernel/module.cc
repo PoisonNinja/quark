@@ -201,6 +201,8 @@ bool load_module(void* binary)
     parse_modinfo(mod, modinfo_index);
 
     if (!mod->name) {
+        // Uhh I'm pretty sure this actually leaks
+        // TODO: Fix
         Log::printk(Log::LogLevel::ERROR,
                     "[load_module]: Missing module name, not loading\n");
         return false;

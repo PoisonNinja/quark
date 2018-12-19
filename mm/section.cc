@@ -1,32 +1,36 @@
 #include <kernel.h>
+#include <lib/algorithm.h>
+#include <lib/rb.h>
 #include <mm/section.h>
 #include <mm/virtual.h>
 
 namespace Memory
 {
 Section::Section(addr_t start, size_t size)
+    : prev(nullptr)
+    , next(nullptr)
+    , largest_subgap(0)
+    , _start(start)
+    , _size(size)
 {
-    _start = start;
-    _size = size;
 }
 
 Section::Section(Section& other)
+    : Section(other._start, other._size)
 {
-    _start = other._start;
-    _size = other._size;
 }
 
-addr_t Section::start()
+addr_t Section::start() const
 {
     return _start;
 }
 
-addr_t Section::end()
+addr_t Section::end() const
 {
     return _start + _size;
 }
 
-size_t Section::size()
+size_t Section::size() const
 {
     return _size;
 }
@@ -41,195 +45,202 @@ bool Section::operator!=(const Section& b)
     return !(*this == b);
 }
 
-SectionManager::SectionManager(addr_t s, addr_t e)
+bool Section::operator<(const Section& b)
 {
-    start = s;
-    _end = e;
+    return this->_start < b._start;
+}
+
+SectionManager::SectionManager(addr_t start, addr_t end)
+    : start(start)
+    , end(end)
+    , highest(0)
+{
 }
 
 SectionManager::SectionManager(SectionManager& other)
+    : SectionManager(other.start, other.end)
 {
-    start = other.start;
-    _end = other._end;
-    for (auto& section : other.sections) {
-        Section* s = new Section(section);
-        sections.push_back(*s);
-    }
 }
 
 SectionManager::~SectionManager()
 {
-    for (auto& i : sections) {
-        delete &i;
-    }
 }
 
 bool SectionManager::add_section(addr_t start, size_t size)
 {
     start = Memory::Virtual::align_down(start);
-    size = Memory::Virtual::align_up(size);
-    // Allocate a new section
+    size  = Memory::Virtual::align_up(size);
+    Log::printk(Log::LogLevel::INFO, "add_section: %p, %zX\n", start, size);
     Section* section = new Section(start, size);
-    // Use a dumb insertion algorithm
-    // Check if the list of sections is empty
-    if (sections.empty()) {
-        // Since it is, we can just simply push it back
-        sections.push_back(*section);
-        return true;
+    // TODO: Sanity checks for overlaps, exceeding bounds
+    // Of course, that probably requires support from rbtree
+    section->prev = this->calculate_prev(start);
+    if (section->prev) {
+        Section* tnext = const_cast<Section*>(section->prev->next);
+        Section* tprev = const_cast<Section*>(section->prev);
+        tprev->next    = section;
+        section->next  = tnext;
     } else {
-        /*
-         * Check if the first section is above our new section
-         */
-        if (sections.front().start() >= section->end()) {
-            // Insert into the front
-            sections.push_front(*section);
-            return true;
-        }
-        /*
-         * Iterate through the sections, looking for the correct insertion
-         * place. We need to use iterators instead of range based because
-         * insert utilizes iterators
-         */
-        for (auto it = sections.begin(); it != sections.end(); it++) {
-            auto i = *it;
-            /*
-             * Check if the section is below our new section
-             */
-            if (i.end() <= section->start()) {
-                /*
-                 * Check if this section is the last one. If it isn't, we need
-                 * to consider the next section as well.
-                 */
-                if (it != --sections.end()) {
-                    /*
-                     * It isn't, so let's obtain the next section. We need to
-                     * duplicate it because we can't peek at the next section
-                     * without incrementing the iterator
-                     */
-                    auto t = it;
-                    t++;
-                    auto j = *t;
-                    // Check if our new section is above the next section.
-                    if (section->start() >= j.start()) {
-                        /*
-                         * It is, there are sections still before our new one.
-                         * Restart the loop
-                         */
-                        continue;
-                    }
-                }
-                /*
-                 * We found the highest section before our new one, insert it
-                 * after
-                 */
-                sections.insert(++it, *section);
-                return true;
-            }
+        if (this->sections.parent(const_cast<const Section*>(section))) {
+            section->next = const_cast<const Section*>(section);
+        } else {
+            section->next = nullptr;
         }
     }
-    // I guess we ran out of address space
-    return false;
+    if (section->next) {
+        Section* tnext = const_cast<Section*>(section->next);
+        tnext->prev    = section;
+    }
+    auto func = libcxx::bind(&SectionManager::calculate_largest_subgap, this,
+                             libcxx::placeholders::_1);
+    if (section->end() > highest) {
+        highest = section->end();
+    }
+    this->sections.insert(*section, func);
+    this->print();
+    return true;
 }
 
 bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
 {
-    bool found = false;
-    size_t best = 0;
-    // Check if there are any sections already allocated
-    if (sections.empty()) {
-        // No, so the hint is what's valid
-        ret = hint;
+    const Section* curr = sections.get_root();
+    if (!curr) {
+        // Woot woot there's nothing allocated, we can do anything we want
+        ret = Memory::Virtual::align_up(hint);
         return true;
     }
-    // Check for gaps before the first section that can hold
-    if (sections.front().start() - start > size) {
-        // Check if the hint is completely inside the gap
-        if (sections.front().start() >= hint + size) {
-            // Yes, so hint is good
-            ret = hint;
-            return true;
-        }
-        addr_t target = sections.front().start() - size;
-        // No, so set fuzz value
-        ret = target;
-        best = (target < hint) ? hint - target : target - hint;
-        found = true;
+    addr_t gap_start, gap_end;
+    if (curr->largest_subgap < size) {
+        goto check_highest;
     }
-    // Iterate through all the sections
-    for (auto it = sections.begin(); it != sections.end(); it++) {
-        addr_t zone_start, zone_end;
-        auto& i = *it;
-        // Check if this section is the last one
-        if (it != --sections.end()) {
-            /*
-             * The gap is between the end of this section and the start of
-             * the next one
-             */
-            auto tmp = it;
-            tmp++;
-            auto& j = *tmp;
-            zone_start = i.end();
-            zone_end = j.start();
+    while (true) {
+        gap_end = curr->start();
+        // Alternatively, check if the hint is any good
+        // TODO: Check
+        // If it's not, we are free to place it anywhere
+        // Basically a port of Linux's algorithm
+        if (this->sections.left(curr)) {
+            if (this->sections.left(curr)->largest_subgap >= size) {
+                curr = this->sections.left(curr);
+                continue;
+            }
+        }
+        gap_start = curr->prev ? (curr->prev->end()) : this->start;
+    check_current:
+        if (gap_end >= this->start && gap_end > gap_start &&
+            gap_end - gap_start >= size) {
+            goto found;
+        }
+        if (this->sections.right(curr)) {
+            if (this->sections.right(curr)->largest_subgap >= size) {
+                curr = this->sections.right(curr);
+                continue;
+            }
+        }
+        while (true) {
+            auto prev = curr;
+            if (!this->sections.parent(curr))
+                goto check_highest;
+            curr = this->sections.parent(curr);
+            if (prev == this->sections.left(curr)) {
+                gap_start = curr->prev->end();
+                gap_end   = curr->start();
+                goto check_current;
+            }
+        }
+    }
+check_highest:
+    gap_start = this->highest;
+    gap_end   = this->end;
+
+found:
+    ret = gap_start;
+    return true;
+}
+
+const Section* SectionManager::calculate_prev(addr_t addr)
+{
+    const Section* curr = sections.get_root();
+    const Section* prev = nullptr;
+    while (curr) {
+        if (curr->end() > addr) {
+            curr = sections.left(curr);
         } else {
-            /*
-             * Last section, so gap is between end of this section and the
-             * end of the entire zone
-             */
-            zone_start = i.end();
-            zone_end = _end;
-        }
-        // Calculate the zone size
-        size_t zone_size = zone_end - zone_start;
-        // Check for null zones (e.g. if start == start of first segment)
-        if (!zone_size)
-            continue;
-        // Calculate the prelimary distance score
-        size_t prelim = 0;
-        // Check if this gap is even eligible to be scored (big enough)
-        if (zone_size >= size) {
-            // Check if the hint can be directly used in this zone
-            if (zone_start <= hint && zone_end >= hint + size) {
-                ret = hint;
-                return true;
-            }
-            // Calculate the distance from the zone to the hint
-            addr_t target;
-            if (zone_start >= hint) {
-                target = zone_start;
-            } else {
-                target = zone_end - size;
-            }
-            prelim = (target < hint) ? hint - target : target - hint;
-            if (!found) {
-                ret = target;
-                best = prelim;
-                found = true;
-            } else {
-                if (prelim < best) {
-                    ret = target;
-                    best = prelim;
-                }
-            }
+            prev = curr;
+            curr = sections.right(curr);
         }
     }
-    return found;
+    return prev;
+}
+
+void SectionManager::calculate_largest_subgap(Section* section)
+{
+    size_t max = 0;
+    if (section->prev) {
+        max = section->start() - section->prev->end();
+    } else {
+        max = section->start() - this->start;
+    }
+    if (section->next) {
+        addr_t gap = section->next->start() - section->end();
+        if (gap > max)
+            max = gap;
+    } else {
+        addr_t gap = this->end - section->end();
+        if (gap > max)
+            max = gap;
+    }
+    if (this->sections.left(const_cast<const Section*>(section))) {
+        if (this->sections.left(const_cast<const Section*>(section))
+                ->largest_subgap > max) {
+            max = this->sections.left(const_cast<const Section*>(section))
+                      ->largest_subgap;
+        }
+    }
+    if (this->sections.right(const_cast<const Section*>(section))) {
+        if (this->sections.right(const_cast<const Section*>(section))
+                ->largest_subgap > max) {
+            max = this->sections.right(const_cast<const Section*>(section))
+                      ->largest_subgap;
+        }
+    }
+    section->largest_subgap = max;
 }
 
 void SectionManager::reset()
 {
-    for (auto& i : sections) {
-        delete &i;
-    }
-    sections.reset();
 }
 
-libcxx::list<Section, &Section::node>::iterator SectionManager::begin()
+void SectionManager::print2DUtil(const Section* root, int space)
 {
-    return sections.begin();
+    // Base case
+    if (root == NULL)
+        return;
+
+    // Increase distance between levels
+    space += 10;
+
+    // Process right child first
+    print2DUtil(root->node.right, space);
+
+    // Print current node after space
+    // count
+    Log::printk(Log::LogLevel::CONTINUE, "\n");
+    for (int i = 10; i < space; i++)
+        Log::printk(Log::LogLevel::CONTINUE, " ");
+    Log::printk(Log::LogLevel::CONTINUE, "%p - %p (%zX)\n", root->start(),
+                root->end(), root->largest_subgap);
+
+    // Process left child
+    print2DUtil(root->node.left, space);
 }
 
-libcxx::list<Section, &Section::node>::iterator SectionManager::end()
+// Wrapper over print2DUtil()
+void SectionManager::print()
 {
-    return sections.end();
+    Log::printk(Log::LogLevel::INFO, "=======================\n");
+    // Pass initial space count as 0
+    print2DUtil(this->sections.get_root(), 0);
+    Log::printk(Log::LogLevel::INFO, "=======================\n");
 }
-}
+} // namespace Memory

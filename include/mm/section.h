@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/list.h>
+#include <lib/rb.h>
 
 namespace Memory
 {
@@ -9,14 +9,20 @@ class Section
 public:
     Section(addr_t start, size_t size);
     Section(Section& other);
-    libcxx::node<Section> node;
+
+    libcxx::rbnode<Section> node;
 
     bool operator==(const Section& b);
     bool operator!=(const Section& b);
+    bool operator<(const Section& b);
 
-    addr_t start();
-    addr_t end();
-    size_t size();
+    addr_t start() const;
+    addr_t end() const;
+    size_t size() const;
+
+    // Additional metadata to speed up accesses
+    const Section *prev, *next;
+    size_t largest_subgap; // Same idea as Linux
 
 private:
     addr_t _start;
@@ -30,16 +36,21 @@ public:
     SectionManager(SectionManager& other);
     ~SectionManager();
 
+    void print2DUtil(const Section* root, int space);
+    void print();
+
     bool add_section(addr_t start, size_t size);
     bool locate_range(addr_t& start, addr_t hint, size_t size);
 
     void reset();
 
-    libcxx::list<Section, &Section::node>::iterator begin();
-    libcxx::list<Section, &Section::node>::iterator end();
-
 private:
-    addr_t start, _end;
-    libcxx::list<Section, &Section::node> sections;
+    addr_t start, end;
+    addr_t highest;
+
+    void calculate_largest_subgap(Section* section);
+    const Section* calculate_prev(addr_t addr);
+
+    libcxx::rbtree<Section, &Section::node> sections;
 };
 } // namespace Memory

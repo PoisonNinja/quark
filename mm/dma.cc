@@ -1,21 +1,34 @@
+#include <arch/mm/layout.h>
+#include <kernel.h>
 #include <mm/dma.h>
 #include <mm/physical.h>
-#include <mm/valloc.h>
 #include <mm/virtual.h>
+#include <mm/vma.h>
+#include <mm/vmalloc.h>
 
 namespace Memory
 {
 namespace DMA
 {
+namespace
+{
+Memory::vma dma_region(DMA_START, DMA_END);
+}
+
 bool allocate(size_t size, Region& region)
 {
-    region.virtual_base  = Memory::Valloc::allocate(size);
+    auto [virt_found, virt_address] = dma_region.allocate(0, size);
+    if (!virt_found) {
+        Log::printk(Log::LogLevel::WARNING, "dma: Unable to find free space\n");
+        return false;
+    }
+    region.virtual_base  = virt_address;
     region.physical_base = Memory::Physical::allocate(size);
     region.size          = size;
     region.real_size     = size;
     if (!Memory::Virtual::map_range(region.virtual_base, region.physical_base,
                                     region.size, PAGE_WRITABLE)) {
-        Memory::Valloc::free(region.virtual_base);
+        // Memory::vmalloc::free(region.virtual_base);
         Memory::Physical::free(region.physical_base, region.size);
         return false;
     }
@@ -31,7 +44,8 @@ SGList* build_sglist(size_t max_elements, size_t max_element_size,
         // We always try to allocate the maximum size
         size_t alloc_size =
             (max_element_size < total_size) ? max_element_size : total_size;
-        auto [physical_base, real_size]           = Memory::Physical::try_allocate(alloc_size);
+        auto [physical_base, real_size] =
+            Memory::Physical::try_allocate(alloc_size);
         Region* region        = new Region();
         region->physical_base = physical_base;
         region->real_size     = real_size;
@@ -43,7 +57,7 @@ SGList* build_sglist(size_t max_elements, size_t max_element_size,
             region->size = total_size - (allocated - real_size);
         }
 
-        region->virtual_base = Memory::Valloc::allocate(real_size);
+        region->virtual_base = dma_region.allocate(0, real_size).second;
         Memory::Virtual::map_range(region->virtual_base, region->physical_base,
                                    region->size, PAGE_WRITABLE);
         sglist->list.push_back(*region);

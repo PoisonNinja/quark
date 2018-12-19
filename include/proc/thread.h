@@ -2,7 +2,6 @@
 
 #include <arch/proc/registers.h>
 #include <lib/list.h>
-#include <mm/section.h>
 #include <proc/signal.h>
 #include <types.h>
 

@@ -3,6 +3,7 @@
 #include <fs/descriptor.h>
 #include <fs/dtable.h>
 #include <lib/list.h>
+#include <mm/vma.h>
 #include <proc/thread.h>
 #include <types.h>
 
@@ -33,7 +34,7 @@ public:
 
     Process* fork();
 
-    Memory::SectionManager* sections;
+    Memory::vma* vma;
 
     libcxx::node<Process> child_node;
 

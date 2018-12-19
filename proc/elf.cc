@@ -29,8 +29,8 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
         if (phdr->p_type == PT_LOAD || phdr->p_type == PT_TLS) {
             if (phdr->p_type == PT_TLS) {
                 Log::printk(Log::LogLevel::DEBUG, "Found TLS section\n");
-                if (!process->sections->locate_range(phdr->p_vaddr, USER_START,
-                                                     phdr->p_memsz)) {
+                if (!process->vma->locate_range(phdr->p_vaddr, USER_START,
+                                                phdr->p_memsz)) {
                     Log::printk(Log::LogLevel::ERROR,
                                 "Failed to locate section\n");
                     return libcxx::pair<bool, addr_t>(false, 0);
@@ -56,7 +56,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                         phdr->p_memsz);
             Log::printk(Log::LogLevel::DEBUG, "Align:            %p\n",
                         phdr->p_align);
-            if (!process->sections->add_section(phdr->p_vaddr, phdr->p_memsz)) {
+            if (!process->vma->add_vmregion(phdr->p_vaddr, phdr->p_memsz)) {
                 Log::printk(Log::LogLevel::ERROR, "Failed to add section\n");
                 return libcxx::pair<bool, addr_t>(false, 0);
             }

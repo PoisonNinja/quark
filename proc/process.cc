@@ -7,9 +7,9 @@
 
 Process::Process(Process* parent)
 {
-    this->parent   = parent;
-    this->pid      = Scheduler::get_free_pid();
-    this->sections = new Memory::SectionManager(USER_START, USER_END);
+    this->parent = parent;
+    this->pid    = Scheduler::get_free_pid();
+    this->vma    = new Memory::vma(USER_START, USER_END);
     for (int i = 1; i < NSIGS; i++) {
         this->signal_actions[i].sa_handler = SIG_DFL;
         this->signal_actions[i].sa_flags   = 0;
@@ -77,19 +77,19 @@ Process* Process::fork()
     child->fds    = this->fds;
     child->set_root(this->get_root());
     child->set_cwd(this->get_cwd());
-    child->sections      = new Memory::SectionManager(*this->sections);
+    child->vma           = new Memory::vma(*this->vma);
     child->address_space = cloned;
     return child;
 }
 
 void Process::exit()
 {
-    for (auto section : *sections) {
-        Memory::Virtual::unmap_range(section.start(), section.end());
-    }
+    // for (auto section : *sections) {
+    //     Memory::Virtual::unmap_range(section.start(), section.end());
+    // }
     Memory::Physical::free(this->address_space);
     Scheduler::remove_process(this->pid);
-    delete this->sections;
+    delete this->vma;
 }
 
 void Process::send_signal(int signum)

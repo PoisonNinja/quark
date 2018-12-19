@@ -129,7 +129,7 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
                     "[sys_mmap] Kernel selecting mapping\n");
         addr_t placement;
         bool ret = false;
-        ret      = Scheduler::get_current_process()->sections->locate_range(
+        ret      = Scheduler::get_current_process()->vma->locate_range(
             placement,
             (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr)
                               : USER_START,
@@ -141,8 +141,8 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
         }
         Log::printk(Log::LogLevel::DEBUG, "[sys_mmap] Selected %p\n",
                     placement);
-        Scheduler::get_current_process()->sections->add_section(
-            placement, mmap_data->length);
+        Scheduler::get_current_process()->vma->add_vmregion(placement,
+                                                            mmap_data->length);
         int flags = Memory::Virtual::prot_to_flags(mmap_data->prot);
         Memory::Virtual::map_range(placement, mmap_data->length, flags);
         return reinterpret_cast<void*>(placement);
@@ -240,6 +240,7 @@ static long sys_dup2(int oldfd, int newfd)
 static long sys_getpid()
 {
     // Return process ID not thread ID
+    Log::printk(Log::LogLevel::DEBUG, "[sys_getpid]\n");
     return Scheduler::get_current_process()->pid;
 }
 
@@ -296,7 +297,7 @@ static long sys_execve(const char* path, const char* old_argv[],
                 "[sys_execve] binary has size of %zu bytes\n", st.st_size);
     uint8_t* raw = new uint8_t[st.st_size];
     file->read(raw, st.st_size);
-    Scheduler::get_current_process()->sections->reset();
+    Scheduler::get_current_process()->vma->reset();
     struct ThreadContext ctx;
     if (!Scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
                                                argc, argv, envc, envp, ctx)) {

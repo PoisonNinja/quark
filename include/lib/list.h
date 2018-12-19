@@ -35,7 +35,6 @@
 
 namespace libcxx
 {
-
 /*
  * Taken from https://stackoverflow.com/a/34142739/8108655, with minor
  * modifications to fix some bugs and match the requirements of Quark.

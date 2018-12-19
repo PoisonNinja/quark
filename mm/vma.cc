@@ -1,12 +1,12 @@
 #include <kernel.h>
 #include <lib/algorithm.h>
 #include <lib/rb.h>
-#include <mm/section.h>
 #include <mm/virtual.h>
+#include <mm/vma.h>
 
 namespace Memory
 {
-Section::Section(addr_t start, size_t size)
+vmregion::vmregion(addr_t start, size_t size)
     : prev(nullptr)
     , next(nullptr)
     , largest_subgap(0)
@@ -15,95 +15,94 @@ Section::Section(addr_t start, size_t size)
 {
 }
 
-Section::Section(Section& other)
-    : Section(other._start, other._size)
+vmregion::vmregion(vmregion& other)
+    : vmregion(other._start, other._size)
 {
 }
 
-addr_t Section::start() const
+addr_t vmregion::start() const
 {
     return _start;
 }
 
-addr_t Section::end() const
+addr_t vmregion::end() const
 {
     return _start + _size;
 }
 
-size_t Section::size() const
+size_t vmregion::size() const
 {
     return _size;
 }
 
-bool Section::operator==(const Section& b)
+bool vmregion::operator==(const vmregion& b)
 {
     return (_start == b._start) && (_size == b._size);
 }
 
-bool Section::operator!=(const Section& b)
+bool vmregion::operator!=(const vmregion& b)
 {
     return !(*this == b);
 }
 
-bool Section::operator<(const Section& b)
+bool vmregion::operator<(const vmregion& b)
 {
     return this->_start < b._start;
 }
 
-SectionManager::SectionManager(addr_t start, addr_t end)
+vma::vma(addr_t start, addr_t end)
     : start(start)
     , end(end)
     , highest(0)
 {
 }
 
-SectionManager::SectionManager(SectionManager& other)
-    : SectionManager(other.start, other.end)
+vma::vma(vma& other)
+    : vma(other.start, other.end)
 {
 }
 
-SectionManager::~SectionManager()
+vma::~vma()
 {
+    this->reset();
 }
 
-bool SectionManager::add_section(addr_t start, size_t size)
+bool vma::add_vmregion(addr_t start, size_t size)
 {
-    start = Memory::Virtual::align_down(start);
-    size  = Memory::Virtual::align_up(size);
-    Log::printk(Log::LogLevel::INFO, "add_section: %p, %zX\n", start, size);
-    Section* section = new Section(start, size);
+    start             = Memory::Virtual::align_down(start);
+    size              = Memory::Virtual::align_up(size);
+    vmregion* section = new vmregion(start, size);
     // TODO: Sanity checks for overlaps, exceeding bounds
     // Of course, that probably requires support from rbtree
     section->prev = this->calculate_prev(start);
     if (section->prev) {
-        Section* tnext = const_cast<Section*>(section->prev->next);
-        Section* tprev = const_cast<Section*>(section->prev);
-        tprev->next    = section;
-        section->next  = tnext;
+        vmregion* tnext = const_cast<vmregion*>(section->prev->next);
+        vmregion* tprev = const_cast<vmregion*>(section->prev);
+        tprev->next     = section;
+        section->next   = tnext;
     } else {
-        if (this->sections.parent(const_cast<const Section*>(section))) {
-            section->next = const_cast<const Section*>(section);
+        if (this->sections.parent(const_cast<const vmregion*>(section))) {
+            section->next = const_cast<const vmregion*>(section);
         } else {
             section->next = nullptr;
         }
     }
     if (section->next) {
-        Section* tnext = const_cast<Section*>(section->next);
-        tnext->prev    = section;
+        vmregion* tnext = const_cast<vmregion*>(section->next);
+        tnext->prev     = section;
     }
-    auto func = libcxx::bind(&SectionManager::calculate_largest_subgap, this,
+    auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
     if (section->end() > highest) {
         highest = section->end();
     }
     this->sections.insert(*section, func);
-    this->print();
     return true;
 }
 
-bool SectionManager::locate_range(addr_t& ret, addr_t hint, size_t size)
+bool vma::locate_range(addr_t& ret, addr_t hint, size_t size)
 {
-    const Section* curr = sections.get_root();
+    const vmregion* curr = sections.get_root();
     if (!curr) {
         // Woot woot there's nothing allocated, we can do anything we want
         ret = Memory::Virtual::align_up(hint);
@@ -158,10 +157,10 @@ found:
     return true;
 }
 
-const Section* SectionManager::calculate_prev(addr_t addr)
+const vmregion* vma::calculate_prev(addr_t addr)
 {
-    const Section* curr = sections.get_root();
-    const Section* prev = nullptr;
+    const vmregion* curr = sections.get_root();
+    const vmregion* prev = nullptr;
     while (curr) {
         if (curr->end() > addr) {
             curr = sections.left(curr);
@@ -173,7 +172,7 @@ const Section* SectionManager::calculate_prev(addr_t addr)
     return prev;
 }
 
-void SectionManager::calculate_largest_subgap(Section* section)
+void vma::calculate_largest_subgap(vmregion* section)
 {
     size_t max = 0;
     if (section->prev) {
@@ -190,57 +189,24 @@ void SectionManager::calculate_largest_subgap(Section* section)
         if (gap > max)
             max = gap;
     }
-    if (this->sections.left(const_cast<const Section*>(section))) {
-        if (this->sections.left(const_cast<const Section*>(section))
+    if (this->sections.left(const_cast<const vmregion*>(section))) {
+        if (this->sections.left(const_cast<const vmregion*>(section))
                 ->largest_subgap > max) {
-            max = this->sections.left(const_cast<const Section*>(section))
+            max = this->sections.left(const_cast<const vmregion*>(section))
                       ->largest_subgap;
         }
     }
-    if (this->sections.right(const_cast<const Section*>(section))) {
-        if (this->sections.right(const_cast<const Section*>(section))
+    if (this->sections.right(const_cast<const vmregion*>(section))) {
+        if (this->sections.right(const_cast<const vmregion*>(section))
                 ->largest_subgap > max) {
-            max = this->sections.right(const_cast<const Section*>(section))
+            max = this->sections.right(const_cast<const vmregion*>(section))
                       ->largest_subgap;
         }
     }
     section->largest_subgap = max;
 }
 
-void SectionManager::reset()
+void vma::reset()
 {
-}
-
-void SectionManager::print2DUtil(const Section* root, int space)
-{
-    // Base case
-    if (root == NULL)
-        return;
-
-    // Increase distance between levels
-    space += 10;
-
-    // Process right child first
-    print2DUtil(root->node.right, space);
-
-    // Print current node after space
-    // count
-    Log::printk(Log::LogLevel::CONTINUE, "\n");
-    for (int i = 10; i < space; i++)
-        Log::printk(Log::LogLevel::CONTINUE, " ");
-    Log::printk(Log::LogLevel::CONTINUE, "%p - %p (%zX)\n", root->start(),
-                root->end(), root->largest_subgap);
-
-    // Process left child
-    print2DUtil(root->node.left, space);
-}
-
-// Wrapper over print2DUtil()
-void SectionManager::print()
-{
-    Log::printk(Log::LogLevel::INFO, "=======================\n");
-    // Pass initial space count as 0
-    print2DUtil(this->sections.get_root(), 0);
-    Log::printk(Log::LogLevel::INFO, "=======================\n");
 }
 } // namespace Memory

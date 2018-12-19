@@ -10,7 +10,7 @@ constexpr size_t num_entries = 256;
 
 static struct IDT::Entry entries[num_entries];
 static struct IDT::Descriptor descriptor = {
-    .limit = sizeof(struct IDT::Entry) * num_entries - 1,
+    .limit  = sizeof(struct IDT::Entry) * num_entries - 1,
     .offset = reinterpret_cast<addr_t>(&entries),
 };
 
@@ -73,14 +73,14 @@ extern "C" void idt_load(addr_t);
 static void set_entry(struct IDT::Entry* entry, addr_t offset,
                       uint16_t selector, uint8_t attributes)
 {
-    entry->offset_low = offset & 0xFFFF;
-    entry->selector = selector;
-    entry->zero = 0;
-    entry->attributes = attributes;
+    entry->offset_low    = offset & 0xFFFF;
+    entry->selector      = selector;
+    entry->zero          = 0;
+    entry->attributes    = attributes;
     entry->offset_middle = (offset >> 16) & 0xFFFF;
 #ifdef X86_64
     entry->offset_high = (offset >> 32) & 0xFFFFFFFF;
-    entry->zero_two = 0;
+    entry->zero_two    = 0;
 #endif
 }
 
@@ -148,6 +148,6 @@ void init()
 
     IDT::idt_load(reinterpret_cast<addr_t>(&descriptor));
 }
-}  // namespace IDT
-}  // namespace X86
-}  // namespace CPU
+} // namespace IDT
+} // namespace X86
+} // namespace CPU

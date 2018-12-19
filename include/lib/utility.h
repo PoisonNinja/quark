@@ -179,7 +179,7 @@ struct pair {
         return *this;
     }
 
-    pair& operator=(const pair&& other)
+    pair& operator=(pair&& other)
     {
         libcxx::swap(this->first, other.first);
         libcxx::swap(this->second, other.second);

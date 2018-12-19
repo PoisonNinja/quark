@@ -1,20 +1,20 @@
 #pragma once
 
+#include <lib/functional.h>
 #include <lib/utility.h>
 
 namespace libcxx
 {
-
 enum class Color {
     RED,
     BLACK,
 };
 
 template <class T>
-class node
+class rbnode
 {
 public:
-    node()
+    rbnode()
         : left(nullptr)
         , right(nullptr)
         , parent(nullptr){};
@@ -23,19 +23,36 @@ public:
     T *left, *right, *parent;
 };
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 class rbtree
 {
 public:
+    typedef libcxx::function<void(T*)> rb_callback_t;
     rbtree();
     ~rbtree();
     void insert(T& value);
+    void insert(T& value, rb_callback_t callback);
     void print();
+
+    // Functions for traversal
     const T* get_root();
+    const T* left(const T* t)
+    {
+        return (t->*Link).left;
+    }
+    const T* right(const T* t)
+    {
+        return (t->*Link).right;
+    }
+    const T* parent(const T* t)
+    {
+        return (t->*Link).parent;
+    }
 
 private:
     // Internal tree operations
-    void balance(T* n);
+    void balance(T* n, rb_callback_t callback);
+    void traverse(T* start, rb_callback_t callback);
     T* insert(T* curr, T* n);
     T* rotate_left(T* root);
     T* rotate_right(T* root);
@@ -52,30 +69,30 @@ private:
     {
         return (t->*Link).parent;
     }
-    Color color(T* node)
+    Color color(T* rbnode)
     {
-        if (!node) {
+        if (!rbnode) {
             return Color::BLACK;
         }
-        return (node->*Link).color;
+        return (rbnode->*Link).color;
     }
 
     T* root;
 };
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 rbtree<T, Link>::rbtree()
 {
     this->root = nullptr;
 };
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 rbtree<T, Link>::~rbtree()
 {
     // TODO: Delete entire tree
 }
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 T* rbtree<T, Link>::insert(T* curr, T* n)
 {
     if (!curr) {
@@ -92,25 +109,40 @@ T* rbtree<T, Link>::insert(T* curr, T* n)
     return curr;
 }
 
-template <class T, node<T> T::*Link>
-void rbtree<T, Link>::insert(T& value)
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::insert(T& value, rb_callback_t callback)
 {
     if (!this->root) {
         this->root                = &value;
         (this->root->*Link).color = Color::BLACK;
+        if (callback)
+            callback(root);
     } else {
         insert(root, &value);
-        balance(&value);
+        if (callback) {
+            for (T* curr = &value; curr != nullptr; curr = parent(curr)) {
+                callback(curr);
+            }
+        }
+        balance(&value, callback);
     }
+} // namespace libcxx
+
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::insert(T& value)
+{
+    // Empty
+    rb_callback_t callback;
+    return this->insert(value, callback);
 }
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 void rbtree<T, Link>::print()
 {
     // TODO: In-order list
 }
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 T* rbtree<T, Link>::rotate_right(T* pivot)
 {
     T* l          = left(pivot);
@@ -121,7 +153,7 @@ T* rbtree<T, Link>::rotate_right(T* pivot)
     return l;
 }
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 T* rbtree<T, Link>::rotate_left(T* pivot)
 {
     T* r          = right(pivot);
@@ -132,38 +164,56 @@ T* rbtree<T, Link>::rotate_left(T* pivot)
     return r;
 }
 
-template <class T, node<T> T::*Link>
-T* rbtree<T, Link>::uncle(T* node)
+template <class T, rbnode<T> T::*Link>
+T* rbtree<T, Link>::uncle(T* rbnode)
 {
     // Quick sanity
-    if (!parent(parent(node))) {
+    if (!parent(parent(rbnode))) {
         return nullptr;
     }
-    if (parent(node) == left(parent(parent(node)))) {
-        return right(parent(parent(node)));
+    if (parent(rbnode) == left(parent(parent(rbnode)))) {
+        return right(parent(parent(rbnode)));
     } else {
-        return left(parent(parent(node)));
+        return left(parent(parent(rbnode)));
     }
 }
 
-template <class T, node<T> T::*Link>
-void rbtree<T, Link>::balance(T* inserted)
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::traverse(T* curr, rb_callback_t callback)
+{
+    if (!curr) {
+        return;
+    }
+    if (this->left(curr)) {
+        traverse(this->left(curr), callback);
+    }
+    if (this->right(curr)) {
+        traverse(this->right(curr), callback);
+    }
+    callback(curr);
+}
+
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::balance(T* inserted, rb_callback_t callback)
 {
     T* x = inserted;
     while (x != root && color(x) != Color::BLACK &&
            color(parent(x)) != Color::BLACK) {
         // Uncle is red
         if (color(uncle(x)) == Color::RED) {
+            // Simple, just recolor the uncle, parent, and grandparent
             (parent(x)->*Link).color = (uncle(x)->*Link).color = Color::BLACK;
             (parent(parent(x))->*Link).color                   = Color::RED;
             x = parent(parent(x));
+            // No need to recompute anything (TODO: Is this correct?)
         } else {
             // Hmmm
             if (parent(x) == left(parent(parent(x)))) {
                 if (x == right(parent(x))) {
                     // Left-right
-                    left(parent(parent(x))) = rotate_left(parent(x));
-                    x                       = left(x);
+                    auto gp  = parent(parent(x));
+                    left(gp) = rotate_left(parent(x));
+                    x        = left(x);
                 }
                 rotate_right(parent(parent(x)));
                 libcxx::swap((parent(x)->*Link).color,
@@ -179,8 +229,9 @@ void rbtree<T, Link>::balance(T* inserted)
                 // Right oriented
                 if (x == left(parent(x))) {
                     // Right-left
-                    right(parent(parent(x))) = rotate_right(parent(x));
-                    x                        = right(x);
+                    auto gp   = parent(parent(x));
+                    right(gp) = rotate_right(parent(x));
+                    x         = right(x);
                 }
                 rotate_left(parent(parent(x)));
                 libcxx::swap((parent(x)->*Link).color,
@@ -194,12 +245,18 @@ void rbtree<T, Link>::balance(T* inserted)
                 }
             }
             x = parent(x);
+            if (callback) {
+                traverse(x, callback);
+                for (T* curr = x; curr != nullptr; curr = parent(curr)) {
+                    callback(curr);
+                }
+            }
         }
     }
     (root->*Link).color = Color::BLACK;
 }
 
-template <class T, node<T> T::*Link>
+template <class T, rbnode<T> T::*Link>
 const T* rbtree<T, Link>::get_root()
 {
     return root;

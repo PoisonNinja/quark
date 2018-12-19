@@ -53,7 +53,7 @@ bool vmregion::operator<(const vmregion& b)
 vma::vma(addr_t start, addr_t end)
     : start(start)
     , end(end)
-    , highest(0)
+    , highest(start)
 {
 }
 
@@ -107,9 +107,7 @@ libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
     addr_t low_limit     = this->start;
     addr_t ret           = 0;
     if (!curr) {
-        // Woot woot there's nothing allocated, we can do anything we want
-        ret = Memory::Virtual::align_up(hint);
-        return true;
+        goto check_highest;
     }
     addr_t gap_start, gap_end;
     if (curr->largest_subgap < size) {

@@ -37,7 +37,7 @@ void do_x86_64() {
     std::cin >> pd;
     std::cout << "pt: ";
     std::cin >> pt;
-    std::cout << decode_fractal_x86_64(pml4, pdpt, pd, pt) << "\n";
+    std::cout << std::hex << decode_fractal_x86_64(pml4, pdpt, pd, pt) << "\n";
 }
 
 void do_x86() {
@@ -46,7 +46,7 @@ void do_x86() {
     std::cin >> pd;
     std::cout << "pt: ";
     std::cin >> pt;
-    std::cout << decode_fractal_x86(pd, pt) << "\n";
+    std::cout << std::hex << decode_fractal_x86(pd, pt) << "\n";
 }
 
 int main() {

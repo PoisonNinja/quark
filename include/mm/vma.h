@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/rb.h>
+#include <lib/utility.h>
 
 namespace Memory
 {
@@ -37,7 +38,9 @@ public:
     ~vma();
 
     bool add_vmregion(addr_t start, size_t size);
-    bool locate_range(addr_t& start, addr_t hint, size_t size);
+    libcxx::pair<bool, addr_t> locate_range(addr_t hint, size_t size);
+
+    libcxx::pair<bool, addr_t> allocate(addr_t hint, size_t size);
 
     void reset();
 

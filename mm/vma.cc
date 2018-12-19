@@ -100,9 +100,12 @@ bool vma::add_vmregion(addr_t start, size_t size)
     return true;
 }
 
-bool vma::locate_range(addr_t& ret, addr_t hint, size_t size)
+libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
 {
     const vmregion* curr = sections.get_root();
+    addr_t high_limit    = this->end - size;
+    addr_t low_limit     = this->start;
+    addr_t ret           = 0;
     if (!curr) {
         // Woot woot there's nothing allocated, we can do anything we want
         ret = Memory::Virtual::align_up(hint);
@@ -124,9 +127,9 @@ bool vma::locate_range(addr_t& ret, addr_t hint, size_t size)
                 continue;
             }
         }
-        gap_start = curr->prev ? (curr->prev->end()) : this->start;
+        gap_start = curr->prev ? (curr->prev->end()) : low_limit;
     check_current:
-        if (gap_end >= this->start && gap_end > gap_start &&
+        if (gap_end >= low_limit && gap_end > gap_start &&
             gap_end - gap_start >= size) {
             goto found;
         }
@@ -150,11 +153,11 @@ bool vma::locate_range(addr_t& ret, addr_t hint, size_t size)
     }
 check_highest:
     gap_start = this->highest;
-    gap_end   = this->end;
+    gap_end   = high_limit;
 
 found:
     ret = gap_start;
-    return true;
+    return libcxx::make_pair(true, ret);
 }
 
 const vmregion* vma::calculate_prev(addr_t addr)
@@ -204,6 +207,15 @@ void vma::calculate_largest_subgap(vmregion* section)
         }
     }
     section->largest_subgap = max;
+}
+
+libcxx::pair<bool, addr_t> vma::allocate(addr_t hint, size_t size)
+{
+    auto res = locate_range(hint, size);
+    if (res.first) {
+        add_vmregion(res.second, size);
+    }
+    return res;
 }
 
 void vma::reset()

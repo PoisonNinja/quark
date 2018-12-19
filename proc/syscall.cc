@@ -127,13 +127,11 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
     if (!(mmap_data->flags & MAP_FIXED)) {
         Log::printk(Log::LogLevel::DEBUG,
                     "[sys_mmap] Kernel selecting mapping\n");
-        addr_t placement;
-        bool ret = false;
-        ret      = Scheduler::get_current_process()->vma->locate_range(
-            placement,
-            (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr)
-                              : USER_START,
-            mmap_data->length);
+        auto [ret, placement] =
+            Scheduler::get_current_process()->vma->locate_range(
+                (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr)
+                                  : USER_START,
+                mmap_data->length);
         if (!ret) {
             Log::printk(Log::LogLevel::WARNING,
                         "[sys_mmap] Failed to allocate area for mmap\n");

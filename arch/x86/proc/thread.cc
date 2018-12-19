@@ -155,100 +155,101 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     for (int i = 0; i < envc; i++) {
         envp_size += libcxx::strlen(envp[i]) + 1;
     }
-    addr_t argv_zone;
-    addr_t envp_zone;
-    addr_t stack_zone;
-    addr_t sigreturn_zone;
-    addr_t tls_zone;
+
+    libcxx::pair<bool, addr_t> argv_zone;
+    libcxx::pair<bool, addr_t> envp_zone;
+    libcxx::pair<bool, addr_t> stack_zone;
+    libcxx::pair<bool, addr_t> sigreturn_zone;
+    libcxx::pair<bool, addr_t> tls_zone;
 
     size_t tls_raw_size = ROUND_UP(parent->tls_memsz, parent->tls_alignment);
     size_t tls_size     = tls_raw_size + sizeof(struct uthread);
     tls_size            = ROUND_UP(tls_size, parent->tls_alignment);
 
-    if (parent->vma->locate_range(argv_zone, USER_START, argv_size)) {
-        Log::printk(Log::LogLevel::DEBUG, "argv located at %p\n", argv_zone);
-        parent->vma->add_vmregion(argv_zone, argv_size);
+    if ((argv_zone = parent->vma->allocate(USER_START, argv_size)).first) {
+        Log::printk(Log::LogLevel::DEBUG, "argv located at %p\n",
+                    argv_zone.second);
     } else {
         Log::printk(Log::LogLevel::ERROR, "Failed to locate argv\n");
         return false;
     }
-    if (parent->vma->locate_range(envp_zone, USER_START, envp_size)) {
-        Log::printk(Log::LogLevel::DEBUG, "envp located at %p\n", envp_zone);
-        parent->vma->add_vmregion(envp_zone, envp_size);
+    if ((envp_zone = parent->vma->allocate(USER_START, envp_size)).first) {
+        Log::printk(Log::LogLevel::DEBUG, "envp located at %p\n",
+                    envp_zone.second);
     } else {
         Log::printk(Log::LogLevel::ERROR, "Failed to locate envp\n");
         return false;
     }
-    if (parent->vma->locate_range(stack_zone, USER_START, 0x1000)) {
-        Log::printk(Log::LogLevel::DEBUG, "Stack located at %p\n", stack_zone);
-        parent->vma->add_vmregion(stack_zone, 0x1000);
+    if ((stack_zone = parent->vma->allocate(USER_START, 0x1000)).first) {
+        Log::printk(Log::LogLevel::DEBUG, "Stack located at %p\n",
+                    stack_zone.second);
     } else {
         Log::printk(Log::LogLevel::ERROR, "Failed to locate stack\n");
         return false;
     }
-    if (parent->vma->locate_range(sigreturn_zone, USER_START, 0x1000)) {
+    if ((sigreturn_zone = parent->vma->allocate(USER_START, 0x1000)).first) {
         Log::printk(Log::LogLevel::DEBUG, "Sigreturn page located at %p\n",
-                    sigreturn_zone);
-        parent->vma->add_vmregion(sigreturn_zone, 0x1000);
+                    sigreturn_zone.second);
     } else {
         Log::printk(Log::LogLevel::ERROR, "Failed to locate sigreturn page\n");
         return false;
     }
-    if (parent->vma->locate_range(tls_zone, USER_START, tls_size)) {
-        Log::printk(Log::LogLevel::DEBUG, "TLS copy located at %p\n", tls_zone);
-        parent->vma->add_vmregion(tls_zone, tls_size);
+    if ((tls_zone = parent->vma->allocate(USER_START, tls_size)).first) {
+        Log::printk(Log::LogLevel::DEBUG, "TLS copy located at %p\n",
+                    tls_zone.second);
     } else {
         Log::printk(Log::LogLevel::ERROR, "Failed to locate TLS copy\n");
         return false;
     }
-    Memory::Virtual::map_range(argv_zone, argv_size,
+    Memory::Virtual::map_range(argv_zone.second, argv_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    Memory::Virtual::map_range(envp_zone, envp_size,
+    Memory::Virtual::map_range(envp_zone.second, envp_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    Memory::Virtual::map_range(stack_zone, 0x1000,
+    Memory::Virtual::map_range(stack_zone.second, 0x1000,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    Memory::Virtual::map_range(sigreturn_zone, 0x1000,
+    Memory::Virtual::map_range(sigreturn_zone.second, 0x1000,
                                PAGE_USER | PAGE_WRITABLE);
-    Memory::Virtual::map_range(tls_zone, tls_size,
+    Memory::Virtual::map_range(tls_zone.second, tls_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
 
-    this->parent->sigreturn = sigreturn_zone;
+    this->parent->sigreturn = sigreturn_zone.second;
 
     // Copy in sigreturn trampoline code
-    libcxx::memcpy(reinterpret_cast<void*>(sigreturn_zone),
+    libcxx::memcpy(reinterpret_cast<void*>(sigreturn_zone.second),
                    signal_return_location, 0x1000);
 
     // Make it unwritable
-    Memory::Virtual::protect(sigreturn_zone, PAGE_USER);
+    Memory::Virtual::protect(sigreturn_zone.second, PAGE_USER);
 
     // Copy TLS data into thread specific data
-    libcxx::memcpy((void*)tls_zone, (void*)parent->tls_base,
+    libcxx::memcpy((void*)tls_zone.second, (void*)parent->tls_base,
                    parent->tls_filesz);
-    libcxx::memset((void*)(tls_zone + parent->tls_filesz), 0,
+    libcxx::memset((void*)(tls_zone.second + parent->tls_filesz), 0,
                    parent->tls_memsz - parent->tls_filesz);
 
     struct uthread* uthread =
-        reinterpret_cast<struct uthread*>(tls_zone + tls_raw_size);
+        reinterpret_cast<struct uthread*>(tls_zone.second + tls_raw_size);
     uthread->self = uthread;
 
-    char* target =
-        reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
-    char** target_argv = reinterpret_cast<char**>(argv_zone);
+    char* target       = reinterpret_cast<char*>(argv_zone.second +
+                                           (sizeof(char*) * (argc + 1)));
+    char** target_argv = reinterpret_cast<char**>(argv_zone.second);
     for (int i = 0; i < argc; i++) {
         libcxx::strcpy(target, argv[i]);
         target_argv[i] = target;
         target += libcxx::strlen(argv[i]) + 1;
     }
-    target_argv[argc] = 0;
-    target = reinterpret_cast<char*>(envp_zone + (sizeof(char*) * (envc + 1)));
-    char** target_envp = reinterpret_cast<char**>(envp_zone);
+    target_argv[argc]  = 0;
+    target             = reinterpret_cast<char*>(envp_zone.second +
+                                     (sizeof(char*) * (envc + 1)));
+    char** target_envp = reinterpret_cast<char**>(envp_zone.second);
     for (int i = 0; i < envc; i++) {
         libcxx::strcpy(target, envp[i]);
         target_envp[i] = target;
         target += libcxx::strlen(envp[i]) + 1;
     }
     target_envp[envc] = 0;
-    libcxx::memset((void*)stack_zone, 0, 0x1000);
+    libcxx::memset(reinterpret_cast<void*>(stack_zone.second), 0, 0x1000);
 
     libcxx::memset(&ctx, 0, sizeof(ctx));
 #ifdef X86_64
@@ -260,7 +261,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.ds  = 0x18 | 3;
     ctx.ss  = 0x18 | 3;
     ctx.fs  = reinterpret_cast<uint64_t>(uthread);
-    ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
+    ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone.second) + 0x1000;
     ctx.rflags        = 0x200;
     // TODO: INSECURE! This allows all programs IOPORT access!
     ctx.rflags |= 0x3000;
@@ -270,7 +271,8 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.ds  = 0x20 | 3;
     ctx.ss  = 0x20 | 3;
     ctx.gs  = reinterpret_cast<uint32_t>(uthread);
-    ctx.esp = ctx.ebp = (reinterpret_cast<addr_t>(stack_zone) + 0x1000) & ~15UL;
+    ctx.esp = ctx.ebp =
+        (reinterpret_cast<addr_t>(stack_zone.second) + 0x1000) & ~15UL;
     // Arguments are passed on the stack
     uint32_t* stack = reinterpret_cast<uint32_t*>(ctx.esp);
     stack[-1]       = reinterpret_cast<uint32_t>(target_envp);

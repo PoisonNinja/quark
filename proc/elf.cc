@@ -29,12 +29,14 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
         if (phdr->p_type == PT_LOAD || phdr->p_type == PT_TLS) {
             if (phdr->p_type == PT_TLS) {
                 Log::printk(Log::LogLevel::DEBUG, "Found TLS section\n");
-                if (!process->vma->locate_range(phdr->p_vaddr, USER_START,
-                                                phdr->p_memsz)) {
+                auto [found, addr] =
+                    process->vma->locate_range(USER_START, phdr->p_memsz);
+                if (!found) {
                     Log::printk(Log::LogLevel::ERROR,
                                 "Failed to locate section\n");
                     return libcxx::pair<bool, addr_t>(false, 0);
                 }
+                phdr->p_vaddr = addr;
                 Log::printk(Log::LogLevel::DEBUG, "TLS section will be at %p\n",
                             phdr->p_vaddr);
                 process->tls_base      = phdr->p_vaddr;

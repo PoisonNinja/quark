@@ -1,5 +1,4 @@
 #include <boot/info.h>
-#include <mm/dma.h>
 #include <mm/physical.h>
 
 namespace Memory

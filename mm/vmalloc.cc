@@ -15,12 +15,12 @@ Memory::vma vmalloc_region(VMALLOC_START, VMALLOC_END);
 
 addr_t allocate(size_t size)
 {
-    size       = Memory::Virtual::align_up(size);
-    addr_t ret = 0;
-    if (!vmalloc_region.locate_range(ret, 0, size)) {
+    size                  = Memory::Virtual::align_up(size);
+    auto [found, address] = vmalloc_region.allocate(0, size);
+    if (!found) {
         Log::printk(Log::LogLevel::WARNING, "vmalloc: Out of memory somehow\n");
     }
-    return ret;
+    return address;
 }
 
 void free(addr_t address)

@@ -7,9 +7,7 @@
 namespace Memory
 {
 vmregion::vmregion(addr_t start, size_t size)
-    : prev(nullptr)
-    , next(nullptr)
-    , largest_subgap(0)
+    : largest_subgap(0)
     , _start(start)
     , _size(size)
 {
@@ -35,19 +33,24 @@ size_t vmregion::size() const
     return _size;
 }
 
-bool vmregion::operator==(const vmregion& b)
+bool vmregion::operator==(const vmregion& b) const
 {
     return (_start == b._start) && (_size == b._size);
 }
 
-bool vmregion::operator!=(const vmregion& b)
+bool vmregion::operator!=(const vmregion& b) const
 {
     return !(*this == b);
 }
 
-bool vmregion::operator<(const vmregion& b)
+bool vmregion::operator<(const vmregion& b) const
 {
     return this->_start < b._start;
+}
+
+bool vmregion::operator>(const vmregion& b) const
+{
+    return this->_start > b._start;
 }
 
 vma::vma(addr_t start, addr_t end)
@@ -74,23 +77,6 @@ bool vma::add_vmregion(addr_t start, size_t size)
     vmregion* section = new vmregion(start, size);
     // TODO: Sanity checks for overlaps, exceeding bounds
     // Of course, that probably requires support from rbtree
-    section->prev = this->calculate_prev(start);
-    if (section->prev) {
-        vmregion* tnext = const_cast<vmregion*>(section->prev->next);
-        vmregion* tprev = const_cast<vmregion*>(section->prev);
-        tprev->next     = section;
-        section->next   = tnext;
-    } else {
-        if (this->sections.parent(const_cast<const vmregion*>(section))) {
-            section->next = const_cast<const vmregion*>(section);
-        } else {
-            section->next = nullptr;
-        }
-    }
-    if (section->next) {
-        vmregion* tnext = const_cast<vmregion*>(section->next);
-        tnext->prev     = section;
-    }
     auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
     if (section->end() > highest) {
@@ -125,7 +111,9 @@ libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
                 continue;
             }
         }
-        gap_start = curr->prev ? (curr->prev->end()) : low_limit;
+        gap_start = this->sections.prev(curr)
+                        ? (this->sections.prev(curr)->end())
+                        : low_limit;
     check_current:
         if (gap_end >= low_limit && gap_end > gap_start &&
             gap_end - gap_start >= size) {
@@ -143,7 +131,7 @@ libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
                 goto check_highest;
             curr = this->sections.parent(curr);
             if (prev == this->sections.left(curr)) {
-                gap_start = curr->prev->end();
+                gap_start = this->sections.prev(curr)->end();
                 gap_end   = curr->start();
                 goto check_current;
             }
@@ -176,13 +164,16 @@ const vmregion* vma::calculate_prev(addr_t addr)
 void vma::calculate_largest_subgap(vmregion* section)
 {
     size_t max = 0;
-    if (section->prev) {
-        max = section->start() - section->prev->end();
+    if (this->sections.prev(const_cast<const vmregion*>(section))) {
+        max = section->start() -
+              this->sections.prev(const_cast<const vmregion*>(section))->end();
     } else {
         max = section->start() - this->start;
     }
-    if (section->next) {
-        addr_t gap = section->next->start() - section->end();
+    if (this->sections.next(const_cast<const vmregion*>(section))) {
+        addr_t gap =
+            this->sections.next(const_cast<const vmregion*>(section))->start() -
+            section->end();
         if (gap > max)
             max = gap;
     } else {

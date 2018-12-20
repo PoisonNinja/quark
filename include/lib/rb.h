@@ -17,10 +17,12 @@ public:
     rbnode()
         : left(nullptr)
         , right(nullptr)
-        , parent(nullptr){};
+        , parent(nullptr)
+        , prev(nullptr)
+        , next(nullptr){};
 
     Color color;
-    T *left, *right, *parent;
+    T *left, *right, *parent, *prev, *next;
 };
 
 template <class T, rbnode<T> T::*Link>
@@ -48,11 +50,20 @@ public:
     {
         return (t->*Link).parent;
     }
+    const T* prev(const T* t)
+    {
+        return (t->*Link).prev;
+    }
+    const T* next(const T* t)
+    {
+        return (t->*Link).next;
+    }
 
 private:
     // Internal tree operations
     void balance(T* n, rb_callback_t callback);
     void traverse(T* start, rb_callback_t callback);
+    T* calculate_prev(T* val);
     T* insert(T* curr, T* n);
     T* rotate_left(T* root);
     T* rotate_right(T* root);
@@ -68,6 +79,14 @@ private:
     T*& parent(T* t)
     {
         return (t->*Link).parent;
+    }
+    T*& prev(T* t)
+    {
+        return (t->*Link).prev;
+    }
+    T*& next(T* t)
+    {
+        return (t->*Link).next;
     }
     Color color(T* rbnode)
     {
@@ -93,6 +112,22 @@ rbtree<T, Link>::~rbtree()
 }
 
 template <class T, rbnode<T> T::*Link>
+T* rbtree<T, Link>::calculate_prev(T* val)
+{
+    T* curr = this->root;
+    T* prev = nullptr;
+    while (curr) {
+        if (*curr > *val) {
+            curr = left(curr);
+        } else {
+            prev = curr;
+            curr = right(curr);
+        }
+    }
+    return prev;
+}
+
+template <class T, rbnode<T> T::*Link>
 T* rbtree<T, Link>::insert(T* curr, T* n)
 {
     if (!curr) {
@@ -112,6 +147,23 @@ T* rbtree<T, Link>::insert(T* curr, T* n)
 template <class T, rbnode<T> T::*Link>
 void rbtree<T, Link>::insert(T& value, rb_callback_t callback)
 {
+    prev(&value) = this->calculate_prev(&value);
+    T* curr      = &value;
+    if (prev(curr)) {
+        T* tnext    = next(prev(curr));
+        T* tprev    = prev(curr);
+        next(tprev) = curr;
+        next(curr)  = tnext;
+    } else {
+        if (parent(curr)) {
+            next(curr) = parent(curr);
+        } else {
+            next(curr) = nullptr;
+        }
+    }
+    if (next(curr)) {
+        prev(next(curr)) = curr;
+    }
     if (!this->root) {
         this->root                = &value;
         (this->root->*Link).color = Color::BLACK;

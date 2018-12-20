@@ -13,16 +13,16 @@ public:
 
     libcxx::rbnode<vmregion> node;
 
-    bool operator==(const vmregion& b);
-    bool operator!=(const vmregion& b);
-    bool operator<(const vmregion& b);
+    bool operator==(const vmregion& b) const;
+    bool operator!=(const vmregion& b) const;
+    bool operator<(const vmregion& b) const;
+    bool operator>(const vmregion& b) const;
 
     addr_t start() const;
     addr_t end() const;
     size_t size() const;
 
     // Additional metadata to speed up accesses
-    const vmregion *prev, *next;
     size_t largest_subgap; // Same idea as Linux
 
 private:

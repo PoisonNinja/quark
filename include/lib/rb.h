@@ -65,8 +65,8 @@ private:
     void traverse(T* start, rb_callback_t callback);
     T* calculate_prev(T* val);
     T* insert(T* curr, T* n);
-    T* rotate_left(T* root);
-    T* rotate_right(T* root);
+    void rotate_left(T* root);
+    void rotate_right(T* root);
     T* uncle(T* root);
     T*& left(T* t)
     {
@@ -195,25 +195,49 @@ void rbtree<T, Link>::print()
 }
 
 template <class T, rbnode<T> T::*Link>
-T* rbtree<T, Link>::rotate_right(T* pivot)
+void rbtree<T, Link>::rotate_right(T* pivot)
 {
-    T* l          = left(pivot);
+    T* l = left(pivot);
+    // Swap the parent pointers to this
+    if (parent(pivot)) {
+        if (pivot == left(parent(pivot))) {
+            left(parent(pivot)) = l;
+        } else {
+            right(parent(pivot)) = l;
+        }
+    } else {
+        root = l;
+    }
     left(pivot)   = right(l);
     parent(l)     = parent(pivot);
     parent(pivot) = l;
-    right(l)      = pivot;
-    return l;
+    if (right(l)) {
+        parent(right(l)) = pivot;
+    }
+    right(l) = pivot;
 }
 
 template <class T, rbnode<T> T::*Link>
-T* rbtree<T, Link>::rotate_left(T* pivot)
+void rbtree<T, Link>::rotate_left(T* pivot)
 {
-    T* r          = right(pivot);
+    T* r = right(pivot);
+    // Swap the parent pointers to this
+    if (parent(pivot)) {
+        if (pivot == left(parent(pivot))) {
+            left(parent(pivot)) = r;
+        } else {
+            right(parent(pivot)) = r;
+        }
+    } else {
+        root = r;
+    }
     right(pivot)  = left(r);
     parent(r)     = parent(pivot);
     parent(pivot) = r;
-    left(r)       = pivot;
-    return r;
+    if (left(r)) {
+        parent(left(r)) = pivot;
+    }
+    left(r) = pivot;
 }
 
 template <class T, rbnode<T> T::*Link>
@@ -263,38 +287,22 @@ void rbtree<T, Link>::balance(T* inserted, rb_callback_t callback)
             if (parent(x) == left(parent(parent(x)))) {
                 if (x == right(parent(x))) {
                     // Left-right
-                    auto gp  = parent(parent(x));
-                    left(gp) = rotate_left(parent(x));
-                    x        = left(x);
+                    rotate_left(parent(x));
+                    x = left(x);
                 }
                 rotate_right(parent(parent(x)));
                 libcxx::swap((parent(x)->*Link).color,
                              (right(parent(x))->*Link).color);
-                if (parent(parent(x)) == nullptr) {
-                    root = parent(x);
-                } else if (left(parent(parent(x))) == right(parent(x))) {
-                    left(parent(parent(x))) = parent(x);
-                } else {
-                    right(parent(parent(x))) = parent(x);
-                }
             } else if (parent(x) == right(parent(parent(x)))) {
                 // Right oriented
                 if (x == left(parent(x))) {
                     // Right-left
-                    auto gp   = parent(parent(x));
-                    right(gp) = rotate_right(parent(x));
-                    x         = right(x);
+                    rotate_right(parent(x));
+                    x = right(x);
                 }
                 rotate_left(parent(parent(x)));
                 libcxx::swap((parent(x)->*Link).color,
                              (left(parent(x))->*Link).color);
-                if (parent(parent(x)) == nullptr) {
-                    root = parent(x);
-                } else if (right(parent(parent(x))) == left(parent(x))) {
-                    right(parent(parent(x))) = parent(x);
-                } else {
-                    left(parent(parent(x))) = parent(x);
-                }
             }
             x = parent(x);
             if (callback) {

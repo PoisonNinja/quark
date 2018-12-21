@@ -35,7 +35,7 @@ public:
     ~rbtree();
     void insert(T& value);
     void insert(T& value, rb_callback_t callback);
-    void remove(T& value);
+    T* remove(T& value);
     void print();
 
     // Functions for traversal
@@ -68,7 +68,7 @@ private:
     void post_remove(T* n);
     T* calculate_prev(T* val);
     T* insert(T* curr, T* n);
-    void remove(T* curr);
+    T* remove(T* curr);
     void rotate_left(T* root);
     void rotate_right(T* root);
     T* uncle(T* root);
@@ -193,13 +193,13 @@ void rbtree<T, Link>::insert(T& value)
 }
 
 template <class T, rbnode<T> T::*Link>
-void rbtree<T, Link>::remove(T& value)
+T* rbtree<T, Link>::remove(T& value)
 {
-    remove(&value);
+    return remove(&value);
 }
 
 template <class T, rbnode<T> T::*Link>
-void rbtree<T, Link>::remove(T* value)
+T* rbtree<T, Link>::remove(T* value)
 {
     T* node = value;
     if (left(node) && right(node)) {
@@ -236,6 +236,7 @@ void rbtree<T, Link>::remove(T* value)
             right(parent(node)) = nullptr;
         }
     }
+    return node;
 }
 
 template <class T, rbnode<T> T::*Link>

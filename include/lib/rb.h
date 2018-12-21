@@ -15,7 +15,8 @@ class rbnode
 {
 public:
     rbnode()
-        : left(nullptr)
+        : color(Color::BLACK)
+        , left(nullptr)
         , right(nullptr)
         , parent(nullptr)
         , prev(nullptr)
@@ -34,6 +35,7 @@ public:
     ~rbtree();
     void insert(T& value);
     void insert(T& value, rb_callback_t callback);
+    void remove(T& value);
     void print();
 
     // Functions for traversal
@@ -63,8 +65,10 @@ private:
     // Internal tree operations
     void balance(T* n, rb_callback_t callback);
     void traverse(T* start, rb_callback_t callback);
+    void post_remove(T* n);
     T* calculate_prev(T* val);
     T* insert(T* curr, T* n);
+    void remove(T* curr);
     void rotate_left(T* root);
     void rotate_right(T* root);
     T* uncle(T* root);
@@ -178,7 +182,7 @@ void rbtree<T, Link>::insert(T& value, rb_callback_t callback)
         }
         balance(&value, callback);
     }
-} // namespace libcxx
+}
 
 template <class T, rbnode<T> T::*Link>
 void rbtree<T, Link>::insert(T& value)
@@ -186,6 +190,111 @@ void rbtree<T, Link>::insert(T& value)
     // Empty
     rb_callback_t callback;
     return this->insert(value, callback);
+}
+
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::remove(T& value)
+{
+    remove(&value);
+}
+
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::remove(T* value)
+{
+    T* node = value;
+    if (left(node) && right(node)) {
+        auto node_orig = node->*Link;
+        *node          = *next(node);
+        node->*Link    = node_orig;
+        node           = next(node);
+    }
+    T* pullup = left(node) ? left(node) : right(node);
+    if (pullup) {
+        if (node == root) {
+            this->root = pullup;
+        } else {
+            if (left(parent(node)) == node) {
+                left(parent(node)) = pullup;
+            } else {
+                right(parent(node)) = pullup;
+            }
+            parent(pullup) = parent(node);
+            if (color(node) == Color::BLACK) {
+                post_remove(pullup);
+            }
+        }
+    } else if (node == root) {
+        root = nullptr;
+    } else {
+        if (color(node) == Color::BLACK) {
+            post_remove(node);
+        }
+        // Remove from parent
+        if (left(parent(node)) == node) {
+            left(parent(node)) = nullptr;
+        } else {
+            right(parent(node)) = nullptr;
+        }
+    }
+}
+
+template <class T, rbnode<T> T::*Link>
+void rbtree<T, Link>::post_remove(T* n)
+{
+    while (n != root && color(n) == Color::BLACK) {
+        if (n == left(parent(n))) {
+            T* sibling = right(parent(n));
+            if (color(sibling) == Color::RED) {
+                (sibling->*Link).color   = Color::BLACK;
+                (parent(n)->*Link).color = Color::RED;
+                rotate_left(parent(n));
+                sibling = right(parent(n));
+            }
+            if (color(left(sibling)) == Color::BLACK &&
+                color(right(sibling)) == Color::BLACK) {
+                (sibling->*Link).color = Color::RED;
+                n                      = parent(n);
+            } else {
+                if (color(right(sibling)) == Color::BLACK) {
+                    (left(sibling)->*Link).color = Color::BLACK;
+                    (sibling->*Link).color       = Color::RED;
+                    rotate_right(sibling);
+                    sibling = right(parent(n));
+                }
+                (sibling->*Link).color        = (parent(n)->*Link).color;
+                (parent(n)->*Link).color      = Color::BLACK;
+                (right(sibling)->*Link).color = Color::BLACK;
+                rotate_left(parent(n));
+                n = root;
+            }
+        } else {
+            T* sibling = left(parent(n));
+            if (color(sibling) == Color::RED) {
+                (sibling->*Link).color   = Color::BLACK;
+                (parent(n)->*Link).color = Color::RED;
+                rotate_right(parent(n));
+                sibling = left(parent(n));
+            }
+            if (color(left(sibling)) == Color::BLACK &&
+                color(right(sibling)) == Color::BLACK) {
+                (sibling->*Link).color = Color::RED;
+                n                      = parent(n);
+            } else {
+                if (color(left(sibling)) == Color::BLACK) {
+                    (right(sibling)->*Link).color = Color::BLACK;
+                    (sibling->*Link).color        = Color::RED;
+                    rotate_left(sibling);
+                    sibling = left(parent(n));
+                }
+                (sibling->*Link).color       = (parent(n)->*Link).color;
+                (parent(n)->*Link).color     = Color::BLACK;
+                (left(sibling)->*Link).color = Color::BLACK;
+                rotate_right(parent(n));
+                n = root;
+            }
+        }
+    }
+    (n->*Link).color = Color::BLACK;
 }
 
 template <class T, rbnode<T> T::*Link>
@@ -273,8 +382,7 @@ template <class T, rbnode<T> T::*Link>
 void rbtree<T, Link>::balance(T* inserted, rb_callback_t callback)
 {
     T* x = inserted;
-    while (x != root && color(x) != Color::BLACK &&
-           color(parent(x)) != Color::BLACK) {
+    while (x != root && color(parent(x)) != Color::BLACK) {
         // Uncle is red
         if (color(uncle(x)) == Color::RED) {
             // Simple, just recolor the uncle, parent, and grandparent

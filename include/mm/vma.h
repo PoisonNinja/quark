@@ -39,8 +39,9 @@ public:
 
     bool add_vmregion(addr_t start, size_t size);
     libcxx::pair<bool, addr_t> locate_range(addr_t hint, size_t size);
-
     libcxx::pair<bool, addr_t> allocate(addr_t hint, size_t size);
+    void free(addr_t addr, size_t size);
+    const vmregion* find(addr_t addr);
 
     void reset();
 
@@ -50,7 +51,6 @@ private:
 
     void traverse();
     void calculate_largest_subgap(vmregion* section);
-    const vmregion* calculate_prev(addr_t addr);
 
     libcxx::rbtree<vmregion, &vmregion::node> sections;
 };

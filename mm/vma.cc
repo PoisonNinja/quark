@@ -146,19 +146,28 @@ found:
     return libcxx::make_pair(true, ret);
 }
 
-const vmregion* vma::calculate_prev(addr_t addr)
+void vma::free(addr_t addr, size_t size)
+{
+    // **** your const :P
+    vmregion* node = const_cast<vmregion*>(find(addr));
+    node           = this->sections.remove(*node);
+    delete node;
+}
+
+const vmregion* vma::find(addr_t addr)
 {
     const vmregion* curr = sections.get_root();
-    const vmregion* prev = nullptr;
+    const vmregion* ret  = nullptr;
     while (curr) {
         if (curr->end() > addr) {
-            curr = sections.left(curr);
-        } else {
-            prev = curr;
-            curr = sections.right(curr);
-        }
+            ret = curr;
+            if (ret->start() <= addr)
+                break;
+            curr = this->sections.left(curr);
+        } else
+            curr = this->sections.right(curr);
     }
-    return prev;
+    return ret;
 }
 
 void vma::calculate_largest_subgap(vmregion* section)

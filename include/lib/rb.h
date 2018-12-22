@@ -1,10 +1,19 @@
 #pragma once
 
+#ifdef USERSPACE
+#include <cassert>
+#include <functional>
+#include <utility>
+#define libcxx std
+#else
 #include <lib/functional.h>
 #include <lib/utility.h>
+#endif
 
+#ifndef USERSPACE
 namespace libcxx
 {
+#endif
 enum class Color {
     RED,
     BLACK,
@@ -430,4 +439,6 @@ const T* rbtree<T, Link>::get_root()
 {
     return root;
 }
-} // namespace libcxx
+#ifndef USERSPACE
+}
+#endif

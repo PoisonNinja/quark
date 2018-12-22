@@ -22,12 +22,14 @@ public:
     addr_t end() const;
     size_t size() const;
 
-    // Additional metadata to speed up accesses
-    size_t largest_subgap; // Same idea as Linux
-
 private:
     addr_t _start;
     size_t _size;
+
+    // Additional metadata to speed up accesses
+    size_t largest_subgap; // Same idea as Linux
+
+    friend class vma;
 };
 
 class vma

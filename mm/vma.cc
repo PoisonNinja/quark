@@ -7,9 +7,9 @@
 namespace Memory
 {
 vmregion::vmregion(addr_t start, size_t size)
-    : largest_subgap(0)
-    , _start(start)
+    : _start(start)
     , _size(size)
+    , largest_subgap(0)
 {
 }
 

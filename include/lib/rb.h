@@ -45,6 +45,7 @@ public:
     void insert(T& value);
     void insert(T& value, rb_callback_t callback);
     T* remove(T& value);
+    T* remove(T& value, rb_callback_t callback);
     void print();
 
     // Functions for traversal
@@ -74,10 +75,10 @@ private:
     // Internal tree operations
     void balance(T* n, rb_callback_t callback);
     void traverse(T* start, rb_callback_t callback);
-    void post_remove(T* n);
+    void post_remove(T* n, rb_callback_t callback);
     T* calculate_prev(T* val);
     T* insert(T* curr, T* n);
-    T* remove(T* curr);
+    T* remove(T* curr, rb_callback_t callback);
     void rotate_left(T* root);
     void rotate_right(T* root);
     T* uncle(T* root);
@@ -202,13 +203,21 @@ void rbtree<T, Link>::insert(T& value)
 }
 
 template <class T, rbnode<T> T::*Link>
-T* rbtree<T, Link>::remove(T& value)
+T* rbtree<T, Link>::remove(T& value, rb_callback_t callback)
 {
-    return remove(&value);
+    return remove(&value, callback);
 }
 
 template <class T, rbnode<T> T::*Link>
-T* rbtree<T, Link>::remove(T* value)
+T* rbtree<T, Link>::remove(T& value)
+{
+    // Empty
+    rb_callback_t callback;
+    return remove(value, callback);
+}
+
+template <class T, rbnode<T> T::*Link>
+T* rbtree<T, Link>::remove(T* value, rb_callback_t callback)
 {
     T* node = value;
     if (left(node) && right(node)) {
@@ -229,14 +238,14 @@ T* rbtree<T, Link>::remove(T* value)
             }
             parent(pullup) = parent(node);
             if (color(node) == Color::BLACK) {
-                post_remove(pullup);
+                post_remove(pullup, callback);
             }
         }
     } else if (node == root) {
         root = nullptr;
     } else {
         if (color(node) == Color::BLACK) {
-            post_remove(node);
+            post_remove(node, callback);
         }
         // Remove from parent
         if (left(parent(node)) == node) {
@@ -245,11 +254,24 @@ T* rbtree<T, Link>::remove(T* value)
             right(parent(node)) = nullptr;
         }
     }
+    // Fix up the previous and next nodes
+    if (prev(node)) {
+        next(prev(node)) = next(node);
+    }
+    if (next(node)) {
+        prev(next(node)) = prev(node);
+    }
+    if (callback) {
+        traverse(value, callback);
+        for (T* curr = node; curr != nullptr; curr = parent(curr)) {
+            callback(curr);
+        }
+    }
     return node;
 }
 
 template <class T, rbnode<T> T::*Link>
-void rbtree<T, Link>::post_remove(T* n)
+void rbtree<T, Link>::post_remove(T* n, rb_callback_t callback)
 {
     while (n != root && color(n) == Color::BLACK) {
         if (n == left(parent(n))) {

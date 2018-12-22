@@ -6,49 +6,49 @@
 
 namespace Memory
 {
-vma::vmregion::vmregion(addr_t start, size_t size)
+vmregion::vmregion(addr_t start, size_t size)
     : largest_subgap(0)
     , _start(start)
     , _size(size)
 {
 }
 
-vma::vmregion::vmregion(vmregion& other)
+vmregion::vmregion(vmregion& other)
     : vmregion(other._start, other._size)
 {
 }
 
-addr_t vma::vmregion::start() const
+addr_t vmregion::start() const
 {
     return _start;
 }
 
-addr_t vma::vma::vmregion::end() const
+addr_t vmregion::end() const
 {
     return _start + _size;
 }
 
-size_t vma::vmregion::size() const
+size_t vmregion::size() const
 {
     return _size;
 }
 
-bool vma::vmregion::operator==(const vmregion& b) const
+bool vmregion::operator==(const vmregion& b) const
 {
     return (_start == b._start) && (_size == b._size);
 }
 
-bool vma::vmregion::operator!=(const vmregion& b) const
+bool vmregion::operator!=(const vmregion& b) const
 {
     return !(*this == b);
 }
 
-bool vma::vmregion::operator<(const vmregion& b) const
+bool vmregion::operator<(const vmregion& b) const
 {
     return this->_start < b._start;
 }
 
-bool vma::vmregion::operator>(const vmregion& b) const
+bool vmregion::operator>(const vmregion& b) const
 {
     return this->_start > b._start;
 }
@@ -156,7 +156,7 @@ void vma::free(addr_t addr, size_t size)
     delete node;
 }
 
-const vma::vmregion* vma::find(addr_t addr)
+const vmregion* vma::find(addr_t addr)
 {
     const vmregion* curr = sections.get_root();
     const vmregion* ret  = nullptr;

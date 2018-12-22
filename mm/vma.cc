@@ -150,7 +150,9 @@ void vma::free(addr_t addr, size_t size)
 {
     // **** your const :P
     vmregion* node = const_cast<vmregion*>(find(addr));
-    node           = this->sections.remove(*node);
+    auto func      = libcxx::bind(&vma::calculate_largest_subgap, this,
+                             libcxx::placeholders::_1);
+    node           = this->sections.remove(*node, func);
     delete node;
 }
 

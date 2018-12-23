@@ -35,7 +35,7 @@ private:
 class vma
 {
 public:
-    vma(addr_t s, addr_t e);
+    vma(addr_t lower_bound, addr_t upper_bound);
     vma(vma& other);
     ~vma();
 
@@ -48,7 +48,7 @@ public:
     void reset();
 
 private:
-    addr_t start, end;
+    addr_t lower_bound, upper_bound;
     addr_t highest;
 
     void traverse();

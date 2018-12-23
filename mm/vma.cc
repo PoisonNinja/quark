@@ -53,15 +53,15 @@ bool vmregion::operator>(const vmregion& b) const
     return this->_start > b._start;
 }
 
-vma::vma(addr_t start, addr_t end)
-    : start(start)
-    , end(end)
-    , highest(start)
+vma::vma(addr_t lower_bound, addr_t upper_bound)
+    : lower_bound(lower_bound)
+    , upper_bound(upper_bound)
+    , highest(lower_bound)
 {
 }
 
 vma::vma(vma& other)
-    : vma(other.start, other.end)
+    : vma(other.lower_bound, other.upper_bound)
 {
 }
 
@@ -89,8 +89,8 @@ bool vma::add_vmregion(addr_t start, size_t size)
 libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
 {
     const vmregion* curr = sections.get_root();
-    addr_t high_limit    = this->end - size;
-    addr_t low_limit     = this->start;
+    addr_t high_limit    = this->upper_bound - size;
+    addr_t low_limit     = this->lower_bound;
     addr_t ret           = 0;
     if (!curr) {
         goto check_highest;
@@ -179,7 +179,7 @@ void vma::calculate_largest_subgap(vmregion* section)
         max = section->start() -
               this->sections.prev(const_cast<const vmregion*>(section))->end();
     } else {
-        max = section->start() - this->start;
+        max = section->start() - this->lower_bound;
     }
     if (this->sections.next(const_cast<const vmregion*>(section))) {
         addr_t gap =
@@ -188,7 +188,7 @@ void vma::calculate_largest_subgap(vmregion* section)
         if (gap > max)
             max = gap;
     } else {
-        addr_t gap = this->end - section->end();
+        addr_t gap = this->upper_bound - section->end();
         if (gap > max)
             max = gap;
     }

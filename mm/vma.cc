@@ -57,6 +57,8 @@ vma::vma(addr_t lower_bound, addr_t upper_bound)
     : lower_bound(lower_bound)
     , upper_bound(upper_bound)
     , highest_mapped(lower_bound)
+    , lowest(nullptr)
+    , highest(nullptr)
 {
 }
 
@@ -79,8 +81,13 @@ bool vma::add_vmregion(addr_t start, size_t size)
     // Of course, that probably requires support from rbtree
     auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
-    if (section->end() > highest_mapped) {
+    if ((highest && section->end() > highest_mapped) || !highest) {
+        // TODO: Maybe get rid of highest_mapped?
         highest_mapped = section->end();
+        highest        = section;
+    }
+    if ((lowest && section->start() < lowest->start()) || !lowest) {
+        lowest = section;
     }
     this->sections.insert(*section, func);
     return true;
@@ -153,6 +160,13 @@ void vma::free(addr_t addr, size_t size)
     auto func      = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
     node           = this->sections.remove(*node, func);
+    if (node == lowest) {
+        lowest = const_cast<vmregion*>(
+            this->sections.next(const_cast<const vmregion*>(node)));
+    } else if (node == highest) {
+        highest = const_cast<vmregion*>(
+            this->sections.prev(const_cast<const vmregion*>(node)));
+    }
     delete node;
 }
 

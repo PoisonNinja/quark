@@ -51,6 +51,8 @@ private:
     addr_t lower_bound, upper_bound;
     addr_t highest_mapped;
 
+    vmregion *lowest, *highest;
+
     void traverse();
     void calculate_largest_subgap(vmregion* section);
 

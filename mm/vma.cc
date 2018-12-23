@@ -56,7 +56,7 @@ bool vmregion::operator>(const vmregion& b) const
 vma::vma(addr_t lower_bound, addr_t upper_bound)
     : lower_bound(lower_bound)
     , upper_bound(upper_bound)
-    , highest(lower_bound)
+    , highest_mapped(lower_bound)
 {
 }
 
@@ -79,8 +79,8 @@ bool vma::add_vmregion(addr_t start, size_t size)
     // Of course, that probably requires support from rbtree
     auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
-    if (section->end() > highest) {
-        highest = section->end();
+    if (section->end() > highest_mapped) {
+        highest_mapped = section->end();
     }
     this->sections.insert(*section, func);
     return true;
@@ -138,7 +138,7 @@ libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
         }
     }
 check_highest:
-    gap_start = this->highest;
+    gap_start = this->highest_mapped;
     gap_end   = high_limit;
 
 found:

@@ -35,6 +35,42 @@ private:
 class vma
 {
 public:
+    class iterator
+    {
+    public:
+        explicit iterator(vmregion* v)
+            : current(v){};
+        vmregion& operator*()
+        {
+            return *current;
+        }
+        vmregion* operator->()
+        {
+            return current;
+        }
+        bool operator==(iterator const& other) const
+        {
+            return this->current == other.current;
+        }
+        bool operator!=(iterator const& other) const
+        {
+            return !(*this == other);
+        }
+        iterator& operator++()
+        {
+            this->current = this->current->node.next;
+            return *this;
+        }
+        iterator& operator--()
+        {
+            this->current = this->current->node.prev;
+            return *this;
+        }
+
+    private:
+        vmregion* current;
+    };
+
     vma(addr_t lower_bound, addr_t upper_bound);
     vma(vma& other);
     ~vma();
@@ -44,6 +80,17 @@ public:
     libcxx::pair<bool, addr_t> allocate(addr_t hint, size_t size);
     void free(addr_t addr, size_t size);
     const vmregion* find(addr_t addr);
+
+    vma::iterator begin()
+    {
+        return vma::iterator(lowest);
+    }
+
+    vma::iterator end()
+    {
+        // Umm, this is probably wrong
+        return vma::iterator(nullptr);
+    }
 
     void reset();
 

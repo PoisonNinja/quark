@@ -20,9 +20,7 @@ enum class Color {
 };
 
 template <class T>
-class rbnode
-{
-public:
+struct rbnode {
     rbnode()
         : color(Color::BLACK)
         , left(nullptr)
@@ -49,39 +47,7 @@ public:
     void print();
 
     // Functions for traversal
-    const T* get_root();
-    const T* left(const T* t)
-    {
-        return (t->*Link).left;
-    }
-    const T* right(const T* t)
-    {
-        return (t->*Link).right;
-    }
-    const T* parent(const T* t)
-    {
-        return (t->*Link).parent;
-    }
-    const T* prev(const T* t)
-    {
-        return (t->*Link).prev;
-    }
-    const T* next(const T* t)
-    {
-        return (t->*Link).next;
-    }
-
-private:
-    // Internal tree operations
-    void balance(T* n, rb_callback_t callback);
-    void traverse(T* start, rb_callback_t callback);
-    void post_remove(T* n, rb_callback_t callback);
-    T* calculate_prev(T* val);
-    T* insert(T* curr, T* n);
-    T* remove(T* curr, rb_callback_t callback);
-    void rotate_left(T* root);
-    void rotate_right(T* root);
-    T* uncle(T* root);
+    T* get_root();
     T*& left(T* t)
     {
         return (t->*Link).left;
@@ -102,6 +68,18 @@ private:
     {
         return (t->*Link).next;
     }
+
+private:
+    // Internal tree operations
+    void balance(T* n, rb_callback_t callback);
+    void traverse(T* start, rb_callback_t callback);
+    void post_remove(T* n, rb_callback_t callback);
+    T* calculate_prev(T* val);
+    T* insert(T* curr, T* n);
+    T* remove(T* curr, rb_callback_t callback);
+    void rotate_left(T* root);
+    void rotate_right(T* root);
+    T* uncle(T* root);
     Color color(T* rbnode)
     {
         if (!rbnode) {
@@ -457,7 +435,7 @@ void rbtree<T, Link>::balance(T* inserted, rb_callback_t callback)
 }
 
 template <class T, rbnode<T> T::*Link>
-const T* rbtree<T, Link>::get_root()
+T* rbtree<T, Link>::get_root()
 {
     return root;
 }

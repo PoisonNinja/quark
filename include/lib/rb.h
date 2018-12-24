@@ -87,6 +87,13 @@ private:
         }
         return (rbnode->*Link).color;
     }
+    void paint(T* rbnode, Color color)
+    {
+        if (!rbnode) {
+            return;
+        }
+        (rbnode->*Link).color = color;
+    }
 
     T* root;
 };
@@ -123,7 +130,7 @@ template <class T, rbnode<T> T::*Link>
 T* rbtree<T, Link>::insert(T* curr, T* n)
 {
     if (!curr) {
-        (n->*Link).color = Color::RED;
+        paint(n, Color::RED);
         return n;
     }
     if (*n < *curr) {
@@ -157,8 +164,8 @@ void rbtree<T, Link>::insert(T& value, rb_callback_t callback)
         prev(next(curr)) = curr;
     }
     if (!this->root) {
-        this->root                = &value;
-        (this->root->*Link).color = Color::BLACK;
+        this->root = &value;
+        paint(this->root, Color::BLACK);
         if (callback)
             callback(root);
     } else {
@@ -255,56 +262,56 @@ void rbtree<T, Link>::post_remove(T* n, rb_callback_t callback)
         if (n == left(parent(n))) {
             T* sibling = right(parent(n));
             if (color(sibling) == Color::RED) {
-                (sibling->*Link).color   = Color::BLACK;
-                (parent(n)->*Link).color = Color::RED;
+                paint(sibling, Color::BLACK);
+                paint(parent(n), Color::RED);
                 rotate_left(parent(n));
                 sibling = right(parent(n));
             }
             if (color(left(sibling)) == Color::BLACK &&
                 color(right(sibling)) == Color::BLACK) {
-                (sibling->*Link).color = Color::RED;
-                n                      = parent(n);
+                paint(sibling, Color::RED);
+                n = parent(n);
             } else {
                 if (color(right(sibling)) == Color::BLACK) {
-                    (left(sibling)->*Link).color = Color::BLACK;
-                    (sibling->*Link).color       = Color::RED;
+                    paint(left(sibling), Color::BLACK);
+                    paint(sibling, Color::RED);
                     rotate_right(sibling);
                     sibling = right(parent(n));
                 }
-                (sibling->*Link).color        = (parent(n)->*Link).color;
-                (parent(n)->*Link).color      = Color::BLACK;
-                (right(sibling)->*Link).color = Color::BLACK;
+                paint(sibling, color(parent(n)));
+                paint(parent(n), Color::BLACK);
+                paint(right(sibling), Color::BLACK);
                 rotate_left(parent(n));
                 n = root;
             }
         } else {
             T* sibling = left(parent(n));
             if (color(sibling) == Color::RED) {
-                (sibling->*Link).color   = Color::BLACK;
-                (parent(n)->*Link).color = Color::RED;
+                paint(sibling, Color::BLACK);
+                paint(parent(n), Color::RED);
                 rotate_right(parent(n));
                 sibling = left(parent(n));
             }
             if (color(left(sibling)) == Color::BLACK &&
                 color(right(sibling)) == Color::BLACK) {
-                (sibling->*Link).color = Color::RED;
-                n                      = parent(n);
+                paint(sibling, Color::RED);
+                n = parent(n);
             } else {
                 if (color(left(sibling)) == Color::BLACK) {
-                    (right(sibling)->*Link).color = Color::BLACK;
-                    (sibling->*Link).color        = Color::RED;
+                    paint(right(sibling), Color::BLACK);
+                    paint(sibling, Color::RED);
                     rotate_left(sibling);
                     sibling = left(parent(n));
                 }
-                (sibling->*Link).color       = (parent(n)->*Link).color;
-                (parent(n)->*Link).color     = Color::BLACK;
-                (left(sibling)->*Link).color = Color::BLACK;
+                paint(sibling, color(parent(n)));
+                paint(parent(n), Color::BLACK);
+                paint(left(sibling), Color::BLACK);
                 rotate_right(parent(n));
                 n = root;
             }
         }
     }
-    (n->*Link).color = Color::BLACK;
+    paint(n, Color::BLACK);
 }
 
 template <class T, rbnode<T> T::*Link>
@@ -396,8 +403,9 @@ void rbtree<T, Link>::balance(T* inserted, rb_callback_t callback)
         // Uncle is red
         if (color(uncle(x)) == Color::RED) {
             // Simple, just recolor the uncle, parent, and grandparent
-            (parent(x)->*Link).color = (uncle(x)->*Link).color = Color::BLACK;
-            (parent(parent(x))->*Link).color                   = Color::RED;
+            paint(parent(x), Color::BLACK);
+            paint(uncle(x), Color::BLACK);
+            paint(parent(parent(x)), Color::RED);
             x = parent(parent(x));
             // No need to recompute anything (TODO: Is this correct?)
         } else {
@@ -431,7 +439,7 @@ void rbtree<T, Link>::balance(T* inserted, rb_callback_t callback)
             }
         }
     }
-    (root->*Link).color = Color::BLACK;
+    paint(root, Color::BLACK);
 }
 
 template <class T, rbnode<T> T::*Link>

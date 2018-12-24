@@ -79,7 +79,7 @@ public:
     libcxx::pair<bool, addr_t> locate_range(addr_t hint, size_t size);
     libcxx::pair<bool, addr_t> allocate(addr_t hint, size_t size);
     void free(addr_t addr, size_t size);
-    const vmregion* find(addr_t addr);
+    vmregion* find(addr_t addr);
 
     vma::iterator begin()
     {

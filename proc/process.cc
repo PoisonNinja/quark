@@ -84,9 +84,9 @@ Process* Process::fork()
 
 void Process::exit()
 {
-    // for (auto section : *sections) {
-    //     Memory::Virtual::unmap_range(section.start(), section.end());
-    // }
+    for (auto& section : *vma) {
+        Memory::Virtual::unmap_range(section.start(), section.end());
+    }
     Memory::Physical::free(this->address_space);
     Scheduler::remove_process(this->pid);
     delete this->vma;

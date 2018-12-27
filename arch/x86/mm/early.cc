@@ -15,7 +15,7 @@ struct Boot::info *info           = nullptr;
 
 namespace memory
 {
-namespace Physical
+namespace physical
 {
 void init_early_alloc(struct Boot::info *b)
 {
@@ -98,5 +98,5 @@ addr_t early_allocate()
     }
     Kernel::panic("Out of memory!\n");
 }
-} // namespace Physical
+} // namespace physical
 } // namespace memory

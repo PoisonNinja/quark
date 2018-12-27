@@ -6,7 +6,7 @@
 
 namespace memory
 {
-namespace Physical
+namespace physical
 {
 addr_t allocate();
 addr_t allocate(size_t size);
@@ -24,5 +24,5 @@ libcxx::pair<addr_t, size_t> try_allocate(size_t max_size);
 
 void init(Boot::info& info);
 void finalize();
-} // namespace Physical
+} // namespace physical
 } // namespace memory

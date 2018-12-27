@@ -21,7 +21,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
         if (old_pt->pages[i].present) {
             libcxx::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
-            addr_t new_page          = memory::Physical::allocate();
+            addr_t new_page          = memory::physical::allocate();
             new_pt->pages[i].address = new_page / 0x1000;
             /*
              * Map the new page into a page that we control so we can copy
@@ -48,7 +48,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
         if (old_pt->pages[i].present) {
             libcxx::memcpy(&new_pt->pages[i], &old_pt->pages[i],
                            sizeof(struct page));
-            addr_t new_page          = memory::Physical::allocate();
+            addr_t new_page          = memory::physical::allocate();
             new_pt->pages[i].address = new_page / 0x1000;
             /*
              * Map the new page into a page that we control so we can copy
@@ -74,7 +74,7 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
         if (old_pd->pages[i].present) {
             libcxx::memcpy(&new_pd->pages[i], &old_pd->pages[i],
                            sizeof(struct page));
-            addr_t new_pt            = memory::Physical::allocate();
+            addr_t new_pt            = memory::physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
             __copy_pt_entry(
                 (struct page_table*)memory::X86::decode_fractal(
@@ -94,7 +94,7 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
         if (old_pdpt->pages[i].present) {
             libcxx::memcpy(&new_pdpt->pages[i], &old_pdpt->pages[i],
                            sizeof(struct page));
-            addr_t new_pd              = memory::Physical::allocate();
+            addr_t new_pd              = memory::physical::allocate();
             new_pdpt->pages[i].address = new_pd / 0x1000;
             __copy_pd_entry((struct page_table*)memory::X86::decode_fractal(
                                 memory::X86::copy_entry,
@@ -139,7 +139,7 @@ addr_t fork()
             memory::X86::copy_entry, memory::X86::recursive_entry);
 #endif
     // Allocate a new page for the PML4
-    addr_t fork_pml4_phys = memory::Physical::allocate();
+    addr_t fork_pml4_phys = memory::physical::allocate();
     /*
      * Map the new PML4 into a page that we control, which we reserved
      * using fork_page. This is so we can set up the fractal mapping
@@ -177,7 +177,7 @@ addr_t fork()
             libcxx::memcpy(&new_pml4->pages[i], &old_pml4->pages[i],
                            sizeof(struct page));
             // Allocate a new PDPT
-            addr_t new_pdpt = memory::Physical::allocate();
+            addr_t new_pdpt = memory::physical::allocate();
             // Set the page address
             new_pml4->pages[i].address = new_pdpt / 0x1000;
 #ifdef X86_64

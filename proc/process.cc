@@ -88,7 +88,7 @@ void Process::exit()
         memory::Virtual::unmap_range(section.start(), section.end());
     }
     this->vma->reset();
-    memory::Physical::free(this->address_space);
+    memory::physical::free(this->address_space);
     Scheduler::remove_process(this->pid);
     delete this->vma;
 }

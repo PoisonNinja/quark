@@ -45,13 +45,13 @@ bool unmap(addr_t v)
         return false;
 #endif
     if (!pt->pages[memory::X86::pt_index(v)].hardware) {
-        memory::Physical::free(pt->pages[memory::X86::pt_index(v)].address *
+        memory::physical::free(pt->pages[memory::X86::pt_index(v)].address *
                                0x1000);
         memory::X86::invlpg(reinterpret_cast<addr_t>(v));
     }
     pt->pages[memory::X86::pt_index(v)].present = 0;
     if (__table_is_empty(pt)) {
-        memory::Physical::free(pd->pages[memory::X86::pd_index(v)].address *
+        memory::physical::free(pd->pages[memory::X86::pd_index(v)].address *
                                0x1000);
         pd->pages[memory::X86::pd_index(v)].present = 0;
         /*
@@ -62,12 +62,12 @@ bool unmap(addr_t v)
         memory::X86::invlpg(reinterpret_cast<addr_t>(pt));
 #ifdef X86_64
         if (__table_is_empty(pd)) {
-            memory::Physical::free(
+            memory::physical::free(
                 pdpt->pages[memory::X86::pdpt_index(v)].address * 0x1000);
             pdpt->pages[memory::X86::pdpt_index(v)].present = 0;
             memory::X86::invlpg(reinterpret_cast<addr_t>(pd));
             if (__table_is_empty(pdpt)) {
-                memory::Physical::free(
+                memory::physical::free(
                     pml4->pages[memory::X86::pml4_index(v)].address * 0x1000);
                 pml4->pages[memory::X86::pml4_index(v)].present = 0;
                 memory::X86::invlpg(reinterpret_cast<addr_t>(pdpt));

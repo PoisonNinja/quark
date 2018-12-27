@@ -7,7 +7,7 @@
 
 namespace memory
 {
-namespace Physical
+namespace physical
 {
 namespace
 {
@@ -82,5 +82,5 @@ void finalize()
 {
     online = true;
 }
-} // namespace Physical
+} // namespace physical
 } // namespace memory

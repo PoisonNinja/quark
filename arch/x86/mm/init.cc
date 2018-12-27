@@ -54,7 +54,7 @@ void arch_init(struct Boot::info &info)
                              i += memory::Virtual::PAGE_SIZE) {
                             if (memory::X86::is_valid_physical_memory(i,
                                                                       info)) {
-                                memory::Physical::free(i);
+                                memory::physical::free(i);
                             }
                         }
                     }

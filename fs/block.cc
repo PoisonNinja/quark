@@ -94,7 +94,6 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
             Log::printk(Log::LogLevel::ERROR, "block: Request failed\n");
             return 0;
         }
-
         // TODO: We should probably free the sglist
     }
     return count;

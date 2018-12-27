@@ -69,6 +69,15 @@ public:
         return (t->*Link).next;
     }
 
+    /*
+     * Note: This will not free anything. Instead, all it does is just set the
+     *       root node to nullptr
+     */
+    void reset()
+    {
+        this->root = nullptr;
+    }
+
 private:
     // Internal tree operations
     void balance(T* n, rb_callback_t callback);

@@ -32,7 +32,7 @@ bool allocate(size_t size, Region& region);
  * Callers must be responsible for memory allocated, including clearing the
  * region memory
  */
-SGList* build_sglist(size_t max_elements, size_t max_element_size,
-                     size_t total_size);
+SGList* make_sglist(size_t max_elements, size_t max_element_size,
+                    size_t total_size);
 } // namespace DMA
 } // namespace Memory

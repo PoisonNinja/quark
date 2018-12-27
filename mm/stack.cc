@@ -23,8 +23,8 @@ bool Stack::empty()
 
 void Stack::expand()
 {
-    addr_t phys = Memory::Physical::allocate();
+    addr_t phys = memory::Physical::allocate();
     addr_t virt = reinterpret_cast<addr_t>(this->base + this->size);
-    Memory::Virtual::map(virt, phys, PAGE_WRITABLE);
-    this->size += Memory::Virtual::PAGE_SIZE / sizeof(addr_t);
+    memory::Virtual::map(virt, phys, PAGE_WRITABLE);
+    this->size += memory::Virtual::PAGE_SIZE / sizeof(addr_t);
 }

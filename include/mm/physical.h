@@ -4,7 +4,7 @@
 #include <lib/utility.h>
 #include <types.h>
 
-namespace Memory
+namespace memory
 {
 namespace Physical
 {
@@ -25,4 +25,4 @@ libcxx::pair<addr_t, size_t> try_allocate(size_t max_size);
 void init(Boot::info& info);
 void finalize();
 } // namespace Physical
-} // namespace Memory
+} // namespace memory

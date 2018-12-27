@@ -70,7 +70,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX; // Set NX bit if requested
             }
-            Memory::Virtual::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
+            memory::Virtual::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
 
             Log::printk(Log::LogLevel::DEBUG,
                         "Copying from %p -> %p, size %X\n",
@@ -91,7 +91,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             }
             if (!(phdr->p_flags & PF_W)) {
                 // Remove write access if requested
-                Memory::Virtual::protect_range(phdr->p_vaddr, phdr->p_memsz,
+                memory::Virtual::protect_range(phdr->p_vaddr, phdr->p_memsz,
                                                flags & ~PAGE_WRITABLE);
             }
         }

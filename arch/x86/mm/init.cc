@@ -7,15 +7,15 @@
 #include <mm/physical.h>
 #include <mm/virtual.h>
 
-namespace Memory
+namespace memory
 {
 void arch_init(struct Boot::info &info)
 {
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
     addr_t multiboot_start =
-        Memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end = Memory::Virtual::align_up(
+        memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
+    addr_t multiboot_end = memory::Virtual::align_up(
         reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");
     Log::printk(Log::LogLevel::INFO, "    Kernel:    [%p - %p]\n",
@@ -51,10 +51,10 @@ void arch_init(struct Boot::info &info)
                                 static_cast<addr_t>(mmap->type));
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
-                             i += Memory::Virtual::PAGE_SIZE) {
-                            if (Memory::X86::is_valid_physical_memory(i,
+                             i += memory::Virtual::PAGE_SIZE) {
+                            if (memory::X86::is_valid_physical_memory(i,
                                                                       info)) {
-                                Memory::Physical::free(i);
+                                memory::Physical::free(i);
                             }
                         }
                     }
@@ -62,5 +62,5 @@ void arch_init(struct Boot::info &info)
             } break;
         }
     }
-} // namespace Memory
-} // namespace Memory
+} // namespace memory
+} // namespace memory

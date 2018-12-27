@@ -54,7 +54,7 @@ void init_stage2(void*)
 
 void init_stage1()
 {
-    addr_t cloned  = Memory::Virtual::fork();
+    addr_t cloned  = memory::Virtual::fork();
     Process* initp = new Process(nullptr);
     Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());
@@ -70,7 +70,7 @@ void kmain(struct Boot::info& info)
 {
     Log::printk(Log::LogLevel::INFO, "%s\n", OS_STRING);
     Log::printk(Log::LogLevel::INFO, "Command line: %s\n", info.cmdline);
-    Memory::init(info);
+    memory::init(info);
     Interrupt::init();
     Interrupt::enable();
     Symbols::init();

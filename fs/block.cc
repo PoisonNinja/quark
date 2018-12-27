@@ -48,8 +48,8 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         size_t to_process = count - processed;
         if (current % this->blkdev->sector_size())
             to_process += this->blkdev->sector_size();
-        Memory::dma::sglist* sglist =
-            Memory::dma::make_sglist(this->blkdev->sg_max_count(),
+        memory::dma::sglist* sglist =
+            memory::dma::make_sglist(this->blkdev->sg_max_count(),
                                      this->blkdev->sg_max_size(), to_process);
         Log::printk(Log::LogLevel::INFO,
                     "block: sglist contains %p bytes in %llX regions\n",

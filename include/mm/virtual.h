@@ -4,7 +4,7 @@
 #include <lib/math.h>
 #include <types.h>
 
-namespace Memory
+namespace memory
 {
 namespace Virtual
 {
@@ -75,4 +75,4 @@ inline int prot_to_flags(int prot)
 addr_t get_address_space_root();
 void set_address_space_root(addr_t root);
 } // namespace Virtual
-} // namespace Memory
+} // namespace memory

@@ -201,15 +201,15 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
         Log::printk(Log::LogLevel::ERROR, "Failed to locate TLS copy\n");
         return false;
     }
-    Memory::Virtual::map_range(argv_zone.second, argv_size,
+    memory::Virtual::map_range(argv_zone.second, argv_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    Memory::Virtual::map_range(envp_zone.second, envp_size,
+    memory::Virtual::map_range(envp_zone.second, envp_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    Memory::Virtual::map_range(stack_zone.second, 0x1000,
+    memory::Virtual::map_range(stack_zone.second, 0x1000,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    Memory::Virtual::map_range(sigreturn_zone.second, 0x1000,
+    memory::Virtual::map_range(sigreturn_zone.second, 0x1000,
                                PAGE_USER | PAGE_WRITABLE);
-    Memory::Virtual::map_range(tls_zone.second, tls_size,
+    memory::Virtual::map_range(tls_zone.second, tls_size,
                                PAGE_USER | PAGE_NX | PAGE_WRITABLE);
 
     this->parent->sigreturn = sigreturn_zone.second;
@@ -219,7 +219,7 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
                    signal_return_location, 0x1000);
 
     // Make it unwritable
-    Memory::Virtual::protect(sigreturn_zone.second, PAGE_USER);
+    memory::Virtual::protect(sigreturn_zone.second, PAGE_USER);
 
     // Copy TLS data into thread specific data
     libcxx::memcpy((void*)tls_zone.second, (void*)parent->tls_base,

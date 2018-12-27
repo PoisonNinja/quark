@@ -34,7 +34,7 @@ public:
 
     Process* fork();
 
-    Memory::vma* vma;
+    memory::vma* vma;
 
     libcxx::node<Process> child_node;
 

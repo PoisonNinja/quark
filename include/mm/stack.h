@@ -25,5 +25,5 @@ private:
 constexpr size_t stack_overhead(size_t total_memory, size_t block_size)
 {
     return total_memory / block_size /
-           (Memory::Virtual::PAGE_SIZE / sizeof(addr_t));
+           (memory::Virtual::PAGE_SIZE / sizeof(addr_t));
 }

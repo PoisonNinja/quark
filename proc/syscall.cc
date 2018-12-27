@@ -141,8 +141,8 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
                     placement);
         Scheduler::get_current_process()->vma->add_vmregion(placement,
                                                             mmap_data->length);
-        int flags = Memory::Virtual::prot_to_flags(mmap_data->prot);
-        Memory::Virtual::map_range(placement, mmap_data->length, flags);
+        int flags = memory::Virtual::prot_to_flags(mmap_data->prot);
+        memory::Virtual::map_range(placement, mmap_data->length, flags);
         return reinterpret_cast<void*>(placement);
     } else {
         Log::printk(Log::LogLevel::WARNING,

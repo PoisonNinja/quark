@@ -2,13 +2,13 @@
 
 #include <fs/dev.h>
 
-namespace Memory
+namespace memory
 {
 namespace dma
 {
 class sglist;
 }
-} // namespace Memory
+} // namespace memory
 
 namespace Filesystem
 {
@@ -23,7 +23,7 @@ struct BlockRequest {
     BlockRequestType command;
     sector_t start;
     sector_t num_sectors;
-    Memory::dma::sglist* sglist;
+    memory::dma::sglist* sglist;
 };
 
 class BlockDevice

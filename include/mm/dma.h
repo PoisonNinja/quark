@@ -3,7 +3,7 @@
 #include <lib/vector.h>
 #include <types.h>
 
-namespace Memory
+namespace memory
 {
 namespace dma
 {
@@ -36,4 +36,4 @@ bool allocate(size_t size, region& region);
 sglist* make_sglist(size_t max_elements, size_t max_element_size,
                     size_t total_size);
 } // namespace dma
-} // namespace Memory
+} // namespace memory

@@ -3,7 +3,7 @@
 #include <lib/rb.h>
 #include <lib/utility.h>
 
-namespace Memory
+namespace memory
 {
 class vmregion
 {
@@ -105,4 +105,4 @@ private:
 
     libcxx::rbtree<vmregion, &vmregion::node> sections;
 };
-} // namespace Memory
+} // namespace memory

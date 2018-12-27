@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Memory
+namespace memory
 {
 namespace Virtual
 {
@@ -36,4 +36,4 @@ struct page_table {
     struct page pages[PAGE_SIZE / sizeof(struct page)];
 };
 }  // namespace Virtual
-}  // namespace Memory
+}  // namespace memory

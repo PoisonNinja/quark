@@ -12,16 +12,16 @@ static addr_t heap_end = HEAP_START;
 
 void *map_heap(size_t size)
 {
-    size *= Memory::Virtual::PAGE_SIZE;
-    Memory::Virtual::map_range(heap_end, size, PAGE_WRITABLE);
+    size *= memory::Virtual::PAGE_SIZE;
+    memory::Virtual::map_range(heap_end, size, PAGE_WRITABLE);
     heap_end += size;
     return reinterpret_cast<void *>(heap_end - size);
 }
 
 void free_heap(void *start, size_t size)
 {
-    size *= Memory::Virtual::PAGE_SIZE;
-    Memory::Virtual::unmap_range(reinterpret_cast<addr_t>(start), size);
+    size *= memory::Virtual::PAGE_SIZE;
+    memory::Virtual::unmap_range(reinterpret_cast<addr_t>(start), size);
 }
 
 int liballoc_lock(void)

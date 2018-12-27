@@ -4,7 +4,7 @@
 #include <mm/virtual.h>
 #include <mm/vma.h>
 
-namespace Memory
+namespace memory
 {
 vmregion::vmregion(addr_t start, size_t size)
     : _start(start)
@@ -74,8 +74,8 @@ vma::~vma()
 
 bool vma::add_vmregion(addr_t start, size_t size)
 {
-    start             = Memory::Virtual::align_down(start);
-    size              = Memory::Virtual::align_up(size);
+    start             = memory::Virtual::align_down(start);
+    size              = memory::Virtual::align_up(size);
     vmregion* section = new vmregion(start, size);
     // TODO: Sanity checks for overlaps, exceeding bounds
     // Of course, that probably requires support from rbtree
@@ -240,4 +240,4 @@ void vma::reset()
     this->sections.reset();
     // Good to go, we can use all functionality again
 }
-} // namespace Memory
+} // namespace memory

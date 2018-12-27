@@ -2,7 +2,7 @@
 #include <arch/mm/virtual.h>
 #include <mm/physical.h>
 
-namespace Memory
+namespace memory
 {
 namespace Virtual
 {
@@ -18,59 +18,59 @@ static inline bool __table_is_empty(struct page_table* table)
 bool unmap(addr_t v)
 {
 #ifdef X86_64
-    struct page_table* pml4 = (struct page_table*)Memory::X86::decode_fractal(
-        Memory::X86::recursive_entry, Memory::X86::recursive_entry,
-        Memory::X86::recursive_entry, Memory::X86::recursive_entry);
-    struct page_table* pdpt = (struct page_table*)Memory::X86::decode_fractal(
-        Memory::X86::recursive_entry, Memory::X86::recursive_entry,
-        Memory::X86::recursive_entry, Memory::X86::pml4_index(v));
-    struct page_table* pd = (struct page_table*)Memory::X86::decode_fractal(
-        Memory::X86::recursive_entry, Memory::X86::recursive_entry,
-        Memory::X86::pml4_index(v), Memory::X86::pdpt_index(v));
-    struct page_table* pt = (struct page_table*)Memory::X86::decode_fractal(
-        Memory::X86::recursive_entry, Memory::X86::pml4_index(v),
-        Memory::X86::pdpt_index(v), Memory::X86::pd_index(v));
-    if (!pml4->pages[Memory::X86::pml4_index(v)].present ||
-        !pdpt->pages[Memory::X86::pdpt_index(v)].present ||
-        !pd->pages[Memory::X86::pd_index(v)].present ||
-        !pt->pages[Memory::X86::pt_index(v)].present)
+    struct page_table* pml4 = (struct page_table*)memory::X86::decode_fractal(
+        memory::X86::recursive_entry, memory::X86::recursive_entry,
+        memory::X86::recursive_entry, memory::X86::recursive_entry);
+    struct page_table* pdpt = (struct page_table*)memory::X86::decode_fractal(
+        memory::X86::recursive_entry, memory::X86::recursive_entry,
+        memory::X86::recursive_entry, memory::X86::pml4_index(v));
+    struct page_table* pd = (struct page_table*)memory::X86::decode_fractal(
+        memory::X86::recursive_entry, memory::X86::recursive_entry,
+        memory::X86::pml4_index(v), memory::X86::pdpt_index(v));
+    struct page_table* pt = (struct page_table*)memory::X86::decode_fractal(
+        memory::X86::recursive_entry, memory::X86::pml4_index(v),
+        memory::X86::pdpt_index(v), memory::X86::pd_index(v));
+    if (!pml4->pages[memory::X86::pml4_index(v)].present ||
+        !pdpt->pages[memory::X86::pdpt_index(v)].present ||
+        !pd->pages[memory::X86::pd_index(v)].present ||
+        !pt->pages[memory::X86::pt_index(v)].present)
         return false;
 #else
-    struct page_table* pd = (struct page_table*)Memory::X86::decode_fractal(
-        Memory::X86::recursive_entry, Memory::X86::recursive_entry);
-    struct page_table* pt = (struct page_table*)Memory::X86::decode_fractal(
-        Memory::X86::recursive_entry, Memory::X86::pd_index(v));
-    if (!pd->pages[Memory::X86::pd_index(v)].present ||
-        !pt->pages[Memory::X86::pt_index(v)].present)
+    struct page_table* pd = (struct page_table*)memory::X86::decode_fractal(
+        memory::X86::recursive_entry, memory::X86::recursive_entry);
+    struct page_table* pt = (struct page_table*)memory::X86::decode_fractal(
+        memory::X86::recursive_entry, memory::X86::pd_index(v));
+    if (!pd->pages[memory::X86::pd_index(v)].present ||
+        !pt->pages[memory::X86::pt_index(v)].present)
         return false;
 #endif
-    if (!pt->pages[Memory::X86::pt_index(v)].hardware) {
-        Memory::Physical::free(pt->pages[Memory::X86::pt_index(v)].address *
+    if (!pt->pages[memory::X86::pt_index(v)].hardware) {
+        memory::Physical::free(pt->pages[memory::X86::pt_index(v)].address *
                                0x1000);
-        Memory::X86::invlpg(reinterpret_cast<addr_t>(v));
+        memory::X86::invlpg(reinterpret_cast<addr_t>(v));
     }
-    pt->pages[Memory::X86::pt_index(v)].present = 0;
+    pt->pages[memory::X86::pt_index(v)].present = 0;
     if (__table_is_empty(pt)) {
-        Memory::Physical::free(pd->pages[Memory::X86::pd_index(v)].address *
+        memory::Physical::free(pd->pages[memory::X86::pd_index(v)].address *
                                0x1000);
-        pd->pages[Memory::X86::pd_index(v)].present = 0;
+        pd->pages[memory::X86::pd_index(v)].present = 0;
         /*
          * TODO: This unconditionally invalidates the mapping even if
          * nothing changed. Perhaps, we should only do this if the mapping or
          * flags changed.
          */
-        Memory::X86::invlpg(reinterpret_cast<addr_t>(pt));
+        memory::X86::invlpg(reinterpret_cast<addr_t>(pt));
 #ifdef X86_64
         if (__table_is_empty(pd)) {
-            Memory::Physical::free(
-                pdpt->pages[Memory::X86::pdpt_index(v)].address * 0x1000);
-            pdpt->pages[Memory::X86::pdpt_index(v)].present = 0;
-            Memory::X86::invlpg(reinterpret_cast<addr_t>(pd));
+            memory::Physical::free(
+                pdpt->pages[memory::X86::pdpt_index(v)].address * 0x1000);
+            pdpt->pages[memory::X86::pdpt_index(v)].present = 0;
+            memory::X86::invlpg(reinterpret_cast<addr_t>(pd));
             if (__table_is_empty(pdpt)) {
-                Memory::Physical::free(
-                    pml4->pages[Memory::X86::pml4_index(v)].address * 0x1000);
-                pml4->pages[Memory::X86::pml4_index(v)].present = 0;
-                Memory::X86::invlpg(reinterpret_cast<addr_t>(pdpt));
+                memory::Physical::free(
+                    pml4->pages[memory::X86::pml4_index(v)].address * 0x1000);
+                pml4->pages[memory::X86::pml4_index(v)].present = 0;
+                memory::X86::invlpg(reinterpret_cast<addr_t>(pdpt));
             }
         }
 #endif
@@ -78,4 +78,4 @@ bool unmap(addr_t v)
     return true;
 }
 } // namespace Virtual
-} // namespace Memory
+} // namespace memory

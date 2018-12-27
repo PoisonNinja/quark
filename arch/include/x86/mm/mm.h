@@ -7,7 +7,7 @@ namespace Boot
 struct info;
 }
 
-namespace Memory
+namespace memory
 {
 namespace X86
 {
@@ -108,4 +108,4 @@ constexpr void* decode_fractal(uint32_t pd, uint32_t pt)
 
 bool is_valid_physical_memory(addr_t m, struct Boot::info& info);
 } // namespace X86
-} // namespace Memory
+} // namespace memory

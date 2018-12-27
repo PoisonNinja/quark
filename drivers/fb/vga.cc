@@ -18,8 +18,8 @@ namespace Filesystem
 VGAFB::VGAFB()
     : KDevice(CHR)
 {
-    addr_t virt = Memory::vmalloc::allocate(VGA_BUFFER_SIZE);
-    if (!Memory::Virtual::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
+    addr_t virt = memory::vmalloc::allocate(VGA_BUFFER_SIZE);
+    if (!memory::Virtual::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
                                     PAGE_WRITABLE | PAGE_HARDWARE)) {
         Log::printk(Log::LogLevel::WARNING, "Failed to map VGA buffer\n");
         return;
@@ -29,7 +29,7 @@ VGAFB::VGAFB()
 
 VGAFB::~VGAFB()
 {
-    Memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
+    memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
 ssize_t VGAFB::write(const uint8_t *buffer, size_t size, off_t offset,

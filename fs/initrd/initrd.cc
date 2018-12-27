@@ -83,8 +83,8 @@ void init(struct Boot::info& info)
     Log::printk(Log::LogLevel::INFO,
                 "initrd: Initrd located at %p - %p, size %p\n",
                 info.initrd_start, info.initrd_end, size);
-    addr_t virt = Memory::vmalloc::allocate(size);
-    if (!Memory::Virtual::map_range(virt, info.initrd_start, size,
+    addr_t virt = memory::vmalloc::allocate(size);
+    if (!memory::Virtual::map_range(virt, info.initrd_start, size,
                                     PAGE_WRITABLE)) {
         Log::printk(Log::LogLevel::ERROR,
                     "initrd: Failed to map initrd into memory\n");
@@ -95,7 +95,7 @@ void init(struct Boot::info& info)
     } else {
         Log::printk(Log::LogLevel::INFO, "initrd: Initrd loaded\n");
     }
-    Memory::Virtual::unmap_range(virt, size);
+    memory::Virtual::unmap_range(virt, size);
 }
 } // namespace Initrd
 } // namespace Filesystem

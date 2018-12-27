@@ -5,7 +5,7 @@ namespace Boot
 struct info;
 }
 
-namespace Memory
+namespace memory
 {
 void init(struct Boot::info& info);
 }

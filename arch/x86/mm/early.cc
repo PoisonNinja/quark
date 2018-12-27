@@ -13,7 +13,7 @@ struct multiboot_fixed *multiboot = nullptr;
 struct Boot::info *info           = nullptr;
 } // namespace
 
-namespace Memory
+namespace memory
 {
 namespace Physical
 {
@@ -48,10 +48,10 @@ void init_early_alloc(struct Boot::info *b)
                               mmap_tag))
                              ->entry_size)) {
                     // Look for the highest memory address (needed for buddy)
-                    if (Memory::Virtual::align_up(tmp->addr + tmp->len) >
+                    if (memory::Virtual::align_up(tmp->addr + tmp->len) >
                         highest)
                         highest =
-                            Memory::Virtual::align_up(tmp->addr + tmp->len);
+                            memory::Virtual::align_up(tmp->addr + tmp->len);
                 }
                 break;
         }
@@ -77,20 +77,20 @@ addr_t early_allocate()
              (reinterpret_cast<struct multiboot_tag_mmap *>(mmap_tag))
                  ->entry_size)) {
         if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
-            for (addr_t i = Memory::Virtual::align_up(mmap->addr);
-                 i < Memory::Virtual::align_up(mmap->addr) +
-                         Memory::Virtual::align_down(mmap->len);
-                 i += Memory::Virtual::PAGE_SIZE) {
+            for (addr_t i = memory::Virtual::align_up(mmap->addr);
+                 i < memory::Virtual::align_up(mmap->addr) +
+                         memory::Virtual::align_down(mmap->len);
+                 i += memory::Virtual::PAGE_SIZE) {
                 /*
                  * Unconditionally increment the start of this zone and
                  * decrement the size of the zone. This works because there are
                  * only two possible conditions: memory we can't use and memory
                  * we can. Both will not be evaluated again, so we can advance.
                  */
-                mmap->addr += Memory::Virtual::PAGE_SIZE;
-                mmap->len -= Memory::Virtual::PAGE_SIZE;
+                mmap->addr += memory::Virtual::PAGE_SIZE;
+                mmap->len -= memory::Virtual::PAGE_SIZE;
                 // Check if it's in a restricted area
-                if (Memory::X86::is_valid_physical_memory(i, *info)) {
+                if (memory::X86::is_valid_physical_memory(i, *info)) {
                     return i;
                 }
             }
@@ -99,4 +99,4 @@ addr_t early_allocate()
     Kernel::panic("Out of memory!\n");
 }
 } // namespace Physical
-} // namespace Memory
+} // namespace memory

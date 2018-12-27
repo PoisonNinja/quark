@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Memory
+namespace memory
 {
 namespace vmalloc
 {
@@ -11,4 +11,4 @@ void free(addr_t address);
 
 void init();
 } // namespace vmalloc
-} // namespace Memory
+} // namespace memory

@@ -15,14 +15,14 @@ namespace Symbols
 void relocate(struct multiboot_tag_elf_sections *sections);
 } // namespace Symbols
 
-namespace Memory
+namespace memory
 {
 namespace Physical
 {
 void init_early_alloc(struct Boot::info *m);
 addr_t early_allocate();
 } // namespace Physical
-} // namespace Memory
+} // namespace memory
 
 namespace X86
 {
@@ -94,7 +94,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
      * Initialize our physical memory early allocator so we can start using
      * memory immediately.
      */
-    Memory::Physical::init_early_alloc(&info);
+    memory::Physical::init_early_alloc(&info);
 
     /*
      * Load the symbols now. We used to do this much later, but the symbols

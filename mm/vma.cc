@@ -155,7 +155,6 @@ found:
 
 void vma::free(addr_t addr, size_t size)
 {
-    // **** your const :P
     vmregion* node = find(addr);
     auto func      = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
@@ -225,5 +224,20 @@ libcxx::pair<bool, addr_t> vma::allocate(addr_t hint, size_t size)
 
 void vma::reset()
 {
+    /*
+     * WARNING: CRITICAL CODE
+     * After this loop all the nodes until we reset the tree itself, the tree
+     * will be in an invalid state, so do NOT call anything else.
+     * TODO: We should probably take a lock
+     */
+    vmregion* region = lowest;
+    while (region != nullptr) {
+        vmregion* next = this->sections.next(region);
+        delete region;
+        region = next;
+    }
+    // Reset the rb tree
+    this->sections.reset();
+    // Good to go, we can use all functionality again
 }
 } // namespace Memory

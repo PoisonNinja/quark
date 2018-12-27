@@ -1,5 +1,5 @@
 #include <arch/drivers/io.h>
-#include <drivers/tty/vga.h>
+#include <drivers/fb/vga.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/virtual.h>
@@ -15,10 +15,7 @@ const int VGA_WIDTH          = 80;
 
 namespace Filesystem
 {
-namespace TTY
-{
-
-VGATTY::VGATTY()
+VGAFB::VGAFB()
     : KDevice(CHR)
 {
     addr_t virt = Memory::vmalloc::allocate(VGA_BUFFER_SIZE);
@@ -30,19 +27,19 @@ VGATTY::VGATTY()
     vga_buffer = reinterpret_cast<uint16_t *>(virt);
 }
 
-VGATTY::~VGATTY()
+VGAFB::~VGAFB()
 {
     Memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGATTY::write(const uint8_t *buffer, size_t size, off_t offset,
-                      void * /* cookie */)
+ssize_t VGAFB::write(const uint8_t *buffer, size_t size, off_t offset,
+                     void * /* cookie */)
 {
     libcxx::memcpy((void *)((uint8_t *)vga_buffer + offset), buffer, size);
     return size;
 }
 
-void VGATTY::update_cursor(int col, int row)
+void VGAFB::update_cursor(int col, int row)
 {
     unsigned short position = (row * VGA_WIDTH) + col;
 
@@ -53,5 +50,4 @@ void VGATTY::update_cursor(int col, int row)
     outb(0x3D4, 0x0E);
     outb(0x3D5, (unsigned char)((position >> 8) & 0xFF));
 }
-} // namespace TTY
 } // namespace Filesystem

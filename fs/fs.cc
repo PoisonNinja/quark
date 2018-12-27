@@ -1,4 +1,4 @@
-#include <drivers/tty/vga.h>
+#include <drivers/fb/vga.h>
 #include <fs/descriptor.h>
 #include <fs/fs.h>
 #include <fs/ftable.h>
@@ -23,8 +23,8 @@ void init()
     Drivers::add("tmpfs", new TmpFS());
     Drivers::add("ptsfs", new PTSFS());
 
-    TTY::VGATTY* vga = new TTY::VGATTY();
-    auto vga_major   = Filesystem::locate_class(Filesystem::CHR);
+    VGAFB* vga     = new VGAFB();
+    auto vga_major = Filesystem::locate_class(Filesystem::CHR);
     register_class(CHR, vga_major);
     register_kdevice(CHR, vga_major, vga);
 

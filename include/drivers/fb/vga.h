@@ -4,13 +4,11 @@
 
 namespace Filesystem
 {
-namespace TTY
-{
-class VGATTY : public KDevice
+class VGAFB : public KDevice
 {
 public:
-    VGATTY();
-    ~VGATTY();
+    VGAFB();
+    ~VGAFB();
 
     ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                   void* cookie) override;
@@ -20,5 +18,4 @@ private:
 
     void update_cursor(int col, int row);
 };
-} // namespace TTY
 } // namespace Filesystem

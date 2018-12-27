@@ -8,14 +8,14 @@
 
 namespace Memory
 {
-namespace DMA
+namespace dma
 {
 namespace
 {
 Memory::vma dma_region(DMA_START, DMA_END);
 }
 
-bool allocate(size_t size, Region& region)
+bool allocate(size_t size, region& region)
 {
     auto [virt_found, virt_address] = dma_region.allocate(0, size);
     if (!virt_found) {
@@ -35,7 +35,7 @@ bool allocate(size_t size, Region& region)
     return true;
 }
 
-SGList::SGList(size_t max_elements, size_t max_element_size, size_t total_size)
+sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)
     : num_regions(0)
     , total_size(0)
 {
@@ -46,7 +46,7 @@ SGList::SGList(size_t max_elements, size_t max_element_size, size_t total_size)
             (max_element_size < total_size) ? max_element_size : total_size;
         auto [physical_base, real_size] =
             Memory::Physical::try_allocate(alloc_size);
-        Region region;
+        region region;
         region.physical_base = physical_base;
         region.real_size     = real_size;
         allocated += real_size;
@@ -66,7 +66,7 @@ SGList::SGList(size_t max_elements, size_t max_element_size, size_t total_size)
     }
 }
 
-SGList::~SGList()
+sglist::~sglist()
 {
     for (auto region : this->list) {
         Memory::Virtual::unmap_range(region.virtual_base, region.size);
@@ -75,12 +75,12 @@ SGList::~SGList()
     }
 }
 
-SGList* make_sglist(size_t max_elements, size_t max_element_size,
+sglist* make_sglist(size_t max_elements, size_t max_element_size,
                     size_t total_size)
 {
     // TODO: Use unique_ptr
-    SGList* sglist = new SGList(max_elements, max_element_size, total_size);
-    return sglist;
+    sglist* sg = new sglist(max_elements, max_element_size, total_size);
+    return sg;
 }
-} // namespace DMA
+} // namespace dma
 } // namespace Memory

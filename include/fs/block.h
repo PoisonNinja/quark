@@ -4,9 +4,9 @@
 
 namespace Memory
 {
-namespace DMA
+namespace dma
 {
-class SGList;
+class sglist;
 }
 } // namespace Memory
 
@@ -23,7 +23,7 @@ struct BlockRequest {
     BlockRequestType command;
     sector_t start;
     sector_t num_sectors;
-    Memory::DMA::SGList* sglist;
+    Memory::dma::sglist* sglist;
 };
 
 class BlockDevice

@@ -5,9 +5,9 @@
 
 namespace Memory
 {
-namespace DMA
+namespace dma
 {
-struct Region {
+struct region {
     addr_t virtual_base;
     addr_t physical_base;
     addr_t size;
@@ -16,15 +16,15 @@ struct Region {
     size_t real_size;
 };
 
-struct SGList {
-    SGList(size_t max_elements, size_t max_element_size, size_t total_size);
-    ~SGList();
+struct sglist {
+    sglist(size_t max_elements, size_t max_element_size, size_t total_size);
+    ~sglist();
     size_t num_regions;
     size_t total_size;
-    libcxx::vector<Region> list;
+    libcxx::vector<region> list;
 };
 
-bool allocate(size_t size, Region& region);
+bool allocate(size_t size, region& region);
 
 /*
  * Builds a scatter gather list with either max_elements regions or regions
@@ -33,7 +33,7 @@ bool allocate(size_t size, Region& region);
  * Callers must be responsible for memory allocated, including clearing the
  * region memory
  */
-SGList* make_sglist(size_t max_elements, size_t max_element_size,
+sglist* make_sglist(size_t max_elements, size_t max_element_size,
                     size_t total_size);
-} // namespace DMA
+} // namespace dma
 } // namespace Memory

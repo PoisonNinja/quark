@@ -36,10 +36,22 @@ public:
             this->current++;
             return *this;
         }
+        iterator operator++(int)
+        {
+            iterator rc(*this);
+            this->operator++();
+            return rc;
+        }
         iterator& operator--()
         {
             this->current--;
             return *this;
+        }
+        iterator operator--(int)
+        {
+            iterator rc(*this);
+            this->operator--();
+            return rc;
         }
 
     private:

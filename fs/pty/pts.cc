@@ -23,7 +23,8 @@ public:
     virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
 
     virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, void* cookie) override;
+    virtual ssize_t write(const uint8_t* buffer, size_t count,
+                          void* cookie) override;
 
 private:
     PTY* pty;
@@ -43,7 +44,7 @@ ssize_t PTS::read(uint8_t* buffer, size_t count, void* cookie)
 {
     return pty->sread(buffer, count);
 }
-ssize_t PTS::write(uint8_t* buffer, size_t count, void* cookie)
+ssize_t PTS::write(const uint8_t* buffer, size_t count, void* cookie)
 {
     return pty->swrite(buffer, count);
 }

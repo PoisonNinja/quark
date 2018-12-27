@@ -18,10 +18,10 @@ public:
     int index();
 
     ssize_t mread(uint8_t* buffer, size_t count);
-    ssize_t mwrite(uint8_t* buffer, size_t count);
+    ssize_t mwrite(const uint8_t* buffer, size_t count);
 
     ssize_t sread(uint8_t* buffer, size_t count);
-    ssize_t swrite(uint8_t* buffer, size_t count);
+    ssize_t swrite(const uint8_t* buffer, size_t count);
 
     libcxx::node<PTY> node;
 

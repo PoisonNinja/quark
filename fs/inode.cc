@@ -51,7 +51,7 @@ ssize_t BaseInode::read(uint8_t*, size_t, off_t, void*)
     return -EBADF;
 }
 
-ssize_t BaseInode::write(uint8_t*, size_t, off_t, void*)
+ssize_t BaseInode::write(const uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }

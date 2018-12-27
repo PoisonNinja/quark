@@ -17,7 +17,7 @@ public:
     virtual int ioctl(unsigned long request, char* argp, void* cookie);
 
     virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie);
-    virtual ssize_t write(uint8_t* buffer, size_t count, void* cookie);
+    virtual ssize_t write(const uint8_t* buffer, size_t count, void* cookie);
 
 private:
 };

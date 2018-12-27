@@ -31,7 +31,7 @@ ssize_t PTY::mread(uint8_t* buffer, size_t count)
     return count;
 }
 
-ssize_t PTY::mwrite(uint8_t* buffer, size_t count)
+ssize_t PTY::mwrite(const uint8_t* buffer, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
         this->sbuf[this->shead++ % pty_size] = buffer[i];
@@ -52,7 +52,7 @@ ssize_t PTY::sread(uint8_t* buffer, size_t count)
     return count;
 }
 
-ssize_t PTY::swrite(uint8_t* buffer, size_t count)
+ssize_t PTY::swrite(const uint8_t* buffer, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
         this->mbuf[this->mhead++ % pty_size] = buffer[i];

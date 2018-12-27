@@ -19,7 +19,7 @@ public:
 
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+    virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                           void* cookie) override;
 
     virtual bool seekable() override;
@@ -54,7 +54,7 @@ ssize_t Intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)
     return read;
 }
 
-ssize_t Intel8042::write(uint8_t*, size_t, off_t, void*)
+ssize_t Intel8042::write(const uint8_t*, size_t, off_t, void*)
 {
     return 0;
 }

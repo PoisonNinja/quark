@@ -231,7 +231,7 @@ ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
     return vnode->read(buffer, count, offset, this->cookie);
 }
 
-ssize_t Descriptor::pwrite(uint8_t* buffer, size_t count, off_t offset)
+ssize_t Descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
 {
     if (!(this->flags & F_WRITE)) {
         Log::printk(Log::LogLevel::WARNING,
@@ -266,7 +266,7 @@ int Descriptor::stat(struct stat* st)
     return vnode->stat(st);
 }
 
-ssize_t Descriptor::write(uint8_t* buffer, size_t count)
+ssize_t Descriptor::write(const uint8_t* buffer, size_t count)
 {
     if (!(this->flags & F_WRITE)) {
         Log::printk(Log::LogLevel::WARNING,

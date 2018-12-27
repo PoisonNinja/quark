@@ -31,11 +31,11 @@ public:
     libcxx::pair<int, libcxx::intrusive_ptr<Descriptor>>
     open(const char* name, int flags, mode_t mode);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
-    ssize_t pwrite(uint8_t* buffer, size_t count, off_t offset);
+    ssize_t pwrite(const uint8_t* buffer, size_t count, off_t offset);
     ssize_t read(uint8_t* buffer, size_t count);
     bool seekable();
     int stat(struct stat* st);
-    ssize_t write(uint8_t* buffer, size_t count);
+    ssize_t write(const uint8_t* buffer, size_t count);
 
 private:
     libcxx::intrusive_ptr<Vnode> vnode;

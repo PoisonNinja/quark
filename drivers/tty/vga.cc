@@ -35,7 +35,7 @@ VGATTY::~VGATTY()
     Memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGATTY::write(uint8_t *buffer, size_t size, off_t offset,
+ssize_t VGATTY::write(const uint8_t *buffer, size_t size, off_t offset,
                       void * /* cookie */)
 {
     libcxx::memcpy((void *)((uint8_t *)vga_buffer + offset), buffer, size);

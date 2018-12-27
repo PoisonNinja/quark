@@ -145,7 +145,7 @@ ssize_t KDevice::read(uint8_t*, size_t, off_t, void*)
     return -EBADF;
 }
 
-ssize_t KDevice::write(uint8_t*, size_t, off_t, void*)
+ssize_t KDevice::write(const uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }

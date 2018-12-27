@@ -37,7 +37,7 @@ public:
 
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie);
-    virtual ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+    virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                           void* cookie);
 
     virtual bool seekable();

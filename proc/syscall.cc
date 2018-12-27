@@ -26,7 +26,7 @@ libcxx::intrusive_ptr<Filesystem::Descriptor> get_start(const char* path)
 
 namespace Syscall
 {
-static long sys_read(int fd, const void* buffer, size_t count)
+static long sys_read(int fd, void* buffer, size_t count)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_read] = %d, %p, %p\n", fd, buffer,
                 count);
@@ -34,7 +34,7 @@ static long sys_read(int fd, const void* buffer, size_t count)
         return -EBADF;
     }
     return Scheduler::get_current_process()->fds.get(fd)->read(
-        const_cast<uint8_t*>(static_cast<const uint8_t*>(buffer)), count);
+        static_cast<uint8_t*>(buffer), count);
 }
 
 static long sys_write(int fd, const void* buffer, size_t count)
@@ -45,7 +45,7 @@ static long sys_write(int fd, const void* buffer, size_t count)
         return -EBADF;
     }
     return Scheduler::get_current_process()->fds.get(fd)->write(
-        const_cast<uint8_t*>(static_cast<const uint8_t*>(buffer)), count);
+        static_cast<const uint8_t*>(buffer), count);
 }
 
 static long sys_open(const char* path, int flags, mode_t mode)

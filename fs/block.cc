@@ -14,7 +14,7 @@ public:
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                  void* cookie) override;
-    ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                   void* cookie) override;
 
 private:
@@ -100,7 +100,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
     return count;
 }
 
-ssize_t BlockWrapper::write(uint8_t* buffer, size_t count, off_t offset,
+ssize_t BlockWrapper::write(const uint8_t* buffer, size_t count, off_t offset,
                             void* cookie)
 {
     // TODO: Eventually implement a more intelligent scheduler

@@ -17,7 +17,8 @@ public:
     virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
 
     virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
-    virtual ssize_t write(uint8_t* buffer, size_t count, void* cookie) override;
+    virtual ssize_t write(const uint8_t* buffer, size_t count,
+                          void* cookie) override;
 
 private:
     size_t next_pty_number;

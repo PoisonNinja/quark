@@ -36,7 +36,8 @@ ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
     return -ENOSYS;
 }
 
-ssize_t TTY::write(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
+ssize_t TTY::write(const uint8_t* /*buffer*/, size_t /*size*/,
+                   void* /* cookie */)
 {
     return -ENOSYS;
 }
@@ -52,7 +53,7 @@ public:
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                  void* cookie) override;
-    ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                   void* cookie) override;
 
 private:
@@ -81,8 +82,8 @@ ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */,
     return this->tty->read(buffer, count, cookie);
 }
 
-ssize_t TTYDevice::write(uint8_t* buffer, size_t count, off_t /* offset */,
-                         void* cookie)
+ssize_t TTYDevice::write(const uint8_t* buffer, size_t count,
+                         off_t /* offset */, void* cookie)
 {
     return this->tty->write(buffer, count, cookie);
 }

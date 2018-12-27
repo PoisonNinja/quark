@@ -109,7 +109,8 @@ ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
     return inode->read(buffer, count, offset, cookie);
 }
 
-ssize_t Vnode::write(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+ssize_t Vnode::write(const uint8_t* buffer, size_t count, off_t offset,
+                     void* cookie)
 {
     if (this->kdev) {
         Log::printk(Log::LogLevel::DEBUG,

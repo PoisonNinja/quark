@@ -12,7 +12,7 @@ public:
     VGATTY();
     ~VGATTY();
 
-    ssize_t write(uint8_t* buffer, size_t count, off_t offset,
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                   void* cookie) override;
 
 private:

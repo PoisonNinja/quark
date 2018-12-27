@@ -39,7 +39,7 @@ ssize_t PTMX::read(uint8_t* buffer, size_t count, void* cookie)
     return static_cast<PTY*>(cookie)->mread(buffer, count);
 }
 
-ssize_t PTMX::write(uint8_t* buffer, size_t count, void* cookie)
+ssize_t PTMX::write(const uint8_t* buffer, size_t count, void* cookie)
 {
     return static_cast<PTY*>(cookie)->mwrite(buffer, count);
 }

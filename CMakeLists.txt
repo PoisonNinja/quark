@@ -64,7 +64,7 @@ message(STATUS "Platform file: " ${PLATFORM_FILE})
 # Verify that the sysroot exists. We will install the kernel into the /boot
 # directory in the sysroot
 if(NOT DEFINED SYSROOT)
-    set(SYSROOT "${CMAKE_SOURCE_DIR}/../hdd")
+    set(SYSROOT "${CMAKE_SOURCE_DIR}/../sysroot")
 endif()
 message(STATUS "Sysroot: " ${SYSROOT})
 

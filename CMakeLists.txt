@@ -85,9 +85,6 @@ project(Quark CXX)
 
 include(${PLATFORM_FILE})
 
-include(CheckIPOSupported)
-check_ipo_supported()
-
 # Enable NASM to compile ASM files
 enable_language(ASM_NASM)
 
@@ -101,9 +98,6 @@ set(CMAKE_ASM_NASM_FLAGS ${CMAKE_ASM_FLAGS})
 
 # We want C++17
 set(CMAKE_CXX_STANDARD 17)
-
-# Enable LTO
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # We must build with -fno-rtti and -fno-exceptions because they require a support library
 #

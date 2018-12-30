@@ -33,7 +33,7 @@ Buddy::Buddy(size_t s, size_t min, size_t max)
     for (size_t i = min; i <= max; i++) {
         this->orders[i].stack =
             new Stack(reinterpret_cast<addr_t*>(STACK_START + stack_offset));
-        stack_offset += memory::Virtual::align_up(
+        stack_offset += memory::virt::align_up(
             stack_overhead(this->size, libcxx::pow2(i)));
         this->orders[i].bitset =
             new libcxx::bitset(this->size / libcxx::pow2(i), true);

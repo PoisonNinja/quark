@@ -73,7 +73,7 @@ Process* Process::fork()
     Process* child = new Process(this);
     Scheduler::add_process(child);
     this->children.push_back(*child);
-    addr_t cloned = memory::Virtual::fork();
+    addr_t cloned = memory::virt::fork();
     child->fds    = this->fds;
     child->set_root(this->get_root());
     child->set_cwd(this->get_cwd());
@@ -85,7 +85,7 @@ Process* Process::fork()
 void Process::exit()
 {
     for (auto& section : *vma) {
-        memory::Virtual::unmap_range(section.start(), section.end());
+        memory::virt::unmap_range(section.start(), section.end());
     }
     this->vma->reset();
     memory::physical::free(this->address_space);

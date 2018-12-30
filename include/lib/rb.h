@@ -44,7 +44,6 @@ public:
     void insert(T& value, rb_callback_t callback);
     T* remove(T& value);
     T* remove(T& value, rb_callback_t callback);
-    void print();
 
     // Functions for traversal
     T* get_root();
@@ -321,12 +320,6 @@ void rbtree<T, Link>::post_remove(T* n, rb_callback_t callback)
         }
     }
     paint(n, Color::BLACK);
-}
-
-template <class T, rbnode<T> T::*Link>
-void rbtree<T, Link>::print()
-{
-    // TODO: In-order list
 }
 
 template <class T, rbnode<T> T::*Link>

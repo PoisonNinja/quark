@@ -272,7 +272,7 @@ bool register_driver(Driver& d)
 libcxx::pair<bool, addr_t> map(addr_t phys, size_t size)
 {
     addr_t v = memory::vmalloc::allocate(size);
-    memory::Virtual::map_range(v, phys, size, PAGE_WRITABLE | PAGE_HARDWARE);
+    memory::virt::map_range(v, phys, size, PAGE_WRITABLE | PAGE_HARDWARE);
     return libcxx::make_pair(true, v);
 }
 

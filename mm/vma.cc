@@ -74,8 +74,8 @@ vma::~vma()
 
 bool vma::add_vmregion(addr_t start, size_t size)
 {
-    start             = memory::Virtual::align_down(start);
-    size              = memory::Virtual::align_up(size);
+    start             = memory::virt::align_down(start);
+    size              = memory::virt::align_up(size);
     vmregion* section = new vmregion(start, size);
     // TODO: Sanity checks for overlaps, exceeding bounds
     // Of course, that probably requires support from rbtree

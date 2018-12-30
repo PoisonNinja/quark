@@ -19,7 +19,7 @@ VGAFB::VGAFB()
     : KDevice(CHR)
 {
     addr_t virt = memory::vmalloc::allocate(VGA_BUFFER_SIZE);
-    if (!memory::Virtual::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
+    if (!memory::virt::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
                                     PAGE_WRITABLE | PAGE_HARDWARE)) {
         Log::printk(Log::LogLevel::WARNING, "Failed to map VGA buffer\n");
         return;

@@ -4,7 +4,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 addr_t arch_get_address_space_root()
 {
@@ -15,5 +15,5 @@ void arch_set_address_space_root(addr_t root)
 {
     return memory::X86::write_cr3(root);
 }
-}  // namespace Virtual
+}  // namespace virt
 }  // namespace memory

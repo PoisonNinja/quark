@@ -4,7 +4,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 static inline bool __table_is_empty(struct page_table* table)
 {
@@ -77,5 +77,5 @@ bool unmap(addr_t v)
     }
     return true;
 }
-} // namespace Virtual
+} // namespace virt
 } // namespace memory

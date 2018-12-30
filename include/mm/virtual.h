@@ -6,7 +6,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 #define PAGE_WRITABLE 0x1
 #define PAGE_USER 0x2
@@ -29,14 +29,14 @@ namespace Virtual
 #define MAP_ANONYMOUS 0x020
 #define MAP_ANON MAP_ANONYMOUS
 
-#define MAP_FAILED (void *)-1
+#define MAP_FAILED ((void *)-1)
 
-inline addr_t align_up(addr_t address)
+constexpr addr_t align_up(addr_t address)
 {
     return libcxx::round_up(address, PAGE_SIZE);
 }
 
-inline addr_t align_down(addr_t address)
+constexpr addr_t align_down(addr_t address)
 {
     return libcxx::round_down(address, PAGE_SIZE);
 }
@@ -57,7 +57,7 @@ bool test(addr_t v);
 addr_t fork();
 
 // Translate userspace protection flags to kernel flags
-inline int prot_to_flags(int prot)
+constexpr int prot_to_flags(int prot)
 {
     int flags = PAGE_NX;
     if (prot & PROT_READ) {
@@ -74,5 +74,5 @@ inline int prot_to_flags(int prot)
 
 addr_t get_address_space_root();
 void set_address_space_root(addr_t root);
-} // namespace Virtual
+} // namespace virt
 } // namespace memory

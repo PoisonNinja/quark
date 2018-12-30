@@ -4,7 +4,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 static inline void __set_flags(struct page* page, uint8_t flags)
 {
@@ -68,5 +68,5 @@ bool protect(addr_t v, int flags)
     memory::X86::invlpg(v);
     return true;
 }
-} // namespace Virtual
+} // namespace virt
 } // namespace memory

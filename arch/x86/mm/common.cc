@@ -14,11 +14,11 @@ bool is_valid_physical_memory(addr_t m, struct Boot::info &info)
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
     addr_t multiboot_start =
-        memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end = memory::Virtual::align_up(
+        memory::virt::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
+    addr_t multiboot_end = memory::virt::align_up(
         reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
-    if (m >= memory::Virtual::align_down(info.kernel_start) &&
-        m < memory::Virtual::align_up(info.kernel_end)) {
+    if (m >= memory::virt::align_down(info.kernel_start) &&
+        m < memory::virt::align_up(info.kernel_end)) {
         Log::printk(Log::LogLevel::DEBUG,
                     "        Rejected %p because in kernel\n", m);
         return false;
@@ -26,8 +26,8 @@ bool is_valid_physical_memory(addr_t m, struct Boot::info &info)
         Log::printk(Log::LogLevel::DEBUG,
                     "        Rejected %p because in multiboot\n", m);
         return false;
-    } else if (m >= memory::Virtual::align_down(info.initrd_start) &&
-               m < memory::Virtual::align_up(info.initrd_end)) {
+    } else if (m >= memory::virt::align_down(info.initrd_start) &&
+               m < memory::virt::align_up(info.initrd_end)) {
         Log::printk(Log::LogLevel::DEBUG,
                     "        Rejected %p because in initrd\n", m);
         return false;

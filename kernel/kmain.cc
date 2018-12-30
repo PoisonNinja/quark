@@ -54,7 +54,7 @@ void init_stage2(void*)
 
 void init_stage1()
 {
-    addr_t cloned  = memory::Virtual::fork();
+    addr_t cloned  = memory::virt::fork();
     Process* initp = new Process(nullptr);
     Scheduler::add_process(initp);
     initp->set_root(Scheduler::get_current_process()->get_root());

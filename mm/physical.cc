@@ -30,7 +30,7 @@ addr_t allocate()
     if (!online) {
         return early_allocate();
     }
-    addr_t result = buddy->alloc(memory::Virtual::PAGE_SIZE);
+    addr_t result = buddy->alloc(memory::virt::PAGE_SIZE);
     // TODO: Perform sanity checks
     return result;
 }
@@ -51,7 +51,7 @@ addr_t allocate(size_t size)
 void free(addr_t address)
 {
     // TODO: Round address
-    buddy->free(address, memory::Virtual::PAGE_SIZE);
+    buddy->free(address, memory::virt::PAGE_SIZE);
 }
 
 void free(addr_t address, size_t size)
@@ -66,10 +66,10 @@ void free(addr_t address, size_t size)
  */
 libcxx::pair<addr_t, size_t> try_allocate(size_t max_size)
 {
-    if (max_size <= memory::Virtual::PAGE_SIZE)
-        max_size = memory::Virtual::PAGE_SIZE;
+    if (max_size <= memory::virt::PAGE_SIZE)
+        max_size = memory::virt::PAGE_SIZE;
     size_t rounded_size = libcxx::pow2(libcxx::log2(max_size));
-    while (rounded_size >= memory::Virtual::PAGE_SIZE) {
+    while (rounded_size >= memory::virt::PAGE_SIZE) {
         if (buddy->available(rounded_size)) {
             return libcxx::make_pair(buddy->alloc(rounded_size), rounded_size);
         }

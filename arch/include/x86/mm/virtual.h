@@ -4,7 +4,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 constexpr size_t PAGE_SIZE = 4096;
 
@@ -35,5 +35,5 @@ struct page {
 struct page_table {
     struct page pages[PAGE_SIZE / sizeof(struct page)];
 };
-}  // namespace Virtual
+}  // namespace virt
 }  // namespace memory

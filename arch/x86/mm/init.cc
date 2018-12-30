@@ -14,8 +14,8 @@ void arch_init(struct Boot::info &info)
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
     addr_t multiboot_start =
-        memory::Virtual::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end = memory::Virtual::align_up(
+        memory::virt::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
+    addr_t multiboot_end = memory::virt::align_up(
         reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");
     Log::printk(Log::LogLevel::INFO, "    Kernel:    [%p - %p]\n",
@@ -51,7 +51,7 @@ void arch_init(struct Boot::info &info)
                                 static_cast<addr_t>(mmap->type));
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
-                             i += memory::Virtual::PAGE_SIZE) {
+                             i += memory::virt::PAGE_SIZE) {
                             if (memory::X86::is_valid_physical_memory(i,
                                                                       info)) {
                                 memory::physical::free(i);

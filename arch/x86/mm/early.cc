@@ -48,10 +48,10 @@ void init_early_alloc(struct Boot::info *b)
                               mmap_tag))
                              ->entry_size)) {
                     // Look for the highest memory address (needed for buddy)
-                    if (memory::Virtual::align_up(tmp->addr + tmp->len) >
+                    if (memory::virt::align_up(tmp->addr + tmp->len) >
                         highest)
                         highest =
-                            memory::Virtual::align_up(tmp->addr + tmp->len);
+                            memory::virt::align_up(tmp->addr + tmp->len);
                 }
                 break;
         }
@@ -77,18 +77,18 @@ addr_t early_allocate()
              (reinterpret_cast<struct multiboot_tag_mmap *>(mmap_tag))
                  ->entry_size)) {
         if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
-            for (addr_t i = memory::Virtual::align_up(mmap->addr);
-                 i < memory::Virtual::align_up(mmap->addr) +
-                         memory::Virtual::align_down(mmap->len);
-                 i += memory::Virtual::PAGE_SIZE) {
+            for (addr_t i = memory::virt::align_up(mmap->addr);
+                 i < memory::virt::align_up(mmap->addr) +
+                         memory::virt::align_down(mmap->len);
+                 i += memory::virt::PAGE_SIZE) {
                 /*
                  * Unconditionally increment the start of this zone and
                  * decrement the size of the zone. This works because there are
                  * only two possible conditions: memory we can't use and memory
                  * we can. Both will not be evaluated again, so we can advance.
                  */
-                mmap->addr += memory::Virtual::PAGE_SIZE;
-                mmap->len -= memory::Virtual::PAGE_SIZE;
+                mmap->addr += memory::virt::PAGE_SIZE;
+                mmap->len -= memory::virt::PAGE_SIZE;
                 // Check if it's in a restricted area
                 if (memory::X86::is_valid_physical_memory(i, *info)) {
                     return i;

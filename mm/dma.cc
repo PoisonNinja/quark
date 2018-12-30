@@ -26,7 +26,7 @@ bool allocate(size_t size, region& region)
     region.physical_base = memory::physical::allocate(size);
     region.size          = size;
     region.real_size     = size;
-    if (!memory::Virtual::map_range(region.virtual_base, region.physical_base,
+    if (!memory::virt::map_range(region.virtual_base, region.physical_base,
                                     region.size, PAGE_WRITABLE)) {
         // memory::vmalloc::free(region.virtual_base);
         memory::physical::free(region.physical_base, region.size);
@@ -58,7 +58,7 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)
         }
 
         region.virtual_base = dma_region.allocate(0, real_size).second;
-        memory::Virtual::map_range(region.virtual_base, region.physical_base,
+        memory::virt::map_range(region.virtual_base, region.physical_base,
                                    region.size, PAGE_WRITABLE);
         list.push_back(region);
         num_regions++;
@@ -69,7 +69,7 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)
 sglist::~sglist()
 {
     for (auto region : this->list) {
-        memory::Virtual::unmap_range(region.virtual_base, region.size);
+        memory::virt::unmap_range(region.virtual_base, region.size);
         dma_region.free(region.virtual_base, region.real_size);
         memory::physical::free(region.physical_base, region.real_size);
     }

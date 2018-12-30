@@ -5,7 +5,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 bool test(addr_t v)
 {
@@ -38,5 +38,5 @@ bool test(addr_t v)
 #endif
     return true;
 }
-}  // namespace Virtual
+}  // namespace virt
 }  // namespace memory

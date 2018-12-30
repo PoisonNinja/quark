@@ -48,7 +48,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                         phdr->p_flags);
             Log::printk(Log::LogLevel::DEBUG, "Offset:           %p\n",
                         phdr->p_offset);
-            Log::printk(Log::LogLevel::DEBUG, "Virtual address:  %p\n",
+            Log::printk(Log::LogLevel::DEBUG, "virt address:  %p\n",
                         phdr->p_vaddr);
             Log::printk(Log::LogLevel::DEBUG, "Physical address: %p\n",
                         phdr->p_paddr);
@@ -62,15 +62,14 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                 Log::printk(Log::LogLevel::ERROR, "Failed to add section\n");
                 return libcxx::pair<bool, addr_t>(false, 0);
             }
-            int flags = PAGE_USER | PAGE_WRITABLE; /*
-                                                    * Writable by default so
-                                                    * kernel can access, we'll
-                                                    * update this later
-                                                    */
+            /*
+             * Writable by default so kernel can access, we'll update this later
+             */
+            int flags = PAGE_USER | PAGE_WRITABLE;
             if (!(phdr->p_flags & PF_X)) {
                 flags |= PAGE_NX; // Set NX bit if requested
             }
-            memory::Virtual::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
+            memory::virt::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
 
             Log::printk(Log::LogLevel::DEBUG,
                         "Copying from %p -> %p, size %X\n",
@@ -91,7 +90,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             }
             if (!(phdr->p_flags & PF_W)) {
                 // Remove write access if requested
-                memory::Virtual::protect_range(phdr->p_vaddr, phdr->p_memsz,
+                memory::virt::protect_range(phdr->p_vaddr, phdr->p_memsz,
                                                flags & ~PAGE_WRITABLE);
             }
         }

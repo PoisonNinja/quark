@@ -7,9 +7,9 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
-static inline int __set_address(struct memory::Virtual::page* page)
+static inline int __set_address(struct memory::virt::page* page)
 {
     if (!page->present) {
         page->address = memory::physical::allocate() / 0x1000;
@@ -91,5 +91,5 @@ bool map(addr_t v, addr_t p, int flags)
     memory::X86::invlpg(v);
     return true;
 }
-} // namespace Virtual
+} // namespace virt
 } // namespace memory

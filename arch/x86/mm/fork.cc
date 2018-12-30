@@ -7,7 +7,7 @@
 
 namespace memory
 {
-namespace Virtual
+namespace virt
 {
 static struct page_table __attribute__((aligned(0x1000))) fork_page;
 struct page_table* const fork_page_pointer = &fork_page;
@@ -27,7 +27,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
              * Map the new page into a page that we control so we can copy
              * the contents of the page
              */
-            memory::Virtual::map(reinterpret_cast<addr_t>(fork_page_pointer),
+            memory::virt::map(reinterpret_cast<addr_t>(fork_page_pointer),
                                  new_page, PAGE_WRITABLE);
             /*
              * Calculate the virtual address given the indexes for the source
@@ -54,7 +54,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
              * Map the new page into a page that we control so we can copy
              * the contents of the page
              */
-            memory::Virtual::map(reinterpret_cast<addr_t>(fork_page_pointer),
+            memory::virt::map(reinterpret_cast<addr_t>(fork_page_pointer),
                                  new_page, PAGE_WRITABLE);
             /*
              * Calculate the virtual address given the indexes for the source
@@ -145,7 +145,7 @@ addr_t fork()
      * using fork_page. This is so we can set up the fractal mapping
      * for the new PML4.
      */
-    memory::Virtual::map(reinterpret_cast<addr_t>(fork_page_pointer),
+    memory::virt::map(reinterpret_cast<addr_t>(fork_page_pointer),
                          fork_pml4_phys, PAGE_WRITABLE);
     /*
      * Copy the entire PML4. However, only the kernel pages will remain
@@ -200,5 +200,5 @@ addr_t fork()
     }
     return fork_pml4_phys;
 }
-} // namespace Virtual
+} // namespace virt
 } // namespace memory

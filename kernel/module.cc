@@ -131,7 +131,7 @@ bool load_module(void* binary)
         }
     }
 
-    Log::printk(Log::LogLevel::DEBUG, "[load_module] libcxx table at %p\n",
+    Log::printk(Log::LogLevel::DEBUG, "[load_module] String table at %p\n",
                 string_table);
 
     ELF::Elf_Sym* symtab = nullptr;

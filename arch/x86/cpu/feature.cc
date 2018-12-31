@@ -28,6 +28,14 @@ static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
 
 void detect_intel(Core& cpu)
 {
+    /*
+     * Linux based - Family 0x6, Model >= 0xE and Family 0xF, Model >= 0x3
+     * support constant TSC
+     */
+    if ((cpu.family == 0x6 && cpu.model >= 0xE) ||
+        (cpu.family == 0xF && cpu.model >= 0x3)) {
+        set_feature(cpu, X86_FEATURE_CONSTANT_TSC);
+    }
     // Intel specific CPUID extensions
     struct cpuid_regs regs;
     regs.eax = 0x80000007;

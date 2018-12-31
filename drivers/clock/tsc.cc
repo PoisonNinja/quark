@@ -20,6 +20,8 @@ TSC::TSC()
         Log::printk(
             Log::LogLevel::WARNING,
             "tsc: CPU doesn't support constant TSC, timing will be unstable\n");
+    } else {
+        Log::printk(Log::LogLevel::INFO, "tsc: CPU supports constant TSC :)\n");
     }
     // Automatic calibration
     Log::printk(Log::LogLevel::INFO, "tsc: Preparing to calibrate\n");

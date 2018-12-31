@@ -48,7 +48,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                         phdr->p_flags);
             Log::printk(Log::LogLevel::DEBUG, "Offset:           %p\n",
                         phdr->p_offset);
-            Log::printk(Log::LogLevel::DEBUG, "virt address:  %p\n",
+            Log::printk(Log::LogLevel::DEBUG, "Virtual address:  %p\n",
                         phdr->p_vaddr);
             Log::printk(Log::LogLevel::DEBUG, "Physical address: %p\n",
                         phdr->p_paddr);
@@ -91,7 +91,7 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             if (!(phdr->p_flags & PF_W)) {
                 // Remove write access if requested
                 memory::virt::protect_range(phdr->p_vaddr, phdr->p_memsz,
-                                               flags & ~PAGE_WRITABLE);
+                                            flags & ~PAGE_WRITABLE);
             }
         }
     }

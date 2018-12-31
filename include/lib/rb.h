@@ -155,35 +155,35 @@ template <class T, rbnode<T> T::*Link>
 void rbtree<T, Link>::insert(T& value, rb_callback_t callback)
 {
     prev(&value) = this->calculate_prev(&value);
-    T* curr      = &value;
-    if (prev(curr)) {
-        T* tnext    = next(prev(curr));
-        T* tprev    = prev(curr);
-        next(tprev) = curr;
-        next(curr)  = tnext;
-    } else {
-        if (parent(curr)) {
-            next(curr) = parent(curr);
-        } else {
-            next(curr) = nullptr;
-        }
-    }
-    if (next(curr)) {
-        prev(next(curr)) = curr;
-    }
+    T* ptr       = &value;
     if (!this->root) {
-        this->root = &value;
+        this->root = ptr;
         paint(this->root, Color::BLACK);
         if (callback)
             callback(root);
     } else {
-        insert(root, &value);
+        insert(root, ptr);
         if (callback) {
             for (T* curr = &value; curr != nullptr; curr = parent(curr)) {
                 callback(curr);
             }
         }
         balance(&value, callback);
+    }
+    if (prev(ptr)) {
+        T* tnext    = next(prev(ptr));
+        T* tprev    = prev(ptr);
+        next(tprev) = ptr;
+        next(ptr)   = tnext;
+    } else {
+        if (parent(ptr)) {
+            next(ptr) = parent(ptr);
+        } else {
+            next(ptr) = nullptr;
+        }
+    }
+    if (next(ptr)) {
+        prev(next(ptr)) = ptr;
     }
 }
 

@@ -61,10 +61,26 @@ void detect(Core& cpu)
 
     regs.eax = 0x00000001;
     cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
-    cpu.stepping              = regs.eax & 0xF;
-    cpu.type                  = regs.eax & 0x3000;
-    cpu.family                = (regs.eax & 0xF00) + (regs.eax & 0xFF00000);
-    cpu.model                 = ((regs.eax & 0xF0000) << 4) + (regs.eax & 0xF0);
+    cpu.type = (regs.eax & 0x3000) >> 12;
+    /*
+     * If model is NOT equal to 15, family is extended family + family.
+     * Otherwise just equal to family
+     */
+    if ((regs.eax & 0xF00) != 0xF00) {
+        cpu.family = ((regs.eax & 0xF00) + (regs.eax & 0xFF00000)) >> 8;
+    } else {
+        cpu.family = (regs.eax & 0xF00) >> 8;
+    }
+    cpu.stepping = regs.eax & 0xF;
+    /*
+     * If model is equal to 6 or 15, model is extended model << 4 + model.
+     * Otherwise just equal to model
+     */
+    if ((regs.eax & 0xF00) == 0xF00 || (regs.eax & 0xF00) == 0x600) {
+        cpu.model = (((regs.eax & 0xF0000) >> 12) + ((regs.eax & 0xF0) >> 4));
+    } else {
+        cpu.model = (regs.eax & 0xF0) >> 4;
+    }
     cpu.features[cpuid_1_edx] = regs.edx;
     cpu.features[cpuid_1_ecx] = regs.ecx;
 
@@ -99,8 +115,8 @@ void detect(Core& cpu)
     uint32_t highest_function = regs.eax;
 
     /*
-     * CPUID EAX values pased 0x80000000 are optional so we need to verify they
-     * exist
+     * CPUID EAX values past 0x80000000 are optional so we need to verify
+     * they exist
      */
     if (highest_function < 0x80000001) {
         Log::printk(
@@ -113,9 +129,9 @@ void detect(Core& cpu)
         cpu.features[cpuid_8000_0001_ecx] = regs.ecx;
 
         if (highest_function < 0x80000004) {
-            Log::printk(
-                Log::LogLevel::WARNING,
-                "CPU does not support extended feature set past 0x80000004\n");
+            Log::printk(Log::LogLevel::WARNING,
+                        "CPU does not support extended feature set past "
+                        "0x80000004\n");
         } else {
             regs.eax = 0x80000002;
             cpuid(&regs.eax, &regs.ebx, &regs.ecx, &regs.edx);
@@ -173,20 +189,20 @@ void detect(Core& cpu)
         Log::printk(Log::LogLevel::INFO, "Found supported CPU vendor\n");
         detect_intel(cpu);
     } else {
-        Log::printk(
-            Log::LogLevel::WARNING,
-            "Unknown CPU vendor, not performing extended feature detection.\n");
+        Log::printk(Log::LogLevel::WARNING,
+                    "Unknown CPU vendor, not performing extended feature "
+                    "detection.\n");
     }
 }
 
 void print(Core& cpu)
 {
-    Log::printk(Log::LogLevel::INFO, "CPU Vendor: %s\n", cpu.vendor);
-    Log::printk(Log::LogLevel::INFO, "CPU Name: %s\n", cpu.name);
+    Log::printk(Log::LogLevel::INFO, "CPU Vendor:   %s\n", cpu.vendor);
+    Log::printk(Log::LogLevel::INFO, "CPU Name:     %s\n", cpu.name);
     Log::printk(Log::LogLevel::INFO, "CPU Stepping: %X\n", cpu.stepping);
-    Log::printk(Log::LogLevel::INFO, "CPU Type: %X\n", cpu.type);
-    Log::printk(Log::LogLevel::INFO, "CPU Family: %X\n", cpu.family);
-    Log::printk(Log::LogLevel::INFO, "CPU Model: %X\n", cpu.model);
+    Log::printk(Log::LogLevel::INFO, "CPU Type:     %X\n", cpu.type);
+    Log::printk(Log::LogLevel::INFO, "CPU Family:   %X\n", cpu.family);
+    Log::printk(Log::LogLevel::INFO, "CPU Model:    %X\n", cpu.model);
 }
 } // namespace X86
 } // namespace CPU

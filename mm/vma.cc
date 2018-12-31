@@ -112,7 +112,7 @@ libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
         // TODO: Check
         // If it's not, we are free to place it anywhere
         // Basically a port of Linux's algorithm
-        if (this->sections.left(curr)) {
+        if (gap_end >= low_limit && this->sections.left(curr)) {
             if (this->sections.left(curr)->largest_subgap >= size) {
                 curr = this->sections.left(curr);
                 continue;

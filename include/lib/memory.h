@@ -191,6 +191,59 @@ private:
     friend class intrusive_ptr;
 };
 
+template <typename T>
+class unique_ptr
+{
+public:
+    unique_ptr()
+        : data(nullptr){};
+    unique_ptr(std::nullptr_t)
+        : data(nullptr){};
+    explicit unique_ptr(T* data)
+        : data(data)
+    {
+    }
+    unique_ptr(unique_ptr&& u)
+    {
+        libcxx::swap(this->data, u.data);
+    }
+    ~unique_ptr()
+    {
+        delete data;
+    }
+
+    unique_ptr(unique_ptr const&) = delete;
+    unique_ptr& operator=(unique_ptr const&) = delete;
+
+    T* operator->() const
+    {
+        return data;
+    }
+    T& operator*() const
+    {
+        return *data;
+    }
+
+    T* get() const
+    {
+        return data;
+    }
+    explicit operator bool() const
+    {
+        return data;
+    }
+
+    T* release()
+    {
+        T* result = nullptr;
+        libcxx::swap(result, data);
+        return result;
+    }
+
+private:
+    T* data;
+};
+
 template <class _Tp>
 inline constexpr _Tp* addressof(_Tp& __x)
 {

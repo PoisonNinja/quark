@@ -2,8 +2,8 @@
 
 #include <lib/memory.h>
 #include <lib/new.h>
+#include <lib/type_traits.h>
 #include <lib/utility.h>
-#include <type_traits>
 #include <types.h>
 
 namespace libcxx

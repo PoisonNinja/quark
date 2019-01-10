@@ -48,7 +48,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         size_t to_process = count - processed;
         if (current % this->blkdev->sector_size())
             to_process += this->blkdev->sector_size();
-        memory::dma::sglist* sglist =
+        auto sglist =
             memory::dma::make_sglist(this->blkdev->sg_max_count(),
                                      this->blkdev->sg_max_size(), to_process);
         Log::printk(Log::LogLevel::INFO,
@@ -59,12 +59,12 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         request.num_sectors = sglist->total_size / blkdev->sector_size();
         request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
-        request.sglist = sglist;
+        request.sglist = libcxx::move(sglist);
         Log::printk(Log::LogLevel::INFO, "block: 0x%zX sectors, 0x%zX start\n",
                     request.num_sectors, request.start);
 
         if (blkdev->request(&request)) {
-            for (auto& region : sglist->list) {
+            for (auto& region : request.sglist->list) {
                 if (current >
                     libcxx::round_down(current, blkdev->sector_size())) {
                     Log::printk(Log::LogLevel::DEBUG,

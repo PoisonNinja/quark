@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs/dev.h>
+#include <lib/memory.h>
 
 namespace memory
 {
@@ -23,7 +24,7 @@ struct BlockRequest {
     BlockRequestType command;
     sector_t start;
     sector_t num_sectors;
-    memory::dma::sglist* sglist;
+    libcxx::unique_ptr<memory::dma::sglist> sglist;
 };
 
 class BlockDevice

@@ -214,6 +214,11 @@ public:
 
     unique_ptr(unique_ptr const&) = delete;
     unique_ptr& operator=(unique_ptr const&) = delete;
+    unique_ptr& operator                     =(unique_ptr&& u)
+    {
+        libcxx::swap(this->data, u.data);
+        return *this;
+    }
 
     T* operator->() const
     {

@@ -27,7 +27,7 @@ bool allocate(size_t size, region& region)
     region.size          = size;
     region.real_size     = size;
     if (!memory::virt::map_range(region.virtual_base, region.physical_base,
-                                    region.size, PAGE_WRITABLE)) {
+                                 region.size, PAGE_WRITABLE)) {
         // memory::vmalloc::free(region.virtual_base);
         memory::physical::free(region.physical_base, region.size);
         return false;
@@ -59,7 +59,7 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)
 
         region.virtual_base = dma_region.allocate(0, real_size).second;
         memory::virt::map_range(region.virtual_base, region.physical_base,
-                                   region.size, PAGE_WRITABLE);
+                                region.size, PAGE_WRITABLE);
         list.push_back(region);
         num_regions++;
         total_size += region.size;
@@ -75,11 +75,12 @@ sglist::~sglist()
     }
 }
 
-sglist* make_sglist(size_t max_elements, size_t max_element_size,
-                    size_t total_size)
+libcxx::unique_ptr<sglist>
+make_sglist(size_t max_elements, size_t max_element_size, size_t total_size)
 {
     // TODO: Use unique_ptr
-    sglist* sg = new sglist(max_elements, max_element_size, total_size);
+    auto sg = libcxx::unique_ptr<sglist>(
+        new sglist(max_elements, max_element_size, total_size));
     return sg;
 }
 } // namespace dma

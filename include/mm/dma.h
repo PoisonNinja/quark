@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/vector.h>
+#include <lib/memory.h>
 #include <types.h>
 
 namespace memory
@@ -33,7 +34,7 @@ bool allocate(size_t size, region& region);
  * Callers must be responsible for memory allocated, including clearing the
  * region memory
  */
-sglist* make_sglist(size_t max_elements, size_t max_element_size,
+libcxx::unique_ptr<sglist> make_sglist(size_t max_elements, size_t max_element_size,
                     size_t total_size);
 } // namespace dma
 } // namespace memory

@@ -46,30 +46,24 @@ struct pair {
     {
     }
 
-    constexpr pair(M m, N n)
-        : first(m)
-        , second(n){};
+    template <typename U, typename V,
+              typename = libcxx::enable_if_t<libcxx::is_convertible_v<U, M> &&
+                                             libcxx::is_convertible_v<V, N>>>
+    constexpr pair(const U& u, const V& v)
+        : first(u)
+        , second(v){};
 
-    pair(const pair& p) = default;
+    template <typename U, typename V,
+              typename = libcxx::enable_if_t<libcxx::is_convertible_v<U, M> &&
+                                             libcxx::is_convertible_v<V, N>>>
+    constexpr pair(U&& u, V&& v)
+        : first(libcxx::forward<U>(u))
+        , second(libcxx::forward<V>(v)){};
 
-    constexpr pair(pair&& p) = default;
-
-    M first;
-    N second;
-
-    pair& operator=(const pair& other)
-    {
-        this->first  = other.first;
-        this->second = other.second;
-        return *this;
-    }
-
-    pair& operator=(pair&& other)
-    {
-        libcxx::swap(this->first, other.first);
-        libcxx::swap(this->second, other.second);
-        return *this;
-    }
+    constexpr pair(const pair& p) = default;
+    constexpr pair(pair&& p)      = default;
+    constexpr pair& operator=(const pair& other) = default;
+    constexpr pair& operator=(pair&& other) = default;
 
     constexpr bool operator==(const pair<M, N>& rhs)
     {
@@ -80,6 +74,9 @@ struct pair {
     {
         return !(*this == rhs);
     }
+
+    M first;
+    N second;
 };
 
 template <typename M, typename N>

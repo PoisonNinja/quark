@@ -798,6 +798,9 @@ struct is_convertible : public __is_convertible<_T1, _T2> {
     static const size_t __complete_check2 = __is_convertible_check<_T2>::__v;
 };
 
+template <class From, class To>
+inline constexpr bool is_convertible_v = is_convertible<From, To>::value;
+
 /*
  * From cppreference.com
  */

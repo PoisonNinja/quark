@@ -68,6 +68,9 @@ struct integral_constant {
     } // since c++14
 };
 
+template <bool B>
+using bool_constant = integral_constant<bool, B>;
+
 using true_type  = libcxx::integral_constant<bool, true>;
 using false_type = libcxx::integral_constant<bool, false>;
 
@@ -134,6 +137,22 @@ using make_index_sequence = make_integer_sequence<size_t, N>;
  *
  * Licensed under CC-BY-SA 3.0 - See LICENSE for more details
  */
+
+template <class T>
+struct add_cv {
+    typedef const volatile T type;
+};
+
+template <class T>
+struct add_const {
+    typedef const T type;
+};
+
+template <class T>
+struct add_volatile {
+    typedef volatile T type;
+};
+
 template <class T>
 struct remove_const {
     typedef T type;
@@ -509,11 +528,65 @@ template <class T>
 inline constexpr bool is_member_object_pointer_v =
     is_member_object_pointer<T>::value;
 
+template <class T>
+struct is_rvalue_reference : libcxx::false_type {
+};
+
+template <class T>
+struct is_rvalue_reference<T &&> : libcxx::true_type {
+};
+
+template <class T>
+struct is_lvalue_reference : libcxx::false_type {
+};
+
+template <class T>
+struct is_lvalue_reference<T &> : libcxx::true_type {
+};
+
+/*
+ * From libcxx
+ */
+struct __two {
+    char __lx[2];
+};
+
+struct __is_referenceable_impl {
+    template <class _Tp>
+    static _Tp &__test(int);
+    template <class _Tp>
+    static __two __test(...);
+};
+
+template <class _Tp>
+struct __is_referenceable
+    : integral_constant<
+          bool, !is_same<decltype(__is_referenceable_impl::__test<_Tp>(0)),
+                         __two>::value> {
+};
+
+template <typename _Tp, bool = __is_referenceable<_Tp>::value>
+struct __add_lvalue_reference_helper {
+    typedef _Tp type;
+};
+
+template <typename _Tp>
+struct __add_lvalue_reference_helper<_Tp, true> {
+    typedef _Tp &type;
+};
 /*
  * From Boost
  *
  * Licensed under Boost Software License - See LICENSE for more details
  */
+/// add_lvalue_reference
+template <typename _Tp>
+struct add_lvalue_reference : public __add_lvalue_reference_helper<_Tp> {
+};
+
+template <class _Tp>
+using add_lvalue_reference_t = typename add_lvalue_reference<_Tp>::type;
+
 namespace detail
 {
 template <typename T, bool b>
@@ -723,5 +796,42 @@ template <class _T1, class _T2>
 struct is_convertible : public __is_convertible<_T1, _T2> {
     static const size_t __complete_check1 = __is_convertible_check<_T1>::__v;
     static const size_t __complete_check2 = __is_convertible_check<_T2>::__v;
+};
+
+/*
+ * From cppreference.com
+ */
+template <typename T, typename U, typename = void>
+struct is_assignable : libcxx::false_type {
+};
+
+template <typename T, typename U>
+struct is_assignable<
+    T, U, decltype(libcxx::declval<T>() = libcxx::declval<U>(), void())>
+    : libcxx::true_type {
+};
+
+template <typename _Tp>
+struct is_empty : public integral_constant<bool, __is_empty(_Tp)> {
+};
+
+template <class _Tp, class... _Args>
+struct is_constructible
+    : public integral_constant<bool, __is_constructible(_Tp, _Args...)> {
+};
+
+template <class...>
+struct conjunction : libcxx::true_type {
+};
+template <class B1>
+struct conjunction<B1> : B1 {
+};
+template <class B1, class... Bn>
+struct conjunction<B1, Bn...>
+    : libcxx::conditional_t<bool(B1::value), conjunction<Bn...>, B1> {
+};
+
+template <class B>
+struct negation : libcxx::bool_constant<!bool(B::value)> {
 };
 } // namespace libcxx

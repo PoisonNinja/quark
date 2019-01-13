@@ -15,12 +15,13 @@ namespace
 memory::vma dma_region(DMA_START, DMA_END);
 }
 
-bool allocate(size_t size, region& region)
+libcxx::pair<bool, region> allocate(size_t size)
 {
+    region region;
     auto [virt_found, virt_address] = dma_region.allocate(0, size);
     if (!virt_found) {
         Log::printk(Log::LogLevel::WARNING, "dma: Unable to find free space\n");
-        return false;
+        return libcxx::make_pair(false, region);
     }
     region.virtual_base  = virt_address;
     region.physical_base = memory::physical::allocate(size);
@@ -28,11 +29,11 @@ bool allocate(size_t size, region& region)
     region.real_size     = size;
     if (!memory::virt::map_range(region.virtual_base, region.physical_base,
                                  region.size, PAGE_WRITABLE)) {
-        // memory::vmalloc::free(region.virtual_base);
+        memory::vmalloc::free(region.virtual_base);
         memory::physical::free(region.physical_base, region.size);
-        return false;
+        return libcxx::make_pair(false, region);
     }
-    return true;
+    return libcxx::make_pair(true, region);
 }
 
 sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)

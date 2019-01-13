@@ -1,7 +1,8 @@
 #pragma once
 
-#include <lib/vector.h>
 #include <lib/memory.h>
+#include <lib/utility.h>
+#include <lib/vector.h>
 #include <types.h>
 
 namespace memory
@@ -13,7 +14,6 @@ struct region {
     addr_t physical_base;
     addr_t size;
 
-    // Please don't touch this
     size_t real_size;
 };
 
@@ -25,7 +25,7 @@ struct sglist {
     libcxx::vector<region> list;
 };
 
-bool allocate(size_t size, region& region);
+libcxx::pair<bool, region> allocate(size_t size);
 
 /*
  * Builds a scatter gather list with either max_elements regions or regions
@@ -34,7 +34,7 @@ bool allocate(size_t size, region& region);
  * Callers must be responsible for memory allocated, including clearing the
  * region memory
  */
-libcxx::unique_ptr<sglist> make_sglist(size_t max_elements, size_t max_element_size,
-                    size_t total_size);
+libcxx::unique_ptr<sglist>
+make_sglist(size_t max_elements, size_t max_element_size, size_t total_size);
 } // namespace dma
 } // namespace memory

@@ -79,10 +79,32 @@ struct pair {
     N second;
 };
 
-template <typename M, typename N>
-libcxx::pair<M, N> make_pair(M m, N n)
+template <class _Tp>
+class reference_wrapper;
+
+template <class _Tp>
+struct ___make_pair_return {
+    typedef _Tp type;
+};
+
+template <class _Tp>
+struct ___make_pair_return<reference_wrapper<_Tp>> {
+    typedef _Tp& type;
+};
+
+template <class _Tp>
+struct __make_pair_return {
+    typedef typename ___make_pair_return<typename decay<_Tp>::type>::type type;
+};
+
+template <class _T1, class _T2>
+inline pair<typename __make_pair_return<_T1>::type,
+            typename __make_pair_return<_T2>::type>
+make_pair(_T1&& __t1, _T2&& __t2)
 {
-    return libcxx::pair<M, N>(m, n);
+    return pair<typename __make_pair_return<_T1>::type,
+                typename __make_pair_return<_T2>::type>(
+        libcxx::forward<_T1>(__t1), libcxx::forward<_T2>(__t2));
 }
 
 /*

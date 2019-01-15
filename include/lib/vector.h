@@ -10,54 +10,6 @@ template <class T>
 class vector
 {
 public:
-    class iterator
-    {
-    public:
-        explicit iterator(T* p)
-            : current(p){};
-        T& operator*()
-        {
-            return *current;
-        }
-        T* operator->()
-        {
-            return current;
-        }
-        bool operator==(iterator const& other) const
-        {
-            return this->current == other.current;
-        }
-        bool operator!=(iterator const& other) const
-        {
-            return !(*this == other);
-        }
-        iterator& operator++()
-        {
-            this->current++;
-            return *this;
-        }
-        iterator operator++(int)
-        {
-            iterator rc(*this);
-            this->operator++();
-            return rc;
-        }
-        iterator& operator--()
-        {
-            this->current--;
-            return *this;
-        }
-        iterator operator--(int)
-        {
-            iterator rc(*this);
-            this->operator--();
-            return rc;
-        }
-
-    private:
-        T* current;
-    };
-
     vector()
         : _data(nullptr)
         , _capacity(0)
@@ -176,9 +128,9 @@ public:
         return !(*this == other);
     }
 
-    vector<T>::iterator begin()
+    T* begin()
     {
-        return vector<T>::iterator(this->_data);
+        return this->_data;
     }
 
     /*
@@ -186,9 +138,9 @@ public:
      * because it points to beyond end of _data, but thankfully dereferencing
      * the end() iterator is UB.
      */
-    vector<T>::iterator end()
+    T* end()
     {
-        return vector<T>::iterator(this->_data + _size);
+        return this->_data + _size;
     }
 
     void swap(libcxx::vector<T>& other)

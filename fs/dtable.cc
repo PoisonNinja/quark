@@ -18,7 +18,7 @@ DTable::~DTable()
 
 int DTable::add(libcxx::intrusive_ptr<Descriptor> desc)
 {
-    for (int i = 0; i < fds.size(); i++) {
+    for (unsigned i = 0; i < fds.size(); i++) {
         if (!fds[i]) {
             fds[i] = desc;
             return i;
@@ -31,7 +31,11 @@ int DTable::add(libcxx::intrusive_ptr<Descriptor> desc)
 
 bool DTable::remove(int fd)
 {
-    if (fd >= fds.size() || fd < 0 || !fds[fd]) {
+    /*
+     * Since we check if fd < 0 first thus short circuiting if it's true
+     * casting fd to unsigned guarantees that we'll get a valid size
+     */
+    if (fd < 0 || static_cast<unsigned>(fd) >= fds.size() || !fds[fd]) {
         return false;
     } else {
         fds[fd] = libcxx::intrusive_ptr<Filesystem::Descriptor>(nullptr);
@@ -41,7 +45,7 @@ bool DTable::remove(int fd)
 
 libcxx::intrusive_ptr<Descriptor> DTable::get(int index)
 {
-    if (index >= fds.size() || index < 0) {
+    if (index < 0 || static_cast<unsigned>(index) >= fds.size()) {
         return libcxx::intrusive_ptr<Descriptor>(nullptr);
     }
     return fds[index];

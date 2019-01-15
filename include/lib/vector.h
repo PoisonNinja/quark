@@ -143,6 +143,16 @@ public:
         return this->_data + _size;
     }
 
+    const T* cbegin()
+    {
+        return this->_data;
+    }
+
+    const T* cend()
+    {
+        return this->_data + _size;
+    }
+
     void swap(libcxx::vector<T>& other)
     {
         libcxx::swap(_data, other._data);

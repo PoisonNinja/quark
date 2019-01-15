@@ -27,7 +27,7 @@ struct TmpFSNode {
     libcxx::node<TmpFSNode> node;
 };
 
-class File : public BaseInode
+class File : public Inode
 {
 public:
     File(ino_t ino, dev_t rdev, mode_t mode);
@@ -42,7 +42,7 @@ private:
     size_t buffer_size;
 };
 
-class Directory : public BaseInode
+class Directory : public Inode
 {
 public:
     Directory(ino_t ino, dev_t rdev, mode_t mode);

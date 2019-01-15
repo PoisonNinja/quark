@@ -2,7 +2,7 @@
 
 #include <fs/tty.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class VGAFB : public KDevice
 {
@@ -18,4 +18,4 @@ private:
 
     void update_cursor(int col, int row);
 };
-} // namespace Filesystem
+} // namespace filesystem

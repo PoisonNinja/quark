@@ -4,7 +4,7 @@
 #include <fs/vnode.h>
 #include <kernel.h>
 
-namespace Filesystem
+namespace filesystem
 {
 Vnode::Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode)
     : Vnode(sb, inode, inode->rdev)
@@ -133,4 +133,4 @@ bool Vnode::seekable()
     }
     return this->inode->seekable();
 }
-} // namespace Filesystem
+} // namespace filesystem

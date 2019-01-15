@@ -17,12 +17,12 @@ public:
     void add_thread(Thread* thread);
     void remove_thread(Thread* thread);
 
-    void set_cwd(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
-    void set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc);
+    void set_cwd(libcxx::intrusive_ptr<filesystem::Descriptor> desc);
+    void set_root(libcxx::intrusive_ptr<filesystem::Descriptor> desc);
 
-    libcxx::intrusive_ptr<Filesystem::Descriptor> get_cwd();
-    libcxx::intrusive_ptr<Filesystem::Descriptor> get_root();
-    Filesystem::DTable fds;
+    libcxx::intrusive_ptr<filesystem::Descriptor> get_cwd();
+    libcxx::intrusive_ptr<filesystem::Descriptor> get_root();
+    filesystem::DTable fds;
 
     // TLS stuff
     addr_t tls_base;
@@ -44,8 +44,8 @@ public:
     addr_t sigreturn;
 
 private:
-    libcxx::intrusive_ptr<Filesystem::Descriptor> cwd;
-    libcxx::intrusive_ptr<Filesystem::Descriptor> root;
+    libcxx::intrusive_ptr<filesystem::Descriptor> cwd;
+    libcxx::intrusive_ptr<filesystem::Descriptor> root;
 
     Process* parent;
     libcxx::list<Process, &Process::child_node> children;

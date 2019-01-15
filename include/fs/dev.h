@@ -3,7 +3,7 @@
 #include <lib/utility.h>
 #include <types.h>
 
-namespace Filesystem
+namespace filesystem
 {
 constexpr dev_t major(dev_t dev)
 {
@@ -52,4 +52,4 @@ bool register_class(DeviceClass c, dev_t major);
 bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev);
 
 KDevice* get_kdevice(mode_t mode, dev_t dev);
-} // namespace Filesystem
+} // namespace filesystem

@@ -4,7 +4,7 @@
 #include <fs/inode.h>
 #include <lib/list.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class TmpFS : public Driver
 {
@@ -59,4 +59,4 @@ private:
     libcxx::list<TmpFSNode, &TmpFSNode::node> children;
 };
 } // namespace InitFS
-} // namespace Filesystem
+} // namespace filesystem

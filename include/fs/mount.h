@@ -4,7 +4,7 @@
 #include <fs/vnode.h>
 #include <lib/list.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class Vnode;
 
@@ -12,4 +12,4 @@ struct Mount {
     Superblock* sb;
     libcxx::node<Mount> node;
 };
-} // namespace Filesystem
+} // namespace filesystem

@@ -11,7 +11,7 @@ class sglist;
 }
 } // namespace memory
 
-namespace Filesystem
+namespace filesystem
 {
 enum class BlockRequestType : int {
     READ,
@@ -44,4 +44,4 @@ public:
 
 bool register_blockdev(dev_t major, BlockDevice* blkdev);
 
-} // namespace Filesystem
+} // namespace filesystem

@@ -3,7 +3,7 @@
 #include <fs/stat.h>
 #include <kernel.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace
 {
@@ -154,4 +154,4 @@ bool KDevice::seekable()
 {
     return true;
 }
-} // namespace Filesystem
+} // namespace filesystem

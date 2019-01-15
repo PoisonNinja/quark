@@ -2,10 +2,10 @@
 
 #include <fs/driver.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace FTable
 {
 
 } // namespace FTable
-} // namespace Filesystem
+} // namespace filesystem

@@ -2,7 +2,7 @@
 #include <fs/inode.h>
 #include <fs/stat.h>
 
-namespace Filesystem
+namespace filesystem
 {
 Inode::Inode()
 {
@@ -70,4 +70,4 @@ bool Inode::seekable()
 {
     return true;
 }
-} // namespace Filesystem
+} // namespace filesystem

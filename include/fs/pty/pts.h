@@ -5,7 +5,7 @@
 #include <fs/pty/pty.h>
 #include <fs/tmpfs/tmpfs.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class PTSFS : public TmpFS
 {
@@ -20,4 +20,4 @@ private:
     InitFS::Directory* root;
 };
 
-} // namespace Filesystem
+} // namespace filesystem

@@ -4,7 +4,7 @@
 #include <lib/string.h>
 #include <mm/dma.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class BlockWrapper : public KDevice
 {
@@ -54,8 +54,8 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         Log::printk(Log::LogLevel::INFO,
                     "block: sglist contains %p bytes in %llX regions\n",
                     sglist->total_size, sglist->num_regions);
-        Filesystem::BlockRequest request;
-        request.command     = Filesystem::BlockRequestType::READ;
+        filesystem::BlockRequest request;
+        request.command     = filesystem::BlockRequestType::READ;
         request.num_sectors = sglist->total_size / blkdev->sector_size();
         request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
@@ -116,4 +116,4 @@ bool register_blockdev(dev_t major, BlockDevice* blkdev)
     register_kdevice(BLK, major, bw);
     return true;
 }
-} // namespace Filesystem
+} // namespace filesystem

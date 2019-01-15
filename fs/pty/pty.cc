@@ -2,7 +2,7 @@
 #include <kernel.h>
 #include <lib/string.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -62,4 +62,4 @@ ssize_t PTY::swrite(const uint8_t* buffer, size_t count)
 }
 
 } // namespace TTY
-} // namespace Filesystem
+} // namespace filesystem

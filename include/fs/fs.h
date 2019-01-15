@@ -3,7 +3,7 @@
 #include <lib/list.h>
 #include <types.h>
 
-namespace Filesystem
+namespace filesystem
 {
 #define O_RDONLY 0x0000
 #define O_WRONLY 0x0001
@@ -20,4 +20,4 @@ namespace Filesystem
 #define SEEK_END 2
 
 void init();
-}  // namespace Filesystem
+}  // namespace filesystem

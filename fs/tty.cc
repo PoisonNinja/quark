@@ -9,7 +9,7 @@ namespace
 dev_t tty_major = 0;
 }
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -42,7 +42,7 @@ ssize_t TTY::write(const uint8_t* /*buffer*/, size_t /*size*/,
     return -ENOSYS;
 }
 
-class TTYDevice : public Filesystem::KDevice
+class TTYDevice : public filesystem::KDevice
 {
 public:
     TTYDevice(TTY* driver);
@@ -97,8 +97,8 @@ bool register_tty(dev_t major, TTY* driver)
 
 void init()
 {
-    auto tty_major = Filesystem::locate_class(Filesystem::CHR);
+    auto tty_major = filesystem::locate_class(filesystem::CHR);
     register_class(CHR, tty_major);
 }
 } // namespace TTY
-} // namespace Filesystem
+} // namespace filesystem

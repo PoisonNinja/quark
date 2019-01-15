@@ -7,11 +7,11 @@ namespace
 {
 constexpr size_t drivers_size = 128;
 
-libcxx::unordered_map<libcxx::string, Filesystem::Driver*, drivers_size>
+libcxx::unordered_map<libcxx::string, filesystem::Driver*, drivers_size>
     drivers_hash;
 } // namespace
 
-namespace Filesystem
+namespace filesystem
 {
 namespace Drivers
 {
@@ -32,4 +32,4 @@ Driver* get(const libcxx::string name)
     }
 }
 } // namespace Drivers
-} // namespace Filesystem
+} // namespace filesystem

@@ -7,7 +7,7 @@
 #include <kernel.h>
 #include <kernel/init.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -50,11 +50,11 @@ int init()
 {
     PTMX* ptmx = new PTMX();
     Log::printk(Log::LogLevel::INFO, "Registering PTMX character device\n");
-    Filesystem::register_class(Filesystem::CHR, 5);
-    Filesystem::TTY::register_tty(5, ptmx);
+    filesystem::register_class(filesystem::CHR, 5);
+    filesystem::TTY::register_tty(5, ptmx);
     return 0;
 }
 FS_INITCALL(init);
 } // namespace
 } // namespace TTY
-} // namespace Filesystem
+} // namespace filesystem

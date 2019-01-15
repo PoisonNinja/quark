@@ -3,7 +3,7 @@
 #include <fs/dev.h>
 #include <fs/inode.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -26,4 +26,4 @@ bool register_tty(dev_t major, TTY* tty);
 
 void init();
 } // namespace TTY
-} // namespace Filesystem
+} // namespace filesystem

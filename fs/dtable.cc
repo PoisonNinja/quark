@@ -1,7 +1,7 @@
 #include <fs/dtable.h>
 #include <kernel.h>
 
-namespace Filesystem
+namespace filesystem
 {
 DTable::DTable()
 {
@@ -38,7 +38,7 @@ bool DTable::remove(int fd)
     if (fd < 0 || static_cast<unsigned>(fd) >= fds.size() || !fds[fd]) {
         return false;
     } else {
-        fds[fd] = libcxx::intrusive_ptr<Filesystem::Descriptor>(nullptr);
+        fds[fd] = libcxx::intrusive_ptr<filesystem::Descriptor>(nullptr);
         return true;
     }
 }
@@ -56,4 +56,4 @@ int DTable::copy(int oldfd, int newfd)
     this->fds[oldfd] = this->fds[newfd];
     return oldfd;
 }
-} // namespace Filesystem
+} // namespace filesystem

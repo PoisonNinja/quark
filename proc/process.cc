@@ -20,22 +20,22 @@ Process::~Process()
 {
 }
 
-void Process::set_cwd(libcxx::intrusive_ptr<Filesystem::Descriptor> desc)
+void Process::set_cwd(libcxx::intrusive_ptr<filesystem::Descriptor> desc)
 {
     cwd = desc;
 }
 
-void Process::set_root(libcxx::intrusive_ptr<Filesystem::Descriptor> desc)
+void Process::set_root(libcxx::intrusive_ptr<filesystem::Descriptor> desc)
 {
     root = desc;
 }
 
-libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_cwd()
+libcxx::intrusive_ptr<filesystem::Descriptor> Process::get_cwd()
 {
     return cwd;
 }
 
-libcxx::intrusive_ptr<Filesystem::Descriptor> Process::get_root()
+libcxx::intrusive_ptr<filesystem::Descriptor> Process::get_root()
 {
     return root;
 }

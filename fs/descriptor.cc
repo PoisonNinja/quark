@@ -6,7 +6,7 @@
 #include <kernel.h>
 #include <lib/string.h>
 
-namespace Filesystem
+namespace filesystem
 {
 char* dirname(const char* path)
 {
@@ -103,7 +103,7 @@ off_t Descriptor::lseek(off_t offset, int whence)
     } else if (whence == SEEK_CUR) {
         start = current_offset;
     } else if (whence == SEEK_END) {
-        struct Filesystem::stat st;
+        struct filesystem::stat st;
         stat(&st);
         start = st.st_size;
     } else {
@@ -281,4 +281,4 @@ ssize_t Descriptor::write(const uint8_t* buffer, size_t count)
     }
     return ret;
 }
-} // namespace Filesystem
+} // namespace filesystem

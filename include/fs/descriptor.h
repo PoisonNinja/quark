@@ -4,7 +4,7 @@
 #include <fs/vnode.h>
 #include <lib/memory.h>
 
-namespace Filesystem
+namespace filesystem
 {
 
 enum DescriptorFlags {
@@ -43,4 +43,4 @@ private:
     int flags;
     void* cookie;
 };
-} // namespace Filesystem
+} // namespace filesystem

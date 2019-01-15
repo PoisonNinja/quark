@@ -12,7 +12,7 @@ namespace
 {
 constexpr size_t buffer_size = 1024;
 
-class Intel8042 : public Filesystem::KDevice
+class Intel8042 : public filesystem::KDevice
 {
 public:
     Intel8042();
@@ -32,7 +32,7 @@ private:
 };
 
 Intel8042::Intel8042()
-    : KDevice(Filesystem::CHR)
+    : KDevice(filesystem::CHR)
     , head(0)
     , tail(0)
 {
@@ -76,10 +76,10 @@ namespace
 {
 int init()
 {
-    dev_t major = Filesystem::locate_class(Filesystem::CHR);
-    Filesystem::register_class(Filesystem::CHR, major);
+    dev_t major = filesystem::locate_class(filesystem::CHR);
+    filesystem::register_class(filesystem::CHR, major);
     Intel8042* d = new Intel8042();
-    Filesystem::register_kdevice(Filesystem::CHR, major, d);
+    filesystem::register_kdevice(filesystem::CHR, major, d);
     return 0;
 }
 DEVICE_INITCALL(init);

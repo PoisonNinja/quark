@@ -19,14 +19,14 @@
 void init_stage2(void*)
 {
     Process* parent = Scheduler::get_current_process();
-    libcxx::intrusive_ptr<Filesystem::Descriptor> root = parent->get_root();
+    libcxx::intrusive_ptr<filesystem::Descriptor> root = parent->get_root();
     auto [err, init] = root->open("/sbin/init", O_RDONLY, 0);
     if (err) {
         Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)
             CPU::halt();
     }
-    struct Filesystem::stat st;
+    struct filesystem::stat st;
     init->stat(&st);
     Log::printk(Log::LogLevel::DEBUG, "init binary has size of %zu bytes\n",
                 st.st_size);
@@ -77,8 +77,8 @@ void kmain(struct Boot::info& info)
     Time::init();
     Scheduler::init();
     Signal::init();
-    Filesystem::init();
-    Filesystem::Initrd::init(info);
+    filesystem::init();
+    filesystem::Initrd::init(info);
     Syscall::init();
 
     PCI::init();

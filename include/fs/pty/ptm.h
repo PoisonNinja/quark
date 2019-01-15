@@ -3,7 +3,7 @@
 #include <fs/inode.h>
 #include <fs/tty.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -25,4 +25,4 @@ private:
 };
 
 } // namespace TTY
-} // namespace Filesystem
+} // namespace filesystem

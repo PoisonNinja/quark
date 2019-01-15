@@ -4,7 +4,7 @@
 #include <fs/superblock.h>
 #include <lib/string.h>
 
-namespace Filesystem
+namespace filesystem
 {
 constexpr uint32_t driver_pseudo = (1 << 0);
 
@@ -20,4 +20,4 @@ namespace Drivers
 bool add(const libcxx::string name, Driver* driver);
 Driver* get(const libcxx::string name);
 } // namespace Drivers
-} // namespace Filesystem
+} // namespace filesystem

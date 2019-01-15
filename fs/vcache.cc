@@ -3,7 +3,7 @@
 #include <lib/murmur.h>
 #include <lib/unordered_map.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace
 {
@@ -65,4 +65,4 @@ libcxx::intrusive_ptr<Vnode> get(ino_t ino, dev_t dev)
     return dummy;
 }
 } // namespace VCache
-} // namespace Filesystem
+} // namespace filesystem

@@ -12,9 +12,9 @@ void* syscall_table[256];
 
 namespace
 {
-libcxx::intrusive_ptr<Filesystem::Descriptor> get_start(const char* path)
+libcxx::intrusive_ptr<filesystem::Descriptor> get_start(const char* path)
 {
-    libcxx::intrusive_ptr<Filesystem::Descriptor> start(nullptr);
+    libcxx::intrusive_ptr<filesystem::Descriptor> start(nullptr);
     if (*path == '/') {
         start = Scheduler::get_current_process()->get_root();
     } else {
@@ -75,7 +75,7 @@ static long sys_close(int fd)
     }
 }
 
-static long sys_stat(const char* path, struct Filesystem::stat* st)
+static long sys_stat(const char* path, struct filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_stat] = %s, %p\n", path, st);
     auto [err, file] = get_start(path)->open(path, 0, 0);
@@ -85,7 +85,7 @@ static long sys_stat(const char* path, struct Filesystem::stat* st)
     return file->stat(st);
 }
 
-static long sys_fstat(int fd, struct Filesystem::stat* st)
+static long sys_fstat(int fd, struct filesystem::stat* st)
 {
     Log::printk(Log::LogLevel::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
     if (!Scheduler::get_current_process()->fds.get(fd)) {
@@ -289,7 +289,7 @@ static long sys_execve(const char* path, const char* old_argv[],
         delete[] argv;
         return -ENOENT;
     }
-    struct Filesystem::stat st;
+    struct filesystem::stat st;
     file->stat(&st);
     Log::printk(Log::LogLevel::DEBUG,
                 "[sys_execve] binary has size of %zu bytes\n", st.st_size);

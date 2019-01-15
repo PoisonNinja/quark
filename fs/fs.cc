@@ -12,7 +12,7 @@
 #include <kernel.h>
 #include <proc/sched.h>
 
-namespace Filesystem
+namespace filesystem
 {
 void init()
 {
@@ -24,7 +24,7 @@ void init()
     Drivers::add("ptsfs", new PTSFS());
 
     VGAFB* vga     = new VGAFB();
-    auto vga_major = Filesystem::locate_class(Filesystem::CHR);
+    auto vga_major = filesystem::locate_class(filesystem::CHR);
     register_class(CHR, vga_major);
     register_kdevice(CHR, vga_major, vga);
 
@@ -46,4 +46,4 @@ void init()
     Scheduler::get_current_process()->set_cwd(droot);
     Scheduler::get_current_process()->set_root(droot);
 }
-} // namespace Filesystem
+} // namespace filesystem

@@ -4,7 +4,7 @@
 #include <lib/memory.h>
 #include <lib/vector.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class DTable
 {
@@ -21,4 +21,4 @@ public:
 private:
     libcxx::vector<libcxx::intrusive_ptr<Descriptor>> fds;
 };
-} // namespace Filesystem
+} // namespace filesystem

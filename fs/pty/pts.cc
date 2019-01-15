@@ -11,7 +11,7 @@
 // HACK
 #include <proc/sched.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -52,7 +52,7 @@ ssize_t PTS::write(const uint8_t* buffer, size_t count, void* cookie)
 } // namespace TTY
 PTSFS::PTSFS()
 {
-    Filesystem::register_class(Filesystem::CHR, 134);
+    filesystem::register_class(filesystem::CHR, 134);
     this->root = new InitFS::Directory(0, 0, 0755);
 }
 
@@ -71,4 +71,4 @@ bool PTSFS::register_pty(TTY::PTY* pty)
     this->root->mknod(name, S_IFCHR | 0644, mkdev(134, pty->index()));
     return true;
 }
-} // namespace Filesystem
+} // namespace filesystem

@@ -7,7 +7,7 @@
 #include <lib/memory.h>
 #include <lib/utility.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class Vnode : public libcxx::intrusive_ref_counter
 {
@@ -42,4 +42,4 @@ private:
     Superblock* sb;
     libcxx::intrusive_ptr<Inode> inode;
 };
-} // namespace Filesystem
+} // namespace filesystem

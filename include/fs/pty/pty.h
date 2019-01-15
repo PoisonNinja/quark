@@ -4,7 +4,7 @@
 #include <lib/list.h>
 #include <proc/sched.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace TTY
 {
@@ -37,4 +37,4 @@ private:
     int idx;
 };
 } // namespace TTY
-} // namespace Filesystem
+} // namespace filesystem

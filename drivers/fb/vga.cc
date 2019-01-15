@@ -13,7 +13,7 @@ const int VGA_HEIGHT         = 25;
 const int VGA_WIDTH          = 80;
 } // namespace
 
-namespace Filesystem
+namespace filesystem
 {
 VGAFB::VGAFB()
     : KDevice(CHR)
@@ -50,4 +50,4 @@ void VGAFB::update_cursor(int col, int row)
     outb(0x3D4, 0x0E);
     outb(0x3D5, (unsigned char)((position >> 8) & 0xFF));
 }
-} // namespace Filesystem
+} // namespace filesystem

@@ -4,7 +4,7 @@
 #include <lib/utility.h>
 #include <types.h>
 
-namespace Filesystem
+namespace filesystem
 {
 class Inode : public libcxx::intrusive_ref_counter
 {
@@ -34,4 +34,4 @@ public:
 
     virtual bool seekable();
 };
-} // namespace Filesystem
+} // namespace filesystem

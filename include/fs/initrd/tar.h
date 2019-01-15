@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Filesystem
+namespace filesystem
 {
 namespace Initrd
 {

@@ -5,7 +5,7 @@
 #include <kernel.h>
 #include <lib/string.h>
 
-namespace Filesystem
+namespace filesystem
 {
 TmpFS::TmpFS()
 {
@@ -175,4 +175,4 @@ libcxx::intrusive_ptr<Inode> Directory::find_child(const char* name)
     return libcxx::intrusive_ptr<Inode>(nullptr);
 }
 } // namespace InitFS
-} // namespace Filesystem
+} // namespace filesystem

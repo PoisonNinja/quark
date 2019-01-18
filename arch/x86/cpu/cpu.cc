@@ -4,7 +4,7 @@
 #include <arch/cpu/idt.h>
 #include <kernel.h>
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -14,15 +14,15 @@ extern "C" void syscall_sysret_wrapper();
 void init_syscalls();
 #endif
 
-Core bsp;
+core bsp;
 
 void init()
 {
     // Add the BSP to the core manager
-    CPU::add_core(&bsp);
+    cpu::add_core(&bsp);
     // Perform feature detections and print them out
-    CPU::X86::detect(bsp);
-    CPU::X86::print(bsp);
+    cpu::X86::detect(bsp);
+    cpu::X86::print(bsp);
     GDT::init();
     IDT::init();
 #ifdef X86_64
@@ -37,24 +37,24 @@ void init()
      */
     uint64_t star = ((((0x20ULL | 3) - 16) << 16) | ((0x8ULL))) << 32;
     // Write STAR (segments)
-    CPU::X86::wrmsr(msr_star, star);
+    cpu::X86::wrmsr(msr_star, star);
     // Write LSTAR (syscall entry point)
-    CPU::X86::wrmsr(msr_lstar,
+    cpu::X86::wrmsr(msr_lstar,
                     reinterpret_cast<uint64_t>(&syscall_sysret_wrapper));
     /*
      * Write FMASK. Bits set here (currently IF) are unset in RFLAGS. We don't
      * want interrupts during a syscall
      */
-    CPU::X86::wrmsr(msr_fmask, 0x200);
+    cpu::X86::wrmsr(msr_fmask, 0x200);
 #else
     // Install the system call handler for i686
-    CPU::X86::init_syscalls();
+    cpu::X86::init_syscalls();
 #endif
 }
-}  // namespace X86
+} // namespace X86
 
 void halt()
 {
     __asm__("hlt");
 }
-}  // namespace CPU
+} // namespace cpu

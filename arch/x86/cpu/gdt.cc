@@ -1,7 +1,7 @@
 #include <arch/cpu/gdt.h>
 #include <lib/string.h>
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -212,4 +212,4 @@ addr_t get_stack()
 }
 }  // namespace TSS
 }  // namespace X86
-}  // namespace CPU
+}  // namespace cpu

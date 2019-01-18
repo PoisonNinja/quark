@@ -19,7 +19,7 @@ void* signal_return_location = (void*)&signal_return;
 #ifdef X86_64
 void set_thread_base(ThreadContext* thread)
 {
-    CPU::X86::wrmsr(CPU::X86::msr_kernel_gs_base,
+    cpu::X86::wrmsr(cpu::X86::msr_kernel_gs_base,
                     reinterpret_cast<uint64_t>(thread));
 }
 #endif
@@ -116,8 +116,8 @@ void save_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 {
     encode_tcontext(ctx, tcontext);
 #ifndef X86_64
-    tcontext->fs = CPU::X86::GDT::get_fs();
-    tcontext->gs = CPU::X86::GDT::get_gs();
+    tcontext->fs = cpu::X86::GDT::get_fs();
+    tcontext->gs = cpu::X86::GDT::get_gs();
 #endif
 }
 
@@ -128,8 +128,8 @@ void load_context(InterruptContext* ctx, struct ThreadContext* tcontext)
 #ifdef X86_64
     set_thread_base(tcontext);
 #else
-    CPU::X86::GDT::set_fs(tcontext->fs);
-    CPU::X86::GDT::set_gs(tcontext->gs);
+    cpu::X86::GDT::set_fs(tcontext->fs);
+    cpu::X86::GDT::set_gs(tcontext->gs);
 #endif
 }
 
@@ -282,18 +282,18 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.eflags = 0x200;
     ctx.eflags |= 0x3000;
 #endif
-    ctx.kernel_stack = CPU::X86::TSS::get_stack();
+    ctx.kernel_stack = cpu::X86::TSS::get_stack();
     return true;
 }
 
 void set_stack(addr_t stack)
 {
-    CPU::X86::TSS::set_stack(stack);
+    cpu::X86::TSS::set_stack(stack);
 }
 
 addr_t get_stack()
 {
-    return CPU::X86::TSS::get_stack();
+    return cpu::X86::TSS::get_stack();
 }
 
 Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)

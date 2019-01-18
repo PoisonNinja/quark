@@ -9,7 +9,7 @@
 
 namespace memory
 {
-void arch_init(struct Boot::info &info)
+void arch_init(struct boot::info &info)
 {
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);

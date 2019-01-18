@@ -9,7 +9,7 @@ namespace memory
 {
 namespace X86
 {
-bool is_valid_physical_memory(addr_t m, struct Boot::info &info)
+bool is_valid_physical_memory(addr_t m, struct boot::info &info)
 {
     struct multiboot_fixed *multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);

@@ -77,7 +77,7 @@ bool parse(addr_t initrd)
     return true;
 }
 
-void init(struct Boot::info& info)
+void init(struct boot::info& info)
 {
     size_t size = info.initrd_end - info.initrd_start;
     Log::printk(Log::LogLevel::INFO,

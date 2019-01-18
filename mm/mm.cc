@@ -3,9 +3,9 @@
 
 namespace memory
 {
-extern void arch_init(struct Boot::info& info);
+extern void arch_init(struct boot::info& info);
 
-void init(struct Boot::info& info)
+void init(struct boot::info& info)
 {
     physical::init(info);
     arch_init(info);

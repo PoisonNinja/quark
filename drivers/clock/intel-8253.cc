@@ -22,7 +22,7 @@ static void interrupt_handler(int /* irq */, void* /*clock*/,
     Time::tick(ctx);
 }
 
-static struct Interrupt::Handler handler(interrupt_handler, NAME, &handler);
+static struct interrupt::handler handler(interrupt_handler, NAME, &handler);
 
 int Intel8253::features()
 {
@@ -50,7 +50,7 @@ bool Intel8253::disable()
     outb(COMMAND, 0x30);
     outb(CHANNEL0, 0);
     outb(CHANNEL0, 0);
-    unregister_handler(Interrupt::irq_to_interrupt(0), handler);
+    unregister_handler(interrupt::irq_to_interrupt(0), handler);
     return true;
 }
 
@@ -64,7 +64,7 @@ bool Intel8253::schedule(time_t interval)
 
 bool Intel8253::periodic()
 {
-    register_handler(Interrupt::irq_to_interrupt(0), handler);
+    register_handler(interrupt::irq_to_interrupt(0), handler);
     uint16_t divisor = FREQUENCY / HZ;
     outb(COMMAND, 0x36); // Channel 0, lobyte/hibyte, mode 2, 16-bit
     outb(CHANNEL0, static_cast<uint8_t>(divisor & 0xFF));

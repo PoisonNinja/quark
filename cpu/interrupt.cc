@@ -5,9 +5,9 @@
 #include <proc/signal.h>
 #include <proc/thread.h>
 
-namespace Interrupt
+namespace interrupt
 {
-static libcxx::list<Interrupt::Handler, &Interrupt::Handler::node>
+static libcxx::list<interrupt::handler, &interrupt::handler::node>
     handlers[max];
 
 extern void arch_init();
@@ -40,15 +40,15 @@ void dispatch(int int_no, struct InterruptContext* ctx)
         }
     } else {
         for (auto& handler : handlers[int_no]) {
-            handler.handler(int_no, handler.dev_id, ctx);
+            handler.func(int_no, handler.dev_id, ctx);
         }
     }
     if (!is_exception(int_no)) {
-        IrqChip::ack(Interrupt::interrupt_to_irq(int_no));
+        IrqChip::ack(interrupt::interrupt_to_irq(int_no));
     }
 }
 
-bool register_handler(uint32_t int_no, Interrupt::Handler& handler)
+bool register_handler(uint32_t int_no, interrupt::handler& handler)
 {
     if (int_no > max) {
         return false;
@@ -57,7 +57,7 @@ bool register_handler(uint32_t int_no, Interrupt::Handler& handler)
     return true;
 }
 
-bool unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
+bool unregister_handler(uint32_t int_no, const interrupt::handler& handler)
 {
     if (int_no > max) {
         return false;
@@ -75,6 +75,6 @@ bool unregister_handler(uint32_t int_no, const Interrupt::Handler& handler)
 
 void init()
 {
-    Interrupt::arch_init();
+    interrupt::arch_init();
 }
-} // namespace Interrupt
+} // namespace interrupt

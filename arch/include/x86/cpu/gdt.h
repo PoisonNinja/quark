@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -84,4 +84,4 @@ void set_stack(addr_t stack);
 addr_t get_stack();
 }  // namespace TSS
 }  // namespace X86
-}  // namespace CPU
+}  // namespace cpu

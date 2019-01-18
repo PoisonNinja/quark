@@ -1,17 +1,17 @@
 #include <cpu/cpu.h>
 
-namespace CPU
+namespace cpu
 {
 const int max_cores = 8;
-Core* cores[max_cores];  // Maximum # of cores
+core* cores[max_cores]; // Maximum # of cores
 
-Core* get_current_core()
+core* get_current_core()
 {
     // Hardcode initial core
     return cores[0];
 }
 
-void add_core(Core* core)
+void add_core(core* core)
 {
     for (int i = 0; i < max_cores; i++) {
         if (!cores[i]) {
@@ -20,4 +20,4 @@ void add_core(Core* core)
         }
     }
 }
-}
+} // namespace cpu

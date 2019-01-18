@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Boot
+namespace boot
 {
 struct info;
 }
@@ -106,6 +106,6 @@ constexpr void* decode_fractal(uint32_t pd, uint32_t pt)
 }
 #endif
 
-bool is_valid_physical_memory(addr_t m, struct Boot::info& info);
+bool is_valid_physical_memory(addr_t m, struct boot::info& info);
 } // namespace X86
 } // namespace memory

@@ -14,7 +14,7 @@ struct cpuid_regs {
 };
 } // namespace
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -26,7 +26,7 @@ static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
             : "memory");
 }
 
-void detect_intel(Core& cpu)
+void detect_intel(core& cpu)
 {
     // i686 starts with Pentium Pro, family 6
 #ifndef X86_64
@@ -53,7 +53,7 @@ void detect_intel(Core& cpu)
     }
 }
 
-void detect(Core& cpu)
+void detect(core& cpu)
 {
     struct cpuid_regs regs;
 
@@ -202,7 +202,7 @@ void detect(Core& cpu)
     }
 }
 
-void print(Core& cpu)
+void print(core& cpu)
 {
     Log::printk(Log::LogLevel::INFO, "CPU Vendor:   %s\n", cpu.vendor);
     Log::printk(Log::LogLevel::INFO, "CPU Name:     %s\n", cpu.name);
@@ -212,4 +212,4 @@ void print(Core& cpu)
     Log::printk(Log::LogLevel::INFO, "CPU Model:    %X\n", cpu.model);
 }
 } // namespace X86
-} // namespace CPU
+} // namespace cpu

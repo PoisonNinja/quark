@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -28,4 +28,4 @@ struct Entry {
 void init();
 }  // namespace IDT
 }  // namespace X86
-}  // namespace CPU
+}  // namespace cpu

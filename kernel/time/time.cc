@@ -87,8 +87,8 @@ void update()
         return;
     }
     int flags;
-    Interrupt::save(flags);
-    Interrupt::disable();
+    interrupt::save(flags);
+    interrupt::disable();
     time_t current = current_clock->read();
     time_t offset  = current - last;
     time_t nsec    = offset * nsec_per_sec / current_clock->frequency();
@@ -99,7 +99,7 @@ void update()
         current_time.tv_sec++;
     }
     last = current;
-    Interrupt::restore(flags);
+    interrupt::restore(flags);
 }
 
 struct timespec now()

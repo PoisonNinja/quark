@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -55,4 +55,4 @@ static inline uint64_t rdmsr(uint32_t msr_id)
 
 void init();
 }  // namespace X86
-}  // namespace CPU
+}  // namespace cpu

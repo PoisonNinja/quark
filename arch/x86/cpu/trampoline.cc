@@ -32,7 +32,7 @@ extern "C" void syscall_trampoline(struct InterruptContext* ctx)
     }
 }
 #else
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -60,14 +60,13 @@ static void syscall_handler(int, void*, struct InterruptContext* ctx)
     }
 }
 
-static struct Interrupt::Handler syscall_handler_data(syscall_handler,
-                                                      "syscall",
-                                                      &syscall_handler_data);
+static struct interrupt::handler
+    syscall_handler_data(syscall_handler, "syscall", &syscall_handler_data);
 
 void init_syscalls()
 {
-    Interrupt::register_handler(0x80, syscall_handler_data);
+    interrupt::register_handler(0x80, syscall_handler_data);
 }
-}  // namespace X86
-}  // namespace CPU
+} // namespace X86
+} // namespace cpu
 #endif

@@ -5,7 +5,7 @@
 #include <lib/list.h>
 #include <types.h>
 
-namespace Interrupt
+namespace interrupt
 {
 constexpr size_t max = 256; // TODO: Move this to architecture folder
 
@@ -22,15 +22,15 @@ inline int irq_to_interrupt(int irq)
 using interrupt_handler_t =
     libcxx::function<void(int, void *, struct InterruptContext *), 64>;
 
-struct Handler {
-    Handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
-        : handler(handler)
+struct handler {
+    handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
+        : func(handler)
         , dev_name(dev_name)
         , dev_id(dev_id){};
-    interrupt_handler_t handler;
+    interrupt_handler_t func;
     const char *dev_name;
     void *dev_id;
-    libcxx::node<Handler> node;
+    libcxx::node<handler> node;
 };
 
 void disable();
@@ -48,8 +48,8 @@ bool is_exception(int int_no);
 
 bool is_userspace(struct InterruptContext *ctx);
 
-bool register_handler(uint32_t int_no, Interrupt::Handler &handler);
-bool unregister_handler(uint32_t int_no, const Interrupt::Handler &handler);
+bool register_handler(uint32_t int_no, interrupt::handler &handler);
+bool unregister_handler(uint32_t int_no, const interrupt::handler &handler);
 
 void init();
-} // namespace Interrupt
+} // namespace interrupt

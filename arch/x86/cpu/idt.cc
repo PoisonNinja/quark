@@ -1,6 +1,6 @@
 #include <arch/cpu/idt.h>
 
-namespace CPU
+namespace cpu
 {
 namespace X86
 {
@@ -150,4 +150,4 @@ void init()
 }
 } // namespace IDT
 } // namespace X86
-} // namespace CPU
+} // namespace cpu

@@ -55,7 +55,7 @@ void idle()
 {
     while (1) {
         // TODO: Get rid of hlt
-        CPU::halt();
+        cpu::halt();
     }
 }
 
@@ -125,12 +125,12 @@ void yield_switch(int, void*, struct InterruptContext* ctx)
     switch_next(ctx);
 }
 
-Interrupt::Handler yield_handler(yield_switch, "yield", &yield_handler);
+interrupt::handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
     Log::printk(Log::LogLevel::INFO, "Initializing scheduler...\n");
-    Interrupt::register_handler(0x81, yield_handler);
+    interrupt::register_handler(0x81, yield_handler);
     kernel_process                = new Process(nullptr);
     kernel_process->address_space = memory::virt::get_address_space_root();
     // TODO: Move this to architecture specific

@@ -10,14 +10,14 @@ namespace
 multiboot_memory_map_t *mmap      = nullptr;
 struct multiboot_tag *mmap_tag    = nullptr;
 struct multiboot_fixed *multiboot = nullptr;
-struct Boot::info *info           = nullptr;
+struct boot::info *info           = nullptr;
 } // namespace
 
 namespace memory
 {
 namespace physical
 {
-void init_early_alloc(struct Boot::info *b)
+void init_early_alloc(struct boot::info *b)
 {
     addr_t highest = 0;
     info           = b;

@@ -6,10 +6,10 @@ extern void arch_do_stack_trace();
 void do_stack_trace()
 {
     int flags;
-    Interrupt::save(flags);
-    Interrupt::disable();
+    interrupt::save(flags);
+    interrupt::disable();
 
     arch_do_stack_trace();
 
-    Interrupt::restore(flags);
+    interrupt::restore(flags);
 }

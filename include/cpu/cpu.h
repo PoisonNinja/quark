@@ -4,9 +4,9 @@
 #include <proc/thread.h>
 #include <types.h>
 
-namespace CPU
+namespace cpu
 {
-class Core
+class core
 {
 public:
     uint32_t id;
@@ -22,8 +22,8 @@ public:
     uint32_t features[18];
 };
 
-Core* get_current_core();
-void add_core(Core* core);
+core* get_current_core();
+void add_core(core* core);
 
 void halt();
-}  // namespace CPU
+} // namespace cpu

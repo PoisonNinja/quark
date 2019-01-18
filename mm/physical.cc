@@ -20,7 +20,7 @@ constexpr size_t maximum_order = 28; // 256 MiB
 
 addr_t early_allocate();
 
-void init(Boot::info& info)
+void init(boot::info& info)
 {
     buddy = new Buddy(info.highest, minimum_order, maximum_order);
 }

@@ -15,8 +15,8 @@ uint64_t TSC::rdtsc()
 
 TSC::TSC()
 {
-    CPU::Core* cpu = CPU::get_current_core();
-    if (!CPU::X86::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
+    cpu::core* cpu = cpu::get_current_core();
+    if (!cpu::X86::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
         Log::printk(
             Log::LogLevel::WARNING,
             "tsc: CPU doesn't support constant TSC, timing will be unstable\n");

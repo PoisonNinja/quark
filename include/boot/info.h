@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Boot
+namespace boot
 {
 struct info {
     const char* cmdline;
@@ -13,4 +13,4 @@ struct info {
     addr_t initrd_end;
     addr_t highest;
 };
-}  // namespace Boot
+}  // namespace boot

@@ -8,7 +8,7 @@
 #include <lib/libcxx.h>
 #include <lib/string.h>
 
-extern void kmain(struct Boot::info &info);
+extern void kmain(struct boot::info &info);
 
 namespace Symbols
 {
@@ -19,7 +19,7 @@ namespace memory
 {
 namespace physical
 {
-void init_early_alloc(struct Boot::info *m);
+void init_early_alloc(struct boot::info *m);
 addr_t early_allocate();
 } // namespace physical
 } // namespace memory
@@ -37,7 +37,7 @@ void *__kernel_end;
 namespace
 {
 Serial serial_console;
-struct Boot::info info;
+struct boot::info info;
 } // namespace
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
@@ -88,7 +88,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
         }
     }
     // Bootstrap the IDT and GDT
-    CPU::X86::init();
+    cpu::X86::init();
 
     /*
      * Initialize our physical memory early allocator so we can start using

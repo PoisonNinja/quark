@@ -7,6 +7,6 @@ namespace filesystem
 {
 namespace Initrd
 {
-void init(struct Boot::info& info);
+void init(struct boot::info& info);
 }
 }

@@ -14,7 +14,7 @@ static char panic_buffer[Kernel::panic_max];
 
 void __attribute__((noreturn)) panic(const char* format, ...)
 {
-    Interrupt::disable();
+    interrupt::disable();
     libcxx::memset(panic_buffer, 0, Kernel::panic_max);
     va_list args;
     va_start(args, format);
@@ -23,6 +23,6 @@ void __attribute__((noreturn)) panic(const char* format, ...)
     Log::printk(Log::LogLevel::ERROR, "%s", panic_buffer);
     do_stack_trace();
     for (;;)
-        CPU::halt();
+        cpu::halt();
 }
 } // namespace Kernel

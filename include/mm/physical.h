@@ -22,7 +22,7 @@ void free(addr_t address, size_t size);
  */
 libcxx::pair<addr_t, size_t> try_allocate(size_t max_size);
 
-void init(Boot::info& info);
+void init(boot::info& info);
 void finalize();
 } // namespace physical
 } // namespace memory

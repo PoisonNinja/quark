@@ -36,10 +36,10 @@ Intel8042::Intel8042()
     , head(0)
     , tail(0)
 {
-    Interrupt::Handler* h = new Interrupt::Handler(
+    interrupt::handler* h = new interrupt::handler(
         libcxx::bind(&Intel8042::handler, this, _1, _2, _3), "keyboard",
         reinterpret_cast<void*>(this));
-    Interrupt::register_handler(Interrupt::irq_to_interrupt(1), *h);
+    interrupt::register_handler(interrupt::irq_to_interrupt(1), *h);
 }
 
 ssize_t Intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)

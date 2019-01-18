@@ -4,7 +4,7 @@
 #include <drivers/irqchip/irqchip.h>
 #include <kernel.h>
 
-namespace Interrupt
+namespace interrupt
 {
 void disable(void)
 {
@@ -81,6 +81,6 @@ void arch_init(void)
 
 extern "C" void arch_handler(struct InterruptContext* ctx)
 {
-    Interrupt::dispatch(ctx->int_no, ctx);
+    interrupt::dispatch(ctx->int_no, ctx);
 }
-};  // namespace Interrupt
+};  // namespace interrupt

@@ -24,7 +24,7 @@ void init_stage2(void*)
     if (err) {
         Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
         for (;;)
-            CPU::halt();
+            cpu::halt();
     }
     struct filesystem::stat st;
     init->stat(&st);
@@ -66,13 +66,13 @@ void init_stage1()
     Scheduler::idle();
 }
 
-void kmain(struct Boot::info& info)
+void kmain(struct boot::info& info)
 {
     Log::printk(Log::LogLevel::INFO, "%s\n", OS_STRING);
     Log::printk(Log::LogLevel::INFO, "Command line: %s\n", info.cmdline);
     memory::init(info);
-    Interrupt::init();
-    Interrupt::enable();
+    interrupt::init();
+    interrupt::enable();
     Symbols::init();
     Time::init();
     Scheduler::init();

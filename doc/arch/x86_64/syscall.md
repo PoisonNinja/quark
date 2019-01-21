@@ -1,12 +1,12 @@
 # x86_64 System Call ABI
 This document describes the system call ABI for x86_64. Since Quark is in development, the ABI is subject to change without notice, but this document will be updated accordingly. Furthermore, ABI changes are a last resort and are rarely changed.
 
-## Description
+## Overview
 x86_64 largely follows the x86_64 Linux system call ABI which in turn follows the x86_64 System V system call ABI.
 
 On x86_64, Quark uses the [syscall](https://www.felixcloutier.com/x86/SYSCALL.html) instruction which is much more performant vs. the traditional `int $0x80` method.
 
-Here is a brief overview of the register usages:
+Here is a brief overview of the register allocation:
 * RAX: System call #
 * RDI: Argument #1
 * RSI: Argument #2
@@ -24,3 +24,8 @@ However, to manually make a system call:
 * Pass in the parameters to the system call as you would for a regular x86_64 function (RDI, RSI, RDX, RCX, R8), substituting RDX for RCX
 * Use `syscall`
 * Return
+
+## System call numbers
+The list of system call numbers can be found in `include/proc/syscall.h` in the Quark kernel source code or in the header `sys/syscall_num.h`.
+
+The system calls are defined using macros, so it's often more portable to use SYS_READ instead of 0.

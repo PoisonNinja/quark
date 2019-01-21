@@ -24,6 +24,19 @@ You will also need to add the following string to `config.h.in` in the root dire
 #cmakedefine CONFIG_<NAME> @CONFIG_<NAME>@
 ```
 
+# Configuring the option
+There are several ways to configure your new option. The first is to define it during build system setup:
+```
+cmake .. -DYOUR_OPTION_NAME=OPTION_VALUE
+```
+
+The other alternative is to use `ccmake` which allows you to graphically configure the option similar to how the ncurses interface for KConfig works.
+
+To use it, point `ccmake` to the build directory, e.g.:
+```
+ccmake build/
+```
+
 # Using the option
 You can use the option in both the build system and in source code.
 
@@ -36,6 +49,7 @@ if(CONFIG_FOO)
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/foo.cc
     )
+endif()
 ```
 
 ## Source code

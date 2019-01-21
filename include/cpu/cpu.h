@@ -10,7 +10,7 @@ class core
 {
 public:
     uint32_t id;
-    Thread* idle;
+    thread* idle;
 
     // CPU info
     uint32_t stepping;

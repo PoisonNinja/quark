@@ -11,12 +11,12 @@ constexpr size_t max_major = 256;
 constexpr size_t max_minor = 256;
 
 struct KDeviceClass {
-    KDevice* minors[max_minor];
-    KDevice* get_kdevice(int minor);
-    void add_kdevice(KDevice* kdevice);
+    kdevice* minors[max_minor];
+    kdevice* get_kdevice(int minor);
+    void add_kdevice(kdevice* kdevice);
 };
 
-void KDeviceClass::add_kdevice(KDevice* kdevice)
+void KDeviceClass::add_kdevice(kdevice* kdevice)
 {
     for (size_t i = 0; i < max_minor; i++) {
         if (!minors[i]) {
@@ -26,7 +26,7 @@ void KDeviceClass::add_kdevice(KDevice* kdevice)
     }
 }
 
-KDevice* KDeviceClass::get_kdevice(int minor)
+kdevice* KDeviceClass::get_kdevice(int minor)
 {
     return minors[minor];
 }
@@ -35,7 +35,7 @@ KDeviceClass* chrdev[max_major] = {nullptr};
 KDeviceClass* blkdev[max_major] = {nullptr};
 } // namespace
 
-dev_t locate_class(DeviceClass c)
+dev_t locate_class(device_class c)
 {
     switch (c) {
         case BLK:
@@ -56,12 +56,12 @@ dev_t locate_class(DeviceClass c)
     return -1;
 }
 
-bool register_class(DeviceClass c, dev_t major)
+bool register_class(device_class c, dev_t major)
 {
     switch (c) {
         case BLK:
             if (blkdev[major]) {
-                Log::printk(Log::LogLevel::WARNING,
+                log::printk(log::log_level::WARNING,
                             "Block device already exists with major %llX\n",
                             major);
                 return false;
@@ -70,7 +70,7 @@ bool register_class(DeviceClass c, dev_t major)
             return true;
         case CHR:
             if (chrdev[major]) {
-                Log::printk(Log::LogLevel::WARNING,
+                log::printk(log::log_level::WARNING,
                             "Character device already exists with major %llX\n",
                             major);
                 return false;
@@ -78,19 +78,19 @@ bool register_class(DeviceClass c, dev_t major)
             chrdev[major] = new KDeviceClass();
             return true;
         default:
-            Log::printk(Log::LogLevel::ERROR,
+            log::printk(log::log_level::ERROR,
                         "Somehow got a invalid class while "
                         "registering a kernel device\n");
             return false;
     }
 }
 
-bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
+bool register_kdevice(device_class c, dev_t major, kdevice* kdev)
 {
     switch (c) {
         case BLK:
             if (!blkdev[major]) {
-                Log::printk(Log::LogLevel::WARNING,
+                log::printk(log::log_level::WARNING,
                             "Block device with major %llX not found\n", major);
                 return false;
             }
@@ -98,7 +98,7 @@ bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
             return true;
         case CHR:
             if (!chrdev[major]) {
-                Log::printk(Log::LogLevel::WARNING,
+                log::printk(log::log_level::WARNING,
                             "Character device with major %llX not found\n",
                             major);
                 return false;
@@ -106,14 +106,14 @@ bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev)
             chrdev[major]->add_kdevice(kdev);
             return true;
         default:
-            Log::printk(Log::LogLevel::ERROR,
+            log::printk(log::log_level::ERROR,
                         "Somehow got a invalid class while "
                         "registering a kernel device\n");
             return false;
     }
 }
 
-KDevice* get_kdevice(mode_t mode, dev_t dev)
+kdevice* get_kdevice(mode_t mode, dev_t dev)
 {
     if (S_ISBLK(mode)) {
         if (!blkdev[major(dev)]) {
@@ -130,27 +130,27 @@ KDevice* get_kdevice(mode_t mode, dev_t dev)
     }
 }
 
-libcxx::pair<int, void*> KDevice::open(const char*)
+libcxx::pair<int, void*> kdevice::open(const char*)
 {
     return libcxx::pair<int, void*>(0, nullptr);
 }
 
-int KDevice::ioctl(unsigned long, char*, void* cookie)
+int kdevice::ioctl(unsigned long, char*, void* cookie)
 {
     return -ENOSYS;
 }
 
-ssize_t KDevice::read(uint8_t*, size_t, off_t, void*)
+ssize_t kdevice::read(uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }
 
-ssize_t KDevice::write(const uint8_t*, size_t, off_t, void*)
+ssize_t kdevice::write(const uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;
 }
 
-bool KDevice::seekable()
+bool kdevice::seekable()
 {
     return true;
 }

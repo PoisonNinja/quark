@@ -5,33 +5,33 @@
 #include <mm/virtual.h>
 #include <mm/vmalloc.h>
 
-namespace PCI
+namespace pci
 {
 namespace
 {
-libcxx::list<Driver, &Driver::node> drivers;
-libcxx::list<Device, &Device::node> devices;
+libcxx::list<driver, &driver::node> drivers;
+libcxx::list<device, &device::node> devices;
 
-bool is_terminator(const Filter& filter)
+bool is_terminator(const filter& filter)
 {
     return !((filter.class_id) || (filter.device_id) || (filter.subclass_id) ||
              (filter.vendor_id));
 }
 
-Driver* match_device(Device& device)
+driver* match_device(device& device)
 {
-    PCIID id = device.get_pciid();
+    pciid id = device.get_pciid();
     if (drivers.empty()) {
         return nullptr;
     }
     // We do three passes through driver lists
     // Pass 1: Match only vendor/device ID (highest granularity)
     for (auto& driver : drivers) {
-        auto filter = driver.filter();
+        auto filter = driver.filt();
         for (size_t i = 0; !is_terminator(filter[i]); i++) {
             if (filter[i].vendor_id == id.vendor_id &&
                 filter[i].device_id == id.device_id) {
-                Log::printk(Log::LogLevel::INFO,
+                log::printk(log::log_level::INFO,
                             "pci: Found driver %s for device %X:%X "
                             "(vendor/device match)\n",
                             driver.name(), id.vendor_id, id.device_id);
@@ -41,12 +41,12 @@ Driver* match_device(Device& device)
     }
     // Pass 2: Match class, subclass, and prog_if
     for (auto& driver : drivers) {
-        auto filter = driver.filter();
+        auto filter = driver.filt();
         for (size_t i = 0; !is_terminator(filter[i]); i++) {
             if (filter[i].class_id == id.class_id &&
                 filter[i].subclass_id == id.subclass_id &&
                 filter[i].prog_if == id.prog_if) {
-                Log::printk(Log::LogLevel::INFO,
+                log::printk(log::log_level::INFO,
                             "pci: Found driver %s for device %X:%X "
                             "(class/subclass/prog_if match)\n",
                             driver.name(), id.vendor_id, id.device_id);
@@ -63,11 +63,11 @@ Driver* match_device(Device& device)
      * to also fill out class/subclass fields
      */
     for (auto& driver : drivers) {
-        auto filter = driver.filter();
+        auto filter = driver.filt();
         for (size_t i = 0; !is_terminator(filter[i]); i++) {
             if (filter[i].class_id == id.class_id &&
                 filter[i].subclass_id == id.subclass_id && !filter[i].prog_if) {
-                Log::printk(Log::LogLevel::INFO,
+                log::printk(log::log_level::INFO,
                             "pci: Found driver %s for device %X:%X "
                             "(class/subclass match)\n",
                             driver.name(), id.vendor_id, id.device_id);
@@ -75,7 +75,7 @@ Driver* match_device(Device& device)
             }
         }
     }
-    Log::printk(Log::LogLevel::ERROR, "pci: Didn't find driver for %X:%X\n",
+    log::printk(log::log_level::ERROR, "pci: Didn't find driver for %X:%X\n",
                 id.vendor_id, id.device_id);
     return nullptr;
 }
@@ -84,7 +84,7 @@ void match_all_devices()
 {
     for (auto& device : devices) {
         if (!device.is_claimed()) {
-            Driver* driver = match_device(device);
+            driver* driver = match_device(device);
             if (driver) {
                 driver->probe(&device);
             }
@@ -220,11 +220,11 @@ void probe_device(uint8_t bus, uint8_t dev)
                         pci_device = PciDevTable[i];
                 }
             }
-            Log::printk(Log::LogLevel::INFO, "pci: [%X:%X] %s %s\n", vendor_id,
+            log::printk(log::log_level::INFO, "pci: [%X:%X] %s %s\n", vendor_id,
                         device_id, pci_vendor.VenFull, pci_device.ChipDesc);
-            Device* device = new Device(bus, dev, i);
-            devices.push_back(*device);
-            match_device(*device);
+            device* d = new device(bus, dev, i);
+            devices.push_back(*d);
+            match_device(*d);
         }
     }
 }
@@ -248,10 +248,11 @@ void probe()
      * scan through them too.
      */
     if (!(type & 0x80)) {
-        Log::printk(Log::LogLevel::INFO, "pci: Only one PCI host controller\n");
+        log::printk(log::log_level::INFO,
+                    "pci: Only one PCI host controller\n");
         probe_bus(0);
     } else {
-        Log::printk(Log::LogLevel::INFO,
+        log::printk(log::log_level::INFO,
                     "pci: Multiple PCI host controllers\n");
         for (int i = 0; i < 8; i++) {
             if (read_16(0, 0, i, pci_vendor_id) != 0xFFFF)
@@ -262,7 +263,7 @@ void probe()
 }
 } // namespace
 
-bool register_driver(Driver& d)
+bool register_driver(driver& d)
 {
     drivers.push_back(d);
     match_all_devices();
@@ -278,50 +279,50 @@ libcxx::pair<bool, addr_t> map(addr_t phys, size_t size)
 
 void init()
 {
-    Log::printk(Log::LogLevel::INFO, "pci: Initializing...\n");
+    log::printk(log::log_level::INFO, "pci: Initializing...\n");
     probe();
 }
 
-Device::Device(uint8_t bus, uint8_t device, uint8_t function)
+device::device(uint8_t bus, uint8_t device, uint8_t function)
     : bus(bus)
-    , device(device)
+    , dev(device)
     , function(function)
 {
 }
 
-uint32_t Device::read_config_32(const uint8_t offset)
+uint32_t device::read_config_32(const uint8_t offset)
 {
-    return read_32(this->bus, this->device, this->function, offset);
+    return read_32(this->bus, this->dev, this->function, offset);
 }
 
-void Device::write_config_32(const uint8_t offset, const uint32_t value)
+void device::write_config_32(const uint8_t offset, const uint32_t value)
 {
-    write_32(this->bus, this->device, this->function, offset, value);
+    write_32(this->bus, this->dev, this->function, offset, value);
 }
 
-uint16_t Device::read_config_16(const uint8_t offset)
+uint16_t device::read_config_16(const uint8_t offset)
 {
-    return read_16(this->bus, this->device, this->function, offset);
+    return read_16(this->bus, this->dev, this->function, offset);
 }
 
-void Device::write_config_16(const uint8_t offset, const uint16_t value)
+void device::write_config_16(const uint8_t offset, const uint16_t value)
 {
-    write_16(this->bus, this->device, this->function, offset, value);
+    write_16(this->bus, this->dev, this->function, offset, value);
 }
 
-uint8_t Device::read_config_8(const uint8_t offset)
+uint8_t device::read_config_8(const uint8_t offset)
 {
-    return read_8(this->bus, this->device, this->function, offset);
+    return read_8(this->bus, this->dev, this->function, offset);
 }
 
-void Device::write_config_8(const uint8_t offset, const uint8_t value)
+void device::write_config_8(const uint8_t offset, const uint8_t value)
 {
-    write_8(this->bus, this->device, this->function, offset, value);
+    write_8(this->bus, this->dev, this->function, offset, value);
 }
 
-PCIID Device::get_pciid()
+pciid device::get_pciid()
 {
-    PCIID id;
+    pciid id;
     id.vendor_id   = this->read_config_16(pci_vendor_id);
     id.device_id   = this->read_config_16(pci_device_id);
     id.class_id    = this->read_config_8(pci_class);
@@ -330,11 +331,11 @@ PCIID Device::get_pciid()
     return id;
 }
 
-PCIBAR Device::get_pcibar(int bar)
+pcibar device::get_pcibar(int bar)
 {
     // BAR0 = 0x10, BAR1 = 0x14, so BARX = 0x10 + (4 * x)
     uint32_t low = this->read_config_32(0x10 + (4 * bar));
-    PCIBAR pcibar;
+    pcibar pcibar;
     if (bar_is_32(low)) {
         pcibar.addr = low & 0xFFFFFFF0;
         this->write_config_32(0x10 + (4 * bar), 0xFFFFFFFF);
@@ -354,35 +355,35 @@ PCIBAR Device::get_pcibar(int bar)
         this->write_config_32(0x10 + (4 * bar), low);
         this->write_config_32(0x10 + (4 * bar + 1), high);
     } else {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "pci: Unsupported BAR type (probably 16-bit or IO)\n");
     }
     return pcibar;
 }
 
-bool Device::is_claimed()
+bool device::is_claimed()
 {
     return this->claimed;
 }
 
-void Device::claim()
+void device::claim()
 {
     if (this->claimed) {
-        Log::printk(
-            Log::LogLevel::WARNING,
+        log::printk(
+            log::log_level::WARNING,
             "pci: Attempting to claim device that is already claimed!\n");
         return;
     }
     this->claimed = true;
 }
 
-void Device::unclaim()
+void device::unclaim()
 {
     if (!this->claimed) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "pci: Attempting to unclaim device that is not claimed!\n");
         return;
     }
     this->claimed = false;
 }
-} // namespace PCI
+} // namespace pci

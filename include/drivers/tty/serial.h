@@ -2,7 +2,7 @@
 
 #include <kernel/log.h>
 
-class Serial : public LogOutput
+class serial : public log_output
 {
 public:
     size_t write(const char *message, size_t size) override;

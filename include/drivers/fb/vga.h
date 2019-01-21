@@ -4,11 +4,11 @@
 
 namespace filesystem
 {
-class VGAFB : public KDevice
+class vgafb : public kdevice
 {
 public:
-    VGAFB();
-    ~VGAFB();
+    vgafb();
+    ~vgafb();
 
     ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                   void* cookie) override;

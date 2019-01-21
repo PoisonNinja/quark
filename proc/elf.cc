@@ -7,59 +7,59 @@
 #include <proc/process.h>
 #include <proc/sched.h>
 
-namespace ELF
+namespace elf
 {
 libcxx::pair<bool, addr_t> load(addr_t binary)
 {
-    Process* process = Scheduler::get_current_process();
-    Elf_Ehdr* header = reinterpret_cast<Elf_Ehdr*>(binary);
+    process* process = scheduler::get_current_process();
+    elf_ehdr* header = reinterpret_cast<elf_ehdr*>(binary);
     if (libcxx::memcmp(header->e_ident, ELFMAG, 4)) {
-        Log::printk(Log::LogLevel::ERROR,
+        log::printk(log::log_level::ERROR,
                     "Binary passed in is not an ELF file!\n");
         return libcxx::pair<bool, addr_t>(false, 0);
     }
-    Log::printk(Log::LogLevel::DEBUG, "Section header offset: %p\n",
+    log::printk(log::log_level::DEBUG, "Section header offset: %p\n",
                 header->e_shoff);
-    Log::printk(Log::LogLevel::DEBUG, "Program header offset: %p\n",
+    log::printk(log::log_level::DEBUG, "Program header offset: %p\n",
                 header->e_phoff);
     for (int i = 0; i < header->e_phnum; i++) {
-        Elf_Phdr* phdr = reinterpret_cast<Elf_Phdr*>(binary + header->e_phoff +
+        elf_phdr* phdr = reinterpret_cast<elf_phdr*>(binary + header->e_phoff +
                                                      (header->e_phentsize * i));
-        Log::printk(Log::LogLevel::DEBUG, "Header type: %X\n", phdr->p_type);
+        log::printk(log::log_level::DEBUG, "Header type: %X\n", phdr->p_type);
         if (phdr->p_type == PT_LOAD || phdr->p_type == PT_TLS) {
             if (phdr->p_type == PT_TLS) {
-                Log::printk(Log::LogLevel::DEBUG, "Found TLS section\n");
+                log::printk(log::log_level::DEBUG, "Found TLS section\n");
                 auto [found, addr] =
                     process->vma->locate_range(USER_START, phdr->p_memsz);
                 if (!found) {
-                    Log::printk(Log::LogLevel::ERROR,
+                    log::printk(log::log_level::ERROR,
                                 "Failed to locate section\n");
                     return libcxx::pair<bool, addr_t>(false, 0);
                 }
                 phdr->p_vaddr = addr;
-                Log::printk(Log::LogLevel::DEBUG, "TLS section will be at %p\n",
-                            phdr->p_vaddr);
+                log::printk(log::log_level::DEBUG,
+                            "TLS section will be at %p\n", phdr->p_vaddr);
                 process->tls_base      = phdr->p_vaddr;
                 process->tls_filesz    = phdr->p_filesz;
                 process->tls_memsz     = phdr->p_memsz;
                 process->tls_alignment = phdr->p_align;
             }
-            Log::printk(Log::LogLevel::DEBUG, "Flags:            %X\n",
+            log::printk(log::log_level::DEBUG, "Flags:            %X\n",
                         phdr->p_flags);
-            Log::printk(Log::LogLevel::DEBUG, "Offset:           %p\n",
+            log::printk(log::log_level::DEBUG, "Offset:           %p\n",
                         phdr->p_offset);
-            Log::printk(Log::LogLevel::DEBUG, "Virtual address:  %p\n",
+            log::printk(log::log_level::DEBUG, "Virtual address:  %p\n",
                         phdr->p_vaddr);
-            Log::printk(Log::LogLevel::DEBUG, "Physical address: %p\n",
+            log::printk(log::log_level::DEBUG, "Physical address: %p\n",
                         phdr->p_paddr);
-            Log::printk(Log::LogLevel::DEBUG, "File size:        %p\n",
+            log::printk(log::log_level::DEBUG, "File size:        %p\n",
                         phdr->p_filesz);
-            Log::printk(Log::LogLevel::DEBUG, "Memory size:      %p\n",
+            log::printk(log::log_level::DEBUG, "Memory size:      %p\n",
                         phdr->p_memsz);
-            Log::printk(Log::LogLevel::DEBUG, "Align:            %p\n",
+            log::printk(log::log_level::DEBUG, "Align:            %p\n",
                         phdr->p_align);
             if (!process->vma->add_vmregion(phdr->p_vaddr, phdr->p_memsz)) {
-                Log::printk(Log::LogLevel::ERROR, "Failed to add section\n");
+                log::printk(log::log_level::ERROR, "Failed to add section\n");
                 return libcxx::pair<bool, addr_t>(false, 0);
             }
             /*
@@ -71,17 +71,17 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             }
             memory::virt::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
 
-            Log::printk(Log::LogLevel::DEBUG,
+            log::printk(log::log_level::DEBUG,
                         "Copying from %p -> %p, size %X\n",
                         binary + phdr->p_offset, phdr->p_vaddr, phdr->p_filesz);
             libcxx::memcpy(reinterpret_cast<void*>(phdr->p_vaddr),
                            reinterpret_cast<void*>(binary + phdr->p_offset),
                            phdr->p_filesz);
             if (phdr->p_filesz < phdr->p_memsz) {
-                Log::printk(Log::LogLevel::DEBUG,
+                log::printk(log::log_level::DEBUG,
                             "Memory size is larger than file size, "
                             "zeroing rest of segment...\n");
-                Log::printk(Log::LogLevel::DEBUG, "Zeroing %p, size 0x%X\n",
+                log::printk(log::log_level::DEBUG, "Zeroing %p, size 0x%X\n",
                             phdr->p_filesz + phdr->p_vaddr,
                             phdr->p_memsz - phdr->p_filesz);
                 libcxx::memset(
@@ -95,8 +95,8 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
             }
         }
     }
-    Log::printk(Log::LogLevel::DEBUG, "Entry point: %p\n", header->e_entry);
+    log::printk(log::log_level::DEBUG, "Entry point: %p\n", header->e_entry);
     // TODO: More sanity checks
     return libcxx::make_pair(true, header->e_entry);
 }
-} // namespace ELF
+} // namespace elf

@@ -5,10 +5,10 @@
 #include <proc/process.h>
 #include <proc/sched.h>
 
-Process::Process(Process* parent)
+process::process(process* parent)
 {
     this->parent = parent;
-    this->pid    = Scheduler::get_free_pid();
+    this->pid    = scheduler::get_free_pid();
     this->vma    = new memory::vma(USER_START, USER_END);
     for (int i = 1; i < NSIGS; i++) {
         this->signal_actions[i].sa_handler = SIG_DFL;
@@ -16,43 +16,43 @@ Process::Process(Process* parent)
     }
 }
 
-Process::~Process()
+process::~process()
 {
 }
 
-void Process::set_cwd(libcxx::intrusive_ptr<filesystem::Descriptor> desc)
+void process::set_cwd(libcxx::intrusive_ptr<filesystem::descriptor> desc)
 {
     cwd = desc;
 }
 
-void Process::set_root(libcxx::intrusive_ptr<filesystem::Descriptor> desc)
+void process::set_root(libcxx::intrusive_ptr<filesystem::descriptor> desc)
 {
     root = desc;
 }
 
-libcxx::intrusive_ptr<filesystem::Descriptor> Process::get_cwd()
+libcxx::intrusive_ptr<filesystem::descriptor> process::get_cwd()
 {
     return cwd;
 }
 
-libcxx::intrusive_ptr<filesystem::Descriptor> Process::get_root()
+libcxx::intrusive_ptr<filesystem::descriptor> process::get_root()
 {
     return root;
 }
 
-void Process::add_thread(Thread* thread)
+void process::add_thread(thread* thread)
 {
     if (threads.empty()) {
         // First node shares same PID
         thread->tid = this->pid;
     } else {
         // Rest of them increment the PID
-        thread->tid = Scheduler::get_free_pid();
+        thread->tid = scheduler::get_free_pid();
     }
     threads.push_back(*thread);
 }
 
-void Process::remove_thread(Thread* thread)
+void process::remove_thread(thread* thread)
 {
     for (auto it = threads.begin(); it != threads.end(); ++it) {
         auto& value = *it;
@@ -62,16 +62,16 @@ void Process::remove_thread(Thread* thread)
         }
     }
     if (threads.empty()) {
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "Last thread exiting, process %d terminating\n", this->pid);
         this->exit();
     }
 }
 
-Process* Process::fork()
+process* process::fork()
 {
-    Process* child = new Process(this);
-    Scheduler::add_process(child);
+    process* child = new process(this);
+    scheduler::add_process(child);
     this->children.push_back(*child);
     addr_t cloned = memory::virt::fork();
     child->fds    = this->fds;
@@ -82,18 +82,18 @@ Process* Process::fork()
     return child;
 }
 
-void Process::exit()
+void process::exit()
 {
     for (auto& section : *vma) {
         memory::virt::unmap_range(section.start(), section.end());
     }
     this->vma->reset();
     memory::physical::free(this->address_space);
-    Scheduler::remove_process(this->pid);
+    scheduler::remove_process(this->pid);
     delete this->vma;
 }
 
-void Process::send_signal(int signum)
+void process::send_signal(int signum)
 {
     // TODO: Broadcast SIGSTOP, SIGCONT, certain signals to all threads
     // TODO: Randomly select a thread instead of the default (or maybe a

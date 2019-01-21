@@ -5,13 +5,13 @@
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
-class PTMX : public TTY
+class ptmx : public tty
 {
 public:
-    PTMX();
-    virtual ~PTMX();
+    ptmx();
+    virtual ~ptmx();
 
     virtual libcxx::pair<int, void*> open(const char* name) override;
     virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
@@ -24,5 +24,5 @@ private:
     size_t next_pty_number;
 };
 
-} // namespace TTY
+} // namespace tty
 } // namespace filesystem

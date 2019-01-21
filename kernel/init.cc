@@ -15,9 +15,10 @@ static addr_t *initcall_levels[] = {
     __initcall5_start, __initcall6_start, __initcall7_start, __initcall_end,
 };
 
-void do_initcall(InitLevel level)
+void do_initcall(init_level level)
 {
-    Log::printk(Log::LogLevel::INFO, "Calling initcalls for level %d\n", level);
+    log::printk(log::log_level::INFO, "Calling initcalls for level %d\n",
+                level);
     for (addr_t *i = initcall_levels[static_cast<int>(level)];
          i < initcall_levels[static_cast<int>(level) + 1]; i++) {
         initcall_t fn = *(initcall_t *)i;

@@ -28,7 +28,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
              * the contents of the page
              */
             memory::virt::map(reinterpret_cast<addr_t>(fork_page_pointer),
-                                 new_page, PAGE_WRITABLE);
+                              new_page, PAGE_WRITABLE);
             /*
              * Calculate the virtual address given the indexes for the source
              */
@@ -55,7 +55,7 @@ void __copy_pt_entry(struct page_table* new_pt, struct page_table* old_pt,
              * the contents of the page
              */
             memory::virt::map(reinterpret_cast<addr_t>(fork_page_pointer),
-                                 new_page, PAGE_WRITABLE);
+                              new_page, PAGE_WRITABLE);
             /*
              * Calculate the virtual address given the indexes for the source
              */
@@ -77,10 +77,10 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
             addr_t new_pt            = memory::physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
             __copy_pt_entry(
-                (struct page_table*)memory::X86::decode_fractal(
-                    memory::X86::copy_entry, pml4_index, pdpt_index, i),
-                (struct page_table*)memory::X86::decode_fractal(
-                    memory::X86::recursive_entry, pml4_index, pdpt_index, i),
+                (struct page_table*)memory::x86::decode_fractal(
+                    memory::x86::copy_entry, pml4_index, pdpt_index, i),
+                (struct page_table*)memory::x86::decode_fractal(
+                    memory::x86::recursive_entry, pml4_index, pdpt_index, i),
                 pml4_index, pdpt_index, i);
         }
     }
@@ -96,12 +96,12 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
                            sizeof(struct page));
             addr_t new_pd              = memory::physical::allocate();
             new_pdpt->pages[i].address = new_pd / 0x1000;
-            __copy_pd_entry((struct page_table*)memory::X86::decode_fractal(
-                                memory::X86::copy_entry,
-                                memory::X86::recursive_entry, pml4_index, i),
-                            (struct page_table*)memory::X86::decode_fractal(
-                                memory::X86::recursive_entry,
-                                memory::X86::recursive_entry, pml4_index, i),
+            __copy_pd_entry((struct page_table*)memory::x86::decode_fractal(
+                                memory::x86::copy_entry,
+                                memory::x86::recursive_entry, pml4_index, i),
+                            (struct page_table*)memory::x86::decode_fractal(
+                                memory::x86::recursive_entry,
+                                memory::x86::recursive_entry, pml4_index, i),
                             pml4_index, i);
         }
     }
@@ -112,31 +112,31 @@ addr_t fork()
     // Fractal mapping address of original PML4
 #ifdef X86_64
     struct page_table* old_pml4 =
-        (struct page_table*)memory::X86::decode_fractal(
-            memory::X86::recursive_entry, memory::X86::recursive_entry,
-            memory::X86::recursive_entry, memory::X86::recursive_entry);
+        (struct page_table*)memory::x86::decode_fractal(
+            memory::x86::recursive_entry, memory::x86::recursive_entry,
+            memory::x86::recursive_entry, memory::x86::recursive_entry);
 #else
     struct page_table* old_pml4 =
-        (struct page_table*)memory::X86::decode_fractal(
-            memory::X86::recursive_entry, memory::X86::recursive_entry);
+        (struct page_table*)memory::x86::decode_fractal(
+            memory::x86::recursive_entry, memory::x86::recursive_entry);
 #endif
     /*
      * Fractal mapping address of original PML4
-     * Notice that the first parameter is memory::X86::copy_entry, while the
-     * rest are memory::X86::recursive_entry. This is because while the address
-     * of the new PML4 is loaded into the memory::X86::copy_entry slot of the
+     * Notice that the first parameter is memory::x86::copy_entry, while the
+     * rest are memory::x86::recursive_entry. This is because while the address
+     * of the new PML4 is loaded into the memory::x86::copy_entry slot of the
      * current PML4, the new PML4 recursive mapping is still
-     * memory::X86::recursive_entry in itself.
+     * memory::x86::recursive_entry in itself.
      */
 #ifdef X86_64
     struct page_table* new_pml4 =
-        (struct page_table*)memory::X86::decode_fractal(
-            memory::X86::copy_entry, memory::X86::recursive_entry,
-            memory::X86::recursive_entry, memory::X86::recursive_entry);
+        (struct page_table*)memory::x86::decode_fractal(
+            memory::x86::copy_entry, memory::x86::recursive_entry,
+            memory::x86::recursive_entry, memory::x86::recursive_entry);
 #else
     struct page_table* new_pml4 =
-        (struct page_table*)memory::X86::decode_fractal(
-            memory::X86::copy_entry, memory::X86::recursive_entry);
+        (struct page_table*)memory::x86::decode_fractal(
+            memory::x86::copy_entry, memory::x86::recursive_entry);
 #endif
     // Allocate a new page for the PML4
     addr_t fork_pml4_phys = memory::physical::allocate();
@@ -146,7 +146,7 @@ addr_t fork()
      * for the new PML4.
      */
     memory::virt::map(reinterpret_cast<addr_t>(fork_page_pointer),
-                         fork_pml4_phys, PAGE_WRITABLE);
+                      fork_pml4_phys, PAGE_WRITABLE);
     /*
      * Copy the entire PML4. However, only the kernel pages will remain
      * (e.g. pml4_index(x) >= 256), as we want to duplicate the user pages
@@ -154,16 +154,16 @@ addr_t fork()
     libcxx::memcpy(fork_page_pointer, old_pml4, sizeof(struct page_table));
 
     // Set up fractal mapping for the new PML4
-    fork_page_pointer->pages[memory::X86::recursive_entry].address =
+    fork_page_pointer->pages[memory::x86::recursive_entry].address =
         fork_pml4_phys / 0x1000;
 
-    // Load the new PML4 into the memory::X86::copy_entry slot of the current
+    // Load the new PML4 into the memory::x86::copy_entry slot of the current
     // PML4
-    old_pml4->pages[memory::X86::copy_entry].present  = 1;
-    old_pml4->pages[memory::X86::copy_entry].writable = 1;
-    old_pml4->pages[memory::X86::copy_entry].address  = fork_pml4_phys / 0x1000;
+    old_pml4->pages[memory::x86::copy_entry].present  = 1;
+    old_pml4->pages[memory::x86::copy_entry].writable = 1;
+    old_pml4->pages[memory::x86::copy_entry].address  = fork_pml4_phys / 0x1000;
 
-    memory::X86::invlpg(reinterpret_cast<addr_t>(new_pml4));
+    memory::x86::invlpg(reinterpret_cast<addr_t>(new_pml4));
 
 #ifdef X86_64
     // Copy only user pages (lower half)
@@ -182,18 +182,18 @@ addr_t fork()
             new_pml4->pages[i].address = new_pdpt / 0x1000;
 #ifdef X86_64
             __copy_pdpt_entry(
-                (struct page_table*)memory::X86::decode_fractal(
-                    memory::X86::copy_entry, memory::X86::recursive_entry,
-                    memory::X86::recursive_entry, i),
-                (struct page_table*)memory::X86::decode_fractal(
-                    memory::X86::recursive_entry, memory::X86::recursive_entry,
-                    memory::X86::recursive_entry, i),
+                (struct page_table*)memory::x86::decode_fractal(
+                    memory::x86::copy_entry, memory::x86::recursive_entry,
+                    memory::x86::recursive_entry, i),
+                (struct page_table*)memory::x86::decode_fractal(
+                    memory::x86::recursive_entry, memory::x86::recursive_entry,
+                    memory::x86::recursive_entry, i),
                 i);
 #else
-            __copy_pt_entry((struct page_table*)memory::X86::decode_fractal(
-                                memory::X86::copy_entry, i),
-                            (struct page_table*)memory::X86::decode_fractal(
-                                memory::X86::recursive_entry, i),
+            __copy_pt_entry((struct page_table*)memory::x86::decode_fractal(
+                                memory::x86::copy_entry, i),
+                            (struct page_table*)memory::x86::decode_fractal(
+                                memory::x86::recursive_entry, i),
                             i);
 #endif
         }

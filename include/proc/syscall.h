@@ -2,7 +2,7 @@
 
 #include <types.h>
 
-namespace Syscall
+namespace syscall
 {
 #define SYS_read 0
 #define SYS_write 1
@@ -46,4 +46,4 @@ struct mmap_wrapper {
 };
 
 void init();
-} // namespace Syscall
+} // namespace syscall

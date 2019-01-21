@@ -4,11 +4,11 @@
 
 namespace cpu
 {
-namespace X86
+namespace x86
 {
-namespace GDT
+namespace gdt
 {
-struct Descriptor {
+struct descriptor {
     uint16_t limit;
     addr_t offset;
 } __attribute__((packed));
@@ -32,7 +32,7 @@ void set_gs(addr_t base);
 #endif
 
 void init();
-}  // namespace GDT
+} // namespace gdt
 
 namespace TSS
 {
@@ -82,6 +82,6 @@ struct Entry {
 
 void set_stack(addr_t stack);
 addr_t get_stack();
-}  // namespace TSS
-}  // namespace X86
-}  // namespace cpu
+} // namespace TSS
+} // namespace x86
+} // namespace cpu

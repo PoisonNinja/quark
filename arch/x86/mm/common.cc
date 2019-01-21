@@ -7,7 +7,7 @@
 
 namespace memory
 {
-namespace X86
+namespace x86
 {
 bool is_valid_physical_memory(addr_t m, struct boot::info &info)
 {
@@ -19,20 +19,20 @@ bool is_valid_physical_memory(addr_t m, struct boot::info &info)
         reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     if (m >= memory::virt::align_down(info.kernel_start) &&
         m < memory::virt::align_up(info.kernel_end)) {
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "        Rejected %p because in kernel\n", m);
         return false;
     } else if (m >= multiboot_start && m < multiboot_end) {
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "        Rejected %p because in multiboot\n", m);
         return false;
     } else if (m >= memory::virt::align_down(info.initrd_start) &&
                m < memory::virt::align_up(info.initrd_end)) {
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "        Rejected %p because in initrd\n", m);
         return false;
     }
     return true;
 }
-} // namespace X86
+} // namespace x86
 } // namespace memory

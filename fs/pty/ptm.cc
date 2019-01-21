@@ -1,5 +1,4 @@
 #include <fs/dev.h>
-#include <fs/ftable.h>
 #include <fs/pty/ptm.h>
 #include <fs/pty/pts.h>
 #include <fs/pty/pty.h>
@@ -9,52 +8,52 @@
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
-PTMX::PTMX()
+ptmx::ptmx()
     : next_pty_number(0)
 {
 }
 
-PTMX::~PTMX()
+ptmx::~ptmx()
 {
 }
 
-libcxx::pair<int, void*> PTMX::open(const char* name)
+libcxx::pair<int, void*> ptmx::open(const char* name)
 {
     // TODO: Perhaps have PTSFS generate this?
-    PTY* pty = new PTY(next_pty_number++);
-    static_cast<PTSFS*>(Drivers::get("ptsfs"))->register_pty(pty);
-    return libcxx::pair<int, void*>(0, pty);
+    pty* p = new pty(next_pty_number++);
+    static_cast<ptsfs*>(drivers::get("ptsfs"))->register_pty(p);
+    return libcxx::pair<int, void*>(0, p);
 }
 
-int PTMX::ioctl(unsigned long request, char* argp, void* cookie)
+int ptmx::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    *reinterpret_cast<int*>(argp) = static_cast<PTY*>(cookie)->index();
+    *reinterpret_cast<int*>(argp) = static_cast<pty*>(cookie)->index();
     return 0;
 }
 
-ssize_t PTMX::read(uint8_t* buffer, size_t count, void* cookie)
+ssize_t ptmx::read(uint8_t* buffer, size_t count, void* cookie)
 {
-    return static_cast<PTY*>(cookie)->mread(buffer, count);
+    return static_cast<pty*>(cookie)->mread(buffer, count);
 }
 
-ssize_t PTMX::write(const uint8_t* buffer, size_t count, void* cookie)
+ssize_t ptmx::write(const uint8_t* buffer, size_t count, void* cookie)
 {
-    return static_cast<PTY*>(cookie)->mwrite(buffer, count);
+    return static_cast<pty*>(cookie)->mwrite(buffer, count);
 }
 
 namespace
 {
 int init()
 {
-    PTMX* ptmx = new PTMX();
-    Log::printk(Log::LogLevel::INFO, "Registering PTMX character device\n");
+    ptmx* p = new ptmx();
+    log::printk(log::log_level::INFO, "Registering ptmx character device\n");
     filesystem::register_class(filesystem::CHR, 5);
-    filesystem::TTY::register_tty(5, ptmx);
+    filesystem::tty::register_tty(5, p);
     return 0;
 }
 FS_INITCALL(init);
 } // namespace
-} // namespace TTY
+} // namespace tty
 } // namespace filesystem

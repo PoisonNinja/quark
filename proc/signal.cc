@@ -8,31 +8,31 @@ static sigset_t ignored_signals;
 static sigset_t stop_signals;
 static sigset_t unblockable_signals;
 
-void Thread::handle_signal(struct InterruptContext* ctx)
+void thread::handle_signal(struct interrupt_context* ctx)
 {
     sigset_t unblocked_signals;
-    Signal::signotset(&unblocked_signals, &this->signal_mask);
+    signal::signotset(&unblocked_signals, &this->signal_mask);
     // Ensure that SIGKILL and SIGSTOP are always unblocked
-    Signal::sigorset(&unblocked_signals, &unblockable_signals);
+    signal::sigorset(&unblocked_signals, &unblockable_signals);
 
     sigset_t deliverable_signals;
-    Signal::sigemptyset(&deliverable_signals);
-    Signal::sigorset(&deliverable_signals, &unblocked_signals);
-    Signal::sigandset(&deliverable_signals, &this->signal_pending);
+    signal::sigemptyset(&deliverable_signals);
+    signal::sigorset(&deliverable_signals, &unblocked_signals);
+    signal::sigandset(&deliverable_signals, &this->signal_pending);
 
-    int signum = Signal::select_signal(&deliverable_signals);
+    int signum = signal::select_signal(&deliverable_signals);
     if (!signum) {
         return;
     }
-    Log::printk(Log::LogLevel::DEBUG, "[signal]: Selecting signal %d\n",
+    log::printk(log::log_level::DEBUG, "[signal]: Selecting signal %d\n",
                 signum);
 
     // The signal is handled
-    Signal::sigdelset(&this->signal_pending, signum);
+    signal::sigdelset(&this->signal_pending, signum);
     this->refresh_signal();
 
     if (signum == SIGKILL) {
-        Log::printk(Log::LogLevel::DEBUG, "[signal]: SIGKILL, killing\n");
+        log::printk(log::log_level::DEBUG, "[signal]: SIGKILL, killing\n");
         this->exit();
     }
 
@@ -40,35 +40,35 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
     if (action->sa_handler == SIG_IGN ||
         (action->sa_handler == SIG_DFL &&
-         Signal::sigismember(&ignored_signals, signum))) {
-        Log::printk(Log::LogLevel::DEBUG, "[signal]: SIG_IGN, returning\n");
+         signal::sigismember(&ignored_signals, signum))) {
+        log::printk(log::log_level::DEBUG, "[signal]: SIG_IGN, returning\n");
         return;
     }
 
-    if ((Signal::sigismember(&stop_signals, signum) &&
+    if ((signal::sigismember(&stop_signals, signum) &&
          action->sa_handler == SIG_DFL) ||
         signum == SIGSTOP) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "[signal]: SIG_DFL with SIGSTOP, you "
                     "should probably implement it. Killing for now\n");
         this->exit();
     }
 
     if (signum == SIGCONT) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "[signal]: SIGCONT, you "
                     "should probably implement it. Killing for now\n");
         this->exit();
     }
 
     if (action->sa_handler == SIG_DFL) {
-        Log::printk(
-            Log::LogLevel::DEBUG,
+        log::printk(
+            log::log_level::DEBUG,
             "[signal]: SIG_DFL with default action of SIGKILl, killing\n");
         this->exit();
     }
 
-    Log::printk(Log::LogLevel::DEBUG, "[signal] Has a sa_handler, calling\n");
+    log::printk(log::log_level::DEBUG, "[signal] Has a sa_handler, calling\n");
 
     bool requested_altstack = action->sa_flags & SA_ONSTACK;
     bool usable_altstack =
@@ -76,13 +76,13 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     bool use_altstack = requested_altstack && usable_altstack;
 
     if (use_altstack) {
-        Log::printk(Log::LogLevel::DEBUG,
-                    "[signal] Signal handler requests and has a "
+        log::printk(log::log_level::DEBUG,
+                    "[signal] signal handler requests and has a "
                     "valid alternate stack, using...\n");
         this->signal_stack.ss_flags |= SS_ONSTACK;
     }
 
-    struct ThreadContext new_state, original_state;
+    struct thread_context new_state, original_state;
     encode_tcontext(ctx, &original_state);
 
     siginfo_t siginfo;
@@ -95,7 +95,7 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
     libcxx::memcpy(&ucontext.uc_stack, &this->signal_stack,
                    sizeof(this->signal_stack));
-    Signal::encode_mcontext(&ucontext.uc_mcontext, &original_state);
+    signal::encode_mcontext(&ucontext.uc_mcontext, &original_state);
 
     struct ksignal ksig = {
         .signum       = signum,
@@ -107,7 +107,7 @@ void Thread::handle_signal(struct InterruptContext* ctx)
 
     // Mask out current signal if SA_NODEFER is not passed in
     if (!(action->sa_flags & SA_NODEFER)) {
-        Signal::sigaddset(&this->signal_mask, signum);
+        signal::sigaddset(&this->signal_mask, signum);
     }
 
     this->setup_signal(&ksig, &original_state, &new_state);
@@ -116,7 +116,7 @@ void Thread::handle_signal(struct InterruptContext* ctx)
     return;
 }
 
-bool Thread::send_signal(int signum)
+bool thread::send_signal(int signum)
 {
     if (signum == 0) {
         return false;
@@ -126,39 +126,39 @@ bool Thread::send_signal(int signum)
         return false;
     }
     // TODO: Check if signal is pending already and return ESIGPENDING
-    Signal::sigaddset(&this->signal_pending, signum);
+    signal::sigaddset(&this->signal_pending, signum);
     this->refresh_signal();
     if (this->signal_required &&
-        this->state == ThreadState::SLEEPING_INTERRUPTIBLE) {
-        Scheduler::insert(this);
+        this->state == thread_state::SLEEPING_INTERRUPTIBLE) {
+        scheduler::insert(this);
     }
     return true;
 }
 
-void Thread::refresh_signal()
+void thread::refresh_signal()
 {
     // TODO: Actually check status of signals
     sigset_t possible;
-    Signal::sigemptyset(&possible);
-    Signal::sigorset(&possible, &signal_pending);
+    signal::sigemptyset(&possible);
+    signal::sigorset(&possible, &signal_pending);
 
     sigset_t unblocked_signals;
-    Signal::signotset(&unblocked_signals, &this->signal_mask);
+    signal::signotset(&unblocked_signals, &this->signal_mask);
     // Ensure that SIGKILL and SIGSTOP are always unblocked
-    Signal::sigorset(&unblocked_signals, &unblockable_signals);
+    signal::sigorset(&unblocked_signals, &unblockable_signals);
 
-    Signal::sigandset(&possible, &unblocked_signals);
+    signal::sigandset(&possible, &unblocked_signals);
 
     // TODO: Extend heuristics to ignore actions that would result in the
     // signal being ignored (e.g. SIG_DFL with default ignored or SIG_IGN)
-    this->signal_required = !Signal::sigisemptyset(&possible);
+    this->signal_required = !signal::sigisemptyset(&possible);
 }
 
-namespace Signal
+namespace signal
 {
-void handle(struct InterruptContext* ctx)
+void handle(struct interrupt_context* ctx)
 {
-    Scheduler::get_current_thread()->handle_signal(ctx);
+    scheduler::get_current_thread()->handle_signal(ctx);
 }
 
 int select_signal(sigset_t* set)
@@ -250,4 +250,4 @@ void init()
     sigaddset(&unblockable_signals, SIGKILL);
     sigaddset(&unblockable_signals, SIGSTOP);
 }
-} // namespace Signal
+} // namespace signal

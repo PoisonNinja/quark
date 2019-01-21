@@ -2,18 +2,18 @@
 #include <drivers/clock/tsc.h>
 #include <kernel/time/time.h>
 
-namespace Time
+namespace time
 {
 void arch_init()
 {
-    Intel8253* pit = new Intel8253();
+    intel8253* pit = new intel8253();
     register_clock(*pit);
 
     /*
      * This must be initialized after PIT since we depend on an existing tick
      * source to calibrate the TSC
      */
-    TSC* tsc = new TSC();
-    register_clock(*tsc);
+    tsc* t = new tsc();
+    register_clock(*t);
 }
-}
+} // namespace time

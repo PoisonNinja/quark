@@ -17,15 +17,15 @@ void* signal_return_location = (void*)&signal_return;
 #define ROUND_UP(x, y) ((((x) + ((y)-1)) / y) * y)
 
 #ifdef X86_64
-void set_thread_base(ThreadContext* thread)
+void set_thread_base(thread_context* thread)
 {
-    cpu::X86::wrmsr(cpu::X86::msr_kernel_gs_base,
+    cpu::x86::wrmsr(cpu::x86::msr_kernel_gs_base,
                     reinterpret_cast<uint64_t>(thread));
 }
 #endif
 
-void encode_tcontext(struct InterruptContext* ctx,
-                     struct ThreadContext* thread_ctx)
+void encode_tcontext(struct interrupt_context* ctx,
+                     struct thread_context* thread_ctx)
 {
 #ifdef X86_64
     thread_ctx->rax    = ctx->rax;
@@ -68,8 +68,8 @@ void encode_tcontext(struct InterruptContext* ctx,
 #endif
 }
 
-void decode_tcontext(struct InterruptContext* ctx,
-                     struct ThreadContext* thread_ctx)
+void decode_tcontext(struct interrupt_context* ctx,
+                     struct thread_context* thread_ctx)
 {
 #ifdef X86_64
     ctx->rax    = thread_ctx->rax;
@@ -112,34 +112,34 @@ void decode_tcontext(struct InterruptContext* ctx,
 #endif
 }
 
-void save_context(InterruptContext* ctx, struct ThreadContext* tcontext)
+void save_context(interrupt_context* ctx, struct thread_context* tcontext)
 {
     encode_tcontext(ctx, tcontext);
 #ifndef X86_64
-    tcontext->fs = cpu::X86::GDT::get_fs();
-    tcontext->gs = cpu::X86::GDT::get_gs();
+    tcontext->fs = cpu::x86::gdt::get_fs();
+    tcontext->gs = cpu::x86::gdt::get_gs();
 #endif
 }
 
-void load_context(InterruptContext* ctx, struct ThreadContext* tcontext)
+void load_context(interrupt_context* ctx, struct thread_context* tcontext)
 {
     decode_tcontext(ctx, tcontext);
     set_stack(tcontext->kernel_stack);
 #ifdef X86_64
     set_thread_base(tcontext);
 #else
-    cpu::X86::GDT::set_fs(tcontext->fs);
-    cpu::X86::GDT::set_gs(tcontext->gs);
+    cpu::x86::gdt::set_fs(tcontext->fs);
+    cpu::x86::gdt::set_gs(tcontext->gs);
 #endif
 }
 
-bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
-                  const char* envp[], struct ThreadContext& ctx)
+bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
+                  const char* envp[], struct thread_context& ctx)
 {
-    auto [success, entry] = ELF::load(binary);
+    auto [success, entry] = elf::load(binary);
 
     /*
-     * ELF::load returns a pair. The first parameter (bool) indicates status,
+     * elf::load returns a pair. The first parameter (bool) indicates status,
      * and second parameter is the entry address. If the first parameter is
      * false, the second parameter is undefined (but usually 0)
      */
@@ -167,50 +167,50 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     tls_size            = ROUND_UP(tls_size, parent->tls_alignment);
 
     if ((argv_zone = parent->vma->allocate(USER_START, argv_size)).first) {
-        Log::printk(Log::LogLevel::DEBUG, "argv located at %p\n",
+        log::printk(log::log_level::DEBUG, "argv located at %p\n",
                     argv_zone.second);
     } else {
-        Log::printk(Log::LogLevel::ERROR, "Failed to locate argv\n");
+        log::printk(log::log_level::ERROR, "Failed to locate argv\n");
         return false;
     }
     if ((envp_zone = parent->vma->allocate(USER_START, envp_size)).first) {
-        Log::printk(Log::LogLevel::DEBUG, "envp located at %p\n",
+        log::printk(log::log_level::DEBUG, "envp located at %p\n",
                     envp_zone.second);
     } else {
-        Log::printk(Log::LogLevel::ERROR, "Failed to locate envp\n");
+        log::printk(log::log_level::ERROR, "Failed to locate envp\n");
         return false;
     }
     if ((stack_zone = parent->vma->allocate(USER_START, 0x1000)).first) {
-        Log::printk(Log::LogLevel::DEBUG, "Stack located at %p\n",
+        log::printk(log::log_level::DEBUG, "Stack located at %p\n",
                     stack_zone.second);
     } else {
-        Log::printk(Log::LogLevel::ERROR, "Failed to locate stack\n");
+        log::printk(log::log_level::ERROR, "Failed to locate stack\n");
         return false;
     }
     if ((sigreturn_zone = parent->vma->allocate(USER_START, 0x1000)).first) {
-        Log::printk(Log::LogLevel::DEBUG, "Sigreturn page located at %p\n",
+        log::printk(log::log_level::DEBUG, "Sigreturn page located at %p\n",
                     sigreturn_zone.second);
     } else {
-        Log::printk(Log::LogLevel::ERROR, "Failed to locate sigreturn page\n");
+        log::printk(log::log_level::ERROR, "Failed to locate sigreturn page\n");
         return false;
     }
     if ((tls_zone = parent->vma->allocate(USER_START, tls_size)).first) {
-        Log::printk(Log::LogLevel::DEBUG, "TLS copy located at %p\n",
+        log::printk(log::log_level::DEBUG, "TLS copy located at %p\n",
                     tls_zone.second);
     } else {
-        Log::printk(Log::LogLevel::ERROR, "Failed to locate TLS copy\n");
+        log::printk(log::log_level::ERROR, "Failed to locate TLS copy\n");
         return false;
     }
     memory::virt::map_range(argv_zone.second, argv_size,
-                               PAGE_USER | PAGE_NX | PAGE_WRITABLE);
+                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     memory::virt::map_range(envp_zone.second, envp_size,
-                               PAGE_USER | PAGE_NX | PAGE_WRITABLE);
+                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     memory::virt::map_range(stack_zone.second, 0x1000,
-                               PAGE_USER | PAGE_NX | PAGE_WRITABLE);
+                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
     memory::virt::map_range(sigreturn_zone.second, 0x1000,
-                               PAGE_USER | PAGE_WRITABLE);
+                            PAGE_USER | PAGE_WRITABLE);
     memory::virt::map_range(tls_zone.second, tls_size,
-                               PAGE_USER | PAGE_NX | PAGE_WRITABLE);
+                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
 
     this->parent->sigreturn = sigreturn_zone.second;
 
@@ -282,56 +282,56 @@ bool Thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.eflags = 0x200;
     ctx.eflags |= 0x3000;
 #endif
-    ctx.kernel_stack = cpu::X86::TSS::get_stack();
+    ctx.kernel_stack = cpu::x86::TSS::get_stack();
     return true;
 }
 
 void set_stack(addr_t stack)
 {
-    cpu::X86::TSS::set_stack(stack);
+    cpu::x86::TSS::set_stack(stack);
 }
 
 addr_t get_stack()
 {
-    return cpu::X86::TSS::get_stack();
+    return cpu::x86::TSS::get_stack();
 }
 
-Thread* create_kernel_thread(Process* p, void (*entry_point)(void*), void* data)
+thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
 {
-    Thread* thread = new Thread(p);
-    libcxx::memset(&thread->tcontext, 0, sizeof(thread->tcontext));
+    thread* kthread = new thread(p);
+    libcxx::memset(&kthread->tcontext, 0, sizeof(kthread->tcontext));
     addr_t stack =
         reinterpret_cast<addr_t>(new uint8_t[0x1000] + 0x1000) & ~15UL;
 #ifdef X86_64
-    thread->tcontext.rdi    = reinterpret_cast<addr_t>(data);
-    thread->tcontext.rip    = reinterpret_cast<addr_t>(entry_point);
-    thread->tcontext.rbp    = reinterpret_cast<addr_t>(stack);
-    thread->tcontext.rsp    = reinterpret_cast<addr_t>(stack);
-    thread->tcontext.cs     = 0x8;
-    thread->tcontext.ds     = 0x10;
-    thread->tcontext.ss     = 0x10;
-    thread->tcontext.rflags = 0x200;
+    kthread->tcontext.rdi    = reinterpret_cast<addr_t>(data);
+    kthread->tcontext.rip    = reinterpret_cast<addr_t>(entry_point);
+    kthread->tcontext.rbp    = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.rsp    = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.cs     = 0x8;
+    kthread->tcontext.ds     = 0x10;
+    kthread->tcontext.ss     = 0x10;
+    kthread->tcontext.rflags = 0x200;
 #else
-    thread->tcontext.eip    = reinterpret_cast<addr_t>(entry_point);
-    thread->tcontext.ebp    = reinterpret_cast<addr_t>(stack);
-    thread->tcontext.esp    = reinterpret_cast<addr_t>(stack);
-    thread->tcontext.cs     = 0x8;
-    thread->tcontext.ds     = 0x10;
-    thread->tcontext.ss     = 0x10;
-    thread->tcontext.eflags = 0x200;
-    uint32_t* stack_ptr     = reinterpret_cast<uint32_t*>(thread->tcontext.esp);
-    stack_ptr[-1]           = reinterpret_cast<uint32_t>(data);
-    thread->tcontext.esp -= 8;
+    kthread->tcontext.eip    = reinterpret_cast<addr_t>(entry_point);
+    kthread->tcontext.ebp    = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.esp    = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.cs     = 0x8;
+    kthread->tcontext.ds     = 0x10;
+    kthread->tcontext.ss     = 0x10;
+    kthread->tcontext.eflags = 0x200;
+    uint32_t* stack_ptr = reinterpret_cast<uint32_t*>(kthread->tcontext.esp);
+    stack_ptr[-1]       = reinterpret_cast<uint32_t>(data);
+    kthread->tcontext.esp -= 8;
 #endif
-    thread->tcontext.kernel_stack = stack;
-    return thread;
+    kthread->tcontext.kernel_stack = stack;
+    return kthread;
 }
 
-extern "C" void load_register_state(struct InterruptContext* ctx);
+extern "C" void load_register_state(struct interrupt_context* ctx);
 
-void load_registers(struct ThreadContext& tcontext)
+void load_registers(struct thread_context& tcontext)
 {
-    struct InterruptContext ctx;
+    struct interrupt_context ctx;
     load_context(&ctx, &tcontext);
     load_register_state(&ctx);
 }

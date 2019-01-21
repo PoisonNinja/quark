@@ -10,10 +10,10 @@
 
 extern void kmain(struct boot::info &info);
 
-namespace Symbols
+namespace symbols
 {
 void relocate(struct multiboot_tag_elf_sections *sections);
-} // namespace Symbols
+} // namespace symbols
 
 namespace memory
 {
@@ -24,7 +24,7 @@ addr_t early_allocate();
 } // namespace physical
 } // namespace memory
 
-namespace X86
+namespace x86
 {
 extern "C" {
 void *__constructors_start;
@@ -36,16 +36,16 @@ void *__kernel_end;
 
 namespace
 {
-Serial serial_console;
+serial serial_console;
 struct boot::info info;
 } // namespace
 
 void init(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     // Get a serial console running so we can output stuff
-    Log::register_log_output(serial_console);
+    log::register_log_output(serial_console);
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        Kernel::panic("Booted by a non-supported bootloader!\n");
+        kernel::panic("Booted by a non-supported bootloader!\n");
     }
 
     // Start filling out information struct
@@ -68,8 +68,8 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                         ->string;
                 break;
             case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-                Log::printk(
-                    Log::LogLevel::INFO, "Booted by %s\n",
+                log::printk(
+                    log::log_level::INFO, "Booted by %s\n",
                     (reinterpret_cast<struct multiboot_tag_string *>(tag))
                         ->string);
                 break;
@@ -82,13 +82,13 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
                         ->mod_end;
                 break;
             case MULTIBOOT_TAG_TYPE_ELF_SECTIONS:
-                Log::printk(Log::LogLevel::INFO, "Located symbol section\n");
+                log::printk(log::log_level::INFO, "Located symbol section\n");
                 sections = (struct multiboot_tag_elf_sections *)tag;
                 break;
         }
     }
     // Bootstrap the IDT and GDT
-    cpu::X86::init();
+    cpu::x86::init();
 
     /*
      * Initialize our physical memory early allocator so we can start using
@@ -100,7 +100,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
      * Load the symbols now. We used to do this much later, but the symbols
      * might get overwritten later once we start using more memory.
      */
-    Symbols::relocate(sections);
+    symbols::relocate(sections);
     kmain(info);
 }
 
@@ -108,7 +108,7 @@ extern "C" {
 void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     libcxx::constructors_initialize(&__constructors_start, &__constructors_end);
-    X86::init(magic, multiboot);
+    x86::init(magic, multiboot);
 }
 }
-} // namespace X86
+} // namespace x86

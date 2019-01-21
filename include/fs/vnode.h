@@ -9,19 +9,19 @@
 
 namespace filesystem
 {
-class Vnode : public libcxx::intrusive_ref_counter
+class vnode : public libcxx::intrusive_ref_counter
 {
 public:
     dev_t rdev;  // Device # if special file, ignored otherwise
     mode_t mode; // Mode of the file
 
-    Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode);
-    Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode, dev_t rdev);
+    vnode(superblock* sb, libcxx::intrusive_ptr<inode> inode);
+    vnode(superblock* sb, libcxx::intrusive_ptr<inode> inode, dev_t rdev);
 
     // Standard file operations
     int ioctl(unsigned long request, char* argp, void* cookie);
-    int link(const char* name, libcxx::intrusive_ptr<Vnode> node);
-    libcxx::intrusive_ptr<Vnode> lookup(const char* name, int flags,
+    int link(const char* name, libcxx::intrusive_ptr<vnode> node);
+    libcxx::intrusive_ptr<vnode> lookup(const char* name, int flags,
                                         mode_t mode);
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
@@ -34,12 +34,12 @@ public:
     bool seekable();
 
     // VFS operations
-    int mount(Mount* mt);
+    int mount(mount* mt);
 
 private:
-    libcxx::list<Mount, &Mount::node> mounts;
-    KDevice* kdev;
-    Superblock* sb;
-    libcxx::intrusive_ptr<Inode> inode;
+    libcxx::list<filesystem::mount, &mount::node> mounts;
+    kdevice* kdev;
+    superblock* sb;
+    libcxx::intrusive_ptr<inode> ino;
 };
 } // namespace filesystem

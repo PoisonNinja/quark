@@ -17,12 +17,12 @@ void arch_init(struct boot::info &info)
         memory::virt::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
     addr_t multiboot_end = memory::virt::align_up(
         reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
-    Log::printk(Log::LogLevel::INFO, "Restricted memory areas:\n");
-    Log::printk(Log::LogLevel::INFO, "    Kernel:    [%p - %p]\n",
+    log::printk(log::log_level::INFO, "Restricted memory areas:\n");
+    log::printk(log::log_level::INFO, "    Kernel:    [%p - %p]\n",
                 info.kernel_start, info.kernel_end);
-    Log::printk(Log::LogLevel::INFO, "    Multiboot: [%p - %p]\n",
+    log::printk(log::log_level::INFO, "    Multiboot: [%p - %p]\n",
                 multiboot_start, multiboot_end);
-    Log::printk(Log::LogLevel::INFO, "    initrd:    [%p - %p]\n",
+    log::printk(log::log_level::INFO, "    initrd:    [%p - %p]\n",
                 info.initrd_start, info.initrd_end);
     struct multiboot_tag *tag;
     for (tag = reinterpret_cast<struct multiboot_tag *>(
@@ -34,7 +34,7 @@ void arch_init(struct boot::info &info)
         switch (tag->type) {
             case MULTIBOOT_TAG_TYPE_MMAP: {
                 multiboot_memory_map_t *mmap;
-                Log::printk(Log::LogLevel::INFO, "Memory map:\n");
+                log::printk(log::log_level::INFO, "Memory map:\n");
                 for (mmap = (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                                 ->entries;
                      reinterpret_cast<multiboot_uint8_t *>(mmap) <
@@ -43,7 +43,7 @@ void arch_init(struct boot::info &info)
                          reinterpret_cast<addr_t>(mmap) +
                          (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                              ->entry_size)) {
-                    Log::printk(Log::LogLevel::INFO,
+                    log::printk(log::log_level::INFO,
                                 "    [%p - %p] Type: 0x%x\n",
                                 static_cast<addr_t>(mmap->addr),
                                 static_cast<addr_t>(mmap->addr) +
@@ -52,7 +52,7 @@ void arch_init(struct boot::info &info)
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
                              i += memory::virt::PAGE_SIZE) {
-                            if (memory::X86::is_valid_physical_memory(i,
+                            if (memory::x86::is_valid_physical_memory(i,
                                                                       info)) {
                                 memory::physical::free(i);
                             }

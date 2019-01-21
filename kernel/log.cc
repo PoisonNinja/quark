@@ -36,11 +36,11 @@
 #include <lib/printf.h>
 #include <lib/string.h>
 
-namespace Log
+namespace log
 {
 constexpr size_t printk_max = CONFIG_PRINTK_MAX;
 
-static libcxx::list<LogOutput, &LogOutput::node> output;
+static libcxx::list<log_output, &log_output::node> output;
 
 static const char* colors[] = {
     "\e[36m", // Blue for debug
@@ -49,18 +49,18 @@ static const char* colors[] = {
     "\e[31m", // Red for error
 };
 
-static char printk_buffer[Log::printk_max];
+static char printk_buffer[log::printk_max];
 
-size_t printk(LogLevel level, const char* format, ...)
+size_t printk(log_level level, const char* format, ...)
 {
 #ifndef QUARK_DEBUG
-    if (level != Log::LogLevel::DEBUG) {
+    if (level != log::log_level::DEBUG) {
 #endif
         size_t r = 0;
-        if (level < Log::LogLevel::CONTINUE) {
-            libcxx::memset(printk_buffer, 0, Log::printk_max);
-            struct Time::timespec spec = Time::now();
-            r = libcxx::snprintf(printk_buffer, Log::printk_max,
+        if (level < log::log_level::CONTINUE) {
+            libcxx::memset(printk_buffer, 0, log::printk_max);
+            struct time::timespec spec = time::now();
+            r = libcxx::snprintf(printk_buffer, log::printk_max,
                                  "%s[%05llu.%09llu]%s ",
                                  colors[static_cast<int>(level)], spec.tv_sec,
                                  spec.tv_nsec, "\e[39m");
@@ -68,10 +68,10 @@ size_t printk(LogLevel level, const char* format, ...)
                 i.write(printk_buffer, r);
             }
         }
-        libcxx::memset(printk_buffer, 0, Log::printk_max);
+        libcxx::memset(printk_buffer, 0, log::printk_max);
         va_list args;
         va_start(args, format);
-        r = libcxx::vsnprintf(printk_buffer, Log::printk_max, format, args);
+        r = libcxx::vsnprintf(printk_buffer, log::printk_max, format, args);
         va_end(args);
         for (auto& i : output) {
             i.write(printk_buffer, r);
@@ -84,8 +84,8 @@ size_t printk(LogLevel level, const char* format, ...)
 #endif
 }
 
-void register_log_output(LogOutput& device)
+void register_log_output(log_output& device)
 {
     output.push_back(device);
 }
-} // namespace Log
+} // namespace log

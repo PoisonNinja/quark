@@ -13,12 +13,12 @@
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
-class PTS : public TTY
+class PTS : public tty
 {
 public:
-    PTS(PTY* pty);
+    PTS(pty* p);
 
     virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
 
@@ -27,12 +27,12 @@ public:
                           void* cookie) override;
 
 private:
-    PTY* pty;
+    pty* p;
 };
 
-PTS::PTS(PTY* pty)
+PTS::PTS(pty* p)
 {
-    this->pty = pty;
+    this->p = p;
 }
 
 int PTS::ioctl(unsigned long request, char* argp, void* cookie)
@@ -42,31 +42,31 @@ int PTS::ioctl(unsigned long request, char* argp, void* cookie)
 
 ssize_t PTS::read(uint8_t* buffer, size_t count, void* cookie)
 {
-    return pty->sread(buffer, count);
+    return p->sread(buffer, count);
 }
 ssize_t PTS::write(const uint8_t* buffer, size_t count, void* cookie)
 {
-    return pty->swrite(buffer, count);
+    return p->swrite(buffer, count);
 }
 
-} // namespace TTY
-PTSFS::PTSFS()
+} // namespace tty
+ptsfs::ptsfs()
 {
     filesystem::register_class(filesystem::CHR, 134);
     this->root = new InitFS::Directory(0, 0, 0755);
 }
 
-bool PTSFS::mount(Superblock* sb)
+bool ptsfs::mount(superblock* sb)
 {
-    sb->root = libcxx::intrusive_ptr<Inode>(this->root);
+    sb->root = libcxx::intrusive_ptr<inode>(this->root);
     return true;
 }
 
-bool PTSFS::register_pty(TTY::PTY* pty)
+bool ptsfs::register_pty(tty::pty* pty)
 {
     char name[128];
-    TTY::PTS* pts = new TTY::PTS(pty);
-    TTY::register_tty(134, pts);
+    tty::PTS* pts = new tty::PTS(pty);
+    tty::register_tty(134, pts);
     libcxx::sprintf(name, "pts%d", pty->index());
     this->root->mknod(name, S_IFCHR | 0644, mkdev(134, pty->index()));
     return true;

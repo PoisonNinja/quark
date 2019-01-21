@@ -6,74 +6,75 @@
 
 namespace filesystem
 {
-Vnode::Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode)
-    : Vnode(sb, inode, inode->rdev)
+vnode::vnode(superblock* sb, libcxx::intrusive_ptr<inode> inode)
+    : vnode(sb, inode, inode->rdev)
 {
 }
 
-Vnode::Vnode(Superblock* sb, libcxx::intrusive_ptr<Inode> inode, dev_t rdev)
+vnode::vnode(superblock* sb, libcxx::intrusive_ptr<inode> inode, dev_t rdev)
 {
-    this->sb    = sb;
-    this->inode = inode;
-    this->rdev  = rdev;
-    this->mode  = inode->mode;
-    this->kdev  = nullptr;
+    this->sb   = sb;
+    this->ino  = inode;
+    this->rdev = rdev;
+    this->mode = ino->mode;
+    this->kdev = nullptr;
 }
 
-int Vnode::ioctl(unsigned long request, char* argp, void* cookie)
+int vnode::ioctl(unsigned long request, char* argp, void* cookie)
 {
     if (this->kdev) {
         return this->kdev->ioctl(request, argp, cookie);
     }
-    return this->inode->ioctl(request, argp, cookie);
+    return this->ino->ioctl(request, argp, cookie);
 }
 
-int Vnode::link(const char* name, libcxx::intrusive_ptr<Vnode> node)
+int vnode::link(const char* name, libcxx::intrusive_ptr<vnode> node)
 {
-    return inode->link(name, node->inode);
+    return ino->link(name, node->ino);
 }
 
-int Vnode::mkdir(const char* name, mode_t mode)
+int vnode::mkdir(const char* name, mode_t mode)
 {
-    return inode->mkdir(name, mode);
+    return ino->mkdir(name, mode);
 }
 
-int Vnode::mknod(const char* name, mode_t mode, dev_t dev)
+int vnode::mknod(const char* name, mode_t mode, dev_t dev)
 {
     // TODO: Check if file exists
-    return this->inode->mknod(name, mode, dev);
+    return this->ino->mknod(name, mode, dev);
 }
 
-int Vnode::mount(Mount* mt)
+int vnode::mount(filesystem::mount* mt)
 {
     this->mounts.push_front(*mt);
     return 0;
 }
 
-libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
+libcxx::intrusive_ptr<vnode> vnode::lookup(const char* name, int flags,
                                            mode_t mode)
 {
-    libcxx::intrusive_ptr<Inode> retinode = inode->lookup(name, flags, mode);
+    libcxx::intrusive_ptr<inode> retinode = ino->lookup(name, flags, mode);
     if (!retinode) {
-        return libcxx::intrusive_ptr<Vnode>(nullptr);
+        return libcxx::intrusive_ptr<vnode>(nullptr);
     }
-    libcxx::intrusive_ptr<Vnode> retvnode =
-        VCache::get(retinode->ino, this->sb->rdev);
+    libcxx::intrusive_ptr<vnode> retvnode =
+        vcache::get(retinode->ino, this->sb->rdev);
     if (!retvnode) {
-        struct KDevice* kdev = get_kdevice(retinode->mode, retinode->rdev);
+        struct kdevice* kdev = get_kdevice(retinode->mode, retinode->rdev);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
-            Log::printk(Log::LogLevel::DEBUG,
+            log::printk(log::log_level::DEBUG,
                         "kdev: Looking for mode %X and dev %p\n",
                         retinode->mode, retinode->rdev);
             if (!kdev) {
                 // TODO: Return -ENXIO
-                return libcxx::intrusive_ptr<Vnode>(nullptr);
+                return libcxx::intrusive_ptr<vnode>(nullptr);
             }
         }
-        Log::printk(Log::LogLevel::DEBUG, "Failed to find %s in cache\n", name);
+        log::printk(log::log_level::DEBUG, "Failed to find %s in cache\n",
+                    name);
         retvnode =
-            libcxx::intrusive_ptr<Vnode>(new Vnode(this->sb, retinode, 0));
-        VCache::add(retinode->ino, this->sb->rdev, retvnode);
+            libcxx::intrusive_ptr<vnode>(new vnode(this->sb, retinode, 0));
+        vcache::add(retinode->ino, this->sb->rdev, retvnode);
         if (S_ISBLK(retinode->mode) || S_ISCHR(retinode->mode)) {
             retvnode->kdev = kdev;
         }
@@ -81,56 +82,56 @@ libcxx::intrusive_ptr<Vnode> Vnode::lookup(const char* name, int flags,
         // New Vnodes cannot have a mountpoint so we can bypass this check
         // if the vnode was just created
         if (!retvnode->mounts.empty()) {
-            Superblock* newsb = retvnode->mounts.front().sb;
-            Log::printk(Log::LogLevel::DEBUG,
+            superblock* newsb = retvnode->mounts.front().sb;
+            log::printk(log::log_level::DEBUG,
                         "Transitioning mountpoints, superblock at %p\n", newsb);
-            return libcxx::intrusive_ptr<Vnode>(
-                new Vnode(newsb, newsb->root, 0));
+            return libcxx::intrusive_ptr<vnode>(
+                new vnode(newsb, newsb->root, 0));
         }
     }
     return retvnode;
 }
 
-libcxx::pair<int, void*> Vnode::open(const char* name)
+libcxx::pair<int, void*> vnode::open(const char* name)
 {
     if (this->kdev) {
         return this->kdev->open(name);
     }
-    return this->inode->open(name);
+    return this->ino->open(name);
 }
 
-ssize_t Vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+ssize_t vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     if (this->kdev) {
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "kdev, intercepting read with cookie\n");
         return this->kdev->read(buffer, count, offset, cookie);
     }
-    return inode->read(buffer, count, offset, cookie);
+    return ino->read(buffer, count, offset, cookie);
 }
 
-ssize_t Vnode::write(const uint8_t* buffer, size_t count, off_t offset,
+ssize_t vnode::write(const uint8_t* buffer, size_t count, off_t offset,
                      void* cookie)
 {
     if (this->kdev) {
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "kdev, intercepting write with cookie\n");
         return this->kdev->write(buffer, count, offset, cookie);
     }
-    return inode->write(buffer, count, offset, cookie);
+    return ino->write(buffer, count, offset, cookie);
 }
 
-int Vnode::stat(struct stat* st)
+int vnode::stat(struct stat* st)
 {
     st->st_dev = this->sb->rdev;
-    return inode->stat(st);
+    return ino->stat(st);
 }
 
-bool Vnode::seekable()
+bool vnode::seekable()
 {
     if (this->kdev) {
         return this->kdev->seekable();
     }
-    return this->inode->seekable();
+    return this->ino->seekable();
 }
 } // namespace filesystem

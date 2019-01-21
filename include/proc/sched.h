@@ -4,50 +4,50 @@
 #include <proc/thread.h>
 #include <types.h>
 
-namespace Scheduler
+namespace scheduler
 {
 constexpr int wait_interruptible = (1 << 0);
 
-struct WaitQueueNode {
-    WaitQueueNode(Thread* t)
-        : thread(t)
+struct wait_queue_node {
+    wait_queue_node(thread* t)
+        : waiter(t)
         , normal_wake(false){};
-    Thread* thread;
-    libcxx::node<WaitQueueNode> node;
+    thread* waiter;
+    libcxx::node<wait_queue_node> node;
     bool normal_wake;
 };
 
-class WaitQueue
+class wait_queue
 {
 public:
-    WaitQueue(){};
-    ~WaitQueue(){}; // TODO: We should probably do something when deallocating
+    wait_queue(){};
+    ~wait_queue(){}; // TODO: We should probably do something when deallocating
 
     int wait(int flags);
 
     void wakeup();
 
 private:
-    libcxx::list<WaitQueueNode, &WaitQueueNode::node> waiters;
+    libcxx::list<wait_queue_node, &wait_queue_node::node> waiters;
 };
 
 void idle();
 
-bool insert(Thread* thread);
-bool remove(Thread* thread);
+bool insert(thread* thread);
+bool remove(thread* thread);
 
 void init();
-void switch_next(struct InterruptContext* ctx);
+void switch_next(struct interrupt_context* ctx);
 void yield();
 
-Process* get_current_process();
-Thread* get_current_thread();
+process* get_current_process();
+thread* get_current_thread();
 
 pid_t get_free_pid();
 
 bool online();
 
-bool add_process(Process* process);
-Process* find_process(pid_t pid);
+bool add_process(process* process);
+process* find_process(pid_t pid);
 bool remove_process(pid_t pid);
-}; // namespace Scheduler
+}; // namespace scheduler

@@ -48,10 +48,8 @@ void init_early_alloc(struct boot::info *b)
                               mmap_tag))
                              ->entry_size)) {
                     // Look for the highest memory address (needed for buddy)
-                    if (memory::virt::align_up(tmp->addr + tmp->len) >
-                        highest)
-                        highest =
-                            memory::virt::align_up(tmp->addr + tmp->len);
+                    if (memory::virt::align_up(tmp->addr + tmp->len) > highest)
+                        highest = memory::virt::align_up(tmp->addr + tmp->len);
                 }
                 break;
         }
@@ -62,7 +60,7 @@ void init_early_alloc(struct boot::info *b)
 addr_t early_allocate()
 {
     if (!info) {
-        Kernel::panic("Attempted to allocate memory without initializing the "
+        kernel::panic("Attempted to allocate memory without initializing the "
                       "early memory allocator!\n");
     }
     /*
@@ -90,13 +88,13 @@ addr_t early_allocate()
                 mmap->addr += memory::virt::PAGE_SIZE;
                 mmap->len -= memory::virt::PAGE_SIZE;
                 // Check if it's in a restricted area
-                if (memory::X86::is_valid_physical_memory(i, *info)) {
+                if (memory::x86::is_valid_physical_memory(i, *info)) {
                     return i;
                 }
             }
         }
     }
-    Kernel::panic("Out of memory!\n");
+    kernel::panic("Out of memory!\n");
 }
 } // namespace physical
 } // namespace memory

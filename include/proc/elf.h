@@ -5,7 +5,7 @@
 #include <proc/thread.h>
 #include <types.h>
 
-namespace ELF
+namespace elf
 {
 /* 32-bit ELF base types. */
 typedef uint32_t Elf32_Addr;
@@ -503,24 +503,24 @@ typedef struct elf64_note {
 libcxx::pair<bool, addr_t> load(addr_t binary);
 
 #if BITS == 64
-typedef Elf64_Sym Elf_Sym;
-typedef Elf64_Phdr Elf_Phdr;
-typedef Elf64_Ehdr Elf_Ehdr;
-typedef Elf64_Shdr Elf_Shdr;
-typedef Elf64_Rela Elf_Rela;
-typedef Elf64_Addr Elf_Addr;
+typedef Elf64_Sym elf_sym;
+typedef Elf64_Phdr elf_phdr;
+typedef Elf64_Ehdr elf_ehdr;
+typedef Elf64_Shdr elf_shdr;
+typedef Elf64_Rela elf_rela;
+typedef Elf64_Addr elf_addr;
 #define ELF_R_TYPE ELF64_R_TYPE
 #define ELF_R_SYM ELF64_R_SYM
 #elif BITS == 32
-typedef Elf32_Sym Elf_Sym;
-typedef Elf32_Phdr Elf_Phdr;
-typedef Elf32_Ehdr Elf_Ehdr;
-typedef Elf32_Shdr Elf_Shdr;
-typedef Elf32_Rela Elf_Rela;
-typedef Elf32_Addr Elf_Addr;
+typedef Elf32_Sym elf_sym;
+typedef Elf32_Phdr elf_phdr;
+typedef Elf32_Ehdr elf_ehdr;
+typedef Elf32_Shdr elf_shdr;
+typedef Elf32_Rela elf_rela;
+typedef Elf32_Addr elf_addr;
 #define ELF_R_TYPE ELF32_R_TYPE
 #define ELF_R_SYM ELF32_R_SYM
 #else
 #error "Unsupported processor word size. Add support for it here"
 #endif
-} // namespace ELF
+} // namespace elf

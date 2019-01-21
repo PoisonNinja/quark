@@ -6,10 +6,10 @@
 
 namespace filesystem
 {
-class Vnode;
+class vnode;
 
-struct Mount {
-    Superblock* sb;
-    libcxx::node<Mount> node;
+struct mount {
+    superblock* sb;
+    libcxx::node<mount> node;
 };
 } // namespace filesystem

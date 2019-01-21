@@ -3,14 +3,14 @@
 #include <cpu/interrupt.h>
 #include <kernel/time/clock.h>
 
-struct InterruptContext;
+struct interrupt_context;
 
-namespace Time
+namespace time
 {
-class Intel8253 : public Clock
+class intel8253 : public clock
 {
 public:
-    Intel8253(){};
+    intel8253(){};
     int features() override;
     time_t read() override;
     time_t frequency() override;
@@ -20,4 +20,4 @@ public:
     bool periodic() override;
     const char* name() override;
 };
-}  // namespace Time
+} // namespace time

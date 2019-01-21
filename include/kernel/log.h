@@ -3,23 +3,23 @@
 #include <lib/list.h>
 #include <types.h>
 
-class LogOutput
+class log_output
 {
 public:
     virtual size_t write(const char*, size_t) = 0;
-    libcxx::node<LogOutput> node;
+    libcxx::node<log_output> node;
 };
 
-namespace Log
+namespace log
 {
-enum class LogLevel : int {
+enum class log_level : int {
     DEBUG,
     INFO,
     WARNING,
     ERROR,
     CONTINUE,
 };
-size_t printk(LogLevel level, const char* format, ...);
+size_t printk(log_level level, const char* format, ...);
 
-void register_log_output(LogOutput& device);
-} // namespace Log
+void register_log_output(log_output& device);
+} // namespace log

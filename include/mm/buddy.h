@@ -6,13 +6,13 @@
 
 constexpr size_t max_num_orders = 28 - 12;
 
-struct BuddyOrder;
+struct buddy_order;
 
-class Buddy
+class buddy
 {
 public:
-    Buddy(size_t s, size_t min, size_t max);
-    ~Buddy();
+    buddy(size_t s, size_t min, size_t max);
+    ~buddy();
 
     addr_t alloc(size_t size);
     void free(addr_t addr, size_t size);
@@ -24,5 +24,5 @@ private:
     size_t size;
     size_t min_order;
     size_t max_order;
-    struct BuddyOrder* orders;
+    struct buddy_order* orders;
 };

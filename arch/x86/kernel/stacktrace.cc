@@ -18,11 +18,11 @@ void arch_do_stack_trace()
             break;
         // The base pointer points to the previous base pointer
         bp                  = (addr_t*)bp[0];
-        auto [name, offset] = Symbols::resolve_addr_fuzzy(rip);
+        auto [name, offset] = symbols::resolve_addr_fuzzy(rip);
         if (!name) {
             break;
         }
-        Log::printk(Log::LogLevel::ERROR, "Frame #%d: %s+%zX\n", frame++, name,
+        log::printk(log::log_level::ERROR, "Frame #%d: %s+%zX\n", frame++, name,
                     offset);
     }
 }

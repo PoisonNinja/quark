@@ -6,28 +6,28 @@
 
 namespace filesystem
 {
-class TmpFS : public Driver
+class tmpfs : public driver
 {
 public:
-    TmpFS();
-    ~TmpFS();
-    bool mount(Superblock* sb) override;
+    tmpfs();
+    ~tmpfs();
+    bool mount(superblock* sb) override;
     uint32_t flags() override;
 };
 
 namespace InitFS
 {
 struct TmpFSNode {
-    TmpFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name);
+    TmpFSNode(libcxx::intrusive_ptr<inode> inode, const char* name);
     TmpFSNode(const struct TmpFSNode& other);
     TmpFSNode& operator=(const struct TmpFSNode& other);
     ~TmpFSNode();
-    libcxx::intrusive_ptr<Inode> inode;
+    libcxx::intrusive_ptr<inode> ino;
     const char* name;
     libcxx::node<TmpFSNode> node;
 };
 
-class File : public Inode
+class File : public inode
 {
 public:
     File(ino_t ino, dev_t rdev, mode_t mode);
@@ -42,20 +42,20 @@ private:
     size_t buffer_size;
 };
 
-class Directory : public Inode
+class Directory : public inode
 {
 public:
     Directory(ino_t ino, dev_t rdev, mode_t mode);
     virtual ~Directory();
     virtual int link(const char* name,
-                     libcxx::intrusive_ptr<Inode> node) override;
-    virtual libcxx::intrusive_ptr<Inode> lookup(const char* name, int flags,
+                     libcxx::intrusive_ptr<inode> node) override;
+    virtual libcxx::intrusive_ptr<inode> lookup(const char* name, int flags,
                                                 mode_t mode) override;
     virtual int mkdir(const char* name, mode_t mode) override;
     virtual int mknod(const char* name, mode_t mode, dev_t dev) override;
 
 private:
-    libcxx::intrusive_ptr<Inode> find_child(const char* name);
+    libcxx::intrusive_ptr<inode> find_child(const char* name);
     libcxx::list<TmpFSNode, &TmpFSNode::node> children;
 };
 } // namespace InitFS

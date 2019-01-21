@@ -5,13 +5,13 @@
 
 namespace filesystem
 {
-class Vnode;
+class vnode;
 
-struct Superblock {
+struct superblock {
     const char* path;
 
-    libcxx::intrusive_ptr<Vnode> source; // Source file (e.g. /dev/sda)
-    libcxx::intrusive_ptr<Inode> root;   // filesystem specific internal inode
+    libcxx::intrusive_ptr<vnode> source; // Source file (e.g. /dev/sda)
+    libcxx::intrusive_ptr<inode> root;   // filesystem specific internal inode
 
     dev_t rdev;
 };

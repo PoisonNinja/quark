@@ -3,7 +3,7 @@
 #include <mm/stack.h>
 #include <mm/virtual.h>
 
-void Stack::push(addr_t address)
+void stack::push(addr_t address)
 {
     if (this->used == this->size) {
         this->expand();
@@ -11,17 +11,17 @@ void Stack::push(addr_t address)
     this->base[this->used++] = address;
 }
 
-addr_t Stack::pop()
+addr_t stack::pop()
 {
     return this->base[--this->used];
 }
 
-bool Stack::empty()
+bool stack::empty()
 {
     return this->used == 0;
 }
 
-void Stack::expand()
+void stack::expand()
 {
     addr_t phys = memory::physical::allocate();
     addr_t virt = reinterpret_cast<addr_t>(this->base + this->size);

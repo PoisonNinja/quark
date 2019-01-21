@@ -3,7 +3,7 @@
 #include <drivers/clock/intel-8253.h>
 #include <kernel/time/time.h>
 
-namespace Time
+namespace time
 {
 constexpr int FREQUENCY = 1193181; // Frequency in HZ
 constexpr int HZ        = 1000;    // # of interrupts per second
@@ -16,36 +16,36 @@ const char* NAME      = "Intel 8253";
 static time_t ticks = 0;
 
 static void interrupt_handler(int /* irq */, void* /*clock*/,
-                              struct InterruptContext* ctx)
+                              struct interrupt_context* ctx)
 {
     ticks++;
-    Time::tick(ctx);
+    time::tick(ctx);
 }
 
 static struct interrupt::handler handler(interrupt_handler, NAME, &handler);
 
-int Intel8253::features()
+int intel8253::features()
 {
     return feature_clock | feature_timer;
 }
 
-time_t Intel8253::read()
+time_t intel8253::read()
 {
     // Ticks emulated using variable since the PIT itself is useless
     return ticks;
 }
 
-time_t Intel8253::frequency()
+time_t intel8253::frequency()
 {
     return HZ;
 }
 
-bool Intel8253::enable()
+bool intel8253::enable()
 {
     return true;
 }
 
-bool Intel8253::disable()
+bool intel8253::disable()
 {
     outb(COMMAND, 0x30);
     outb(CHANNEL0, 0);
@@ -54,7 +54,7 @@ bool Intel8253::disable()
     return true;
 }
 
-bool Intel8253::schedule(time_t interval)
+bool intel8253::schedule(time_t interval)
 {
     outb(COMMAND, 0x38); // Channel 0, lobyte/hibyte, mode 4, 16-bit
     outb(CHANNEL0, static_cast<uint8_t>(interval & 0xFF));
@@ -62,7 +62,7 @@ bool Intel8253::schedule(time_t interval)
     return true;
 }
 
-bool Intel8253::periodic()
+bool intel8253::periodic()
 {
     register_handler(interrupt::irq_to_interrupt(0), handler);
     uint16_t divisor = FREQUENCY / HZ;
@@ -72,8 +72,8 @@ bool Intel8253::periodic()
     return true;
 }
 
-const char* Intel8253::name()
+const char* intel8253::name()
 {
     return NAME;
 }
-} // namespace Time
+} // namespace time

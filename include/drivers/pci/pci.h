@@ -4,14 +4,14 @@
 #include <lib/utility.h>
 #include <types.h>
 
-namespace PCI
+namespace pci
 {
 /*
  * For now, a driver can either support one specific model or one entire family
  * of devices. In the future we may look into multiple vendors/devices, but this
  * will suffice for now.
  */
-struct Filter {
+struct filter {
     uint16_t vendor_id;
     uint16_t device_id;
     uint8_t class_id;
@@ -22,7 +22,7 @@ struct Filter {
 #define PCI_CLASS_IF(class, subclass, prog_if) 0, 0, class, subclass, prog_if
 #define PCI_CLASS(class, subclass) 0, 0, class, subclass, 0
 
-struct PCIID {
+struct pciid {
     uint16_t vendor_id;
     uint16_t device_id;
     uint8_t class_id;
@@ -30,7 +30,7 @@ struct PCIID {
     uint8_t prog_if;
 };
 
-struct PCIBAR {
+struct pcibar {
     addr_t addr;
     size_t size;
 };
@@ -45,10 +45,10 @@ constexpr bool bar_is_64(uint32_t low)
     return ((low & 0x6) == 0x4);
 }
 
-class Device
+class device
 {
 public:
-    Device(uint8_t bus, uint8_t device, uint8_t function);
+    device(uint8_t bus, uint8_t device, uint8_t function);
 
     uint32_t read_config_32(const uint8_t offset);
     void write_config_32(const uint8_t offset, const uint32_t value);
@@ -57,30 +57,30 @@ public:
     uint8_t read_config_8(const uint8_t offset);
     void write_config_8(const uint8_t offset, const uint8_t value);
 
-    PCIID get_pciid();
-    PCIBAR get_pcibar(int bar);
+    pciid get_pciid();
+    pcibar get_pcibar(int bar);
 
     bool is_claimed();
     void claim();
     void unclaim();
 
-    libcxx::node<Device> node;
+    libcxx::node<device> node;
 
 private:
     bool claimed = false;
     uint8_t bus;
-    uint8_t device;
+    uint8_t dev;
     uint8_t function;
 };
 
-class Driver
+class driver
 {
 public:
-    virtual ~Driver(){};
-    virtual bool probe(Device* dev) = 0;
+    virtual ~driver(){};
+    virtual bool probe(device* dev) = 0;
     virtual const char* name()      = 0;
-    virtual const Filter* filter()  = 0;
-    libcxx::node<Driver> node;
+    virtual const filter* filt()    = 0;
+    libcxx::node<driver> node;
 };
 
 constexpr uint8_t pci_vendor_id = 0x00;
@@ -133,8 +133,8 @@ constexpr uint8_t pci_io_base_upper           = 0x30;
 constexpr uint8_t pci_io_base_lower           = 0x32;
 constexpr uint8_t pci_bridge_control          = 0x3E;
 
-bool register_driver(Driver& d);
+bool register_driver(driver& d);
 
 libcxx::pair<bool, addr_t> map(addr_t phys, size_t size);
 void init();
-} // namespace PCI
+} // namespace pci

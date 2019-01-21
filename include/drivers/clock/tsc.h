@@ -2,12 +2,12 @@
 
 #include <kernel/time/clock.h>
 
-namespace Time
+namespace time
 {
-class TSC : public Clock
+class tsc : public clock
 {
 public:
-    TSC();
+    tsc();
     int features() override;
     time_t read() override;
     time_t frequency() override;
@@ -23,4 +23,4 @@ private:
     uint64_t calibrate();
     time_t calibrated_frequency;
 };
-}  // namespace Time
+} // namespace time

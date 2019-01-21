@@ -7,16 +7,16 @@
 
 namespace filesystem
 {
-class PTSFS : public TmpFS
+class ptsfs : public tmpfs
 {
 public:
-    PTSFS();
+    ptsfs();
     // Returns minor
-    bool register_pty(TTY::PTY* pty);
-    bool mount(Superblock* sb) override;
+    bool register_pty(tty::pty* pty);
+    bool mount(superblock* sb) override;
 
 private:
-    libcxx::list<TTY::PTY, &TTY::PTY::node> ptys;
+    libcxx::list<tty::pty, &tty::pty::node> ptys;
     InitFS::Directory* root;
 };
 

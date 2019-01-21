@@ -1,7 +1,7 @@
 #include <errno.h>
 #include <fs/descriptor.h>
+#include <fs/driver.h>
 #include <fs/fs.h>
-#include <fs/ftable.h>
 #include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
@@ -66,20 +66,20 @@ char* basename(const char* path)
     }
 }
 
-Descriptor::Descriptor(libcxx::intrusive_ptr<Vnode> vnode, int flags)
+descriptor::descriptor(libcxx::intrusive_ptr<vnode> vnode, int flags)
 {
-    this->vnode          = vnode;
+    this->vno            = vnode;
     this->cookie         = nullptr;
     this->current_offset = 0;
     this->flags          = flags;
 }
 
-int Descriptor::ioctl(unsigned long request, char* argp)
+int descriptor::ioctl(unsigned long request, char* argp)
 {
-    return this->vnode->ioctl(request, argp, this->cookie);
+    return this->vno->ioctl(request, argp, this->cookie);
 }
 
-int Descriptor::link(const char* name, libcxx::intrusive_ptr<Descriptor> node)
+int descriptor::link(const char* name, libcxx::intrusive_ptr<descriptor> node)
 {
     const char* dir       = dirname(name);
     const char* file      = basename(name);
@@ -89,13 +89,13 @@ int Descriptor::link(const char* name, libcxx::intrusive_ptr<Descriptor> node)
         delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->link(file, node->vnode);
+    int ret = directory->vno->link(file, node->vno);
     delete[] dir;
     delete[] file;
     return ret;
 }
 
-off_t Descriptor::lseek(off_t offset, int whence)
+off_t descriptor::lseek(off_t offset, int whence)
 {
     off_t start;
     if (whence == SEEK_SET) {
@@ -116,11 +116,11 @@ off_t Descriptor::lseek(off_t offset, int whence)
     return current_offset = result;
 }
 
-int Descriptor::mkdir(const char* name, mode_t mode)
+int descriptor::mkdir(const char* name, mode_t mode)
 {
     const char* dir  = dirname(name);
     const char* file = basename(name);
-    Log::printk(Log::LogLevel::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
+    log::printk(log::log_level::DEBUG, "[descriptor->mkdir] dir: %s file: %s\n",
                 dir, file);
     auto [err, directory] = this->open(dir, O_RDONLY, 0);
     if (!directory) {
@@ -128,17 +128,17 @@ int Descriptor::mkdir(const char* name, mode_t mode)
         delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->mkdir(file, mode);
+    int ret = directory->vno->mkdir(file, mode);
     delete[] dir;
     delete[] file;
     return ret;
 }
 
-int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
+int descriptor::mknod(const char* name, mode_t mode, dev_t dev)
 {
     const char* dir  = dirname(name);
     const char* file = basename(name);
-    Log::printk(Log::LogLevel::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
+    log::printk(log::log_level::DEBUG, "[descriptor->mknod] dir: %s file: %s\n",
                 dir, file);
     auto [err, directory] = this->open(dir, O_RDONLY, 0);
     if (!directory) {
@@ -146,22 +146,22 @@ int Descriptor::mknod(const char* name, mode_t mode, dev_t dev)
         delete[] file;
         return -ENOENT;
     }
-    int ret = directory->vnode->mknod(file, mode, dev);
+    int ret = directory->vno->mknod(file, mode, dev);
     delete[] dir;
     delete[] file;
     return ret;
 }
 
-int Descriptor::mount(const char* source, const char* target, const char* type,
+int descriptor::mount(const char* source, const char* target, const char* type,
                       unsigned long flags)
 {
     /*
      * Retrieve the driver first so we can check if the driver actually wants
      * a real block device or doesn't care (e.g. procfs)
      */
-    Driver* driver = Drivers::get(type);
+    driver* driver = drivers::get(type);
     if (!driver) {
-        Log::printk(Log::LogLevel::WARNING, "Failed to locate driver for %s\n",
+        log::printk(log::log_level::WARNING, "Failed to locate driver for %s\n",
                     type);
         return -EINVAL;
     }
@@ -174,27 +174,27 @@ int Descriptor::mount(const char* source, const char* target, const char* type,
     if (!source_desc && !(driver->flags() & driver_pseudo)) {
         return -ENOENT;
     }
-    Superblock* sb = new Superblock();
+    superblock* sb = new superblock();
     sb->path       = source;
     if (source_desc)
-        sb->source = source_desc->vnode;
+        sb->source = source_desc->vno;
     driver->mount(sb);
-    Mount* mt = new Mount();
-    mt->sb    = sb;
-    target_desc->vnode->mount(mt);
+    filesystem::mount* mt = new filesystem::mount();
+    mt->sb                = sb;
+    target_desc->vno->mount(mt);
     return 0;
 }
 
-libcxx::pair<int, libcxx::intrusive_ptr<Descriptor>>
-Descriptor::open(const char* name, int flags, mode_t mode)
+libcxx::pair<int, libcxx::intrusive_ptr<descriptor>>
+descriptor::open(const char* name, int flags, mode_t mode)
 {
     char* path = libcxx::strdup(name);
     char* current;
     char* filename = basename(name);
-    libcxx::intrusive_ptr<Descriptor> ret(nullptr);
-    libcxx::intrusive_ptr<Vnode> curr_vnode = this->vnode;
+    libcxx::intrusive_ptr<descriptor> ret(nullptr);
+    libcxx::intrusive_ptr<vnode> curr_vnode = this->vno;
     while ((current = libcxx::strtok_r(path, "/", &path))) {
-        Log::printk(Log::LogLevel::DEBUG, "[descriptor->open] %s\n", current);
+        log::printk(log::log_level::DEBUG, "[descriptor->open] %s\n", current);
         int checked_flags   = flags;
         mode_t checked_mode = mode;
         if (libcxx::strcmp(current, filename)) {
@@ -203,53 +203,53 @@ Descriptor::open(const char* name, int flags, mode_t mode)
         }
         curr_vnode = curr_vnode->lookup(current, checked_flags, checked_mode);
         if (!curr_vnode) {
-            Log::printk(Log::LogLevel::ERROR,
+            log::printk(log::log_level::ERROR,
                         "[descriptor->open] Failed to open %s\n", current);
             return libcxx::make_pair(
-                -ENOENT, libcxx::intrusive_ptr<Descriptor>(nullptr));
+                -ENOENT, libcxx::intrusive_ptr<descriptor>(nullptr));
         }
     }
-    ret = libcxx::intrusive_ptr<Descriptor>(
-        new Descriptor(curr_vnode, oflags_to_descriptor(flags)));
+    ret = libcxx::intrusive_ptr<descriptor>(
+        new descriptor(curr_vnode, oflags_to_descriptor(flags)));
     auto [status, _cookie] = curr_vnode->open(name);
     if (!status) {
         ret->cookie = _cookie;
-        Log::printk(Log::LogLevel::DEBUG,
+        log::printk(log::log_level::DEBUG,
                     "[descriptor->open] Setting cookie to %p\n", ret->cookie);
     }
     delete[] path;
     return libcxx::make_pair(0, ret);
 }
 
-ssize_t Descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
+ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
 {
     if (!(this->flags & F_READ)) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    return vnode->read(buffer, count, offset, this->cookie);
+    return vno->read(buffer, count, offset, this->cookie);
 }
 
-ssize_t Descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
+ssize_t descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
 {
     if (!(this->flags & F_WRITE)) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    return vnode->write(buffer, count, offset, this->cookie);
+    return vno->write(buffer, count, offset, this->cookie);
 }
 
-bool Descriptor::seekable()
+bool descriptor::seekable()
 {
-    return this->vnode->seekable();
+    return this->vno->seekable();
 }
 
-ssize_t Descriptor::read(uint8_t* buffer, size_t count)
+ssize_t descriptor::read(uint8_t* buffer, size_t count)
 {
     if (!(this->flags & F_READ)) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
@@ -261,20 +261,19 @@ ssize_t Descriptor::read(uint8_t* buffer, size_t count)
     return ret;
 }
 
-int Descriptor::stat(struct stat* st)
+int descriptor::stat(struct stat* st)
 {
-    return vnode->stat(st);
+    return vno->stat(st);
 }
 
-ssize_t Descriptor::write(const uint8_t* buffer, size_t count)
+ssize_t descriptor::write(const uint8_t* buffer, size_t count)
 {
     if (!(this->flags & F_WRITE)) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    ssize_t ret =
-        this->vnode->write(buffer, count, current_offset, this->cookie);
+    ssize_t ret = this->vno->write(buffer, count, current_offset, this->cookie);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
         current_offset += ret;

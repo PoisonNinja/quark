@@ -6,7 +6,7 @@
 
 namespace
 {
-libcxx::list<Module, &Module::node> modules;
+libcxx::list<module, &module::node> modules;
 
 // A ghetto version of strtok that accepts \0
 const char* next_token(const char* string, const char* end)
@@ -30,14 +30,14 @@ const char* next_token(const char* string, const char* end)
     return p;
 }
 
-void parse_modinfo(Module* mod, size_t index)
+void parse_modinfo(module* mod, size_t index)
 {
     const char* key = (char*)(mod->sections[index]);
     const char* end = (char*)(mod->sections[index] + mod->shdrs[index].sh_size);
 
     int found = 0;
     while (key) {
-        Log::printk(Log::LogLevel::DEBUG, "[parse_modinfo]: Key: %s\n", key);
+        log::printk(log::log_level::DEBUG, "[parse_modinfo]: Key: %s\n", key);
 
         if (!libcxx::strncmp("name=", key, 5)) {
             mod->name = key + 5;
@@ -52,7 +52,7 @@ void parse_modinfo(Module* mod, size_t index)
             mod->author = key + 7;
             found++;
         } else {
-            Log::printk(Log::LogLevel::WARNING,
+            log::printk(log::log_level::WARNING,
                         "[parse_modinfo]: Invalid token %s\n", key);
         }
 
@@ -60,35 +60,35 @@ void parse_modinfo(Module* mod, size_t index)
     }
 
     if (found != 4) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "[parse_modinfo]: Missing required attributes\n");
     }
 }
 } // namespace
 
-extern bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
+extern bool relocate_module(module* mod, elf::elf_sym* symtab,
                             const char* string_table);
 
 bool load_module(void* binary)
 {
-    Log::printk(Log::LogLevel::INFO, "[load_module] Loading module at %p\n",
+    log::printk(log::log_level::INFO, "[load_module] Loading module at %p\n",
                 binary);
-    ELF::Elf_Ehdr* header = reinterpret_cast<ELF::Elf_Ehdr*>(binary);
+    elf::elf_ehdr* header = reinterpret_cast<elf::elf_ehdr*>(binary);
     if (libcxx::memcmp(header->e_ident, ELFMAG, 4)) {
-        Log::printk(Log::LogLevel::ERROR,
-                    "[load_module] Binary passed in is not an ELF file!\n");
+        log::printk(log::log_level::ERROR,
+                    "[load_module] Binary passed in is not an elf file!\n");
         return false;
     }
 
-    struct Module* mod = new Module;
+    struct module* mod = new module;
 
     mod->shnum    = header->e_shnum;
-    mod->shdrs    = new ELF::Elf_Shdr[mod->shnum];
+    mod->shdrs    = new elf::elf_shdr[mod->shnum];
     mod->sections = new addr_t[mod->shnum];
 
     for (uint32_t i = 0; i < header->e_shnum; i++) {
-        ELF::Elf_Shdr* shdr =
-            reinterpret_cast<ELF::Elf_Shdr*>(
+        elf::elf_shdr* shdr =
+            reinterpret_cast<elf::elf_shdr*>(
                 (reinterpret_cast<addr_t>(binary) + header->e_shoff)) +
             i;
         libcxx::memcpy(&mod->shdrs[i], shdr, header->e_shentsize);
@@ -96,7 +96,7 @@ bool load_module(void* binary)
 
     for (uint32_t i = 0; i < header->e_shnum; i++) {
         mod->shdrs[i].sh_addr = mod->sections[i] =
-            reinterpret_cast<ELF::Elf_Addr>(new uint8_t[mod->shdrs[i].sh_size]);
+            reinterpret_cast<elf::elf_addr>(new uint8_t[mod->shdrs[i].sh_size]);
         if (mod->shdrs[i].sh_type == SHT_NOBITS) {
             libcxx::memset(reinterpret_cast<void*>(mod->sections[i]), 0,
                            mod->shdrs[i].sh_size);
@@ -109,8 +109,8 @@ bool load_module(void* binary)
         }
     }
 
-    ELF::Elf_Shdr* shdr_string_table = &mod->shdrs[header->e_shstrndx];
-    Log::printk(Log::LogLevel::DEBUG,
+    elf::elf_shdr* shdr_string_table = &mod->shdrs[header->e_shstrndx];
+    log::printk(log::log_level::DEBUG,
                 "[load_module] shdr_string_table: %p, type: %X, offset: %p\n",
                 shdr_string_table, shdr_string_table->sh_type,
                 shdr_string_table->sh_offset);
@@ -131,54 +131,54 @@ bool load_module(void* binary)
         }
     }
 
-    Log::printk(Log::LogLevel::DEBUG, "[load_module] String table at %p\n",
+    log::printk(log::log_level::DEBUG, "[load_module] String table at %p\n",
                 string_table);
 
-    ELF::Elf_Sym* symtab = nullptr;
+    elf::elf_sym* symtab = nullptr;
     size_t num_syms      = 0;
     for (uint32_t i = 0; i < header->e_shnum; i++) {
         if (mod->shdrs[i].sh_type == SHT_SYMTAB) {
-            symtab   = reinterpret_cast<ELF::Elf_Sym*>(mod->sections[i]);
+            symtab   = reinterpret_cast<elf::elf_sym*>(mod->sections[i]);
             num_syms = mod->shdrs[i].sh_size / mod->shdrs[i].sh_entsize;
             break;
         }
     }
 
     if (!relocate_module(mod, symtab, string_table)) {
-        Log::printk(Log::LogLevel::ERROR,
+        log::printk(log::log_level::ERROR,
                     "[load_module] Failed to perform relocations\n");
         return false;
     }
 
-    ELF::Elf_Sym* sym = symtab;
+    elf::elf_sym* sym = symtab;
     addr_t ctor_start = 0, ctor_end = 0;
     for (size_t j = 1; j <= num_syms; j++, sym++) {
         // We only want to consider functions
         // if (ELF_ST_TYPE(sym->st_info) != STT_FUNC)
         //     continue;
         if (!libcxx::strcmp(string_table + sym->st_name, "init")) {
-            Log::printk(Log::LogLevel::DEBUG,
+            log::printk(log::log_level::DEBUG,
                         "[load_module] Located init point at %p\n",
                         mod->sections[sym->st_shndx] + sym->st_value);
             mod->init = reinterpret_cast<int (*)()>(
                 mod->sections[sym->st_shndx] + sym->st_value);
         } else if (!libcxx::strcmp(string_table + sym->st_name, "fini")) {
-            Log::printk(Log::LogLevel::DEBUG,
+            log::printk(log::log_level::DEBUG,
                         "[load_module] Located fini point at %p\n",
                         mod->sections[sym->st_shndx] + sym->st_value);
             mod->fini = reinterpret_cast<int (*)()>(
                 mod->sections[sym->st_shndx] + sym->st_value);
         } else if (!libcxx::strcmp(string_table + sym->st_name,
                                    "__constructors_start")) {
-            Log::printk(
-                Log::LogLevel::DEBUG,
+            log::printk(
+                log::log_level::DEBUG,
                 "[load_module] Located __constructors_start point at %p\n",
                 mod->sections[sym->st_shndx] + sym->st_value);
             ctor_start = mod->sections[sym->st_shndx] + sym->st_value;
         } else if (!libcxx::strcmp(string_table + sym->st_name,
                                    "__constructors_end")) {
-            Log::printk(
-                Log::LogLevel::DEBUG,
+            log::printk(
+                log::log_level::DEBUG,
                 "[load_module] Located __constructors_end point at %p\n",
                 mod->sections[sym->st_shndx] + sym->st_value);
             ctor_end = mod->sections[sym->st_shndx] + sym->st_value;
@@ -203,19 +203,19 @@ bool load_module(void* binary)
     if (!mod->name) {
         // Uhh I'm pretty sure this actually leaks
         // TODO: Fix
-        Log::printk(Log::LogLevel::ERROR,
+        log::printk(log::log_level::ERROR,
                     "[load_module]: Missing module name, not loading\n");
         return false;
         delete mod;
     }
 
-    Log::printk(Log::LogLevel::INFO, "[load_module] Loaded module %s\n",
+    log::printk(log::log_level::INFO, "[load_module] Loaded module %s\n",
                 mod->name);
-    Log::printk(Log::LogLevel::INFO, "[load_module] Description: %s\n",
+    log::printk(log::log_level::INFO, "[load_module] Description: %s\n",
                 (mod->description) ? mod->description : "");
-    Log::printk(Log::LogLevel::INFO, "[load_module] Author: %s\n",
+    log::printk(log::log_level::INFO, "[load_module] Author: %s\n",
                 (mod->author) ? mod->author : "");
-    Log::printk(Log::LogLevel::INFO, "[load_module] Version: %s\n",
+    log::printk(log::log_level::INFO, "[load_module] Version: %s\n",
                 (mod->version) ? mod->version : "");
 
     modules.push_front(*mod);
@@ -228,7 +228,7 @@ bool unload_module(const char* name)
 {
     for (auto it = modules.begin(); it != modules.end(); it++) {
         if (!libcxx::strcmp(it->name, name)) {
-            Log::printk(Log::LogLevel::INFO,
+            log::printk(log::log_level::INFO,
                         "[unload_module] Unloading module %s\n", name);
             if (it->fini) {
                 it->fini();

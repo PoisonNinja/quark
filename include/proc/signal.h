@@ -110,14 +110,14 @@ struct ksignal {
     ucontext_t* ucontext;
 };
 
-struct InterruptContext;
+struct interrupt_context;
 
-namespace Signal
+namespace signal
 {
-void encode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx);
-void decode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx);
+void encode_mcontext(mcontext_t* mctx, struct thread_context* ctx);
+void decode_mcontext(mcontext_t* mctx, struct thread_context* ctx);
 
-void handle(struct InterruptContext* ctx);
+void handle(struct interrupt_context* ctx);
 
 int select_signal(sigset_t* set);
 
@@ -136,4 +136,4 @@ void sigorset(sigset_t* dest, const sigset_t* source);
 void signotset(sigset_t* dest, const sigset_t* source);
 
 void init();
-} // namespace Signal
+} // namespace signal

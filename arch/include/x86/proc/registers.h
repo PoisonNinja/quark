@@ -3,7 +3,7 @@
 #include <types.h>
 
 #ifdef X86_64
-struct ThreadContext {
+struct thread_context {
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -77,7 +77,7 @@ enum {
 #define REG_CR2 REG_CR2
 };
 #else
-struct ThreadContext {
+struct thread_context {
     uint32_t edi;
     uint32_t esi;
     uint32_t ebp;

@@ -5,11 +5,11 @@
 #include <proc/signal.h>
 #include <types.h>
 
-struct InterruptContext;
+struct interrupt_context;
 
-class Process;
+class process;
 
-enum class ThreadState {
+enum class thread_state {
     UNMANAGED,
     SLEEPING_UNINTERRUPTIBLE,
     SLEEPING_INTERRUPTIBLE,
@@ -17,21 +17,21 @@ enum class ThreadState {
     RUNNING,
 };
 
-class Thread
+class thread
 {
 public:
-    Thread(Process *p);
-    ~Thread();
+    thread(process *p);
+    ~thread();
     bool load(addr_t binary, int argc, const char *argv[], int envc,
-              const char *envp[], struct ThreadContext &ctx);
+              const char *envp[], struct thread_context &ctx);
     void exit();
 
     tid_t tid;
-    ThreadState state;
-    struct ThreadContext tcontext; // Thread execution state
-    libcxx::node<Thread> process_node;
-    libcxx::node<Thread> scheduler_node;
-    Process *parent;
+    thread_state state;
+    struct thread_context tcontext; // Thread execution state
+    libcxx::node<thread> process_node;
+    libcxx::node<thread> scheduler_node;
+    process *parent;
 
     // Signals
     size_t signal_count;
@@ -40,28 +40,30 @@ public:
     sigset_t signal_pending;
     stack_t signal_stack;
 
-    void handle_signal(struct InterruptContext *ctx);
+    void handle_signal(struct interrupt_context *ctx);
     bool send_signal(int signal);
 
 private:
     void setup_signal(struct ksignal *ksig,
-                      struct ThreadContext *original_state,
-                      struct ThreadContext *new_state);
+                      struct thread_context *original_state,
+                      struct thread_context *new_state);
     void refresh_signal();
 };
 
-void encode_tcontext(struct InterruptContext *ctx,
-                     struct ThreadContext *thread_ctx);
-void decode_tcontext(struct InterruptContext *ctx,
-                     struct ThreadContext *thread_ctx);
+void encode_tcontext(struct interrupt_context *ctx,
+                     struct thread_context *thread_ctx);
+void decode_tcontext(struct interrupt_context *ctx,
+                     struct thread_context *thread_ctx);
 
-void save_context(struct InterruptContext *ctx, struct ThreadContext *tcontext);
-void load_context(struct InterruptContext *ctx, struct ThreadContext *tcontext);
+void save_context(struct interrupt_context *ctx,
+                  struct thread_context *tcontext);
+void load_context(struct interrupt_context *ctx,
+                  struct thread_context *tcontext);
 
-Thread *create_kernel_thread(Process *p, void (*entry_point)(void *),
+thread *create_kernel_thread(process *p, void (*entry_point)(void *),
                              void *data);
 
 void set_stack(addr_t stack);
 addr_t get_stack();
 
-void load_registers(struct ThreadContext &tcontext);
+void load_registers(struct thread_context &tcontext);

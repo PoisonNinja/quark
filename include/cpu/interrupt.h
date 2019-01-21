@@ -20,7 +20,7 @@ inline int irq_to_interrupt(int irq)
 }
 
 using interrupt_handler_t =
-    libcxx::function<void(int, void *, struct InterruptContext *), 64>;
+    libcxx::function<void(int, void *, struct interrupt_context *), 64>;
 
 struct handler {
     handler(interrupt_handler_t handler, const char *dev_name, void *dev_id)
@@ -39,14 +39,14 @@ void enable();
 void save(int &store);
 void restore(int &store);
 
-void dispatch(int int_no, struct InterruptContext *ctx);
+void dispatch(int int_no, struct interrupt_context *ctx);
 
-void dump(struct InterruptContext *ctx);
+void dump(struct interrupt_context *ctx);
 
 bool interrupts_enabled();
 bool is_exception(int int_no);
 
-bool is_userspace(struct InterruptContext *ctx);
+bool is_userspace(struct interrupt_context *ctx);
 
 bool register_handler(uint32_t int_no, interrupt::handler &handler);
 bool unregister_handler(uint32_t int_no, const interrupt::handler &handler);

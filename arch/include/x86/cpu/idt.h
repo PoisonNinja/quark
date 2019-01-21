@@ -4,11 +4,11 @@
 
 namespace cpu
 {
-namespace X86
+namespace x86
 {
-namespace IDT
+namespace idt
 {
-struct Descriptor {
+struct descriptor {
     uint16_t limit;
     addr_t offset;
 } __attribute__((packed));
@@ -26,6 +26,6 @@ struct Entry {
 } __attribute__((packed));
 
 void init();
-}  // namespace IDT
-}  // namespace X86
-}  // namespace cpu
+} // namespace idt
+} // namespace x86
+} // namespace cpu

@@ -7,30 +7,30 @@
 #include <proc/ptable.h>
 #include <proc/sched.h>
 
-namespace Scheduler
+namespace scheduler
 {
 namespace
 {
-libcxx::list<Thread, &Thread::scheduler_node> run_queue;
-Thread* current_thread;
-Process* kernel_process;
-Thread* kidle;
+libcxx::list<thread, &thread::scheduler_node> run_queue;
+thread* current_thread;
+process* kernel_process;
+thread* kidle;
 
-PTable ptable;
+ptable ptable;
 
 bool _online = false;
 } // namespace
 
-int WaitQueue::wait(int flags)
+int wait_queue::wait(int flags)
 {
-    Thread* t = Scheduler::get_current_thread();
-    WaitQueueNode node(t);
+    thread* t = scheduler::get_current_thread();
+    wait_queue_node node(t);
     this->waiters.push_back(node);
     t->state = (flags & wait_interruptible)
-                   ? ThreadState::SLEEPING_INTERRUPTIBLE
-                   : ThreadState::SLEEPING_UNINTERRUPTIBLE;
-    Scheduler::remove(t);
-    Scheduler::yield();
+                   ? thread_state::SLEEPING_INTERRUPTIBLE
+                   : thread_state::SLEEPING_UNINTERRUPTIBLE;
+    scheduler::remove(t);
+    scheduler::yield();
     int ret = 0;
     // Check if a signal is pending
     if (!node.normal_wake) {
@@ -41,11 +41,11 @@ int WaitQueue::wait(int flags)
     return ret;
 }
 
-void WaitQueue::wakeup()
+void wait_queue::wakeup()
 {
     for (auto it = this->waiters.begin(); it != this->waiters.end();) {
         (*it).normal_wake = true;
-        Scheduler::insert((*it).thread);
+        scheduler::insert((*it).waiter);
         // Erase the element
         it = this->waiters.erase(it);
     }
@@ -67,23 +67,23 @@ pid_t get_free_pid()
     return next_pid++;
 }
 
-bool insert(Thread* thread)
+bool insert(thread* thread)
 {
-    thread->state = ThreadState::RUNNABLE;
+    thread->state = thread_state::RUNNABLE;
     run_queue.push_front(*thread);
     return true;
 }
 
-bool remove(Thread* thread)
+bool remove(thread* thread)
 {
-    thread->state = ThreadState::UNMANAGED;
+    thread->state = thread_state::UNMANAGED;
     run_queue.erase(run_queue.iterator_to(*thread));
     return true;
 }
 
-Thread* next()
+thread* next()
 {
-    Thread* next = nullptr;
+    thread* next = nullptr;
     if (run_queue.empty()) {
         next = kidle;
     } else {
@@ -94,13 +94,13 @@ Thread* next()
     return next;
 }
 
-void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
+void switch_context(struct interrupt_context* ctx, thread* current,
+                    thread* next)
 {
     save_context(ctx, &current->tcontext);
     if (current) {
         if (current->parent->address_space != next->parent->address_space) {
-            memory::virt::set_address_space_root(
-                next->parent->address_space);
+            memory::virt::set_address_space_root(next->parent->address_space);
         }
     } else {
         memory::virt::set_address_space_root(next->parent->address_space);
@@ -108,19 +108,19 @@ void switch_context(struct InterruptContext* ctx, Thread* current, Thread* next)
     load_context(ctx, &next->tcontext);
 }
 
-void switch_next(struct InterruptContext* ctx)
+void switch_next(struct interrupt_context* ctx)
 {
-    Thread* next_thread = next();
+    thread* next_thread = next();
     switch_context(ctx, current_thread, next_thread);
     current_thread = next_thread;
-    if (Scheduler::online()) {
-        if (Scheduler::get_current_thread()->signal_required) {
-            Scheduler::get_current_thread()->handle_signal(ctx);
+    if (scheduler::online()) {
+        if (scheduler::get_current_thread()->signal_required) {
+            scheduler::get_current_thread()->handle_signal(ctx);
         }
     }
 }
 
-void yield_switch(int, void*, struct InterruptContext* ctx)
+void yield_switch(int, void*, struct interrupt_context* ctx)
 {
     switch_next(ctx);
 }
@@ -129,13 +129,13 @@ interrupt::handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
-    Log::printk(Log::LogLevel::INFO, "Initializing scheduler...\n");
+    log::printk(log::log_level::INFO, "Initializing scheduler...\n");
     interrupt::register_handler(0x81, yield_handler);
-    kernel_process                = new Process(nullptr);
+    kernel_process                = new process(nullptr);
     kernel_process->address_space = memory::virt::get_address_space_root();
     // TODO: Move this to architecture specific
-    Thread* kinit = new Thread(kernel_process);
-    Scheduler::insert(kinit);
+    thread* kinit = new thread(kernel_process);
+    scheduler::insert(kinit);
     /*
      * Set kinit as current_thread, so on the first task switch caused by the
      * timer, it will save the kernel context into the kinit task, but since
@@ -144,15 +144,15 @@ void init()
      */
     current_thread = kinit;
     _online        = true;
-    Log::printk(Log::LogLevel::INFO, "Scheduler initialized\n");
+    log::printk(log::log_level::INFO, "scheduler initialized\n");
 }
 
-Process* get_current_process()
+process* get_current_process()
 {
     return current_thread->parent;
 }
 
-Thread* get_current_thread()
+thread* get_current_thread()
 {
     return current_thread;
 }
@@ -162,12 +162,12 @@ bool online()
     return _online;
 }
 
-bool add_process(Process* process)
+bool add_process(process* process)
 {
     return ptable.add(process);
 }
 
-Process* find_process(pid_t pid)
+process* find_process(pid_t pid)
 {
     return ptable.get(pid);
 }
@@ -176,4 +176,4 @@ bool remove_process(pid_t pid)
 {
     return ptable.remove(pid);
 }
-} // namespace Scheduler
+} // namespace scheduler

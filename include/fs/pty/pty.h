@@ -6,14 +6,14 @@
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
 constexpr size_t pty_size = 4096;
 
-class PTY
+class pty
 {
 public:
-    PTY(int index);
+    pty(int index);
 
     int index();
 
@@ -23,18 +23,18 @@ public:
     ssize_t sread(uint8_t* buffer, size_t count);
     ssize_t swrite(const uint8_t* buffer, size_t count);
 
-    libcxx::node<PTY> node;
+    libcxx::node<pty> node;
 
 private:
     char mbuf[pty_size];
     size_t mhead, mtail;
-    Scheduler::WaitQueue mqueue;
+    scheduler::wait_queue mqueue;
 
     char sbuf[pty_size];
     size_t shead, stail;
-    Scheduler::WaitQueue squeue;
+    scheduler::wait_queue squeue;
 
     int idx;
 };
-} // namespace TTY
+} // namespace tty
 } // namespace filesystem

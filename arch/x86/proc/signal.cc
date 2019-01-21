@@ -16,9 +16,9 @@ struct stack_frame {
     siginfo_t siginfo;
 };
 
-void Thread::setup_signal(struct ksignal* ksig,
-                          struct ThreadContext* original_state,
-                          struct ThreadContext* new_state)
+void thread::setup_signal(struct ksignal* ksig,
+                          struct thread_context* original_state,
+                          struct thread_context* new_state)
 {
     libcxx::memcpy(new_state, original_state, sizeof(*new_state));
     addr_t stack_location;
@@ -55,9 +55,9 @@ void Thread::setup_signal(struct ksignal* ksig,
     frame->ucontext_address = &frame->ucontext;
 #endif
 
-    Log::printk(Log::LogLevel::DEBUG, "Going to return to gadget at %p\n",
+    log::printk(log::log_level::DEBUG, "Going to return to gadget at %p\n",
                 frame->ret_location);
-    Log::printk(Log::LogLevel::DEBUG, "Frame at %p\n", frame);
+    log::printk(log::log_level::DEBUG, "Frame at %p\n", frame);
 
 #ifdef X86_64
     new_state->rip = (uint64_t)ksig->sa->sa_handler;
@@ -77,9 +77,9 @@ void Thread::setup_signal(struct ksignal* ksig,
 #endif
 }
 
-namespace Signal
+namespace signal
 {
-void encode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
+void encode_mcontext(mcontext_t* mctx, struct thread_context* ctx)
 {
 #ifdef X86_64
     mctx->gregs[REG_R8]  = ctx->r8;
@@ -118,7 +118,7 @@ void encode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
 #endif
 }
 
-void decode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
+void decode_mcontext(mcontext_t* mctx, struct thread_context* ctx)
 {
 #ifdef X86_64
     ctx->r8     = mctx->gregs[REG_R8];
@@ -154,4 +154,4 @@ void decode_mcontext(mcontext_t* mctx, struct ThreadContext* ctx)
 // // TODO: Decode CS, GS, and FS
 #endif
 }
-} // namespace Signal
+} // namespace signal

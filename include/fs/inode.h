@@ -6,7 +6,7 @@
 
 namespace filesystem
 {
-class Inode : public libcxx::intrusive_ref_counter
+class inode : public libcxx::intrusive_ref_counter
 {
 public:
     ino_t ino;
@@ -17,11 +17,11 @@ public:
     uid_t uid;
     gid_t gid;
 
-    Inode();
-    virtual ~Inode();
+    inode();
+    virtual ~inode();
     virtual int ioctl(unsigned long request, char* argp, void* cookie);
-    virtual int link(const char* name, libcxx::intrusive_ptr<Inode> node);
-    virtual libcxx::intrusive_ptr<Inode> lookup(const char* name, int flags,
+    virtual int link(const char* name, libcxx::intrusive_ptr<inode> node);
+    virtual libcxx::intrusive_ptr<inode> lookup(const char* name, int flags,
                                                 mode_t mode);
     virtual int mkdir(const char* name, mode_t mode);
     virtual int mknod(const char* name, mode_t mode, dev_t dev);

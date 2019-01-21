@@ -1,33 +1,33 @@
 #include <proc/ptable.h>
 
-PTable::PTable()
+ptable::ptable()
 {
     this->size = 0;
 }
 
-Process* PTable::get(pid_t pid)
+process* ptable::get(pid_t pid)
 {
     for (auto wrapper : list) {
-        if (wrapper.process->pid == pid) {
-            return wrapper.process;
+        if (wrapper.p->pid == pid) {
+            return wrapper.p;
         }
     }
     return nullptr;
 }
 
-bool PTable::add(Process* process)
+bool ptable::add(process* process)
 {
-    PTableWrapper* wrapper = new PTableWrapper(process);
+    ptable_wrapper* wrapper = new ptable_wrapper(process);
     this->list.push_back(*wrapper);
     this->size++;
     return true;
 }
 
-bool PTable::remove(pid_t pid)
+bool ptable::remove(pid_t pid)
 {
     for (auto it = list.begin(); it != list.end(); ++it) {
         auto& value = *it;
-        if (value.process->pid == pid) {
+        if (value.p->pid == pid) {
             list.erase(it);
             this->size--;
             return true;

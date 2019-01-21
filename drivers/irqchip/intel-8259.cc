@@ -1,23 +1,23 @@
 #include <arch/drivers/io.h>
 #include <drivers/irqchip/intel-8259.h>
 
-namespace IrqChip
+namespace irqchip
 {
 static const int PIC1_COMMAND = 0x20;
-static const int PIC1_DATA = 0x21;
+static const int PIC1_DATA    = 0x21;
 static const int PIC2_COMMAND = 0xA0;
-static const int PIC2_DATA = 0xA1;
+static const int PIC2_DATA    = 0xA1;
 
-static const int PIC1_OFFSET = 0x20;  // 32
-static const int PIC2_OFFSET = 0x28;  // 40
+static const int PIC1_OFFSET = 0x20; // 32
+static const int PIC2_OFFSET = 0x28; // 40
 
-static const int COMMAND_EOI = 0x20;
+static const int COMMAND_EOI  = 0x20;
 static const int COMMAND_INIT = 0x10; /* Initialization - required! */
 
 static const int CONFIG_ICW4 = 0x01; /* ICW4 (not) needed */
 static const int CONFIG_8086 = 0x01; /* 8086/88 (MCS-80/85) mode */
 
-bool Intel8259::enable()
+bool intel8259::enable()
 {
     outb(PIC1_COMMAND, COMMAND_INIT + CONFIG_ICW4);
     iowait();
@@ -40,15 +40,15 @@ bool Intel8259::enable()
     return true;
 }
 
-bool Intel8259::disable()
+bool intel8259::disable()
 {
     for (int i = 0; i < 16; i++) {
-        Intel8259::mask(i);
+        intel8259::mask(i);
     }
     return true;
 }
 
-bool Intel8259::mask(uint32_t irq)
+bool intel8259::mask(uint32_t irq)
 {
     uint16_t port;
     uint8_t value;
@@ -64,7 +64,7 @@ bool Intel8259::mask(uint32_t irq)
     return true;
 }
 
-bool Intel8259::unmask(uint32_t irq)
+bool intel8259::unmask(uint32_t irq)
 {
     uint16_t port;
     uint8_t value;
@@ -80,7 +80,7 @@ bool Intel8259::unmask(uint32_t irq)
     return true;
 }
 
-bool Intel8259::ack(uint32_t irq)
+bool intel8259::ack(uint32_t irq)
 {
     if (irq >= 8) {
         outb(PIC2_COMMAND, COMMAND_EOI);
@@ -89,9 +89,9 @@ bool Intel8259::ack(uint32_t irq)
     return true;
 }
 
-bool Intel8259::spurious()
+bool intel8259::spurious()
 {
     // TODO: Implement
     return false;
 }
-}  // namespace IrqChip
+} // namespace irqchip

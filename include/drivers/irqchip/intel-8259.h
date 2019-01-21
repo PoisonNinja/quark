@@ -2,9 +2,9 @@
 
 #include <drivers/irqchip/irqchip.h>
 
-namespace IrqChip
+namespace irqchip
 {
-class Intel8259 : public IrqChip
+class intel8259 : public irqchip
 {
 public:
     bool enable() override;
@@ -14,4 +14,4 @@ public:
     bool ack(uint32_t irq) override;
     bool spurious() override;
 };
-}
+} // namespace irqchip

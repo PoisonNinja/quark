@@ -4,9 +4,9 @@
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
-PTY::PTY(int index)
+pty::pty(int index)
 {
     libcxx::memset(mbuf, 0, pty_size);
     libcxx::memset(sbuf, 0, pty_size);
@@ -14,24 +14,24 @@ PTY::PTY(int index)
     this->idx                                             = index;
 }
 
-int PTY::index()
+int pty::index()
 {
     return this->idx;
 }
 
-ssize_t PTY::mread(uint8_t* buffer, size_t count)
+ssize_t pty::mread(uint8_t* buffer, size_t count)
 {
     size_t read = 0;
     while (read < count) {
         if (this->mhead == this->mtail) {
-            this->mqueue.wait(Scheduler::wait_interruptible);
+            this->mqueue.wait(scheduler::wait_interruptible);
         }
         buffer[read++] = this->mbuf[this->mtail++ % pty_size];
     }
     return count;
 }
 
-ssize_t PTY::mwrite(const uint8_t* buffer, size_t count)
+ssize_t pty::mwrite(const uint8_t* buffer, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
         this->sbuf[this->shead++ % pty_size] = buffer[i];
@@ -40,19 +40,19 @@ ssize_t PTY::mwrite(const uint8_t* buffer, size_t count)
     return count;
 }
 
-ssize_t PTY::sread(uint8_t* buffer, size_t count)
+ssize_t pty::sread(uint8_t* buffer, size_t count)
 {
     size_t read = 0;
     while (read < count) {
         if (this->shead == this->stail) {
-            this->squeue.wait(Scheduler::wait_interruptible);
+            this->squeue.wait(scheduler::wait_interruptible);
         }
         buffer[read++] = this->sbuf[this->stail++ % pty_size];
     }
     return count;
 }
 
-ssize_t PTY::swrite(const uint8_t* buffer, size_t count)
+ssize_t pty::swrite(const uint8_t* buffer, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
         this->mbuf[this->mhead++ % pty_size] = buffer[i];
@@ -61,5 +61,5 @@ ssize_t PTY::swrite(const uint8_t* buffer, size_t count)
     return count;
 }
 
-} // namespace TTY
+} // namespace tty
 } // namespace filesystem

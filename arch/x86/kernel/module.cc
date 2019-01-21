@@ -3,7 +3,7 @@
 #include <kernel/symbol.h>
 #include <proc/elf.h>
 
-bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
+bool relocate_module(module* mod, elf::elf_sym* symtab,
                      const char* string_table)
 {
     for (uint32_t i = 0; i < mod->shnum; i++) {
@@ -24,11 +24,11 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                  * both as long as we don't use r_addend for i686 since it's
                  * the last member.
                  */
-                ELF::Elf_Rela* rel =
-                    reinterpret_cast<ELF::Elf_Rela*>(mod->sections[i] + x);
+                elf::elf_rela* rel =
+                    reinterpret_cast<elf::elf_rela*>(mod->sections[i] + x);
                 // Get the symbol offset
-                ELF::Elf_Sym* sym = symtab + ELF_R_SYM(rel->r_info);
-                Log::printk(Log::LogLevel::DEBUG, "[load_module] Name: %s\n",
+                elf::elf_sym* sym = symtab + ELF_R_SYM(rel->r_info);
+                log::printk(log::log_level::DEBUG, "[load_module] Name: %s\n",
                             string_table + sym->st_name);
                 addr_t symaddr = 0;
                 /*
@@ -38,9 +38,9 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                  */
                 if (sym->st_shndx == 0) {
                     addr_t temp =
-                        Symbols::resolve_name(string_table + sym->st_name);
+                        symbols::resolve_name(string_table + sym->st_name);
                     if (!temp) {
-                        Log::printk(Log::LogLevel::ERROR,
+                        log::printk(log::log_level::ERROR,
                                     "[load_module] Undefined reference to %s\n",
                                     string_table + sym->st_name);
                         return false;
@@ -70,7 +70,7 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                 switch (ELF_R_TYPE(rel->r_info)) {
                     // case R_386_32
                     case R_X86_64_64:
-                        Log::printk(Log::LogLevel::DEBUG,
+                        log::printk(log::log_level::DEBUG,
                                     "[load_module] R_X86_64_64: %p %p %p %X\n",
                                     addend, rel->r_offset, symaddr,
                                     mod->shdrs[i].sh_info);
@@ -78,7 +78,7 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                         *(reinterpret_cast<addr_t*>(target)) = symaddr + addend;
                         break;
                     case R_386_PC32:
-                        Log::printk(Log::LogLevel::DEBUG,
+                        log::printk(log::log_level::DEBUG,
                                     "[load_module] R_386_PC32: %p %p %p %X\n",
                                     addend, target, symaddr,
                                     mod->shdrs[i].sh_info);
@@ -86,8 +86,8 @@ bool relocate_module(Module* mod, ELF::Elf_Sym* symtab,
                             symaddr + addend - target;
                         break;
                     default:
-                        Log::printk(
-                            Log::LogLevel::ERROR,
+                        log::printk(
+                            log::log_level::ERROR,
                             "[load_module] Unsupported relocation type: %d\n",
                             ELF_R_TYPE(rel->r_info));
                         break;

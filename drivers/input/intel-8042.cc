@@ -12,7 +12,7 @@ namespace
 {
 constexpr size_t buffer_size = 1024;
 
-class Intel8042 : public filesystem::KDevice
+class Intel8042 : public filesystem::kdevice
 {
 public:
     Intel8042();
@@ -25,14 +25,14 @@ public:
     virtual bool seekable() override;
 
 private:
-    void handler(int, void*, struct InterruptContext*);
+    void handler(int, void*, struct interrupt_context*);
     char buffer[buffer_size];
     size_t head, tail;
-    Scheduler::WaitQueue queue;
+    scheduler::wait_queue queue;
 };
 
 Intel8042::Intel8042()
-    : KDevice(filesystem::CHR)
+    : kdevice(filesystem::CHR)
     , head(0)
     , tail(0)
 {
@@ -47,7 +47,7 @@ ssize_t Intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)
     size_t read = 0;
     while (read < count) {
         if (this->head == this->tail) {
-            this->queue.wait(Scheduler::wait_interruptible);
+            this->queue.wait(scheduler::wait_interruptible);
         }
         buffer[read++] = this->buffer[tail++ % buffer_size];
     }
@@ -59,10 +59,10 @@ ssize_t Intel8042::write(const uint8_t*, size_t, off_t, void*)
     return 0;
 }
 
-void Intel8042::handler(int, void* dev_id, struct InterruptContext*)
+void Intel8042::handler(int, void* dev_id, struct interrupt_context*)
 {
     this->buffer[this->head++ % buffer_size] = inb(0x60);
-    Log::printk(Log::LogLevel::INFO, "Key event, %p\n", this);
+    log::printk(log::log_level::INFO, "Key event, %p\n", this);
     this->queue.wakeup();
 }
 

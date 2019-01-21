@@ -6,19 +6,19 @@
 
 namespace filesystem
 {
-class DTable
+class dtable
 {
 public:
-    DTable();
-    DTable(const DTable& other);
-    ~DTable();
+    dtable();
+    dtable(const dtable& other);
+    ~dtable();
 
-    int add(libcxx::intrusive_ptr<Descriptor> desc);
-    libcxx::intrusive_ptr<Descriptor> get(int index);
+    int add(libcxx::intrusive_ptr<descriptor> desc);
+    libcxx::intrusive_ptr<descriptor> get(int index);
     int copy(int oldfd, int newfd);
     bool remove(int fd);
 
 private:
-    libcxx::vector<libcxx::intrusive_ptr<Descriptor>> fds;
+    libcxx::vector<libcxx::intrusive_ptr<descriptor>> fds;
 };
 } // namespace filesystem

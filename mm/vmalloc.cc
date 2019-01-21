@@ -18,14 +18,15 @@ addr_t allocate(size_t size)
     size                  = memory::virt::align_up(size);
     auto [found, address] = vmalloc_region.allocate(0, size);
     if (!found) {
-        Log::printk(Log::LogLevel::WARNING, "vmalloc: Out of memory somehow\n");
+        log::printk(log::log_level::WARNING,
+                    "vmalloc: Out of memory somehow\n");
     }
     return address;
 }
 
 void free(addr_t address)
 {
-    Log::printk(Log::LogLevel::WARNING,
+    log::printk(log::log_level::WARNING,
                 "vmalloc memory free was requested, but this "
                 "function is not implemented!\n");
 }

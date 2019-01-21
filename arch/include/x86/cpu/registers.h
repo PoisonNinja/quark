@@ -3,7 +3,7 @@
 #include <types.h>
 
 #ifdef X86_64
-struct InterruptContext {
+struct interrupt_context {
     uint64_t gs;
     uint64_t fs;
     uint64_t ds;
@@ -31,7 +31,7 @@ struct InterruptContext {
     uint64_t ss;
 } __attribute__((packed));
 #else
-struct InterruptContext {
+struct interrupt_context {
     uint32_t ds;
     uint32_t edi;
     uint32_t esi;

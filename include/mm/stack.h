@@ -3,10 +3,10 @@
 #include <mm/virtual.h>
 #include <types.h>
 
-class Stack
+class stack
 {
 public:
-    Stack(addr_t* base)
+    stack(addr_t* base)
         : base(base)
         , size(0)
         , used(0){};

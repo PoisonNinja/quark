@@ -59,5 +59,5 @@ or
 or
 
 ```C
-Log::printk(Log::LogLevel::INFO, "CONFIG_BAZ is %d\n", CONFIG_BAZ);
+log::printk(log::log_level::INFO, "CONFIG_BAZ is %d\n", CONFIG_BAZ);
 ```

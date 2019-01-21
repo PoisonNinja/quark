@@ -5,13 +5,13 @@
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
-class TTY
+class tty
 {
 public:
-    TTY();
-    ~TTY();
+    tty();
+    ~tty();
 
     virtual libcxx::pair<int, void*> open(const char* name);
     virtual int ioctl(unsigned long request, char* argp, void* cookie);
@@ -22,8 +22,8 @@ public:
 private:
 };
 
-bool register_tty(dev_t major, TTY* tty);
+bool register_tty(dev_t major, tty* tty);
 
 void init();
-} // namespace TTY
+} // namespace tty
 } // namespace filesystem

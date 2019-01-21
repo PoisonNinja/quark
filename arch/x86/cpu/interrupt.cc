@@ -16,30 +16,30 @@ void enable(void)
     __asm__("sti");
 }
 
-void dump(InterruptContext* ctx)
+void dump(interrupt_context* ctx)
 {
 #ifdef X86_64
-    Log::printk(Log::LogLevel::ERROR, "RAX = %p RBX = %p RCX = %p RDX = %p\n",
+    log::printk(log::log_level::ERROR, "RAX = %p RBX = %p RCX = %p RDX = %p\n",
                 ctx->rax, ctx->rbx, ctx->rcx, ctx->rdx);
-    Log::printk(Log::LogLevel::ERROR, "RSI = %p RDI = %p RBP = %p RSP = %p\n",
+    log::printk(log::log_level::ERROR, "RSI = %p RDI = %p RBP = %p RSP = %p\n",
                 ctx->rsi, ctx->rdi, ctx->rbp, ctx->rsp);
-    Log::printk(Log::LogLevel::ERROR, "R8  = %p R9  = %p R10 = %p R11 = %p\n",
+    log::printk(log::log_level::ERROR, "R8  = %p R9  = %p R10 = %p R11 = %p\n",
                 ctx->r8, ctx->r9, ctx->r10, ctx->r11);
-    Log::printk(Log::LogLevel::ERROR, "R12 = %p R13 = %p R14 = %p R15 = %p\n",
+    log::printk(log::log_level::ERROR, "R12 = %p R13 = %p R14 = %p R15 = %p\n",
                 ctx->r12, ctx->r13, ctx->r14, ctx->r15);
-    Log::printk(Log::LogLevel::ERROR,
+    log::printk(log::log_level::ERROR,
                 "RIP = %p CS  = %p DS  = %p RFLAGS = %p\n", ctx->rip, ctx->cs,
                 ctx->ds, ctx->rflags);
 #else
-    Log::printk(Log::LogLevel::ERROR, "EAX = %p EBX = %p ECX = %p EDX = %p\n",
+    log::printk(log::log_level::ERROR, "EAX = %p EBX = %p ECX = %p EDX = %p\n",
                 ctx->eax, ctx->ebx, ctx->ecx, ctx->edx);
-    Log::printk(Log::LogLevel::ERROR, "ESI = %p EDI = %p EBP = %p ESP = %p\n",
+    log::printk(log::log_level::ERROR, "ESI = %p EDI = %p EBP = %p ESP = %p\n",
                 ctx->esi, ctx->edi, ctx->ebp, ctx->esp);
-    Log::printk(Log::LogLevel::ERROR,
+    log::printk(log::log_level::ERROR,
                 "EIP = %p CS  = %p DS  = %p EFLAGS = %p\n", ctx->eip, ctx->cs,
                 ctx->ds, ctx->eflags);
 #endif
-    Log::printk(Log::LogLevel::ERROR, "Exception #%d, error code 0x%X\n",
+    log::printk(log::log_level::ERROR, "Exception #%d, error code 0x%X\n",
                 ctx->int_no, ctx->err_code);
 }
 
@@ -54,7 +54,7 @@ bool interrupts_enabled(void)
     return eflags & (1 << 9);
 }
 
-bool is_userspace(struct InterruptContext* ctx)
+bool is_userspace(struct interrupt_context* ctx)
 {
     // The CS values being compared to are the selectors for user code segment
 #ifdef X86_64
@@ -75,12 +75,12 @@ bool is_exception(int int_no)
 
 void arch_init(void)
 {
-    IrqChip::Intel8259* pic = new IrqChip::Intel8259();
-    IrqChip::set_irqchip(*pic);
+    irqchip::intel8259* pic = new irqchip::intel8259();
+    irqchip::set_irqchip(*pic);
 }
 
-extern "C" void arch_handler(struct InterruptContext* ctx)
+extern "C" void arch_handler(struct interrupt_context* ctx)
 {
     interrupt::dispatch(ctx->int_no, ctx);
 }
-};  // namespace interrupt
+}; // namespace interrupt

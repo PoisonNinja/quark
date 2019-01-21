@@ -26,16 +26,16 @@ void restore(int& store)
     }
 }
 
-void dispatch(int int_no, struct InterruptContext* ctx)
+void dispatch(int int_no, struct interrupt_context* ctx)
 {
     if (handlers[int_no].empty()) {
         if (is_exception(int_no)) {
             dump(ctx);
             if (is_userspace(ctx)) {
-                Scheduler::get_current_thread()->send_signal(SIGSEGV);
-                return Scheduler::get_current_thread()->handle_signal(ctx);
+                scheduler::get_current_thread()->send_signal(SIGSEGV);
+                return scheduler::get_current_thread()->handle_signal(ctx);
             } else {
-                Kernel::panic("Unhandled exception, system halted\n");
+                kernel::panic("Unhandled exception, system halted\n");
             }
         }
     } else {
@@ -44,7 +44,7 @@ void dispatch(int int_no, struct InterruptContext* ctx)
         }
     }
     if (!is_exception(int_no)) {
-        IrqChip::ack(interrupt::interrupt_to_irq(int_no));
+        irqchip::ack(interrupt::interrupt_to_irq(int_no));
     }
 }
 

@@ -4,74 +4,75 @@
 #include <kernel.h>
 #include <kernel/time/time.h>
 
-namespace Time
+namespace time
 {
-uint64_t TSC::rdtsc()
+uint64_t tsc::rdtsc()
 {
     unsigned int low, high;
     __asm__ __volatile__("rdtsc" : "=a"(low), "=d"(high));
     return ((uint64_t)high << 32) | low;
 }
 
-TSC::TSC()
+tsc::tsc()
 {
     cpu::core* cpu = cpu::get_current_core();
-    if (!cpu::X86::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
-        Log::printk(
-            Log::LogLevel::WARNING,
-            "tsc: CPU doesn't support constant TSC, timing will be unstable\n");
+    if (!cpu::x86::has_feature(*cpu, X86_FEATURE_CONSTANT_TSC)) {
+        log::printk(
+            log::log_level::WARNING,
+            "tsc: CPU doesn't support constant tsc, timing will be unstable\n");
     } else {
-        Log::printk(Log::LogLevel::INFO, "tsc: CPU supports constant TSC :)\n");
+        log::printk(log::log_level::INFO,
+                    "tsc: CPU supports constant tsc :)\n");
     }
     // Automatic calibration
-    Log::printk(Log::LogLevel::INFO, "tsc: Preparing to calibrate\n");
+    log::printk(log::log_level::INFO, "tsc: Preparing to calibrate\n");
     calibrated_frequency = calibrate() * 1000;
-    Log::printk(Log::LogLevel::INFO, "tsc: Calibrated to %llu kHZ\n",
+    log::printk(log::log_level::INFO, "tsc: Calibrated to %llu kHZ\n",
                 calibrated_frequency);
 }
 
-int TSC::features()
+int tsc::features()
 {
     return feature_clock;
 }
 
-time_t TSC::read()
+time_t tsc::read()
 {
     // Ticks emulated using variable since the PIT itself is useless
     return rdtsc();
 }
 
-time_t TSC::frequency()
+time_t tsc::frequency()
 {
     return calibrated_frequency;
 }
 
-bool TSC::enable()
+bool tsc::enable()
 {
     return true;
 }
 
-bool TSC::disable()
+bool tsc::disable()
 {
     return true;
 }
 
-bool TSC::schedule(time_t /**/)
+bool tsc::schedule(time_t /**/)
 {
     return false;
 }
 
-bool TSC::periodic()
+bool tsc::periodic()
 {
     return false;
 }
 
-const char* TSC::name()
+const char* tsc::name()
 {
-    return "x86 TSC";
+    return "x86 tsc";
 }
 
-uint64_t TSC::calibrate()
+uint64_t tsc::calibrate()
 {
     time_t t1, t2;
     time_t nsec     = 10 * 1000 * 1000;
@@ -79,10 +80,10 @@ uint64_t TSC::calibrate()
     for (int i = 0; i < 5; i++) {
         t1 = this->rdtsc();
         // Precalculated nsec to minimize overhead
-        Time::ndelay(nsec);
+        time::ndelay(nsec);
         t2            = this->rdtsc();
         uint64_t freq = (t2 - t1) / 10;
-        Log::printk(Log::LogLevel::INFO, "tsc: Calibration round %d: %zu\n", i,
+        log::printk(log::log_level::INFO, "tsc: Calibration round %d: %zu\n", i,
                     freq);
         if (freq < lowest) {
             lowest = freq;
@@ -90,4 +91,4 @@ uint64_t TSC::calibrate()
     }
     return lowest;
 }
-} // namespace Time
+} // namespace time

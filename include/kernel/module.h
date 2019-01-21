@@ -4,8 +4,8 @@
 #include <proc/elf.h>
 #include <types.h>
 
-struct Module {
-    Module()
+struct module {
+    module()
     {
         shdrs    = nullptr;
         sections = nullptr;
@@ -19,14 +19,14 @@ struct Module {
     size_t shnum;
 
     // Dynamically allocated
-    ELF::Elf_Shdr* shdrs;
+    elf::elf_shdr* shdrs;
     addr_t* sections;
 
-    // Module entry points
+    // module entry points
     int (*init)();
     int (*fini)();
 
-    libcxx::node<Module> node;
+    libcxx::node<module> node;
 };
 
 // Each key can only be defined once

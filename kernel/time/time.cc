@@ -3,27 +3,27 @@
 #include <kernel/time/time.h>
 #include <proc/sched.h>
 
-namespace Time
+namespace time
 {
-static libcxx::list<Clock, &Clock::node> clock_list;
-static Clock* current_ticker = nullptr;
-static Clock* current_clock  = nullptr;
+static libcxx::list<clock, &clock::node> clock_list;
+static clock* current_ticker = nullptr;
+static clock* current_clock  = nullptr;
 static volatile struct timespec current_time;
 static volatile time_t last = 0;
 
 extern void arch_init();
 
-void update_clock(Clock* new_clock)
+void update_clock(clock* new_clock)
 {
     current_clock = new_clock;
     last          = new_clock->read();
 }
 
-bool register_clock(Clock& clock)
+bool register_clock(clock& clock)
 {
     clock_list.push_back(clock);
     if (clock.features() & feature_timer) {
-        Log::printk(Log::LogLevel::INFO,
+        log::printk(log::log_level::INFO,
                     "Selecting %s as the system tick source\n", clock.name());
         if (current_ticker) {
             current_ticker->disable();
@@ -33,7 +33,7 @@ bool register_clock(Clock& clock)
     }
     if (clock.features() & feature_clock) {
         if (!current_clock || current_clock->frequency() < clock.frequency()) {
-            Log::printk(Log::LogLevel::INFO,
+            log::printk(log::log_level::INFO,
                         "Selecting %s as the system clock\n", clock.name());
             update_clock(&clock);
         }
@@ -54,8 +54,8 @@ void ndelay(time_t nsec)
 void udelay(time_t usec)
 {
     if (usec > UINT64_MAX / 1000) {
-        Log::printk(
-            Log::LogLevel::WARNING,
+        log::printk(
+            log::log_level::WARNING,
             "udelay received argument that is too large "
             "to safely pass to ndelay, unexpected behavior may occur\n");
     }
@@ -65,19 +65,19 @@ void udelay(time_t usec)
 void mdelay(time_t msec)
 {
     if (msec > UINT64_MAX / 1000 / 1000) {
-        Log::printk(
-            Log::LogLevel::WARNING,
+        log::printk(
+            log::log_level::WARNING,
             "mdelay received argument that is too large "
             "to safely pass to ndelay, unexpected behavior may occur\n");
     }
     ndelay(msec * 1000 * 1000);
 }
 
-void tick(struct InterruptContext* ctx)
+void tick(struct interrupt_context* ctx)
 {
     update();
-    if (Scheduler::online()) {
-        Scheduler::switch_next(ctx);
+    if (scheduler::online()) {
+        scheduler::switch_next(ctx);
     }
 }
 
@@ -104,8 +104,8 @@ void update()
 
 struct timespec now()
 {
-    Time::update();
-    Time::timespec tm;
+    time::update();
+    time::timespec tm;
     tm.tv_sec  = current_time.tv_sec;
     tm.tv_nsec = current_time.tv_nsec;
     return tm;
@@ -113,6 +113,6 @@ struct timespec now()
 
 void init()
 {
-    Time::arch_init();
+    time::arch_init();
 }
-} // namespace Time
+} // namespace time

@@ -20,7 +20,8 @@ libcxx::pair<bool, region> allocate(size_t size)
     region region;
     auto [virt_found, virt_address] = dma_region.allocate(0, size);
     if (!virt_found) {
-        Log::printk(Log::LogLevel::WARNING, "dma: Unable to find free space\n");
+        log::printk(log::log_level::WARNING,
+                    "dma: Unable to find free space\n");
         return libcxx::make_pair(false, region);
     }
     region.virtual_base  = virt_address;

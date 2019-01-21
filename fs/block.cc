@@ -6,10 +6,10 @@
 
 namespace filesystem
 {
-class BlockWrapper : public KDevice
+class BlockWrapper : public kdevice
 {
 public:
-    BlockWrapper(BlockDevice* bd);
+    BlockWrapper(block_device* bd);
     ~BlockWrapper();
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset,
@@ -19,11 +19,11 @@ public:
 
 private:
     // TODO: Request queue
-    BlockDevice* blkdev;
+    block_device* blkdev;
 };
 
-BlockWrapper::BlockWrapper(BlockDevice* bd)
-    : KDevice(BLK)
+BlockWrapper::BlockWrapper(block_device* bd)
+    : kdevice(BLK)
     , blkdev(bd)
 {
 }
@@ -51,28 +51,28 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         auto sglist =
             memory::dma::make_sglist(this->blkdev->sg_max_count(),
                                      this->blkdev->sg_max_size(), to_process);
-        Log::printk(Log::LogLevel::INFO,
+        log::printk(log::log_level::INFO,
                     "block: sglist contains %p bytes in %llX regions\n",
                     sglist->total_size, sglist->num_regions);
-        filesystem::BlockRequest request;
-        request.command     = filesystem::BlockRequestType::READ;
+        filesystem::block_request request;
+        request.command     = filesystem::block_request_type::READ;
         request.num_sectors = sglist->total_size / blkdev->sector_size();
         request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
         request.sglist = libcxx::move(sglist);
-        Log::printk(Log::LogLevel::INFO, "block: 0x%zX sectors, 0x%zX start\n",
+        log::printk(log::log_level::INFO, "block: 0x%zX sectors, 0x%zX start\n",
                     request.num_sectors, request.start);
 
         if (blkdev->request(&request)) {
             for (auto& region : request.sglist->list) {
                 if (current >
                     libcxx::round_down(current, blkdev->sector_size())) {
-                    Log::printk(Log::LogLevel::DEBUG,
+                    log::printk(log::log_level::DEBUG,
                                 "block: Unaligned disk read :(\n");
                     size_t distance =
                         current -
                         libcxx::round_down(current, blkdev->sector_size());
-                    Log::printk(Log::LogLevel::DEBUG,
+                    log::printk(log::log_level::DEBUG,
                                 "block: Block offset 0x%zX\n", distance);
                     libcxx::memcpy(
                         buffer + processed,
@@ -81,7 +81,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
                     processed += region.size - distance;
                     current += region.size - distance;
                 } else {
-                    Log::printk(Log::LogLevel::DEBUG,
+                    log::printk(log::log_level::DEBUG,
                                 "block: Aligned disk read :)\n");
                     libcxx::memcpy(buffer + processed,
                                    reinterpret_cast<void*>(region.virtual_base),
@@ -91,7 +91,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
                 }
             }
         } else {
-            Log::printk(Log::LogLevel::ERROR, "block: Request failed\n");
+            log::printk(log::log_level::ERROR, "block: Request failed\n");
             return 0;
         }
         // TODO: We should probably free the sglist
@@ -106,11 +106,11 @@ ssize_t BlockWrapper::write(const uint8_t* buffer, size_t count, off_t offset,
     return 0;
 }
 
-BlockDevice::~BlockDevice()
+block_device::~block_device()
 {
 }
 
-bool register_blockdev(dev_t major, BlockDevice* blkdev)
+bool register_blockdev(dev_t major, block_device* blkdev)
 {
     BlockWrapper* bw = new BlockWrapper(blkdev);
     register_kdevice(BLK, major, bw);

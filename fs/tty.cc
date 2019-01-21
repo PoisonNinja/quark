@@ -11,41 +11,41 @@ dev_t tty_major = 0;
 
 namespace filesystem
 {
-namespace TTY
+namespace tty
 {
-TTY::TTY()
-{
-}
-
-TTY::~TTY()
+tty::tty()
 {
 }
 
-libcxx::pair<int, void*> TTY::open(const char* name)
+tty::~tty()
+{
+}
+
+libcxx::pair<int, void*> tty::open(const char* name)
 {
     return libcxx::pair<int, void*>(0, nullptr);
 }
 
-int TTY::ioctl(unsigned long request, char* argp, void* cookie)
+int tty::ioctl(unsigned long request, char* argp, void* cookie)
 {
     return 0;
 }
 
-ssize_t TTY::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
+ssize_t tty::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
 {
     return -ENOSYS;
 }
 
-ssize_t TTY::write(const uint8_t* /*buffer*/, size_t /*size*/,
+ssize_t tty::write(const uint8_t* /*buffer*/, size_t /*size*/,
                    void* /* cookie */)
 {
     return -ENOSYS;
 }
 
-class TTYDevice : public filesystem::KDevice
+class TTYDevice : public filesystem::kdevice
 {
 public:
-    TTYDevice(TTY* driver);
+    TTYDevice(tty* driver);
 
     int ioctl(unsigned long request, char* argp, void* cookie) override;
 
@@ -57,38 +57,38 @@ public:
                   void* cookie) override;
 
 private:
-    TTY* tty;
+    tty* t;
 };
 
-TTYDevice::TTYDevice(TTY* tty)
-    : KDevice(CHR)
-    , tty(tty)
+TTYDevice::TTYDevice(tty* tty)
+    : kdevice(CHR)
+    , t(tty)
 {
 }
 
 int TTYDevice::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    return this->tty->ioctl(request, argp, cookie);
+    return this->t->ioctl(request, argp, cookie);
 }
 
 libcxx::pair<int, void*> TTYDevice::open(const char* name)
 {
-    return this->tty->open(name);
+    return this->t->open(name);
 }
 
 ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */,
                         void* cookie)
 {
-    return this->tty->read(buffer, count, cookie);
+    return this->t->read(buffer, count, cookie);
 }
 
 ssize_t TTYDevice::write(const uint8_t* buffer, size_t count,
                          off_t /* offset */, void* cookie)
 {
-    return this->tty->write(buffer, count, cookie);
+    return this->t->write(buffer, count, cookie);
 }
 
-bool register_tty(dev_t major, TTY* driver)
+bool register_tty(dev_t major, tty* driver)
 {
     TTYDevice* tty = new TTYDevice(driver);
     register_kdevice(CHR, (major) ? major : tty_major, tty);
@@ -100,5 +100,5 @@ void init()
     auto tty_major = filesystem::locate_class(filesystem::CHR);
     register_class(CHR, tty_major);
 }
-} // namespace TTY
+} // namespace tty
 } // namespace filesystem

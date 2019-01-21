@@ -1,11 +1,11 @@
 #include <cpu/interrupt.h>
 #include <drivers/irqchip/irqchip.h>
 
-namespace IrqChip
+namespace irqchip
 {
-static IrqChip* current_chip = nullptr;
+static irqchip* current_chip                  = nullptr;
 static uint8_t interrupt_mask[interrupt::max] = {
-    0};  // TODO: Convert to bitfield
+    0}; // TODO: Convert to bitfield
 
 bool mask(uint32_t irq)
 {
@@ -41,7 +41,7 @@ bool ack(uint32_t irq)
     return current_chip->ack(irq);
 }
 
-bool set_irqchip(IrqChip& chip)
+bool set_irqchip(irqchip& chip)
 {
     if (current_chip) {
         current_chip->disable();
@@ -57,4 +57,4 @@ bool set_irqchip(IrqChip& chip)
     current_chip->enable();
     return true;
 }
-}
+} // namespace irqchip

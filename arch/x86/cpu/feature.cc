@@ -16,7 +16,7 @@ struct cpuid_regs {
 
 namespace cpu
 {
-namespace X86
+namespace x86
 {
 static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
 {
@@ -31,7 +31,7 @@ void detect_intel(core& cpu)
     // i686 starts with Pentium Pro, family 6
 #ifndef X86_64
     if (cpu.family < 0x6) {
-        Kernel::panic("Your processor is too old! This kernel is compiled for "
+        kernel::panic("Your processor is too old! This kernel is compiled for "
                       "i686, try using a Pentium Pro or newer\n");
     }
 #endif
@@ -126,8 +126,8 @@ void detect(core& cpu)
      * they exist
      */
     if (highest_function < 0x80000001) {
-        Log::printk(
-            Log::LogLevel::WARNING,
+        log::printk(
+            log::log_level::WARNING,
             "CPU does not support extended feature set past 0x80000001\n");
     } else {
         regs.eax = 0x80000001;
@@ -136,7 +136,7 @@ void detect(core& cpu)
         cpu.features[cpuid_8000_0001_ecx] = regs.ecx;
 
         if (highest_function < 0x80000004) {
-            Log::printk(Log::LogLevel::WARNING,
+            log::printk(log::log_level::WARNING,
                         "CPU does not support extended feature set past "
                         "0x80000004\n");
         } else {
@@ -160,7 +160,7 @@ void detect(core& cpu)
             *(uint32_t*)&cpu.name[44] = regs.edx;
 
             if (highest_function < 0x80000007) {
-                Log::printk(Log::LogLevel::WARNING,
+                log::printk(log::log_level::WARNING,
                             "CPU does not support extended "
                             "feature set past 0x80000007\n");
             } else {
@@ -169,7 +169,7 @@ void detect(core& cpu)
                 cpu.features[cpuid_8000_0007_ebx] = regs.ebx;
 
                 if (highest_function < 0x80000008) {
-                    Log::printk(Log::LogLevel::WARNING,
+                    log::printk(log::log_level::WARNING,
                                 "CPU does not support extended "
                                 "feature set past 0x80000008\n");
                 } else {
@@ -178,7 +178,7 @@ void detect(core& cpu)
                     cpu.features[cpuid_8000_0008_ebx] = regs.ebx;
 
                     if (highest_function < 0x8000000A) {
-                        Log::printk(Log::LogLevel::WARNING,
+                        log::printk(log::log_level::WARNING,
                                     "CPU does not support extended "
                                     "feature set past 0x8000000A\n");
                     } else {
@@ -193,10 +193,10 @@ void detect(core& cpu)
 
     // Vendor specific CPUID extensions
     if (!libcxx::strncmp("GenuineIntel", cpu.vendor, 13)) {
-        Log::printk(Log::LogLevel::INFO, "Found supported CPU vendor\n");
+        log::printk(log::log_level::INFO, "Found supported CPU vendor\n");
         detect_intel(cpu);
     } else {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "Unknown CPU vendor, not performing extended feature "
                     "detection.\n");
     }
@@ -204,12 +204,12 @@ void detect(core& cpu)
 
 void print(core& cpu)
 {
-    Log::printk(Log::LogLevel::INFO, "CPU Vendor:   %s\n", cpu.vendor);
-    Log::printk(Log::LogLevel::INFO, "CPU Name:     %s\n", cpu.name);
-    Log::printk(Log::LogLevel::INFO, "CPU Stepping: %X\n", cpu.stepping);
-    Log::printk(Log::LogLevel::INFO, "CPU Type:     %X\n", cpu.type);
-    Log::printk(Log::LogLevel::INFO, "CPU Family:   %X\n", cpu.family);
-    Log::printk(Log::LogLevel::INFO, "CPU Model:    %X\n", cpu.model);
+    log::printk(log::log_level::INFO, "CPU Vendor:   %s\n", cpu.vendor);
+    log::printk(log::log_level::INFO, "CPU Name:     %s\n", cpu.name);
+    log::printk(log::log_level::INFO, "CPU Stepping: %X\n", cpu.stepping);
+    log::printk(log::log_level::INFO, "CPU Type:     %X\n", cpu.type);
+    log::printk(log::log_level::INFO, "CPU Family:   %X\n", cpu.family);
+    log::printk(log::log_level::INFO, "CPU Model:    %X\n", cpu.model);
 }
-} // namespace X86
+} // namespace x86
 } // namespace cpu

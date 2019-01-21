@@ -5,7 +5,7 @@
 
 namespace filesystem
 {
-namespace Initrd
+namespace initrd
 {
 void init(struct boot::info& info);
 }

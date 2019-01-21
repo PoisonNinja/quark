@@ -19,7 +19,7 @@ void constructors_initialize(void *__constructors_start,
 extern "C" {
 __attribute__((noreturn)) void __cxa_pure_virtual()
 {
-    Kernel::panic("__cxa_pure_virtual encountered!\n");
+    kernel::panic("__cxa_pure_virtual encountered!\n");
 }
 
 static constexpr size_t ATEXIT_MAX_FUNCS = 128;

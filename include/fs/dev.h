@@ -20,14 +20,14 @@ constexpr dev_t mkdev(dev_t major, dev_t minor)
     return ((major & 0xFF) << 8) | ((minor & 0xFF) << 0);
 }
 
-enum DeviceClass { BLK, CHR };
+enum device_class { BLK, CHR };
 
-class KDevice
+class kdevice
 {
 public:
-    KDevice(DeviceClass type)
+    kdevice(device_class type)
         : type(type){};
-    virtual ~KDevice(){};
+    virtual ~kdevice(){};
 
     const char* name;
 
@@ -43,13 +43,13 @@ public:
     virtual bool seekable();
 
 protected:
-    DeviceClass type;
+    device_class type;
 };
 
-dev_t locate_class(DeviceClass c);
-bool register_class(DeviceClass c, dev_t major);
+dev_t locate_class(device_class c);
+bool register_class(device_class c, dev_t major);
 
-bool register_kdevice(DeviceClass c, dev_t major, KDevice* kdev);
+bool register_kdevice(device_class c, dev_t major, kdevice* kdev);
 
-KDevice* get_kdevice(mode_t mode, dev_t dev);
+kdevice* get_kdevice(mode_t mode, dev_t dev);
 } // namespace filesystem

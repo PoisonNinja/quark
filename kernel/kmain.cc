@@ -18,17 +18,17 @@
 
 void init_stage2(void*)
 {
-    Process* parent = Scheduler::get_current_process();
-    libcxx::intrusive_ptr<filesystem::Descriptor> root = parent->get_root();
+    process* parent = scheduler::get_current_process();
+    libcxx::intrusive_ptr<filesystem::descriptor> root = parent->get_root();
     auto [err, init] = root->open("/sbin/init", O_RDONLY, 0);
     if (err) {
-        Log::printk(Log::LogLevel::ERROR, "Failed to open init\n");
+        log::printk(log::log_level::ERROR, "Failed to open init\n");
         for (;;)
             cpu::halt();
     }
     struct filesystem::stat st;
     init->stat(&st);
-    Log::printk(Log::LogLevel::DEBUG, "init binary has size of %zu bytes\n",
+    log::printk(log::log_level::DEBUG, "init binary has size of %zu bytes\n",
                 st.st_size);
     uint8_t* init_raw = new uint8_t[st.st_size];
     init->read(init_raw, st.st_size);
@@ -41,12 +41,13 @@ void init_stage2(void*)
     const char* envp[] = {
         "hello=world",
     };
-    struct ThreadContext ctx;
-    if (!Scheduler::get_current_thread()->load(
+    struct thread_context ctx;
+    if (!scheduler::get_current_thread()->load(
             reinterpret_cast<addr_t>(init_raw), argc, argv, envc, envp, ctx)) {
-        Log::printk(Log::LogLevel::ERROR, "Failed to load thread state\n");
+        log::printk(log::log_level::ERROR, "Failed to load thread state\n");
     } else {
-        Log::printk(Log::LogLevel::DEBUG, "Preparing to jump into userspace\n");
+        log::printk(log::log_level::DEBUG,
+                    "Preparing to jump into userspace\n");
     }
     delete[] init_raw;
     load_registers(ctx);
@@ -55,45 +56,45 @@ void init_stage2(void*)
 void init_stage1()
 {
     addr_t cloned  = memory::virt::fork();
-    Process* initp = new Process(nullptr);
-    Scheduler::add_process(initp);
-    initp->set_root(Scheduler::get_current_process()->get_root());
-    initp->set_cwd(Scheduler::get_current_process()->get_cwd());
+    process* initp = new process(nullptr);
+    scheduler::add_process(initp);
+    initp->set_root(scheduler::get_current_process()->get_root());
+    initp->set_cwd(scheduler::get_current_process()->get_cwd());
     initp->address_space = cloned;
 
-    Thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
-    Scheduler::insert(stage2);
-    Scheduler::idle();
+    thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
+    scheduler::insert(stage2);
+    scheduler::idle();
 }
 
 void kmain(struct boot::info& info)
 {
-    Log::printk(Log::LogLevel::INFO, "%s\n", OS_STRING);
-    Log::printk(Log::LogLevel::INFO, "Command line: %s\n", info.cmdline);
+    log::printk(log::log_level::INFO, "%s\n", OS_STRING);
+    log::printk(log::log_level::INFO, "Command line: %s\n", info.cmdline);
     memory::init(info);
     interrupt::init();
     interrupt::enable();
-    Symbols::init();
-    Time::init();
-    Scheduler::init();
-    Signal::init();
+    symbols::init();
+    time::init();
+    scheduler::init();
+    signal::init();
     filesystem::init();
-    filesystem::Initrd::init(info);
-    Syscall::init();
+    filesystem::initrd::init(info);
+    syscall::init();
 
-    PCI::init();
+    pci::init();
 
     /*
      * Core subsystems are online, let's starting bringing up the rest of
      * the kernel.
      */
-    do_initcall(InitLevel::EARLY);
-    do_initcall(InitLevel::CORE);
-    do_initcall(InitLevel::ARCH);
-    do_initcall(InitLevel::SUBSYS);
-    do_initcall(InitLevel::FS);
-    do_initcall(InitLevel::DEVICE);
-    do_initcall(InitLevel::LATE);
+    do_initcall(init_level::EARLY);
+    do_initcall(init_level::CORE);
+    do_initcall(init_level::ARCH);
+    do_initcall(init_level::SUBSYS);
+    do_initcall(init_level::FS);
+    do_initcall(init_level::DEVICE);
+    do_initcall(init_level::LATE);
 
     init_stage1();
 }

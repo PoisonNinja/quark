@@ -4,7 +4,7 @@
 
 namespace filesystem
 {
-namespace Initrd
+namespace initrd
 {
 namespace Tar
 {

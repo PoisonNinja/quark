@@ -15,31 +15,31 @@ const int VGA_WIDTH          = 80;
 
 namespace filesystem
 {
-VGAFB::VGAFB()
-    : KDevice(CHR)
+vgafb::vgafb()
+    : kdevice(CHR)
 {
     addr_t virt = memory::vmalloc::allocate(VGA_BUFFER_SIZE);
     if (!memory::virt::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
-                                    PAGE_WRITABLE | PAGE_HARDWARE)) {
-        Log::printk(Log::LogLevel::WARNING, "Failed to map VGA buffer\n");
+                                 PAGE_WRITABLE | PAGE_HARDWARE)) {
+        log::printk(log::log_level::WARNING, "Failed to map VGA buffer\n");
         return;
     }
     vga_buffer = reinterpret_cast<uint16_t *>(virt);
 }
 
-VGAFB::~VGAFB()
+vgafb::~vgafb()
 {
     memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t VGAFB::write(const uint8_t *buffer, size_t size, off_t offset,
+ssize_t vgafb::write(const uint8_t *buffer, size_t size, off_t offset,
                      void * /* cookie */)
 {
     libcxx::memcpy((void *)((uint8_t *)vga_buffer + offset), buffer, size);
     return size;
 }
 
-void VGAFB::update_cursor(int col, int row)
+void vgafb::update_cursor(int col, int row)
 {
     unsigned short position = (row * VGA_WIDTH) + col;
 

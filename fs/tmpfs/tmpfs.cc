@@ -7,42 +7,42 @@
 
 namespace filesystem
 {
-TmpFS::TmpFS()
+tmpfs::tmpfs()
 {
 }
 
-TmpFS::~TmpFS()
+tmpfs::~tmpfs()
 {
 }
 
-bool TmpFS::mount(Superblock* sb)
+bool tmpfs::mount(superblock* sb)
 {
-    sb->root = libcxx::intrusive_ptr<Inode>(new InitFS::Directory(0, 0, 0755));
+    sb->root = libcxx::intrusive_ptr<inode>(new InitFS::Directory(0, 0, 0755));
     return true;
 }
 
-uint32_t TmpFS::flags()
+uint32_t tmpfs::flags()
 {
     return driver_pseudo;
 }
 
 namespace InitFS
 {
-TmpFSNode::TmpFSNode(libcxx::intrusive_ptr<Inode> inode, const char* name)
+TmpFSNode::TmpFSNode(libcxx::intrusive_ptr<inode> inode, const char* name)
 {
-    this->inode = inode;
-    this->name  = libcxx::strdup(name);
+    this->ino  = inode;
+    this->name = libcxx::strdup(name);
 }
 
 TmpFSNode::TmpFSNode(const struct TmpFSNode& other)
 {
-    this->inode = other.inode;
-    this->name  = libcxx::strdup(other.name);
+    this->ino  = other.ino;
+    this->name = libcxx::strdup(other.name);
 }
 
 TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
 {
-    this->inode         = other.inode;
+    this->ino           = other.ino;
     const char* newname = libcxx::strdup(other.name);
     libcxx::swap(this->name, newname);
     return *this;
@@ -111,14 +111,14 @@ Directory::Directory(ino_t ino, dev_t rdev, mode_t mode)
 Directory::~Directory()
 {
     if (!children.empty()) {
-        Log::printk(Log::LogLevel::WARNING,
+        log::printk(log::log_level::WARNING,
                     "initfs directory freed, but children not freed.\n");
     }
 }
 
-int Directory::link(const char* name, libcxx::intrusive_ptr<Inode> node)
+int Directory::link(const char* name, libcxx::intrusive_ptr<inode> node)
 {
-    libcxx::intrusive_ptr<Inode> child = find_child(name);
+    libcxx::intrusive_ptr<inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
@@ -126,16 +126,16 @@ int Directory::link(const char* name, libcxx::intrusive_ptr<Inode> node)
     return 0;
 }
 
-libcxx::intrusive_ptr<Inode> Directory::lookup(const char* name, int flags,
+libcxx::intrusive_ptr<inode> Directory::lookup(const char* name, int flags,
                                                mode_t mode)
 {
-    libcxx::intrusive_ptr<Inode> ret = find_child(name);
+    libcxx::intrusive_ptr<inode> ret = find_child(name);
     if (ret == nullptr) {
     }
     if (ret) {
         return ret;
     } else if (!ret && !(flags & O_CREAT)) {
-        return libcxx::intrusive_ptr<Inode>(nullptr);
+        return libcxx::intrusive_ptr<inode>(nullptr);
     }
     libcxx::intrusive_ptr<File> child(new File(0, 0, mode));
     TmpFSNode* node = new TmpFSNode(child, name);
@@ -145,7 +145,7 @@ libcxx::intrusive_ptr<Inode> Directory::lookup(const char* name, int flags,
 
 int Directory::mkdir(const char* name, mode_t mode)
 {
-    libcxx::intrusive_ptr<Inode> child = find_child(name);
+    libcxx::intrusive_ptr<inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
@@ -165,14 +165,14 @@ int Directory::mknod(const char* name, mode_t mode, dev_t dev)
     return 0;
 }
 
-libcxx::intrusive_ptr<Inode> Directory::find_child(const char* name)
+libcxx::intrusive_ptr<inode> Directory::find_child(const char* name)
 {
     for (auto& i : children) {
         if (!libcxx::strcmp(i.name, name)) {
-            return i.inode;
+            return i.ino;
         }
     }
-    return libcxx::intrusive_ptr<Inode>(nullptr);
+    return libcxx::intrusive_ptr<inode>(nullptr);
 }
 } // namespace InitFS
 } // namespace filesystem

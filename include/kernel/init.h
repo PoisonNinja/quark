@@ -2,7 +2,7 @@
 
 using initcall_t = int (*)();
 
-enum class InitLevel : int {
+enum class init_level : int {
     EARLY,
     CORE,
     ARCH,
@@ -24,4 +24,4 @@ enum class InitLevel : int {
 #define DEVICE_INITCALL(fn) __define_initcall(fn, 6)
 #define LATE_INITCALL(fn) __define_initcall(fn, 7)
 
-void do_initcall(InitLevel level);
+void do_initcall(init_level level);

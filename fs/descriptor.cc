@@ -10,36 +10,24 @@ namespace filesystem
 {
 char* dirname(const char* path)
 {
-    const char* slash = libcxx::strrchr(path, '/');
-    if (slash && slash != path && *(slash + 1) == '\0') {
-        /* Determine whether all remaining characters are slashes.  */
-        const char* runp;
-        for (runp = slash; runp != path; --runp)
-            if (runp[-1] != '/')
-                break;
-        /* The '/' is the last character, we have to look further.  */
-        if (runp != path)
-            slash = (const char*)libcxx::memrchr(path, '/', runp - path);
-    }
-    if (slash) {
-        const char* runp;
-        for (runp = slash; runp != path; --runp)
-            if (runp[-1] != '/')
-                break;
-        if (runp == path) {
-            if (slash == path + 1)
-                slash++;
-            else
-                slash = path + 1;
-        } else
-            slash = runp;
+    const char* slash;
+    if (path == NULL || *path == '\0')
+        return libcxx::strdup(".");
+    slash = path + libcxx::strlen(path) - 1;
+    while (*slash == '/')
+        slash--;
+    if (slash != path)
+        slash = (const char*)libcxx::memrchr(path, '/', slash - path);
+    if (slash < path) {
+        return libcxx::strdup(".");
+    } else if (slash == path) {
+        return libcxx::strdup("/");
+    } else {
         size_t diff = slash - path;
         char* ret   = new char[diff + 1];
         libcxx::memcpy(ret, path, diff);
         ret[diff] = '\0';
         return ret;
-    } else {
-        return libcxx::strdup(".");
     }
 }
 

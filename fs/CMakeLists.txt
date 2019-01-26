@@ -12,6 +12,7 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/vnode.cc
 )
 
+add_subdirectory(ext2)
 add_subdirectory(pty)
 add_subdirectory(initrd)
 add_subdirectory(tmpfs)

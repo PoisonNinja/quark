@@ -37,15 +37,15 @@ libcxx::pair<bool, region> allocate(size_t size)
     return libcxx::make_pair(true, region);
 }
 
-sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)
+sglist::sglist(size_t max_elements, size_t max_element_size, size_t total)
     : num_regions(0)
     , total_size(0)
 {
     size_t allocated = 0;
-    while (allocated < total_size && num_regions <= max_elements) {
+    while (allocated < total && num_regions <= max_elements) {
         // We always try to allocate the maximum size
         size_t alloc_size =
-            (max_element_size < total_size) ? max_element_size : total_size;
+            (max_element_size < total) ? max_element_size : total;
         auto [physical_base, real_size] =
             memory::physical::try_allocate(alloc_size);
         region region;
@@ -53,10 +53,10 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total_size)
         region.real_size     = real_size;
         allocated += real_size;
 
-        if (allocated < total_size) {
+        if (allocated < total) {
             region.size = real_size;
         } else {
-            region.size = total_size - (allocated - real_size);
+            region.size = total - (allocated - real_size);
         }
 
         region.virtual_base = dma_region.allocate(0, real_size).second;

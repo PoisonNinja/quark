@@ -11,18 +11,30 @@ namespace filesystem
 char* dirname(const char* path)
 {
     const char* slash = libcxx::strrchr(path, '/');
+    if (slash && slash != path && *(slash + 1) == '\0') {
+        /* Determine whether all remaining characters are slashes.  */
+        const char* runp;
+        for (runp = slash; runp != path; --runp)
+            if (runp[-1] != '/')
+                break;
+        /* The '/' is the last character, we have to look further.  */
+        if (runp != path)
+            slash = (const char*)libcxx::memrchr(path, '/', runp - path);
+    }
     if (slash) {
-        if (*(slash + 1) == '\0') {
-            if (slash == path) {
-                return libcxx::strdup("/");
-            }
-            slash = (const char*)libcxx::memrchr(path, '/', slash - path);
-        }
+        const char* runp;
+        for (runp = slash; runp != path; --runp)
+            if (runp[-1] != '/')
+                break;
+        if (runp == path) {
+            if (slash == path + 1)
+                slash++;
+            else
+                slash = path + 1;
+        } else
+            slash = runp;
         size_t diff = slash - path;
-        if (!diff || !slash) {
-            return libcxx::strdup(".");
-        }
-        char* ret = new char[diff + 1];
+        char* ret   = new char[diff + 1];
         libcxx::memcpy(ret, path, diff);
         ret[diff] = '\0';
         return ret;
@@ -40,7 +52,8 @@ char* basename(const char* path)
     if (slash) {
         // Check if this is a trailing slash
         if (*(slash + 1) == '\0') {
-            // Keep on moving the terminate back until we are no longer slashes
+            // Keep on moving the terminate back until we are no longer
+            // slashes
             while (terminate > path && *(--terminate) == '/')
                 ;
             /*
@@ -156,8 +169,8 @@ int descriptor::mount(const char* source, const char* target, const char* type,
                       unsigned long flags)
 {
     /*
-     * Retrieve the driver first so we can check if the driver actually wants
-     * a real block device or doesn't care (e.g. procfs)
+     * Retrieve the driver first so we can check if the driver actually
+     * wants a real block device or doesn't care (e.g. procfs)
      */
     driver* driver = drivers::get(type);
     if (!driver) {

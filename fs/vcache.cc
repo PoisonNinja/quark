@@ -8,17 +8,22 @@ namespace filesystem
 {
 namespace
 {
-class Key
+class key
 {
 public:
-    Key(ino_t i, dev_t d)
+    key(ino_t i, dev_t d)
         : ino(i)
         , dev(d){};
-    bool operator==(const Key& k) const
+    key(const key& other) = default;
+    key(key&& other)      = default;
+    key& operator=(const key& other) = default;
+    key& operator=(key&& other) = default;
+
+    bool operator==(const key& k) const
     {
         return (ino == k.ino) && (dev == k.dev);
     }
-    bool operator!=(const Key& k) const
+    bool operator!=(const key& k) const
     {
         return !(*this == k);
     }
@@ -28,8 +33,8 @@ private:
     dev_t dev;
 };
 
-struct Hash {
-    unsigned long operator()(const Key& key)
+struct hash {
+    unsigned long operator()(const key& key)
     {
         return libcxx::murmur::hash(&key, sizeof(key));
     }
@@ -37,7 +42,7 @@ struct Hash {
 
 constexpr size_t vcache_size = 1024;
 
-libcxx::unordered_map<Key, libcxx::intrusive_ptr<vnode>, vcache_size, Hash>
+libcxx::unordered_map<key, libcxx::intrusive_ptr<vnode>, vcache_size, hash>
     vcache_hash;
 } // namespace
 
@@ -46,7 +51,7 @@ namespace vcache
 bool add(ino_t ino, dev_t dev, libcxx::intrusive_ptr<vnode> vnode)
 {
     libcxx::intrusive_ptr<filesystem::vnode> dummy(nullptr);
-    Key key(ino, dev);
+    key key(ino, dev);
     if (vcache_hash.at(key, dummy)) {
         log::printk(log::log_level::WARNING,
                     "Vnode cache already has this vnode, discarding\n");
@@ -59,7 +64,7 @@ bool add(ino_t ino, dev_t dev, libcxx::intrusive_ptr<vnode> vnode)
 libcxx::intrusive_ptr<vnode> get(ino_t ino, dev_t dev)
 {
     libcxx::intrusive_ptr<vnode> dummy = libcxx::intrusive_ptr<vnode>(nullptr);
-    Key key(ino, dev);
+    key key(ino, dev);
     if (!vcache_hash.at(key, dummy)) {
         return libcxx::intrusive_ptr<vnode>(nullptr);
     }

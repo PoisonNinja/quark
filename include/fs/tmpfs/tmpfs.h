@@ -6,32 +6,32 @@
 
 namespace filesystem
 {
-class tmpfs : public driver
+namespace tmpfs
+{
+class driver : public filesystem::driver
 {
 public:
-    tmpfs();
-    ~tmpfs();
+    driver();
+    ~driver();
     bool mount(superblock* sb) override;
     uint32_t flags() override;
 };
 
-namespace InitFS
-{
-struct TmpFSNode {
-    TmpFSNode(libcxx::intrusive_ptr<inode> inode, const char* name);
-    TmpFSNode(const struct TmpFSNode& other);
-    TmpFSNode& operator=(const struct TmpFSNode& other);
-    ~TmpFSNode();
+struct tmpfs_node {
+    tmpfs_node(libcxx::intrusive_ptr<inode> inode, const char* name);
+    tmpfs_node(const struct tmpfs_node& other);
+    tmpfs_node& operator=(const struct tmpfs_node& other);
+    ~tmpfs_node();
     libcxx::intrusive_ptr<inode> ino;
     const char* name;
-    libcxx::node<TmpFSNode> node;
+    libcxx::node<tmpfs_node> node;
 };
 
-class File : public inode
+class file : public inode
 {
 public:
-    File(ino_t ino, dev_t rdev, mode_t mode);
-    virtual ~File();
+    file(ino_t ino, dev_t rdev, mode_t mode);
+    virtual ~file();
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie) override;
     virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
@@ -42,11 +42,11 @@ private:
     size_t buffer_size;
 };
 
-class Directory : public inode
+class directory : public inode
 {
 public:
-    Directory(ino_t ino, dev_t rdev, mode_t mode);
-    virtual ~Directory();
+    directory(ino_t ino, dev_t rdev, mode_t mode);
+    virtual ~directory();
     virtual int link(const char* name,
                      libcxx::intrusive_ptr<inode> node) override;
     virtual libcxx::intrusive_ptr<inode> lookup(const char* name, int flags,
@@ -56,7 +56,7 @@ public:
 
 private:
     libcxx::intrusive_ptr<inode> find_child(const char* name);
-    libcxx::list<TmpFSNode, &TmpFSNode::node> children;
+    libcxx::list<tmpfs_node, &tmpfs_node::node> children;
 };
-} // namespace InitFS
+} // namespace tmpfs
 } // namespace filesystem

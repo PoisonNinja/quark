@@ -11,6 +11,11 @@
 // HACK
 #include <proc/sched.h>
 
+namespace
+{
+constexpr int pty_major = 134;
+}
+
 namespace filesystem
 {
 namespace tty
@@ -52,8 +57,8 @@ ssize_t PTS::write(const uint8_t* buffer, size_t count, void* cookie)
 } // namespace tty
 ptsfs::ptsfs()
 {
-    filesystem::register_class(filesystem::CHR, 134);
-    this->root = new InitFS::Directory(0, 0, 0755);
+    filesystem::register_class(filesystem::CHR, pty_major);
+    this->root = new tmpfs::directory(0, 0, 0755);
 }
 
 bool ptsfs::mount(superblock* sb)
@@ -66,9 +71,9 @@ bool ptsfs::register_pty(tty::pty* pty)
 {
     char name[128];
     tty::PTS* pts = new tty::PTS(pty);
-    tty::register_tty(134, pts);
+    tty::register_tty(pty_major, pts);
     libcxx::sprintf(name, "pts%d", pty->index());
-    this->root->mknod(name, S_IFCHR | 0644, mkdev(134, pty->index()));
+    this->root->mknod(name, S_IFCHR | 0644, mkdev(pty_major, pty->index()));
     return true;
 }
 } // namespace filesystem

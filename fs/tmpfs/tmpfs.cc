@@ -7,40 +7,40 @@
 
 namespace filesystem
 {
-tmpfs::tmpfs()
+namespace tmpfs
+{
+driver::driver()
 {
 }
 
-tmpfs::~tmpfs()
+driver::~driver()
 {
 }
 
-bool tmpfs::mount(superblock* sb)
+bool driver::mount(superblock* sb)
 {
-    sb->root = libcxx::intrusive_ptr<inode>(new InitFS::Directory(0, 0, 0755));
+    sb->root = libcxx::intrusive_ptr<inode>(new tmpfs::directory(0, 0, 0755));
     return true;
 }
 
-uint32_t tmpfs::flags()
+uint32_t driver::flags()
 {
     return driver_pseudo;
 }
 
-namespace InitFS
-{
-TmpFSNode::TmpFSNode(libcxx::intrusive_ptr<inode> inode, const char* name)
+tmpfs_node::tmpfs_node(libcxx::intrusive_ptr<inode> inode, const char* name)
 {
     this->ino  = inode;
     this->name = libcxx::strdup(name);
 }
 
-TmpFSNode::TmpFSNode(const struct TmpFSNode& other)
+tmpfs_node::tmpfs_node(const struct tmpfs_node& other)
 {
     this->ino  = other.ino;
     this->name = libcxx::strdup(other.name);
 }
 
-TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
+tmpfs_node& tmpfs_node::operator=(const struct tmpfs_node& other)
 {
     this->ino           = other.ino;
     const char* newname = libcxx::strdup(other.name);
@@ -48,12 +48,12 @@ TmpFSNode& TmpFSNode::operator=(const struct TmpFSNode& other)
     return *this;
 }
 
-TmpFSNode::~TmpFSNode()
+tmpfs_node::~tmpfs_node()
 {
     delete[] this->name;
 }
 
-File::File(ino_t ino, dev_t rdev, mode_t mode)
+file::file(ino_t ino, dev_t rdev, mode_t mode)
 {
     this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
     this->rdev = rdev;
@@ -66,14 +66,14 @@ File::File(ino_t ino, dev_t rdev, mode_t mode)
     buffer_size = 0;
 }
 
-File::~File()
+file::~file()
 {
     if (this->data) {
         delete[] data;
     }
 }
 
-ssize_t File::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+ssize_t file::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     // Trim out of bound reads
     if (count + offset > buffer_size) {
@@ -83,7 +83,7 @@ ssize_t File::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
     return count;
 }
 
-ssize_t File::write(const uint8_t* buffer, size_t count, off_t offset,
+ssize_t file::write(const uint8_t* buffer, size_t count, off_t offset,
                     void* cookie)
 {
     if (count + offset > buffer_size) {
@@ -101,14 +101,14 @@ ssize_t File::write(const uint8_t* buffer, size_t count, off_t offset,
     return count;
 }
 
-Directory::Directory(ino_t ino, dev_t rdev, mode_t mode)
+directory::directory(ino_t ino, dev_t rdev, mode_t mode)
 {
     this->ino  = (ino) ? ino : reinterpret_cast<ino_t>(this);
     this->rdev = rdev;
     this->mode = mode | S_IFDIR;
 }
 
-Directory::~Directory()
+directory::~directory()
 {
     if (!children.empty()) {
         log::printk(log::log_level::WARNING,
@@ -116,17 +116,17 @@ Directory::~Directory()
     }
 }
 
-int Directory::link(const char* name, libcxx::intrusive_ptr<inode> node)
+int directory::link(const char* name, libcxx::intrusive_ptr<inode> node)
 {
     libcxx::intrusive_ptr<inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
-    children.push_back(*(new TmpFSNode(node, name)));
+    children.push_back(*(new tmpfs_node(node, name)));
     return 0;
 }
 
-libcxx::intrusive_ptr<inode> Directory::lookup(const char* name, int flags,
+libcxx::intrusive_ptr<inode> directory::lookup(const char* name, int flags,
                                                mode_t mode)
 {
     libcxx::intrusive_ptr<inode> ret = find_child(name);
@@ -137,35 +137,35 @@ libcxx::intrusive_ptr<inode> Directory::lookup(const char* name, int flags,
     } else if (!ret && !(flags & O_CREAT)) {
         return libcxx::intrusive_ptr<inode>(nullptr);
     }
-    libcxx::intrusive_ptr<File> child(new File(0, 0, mode));
-    TmpFSNode* node = new TmpFSNode(child, name);
+    libcxx::intrusive_ptr<file> child(new file(0, 0, mode));
+    tmpfs_node* node = new tmpfs_node(child, name);
     children.push_back(*node);
     return child;
 }
 
-int Directory::mkdir(const char* name, mode_t mode)
+int directory::mkdir(const char* name, mode_t mode)
 {
     libcxx::intrusive_ptr<inode> child = find_child(name);
     if (child) {
         return -EEXIST;
     }
-    libcxx::intrusive_ptr<Directory> dir(new Directory(0, 0, mode));
+    libcxx::intrusive_ptr<directory> dir(new directory(0, 0, mode));
     dir->link(".", dir);
-    dir->link("..", libcxx::intrusive_ptr<Directory>(this));
-    TmpFSNode* node = new TmpFSNode(dir, name);
+    dir->link("..", libcxx::intrusive_ptr<directory>(this));
+    tmpfs_node* node = new tmpfs_node(dir, name);
     children.push_back(*node);
     return 0;
 }
 
-int Directory::mknod(const char* name, mode_t mode, dev_t dev)
+int directory::mknod(const char* name, mode_t mode, dev_t dev)
 {
-    libcxx::intrusive_ptr<File> child(new File(0, dev, mode));
-    TmpFSNode* node = new TmpFSNode(child, name);
+    libcxx::intrusive_ptr<file> child(new file(0, dev, mode));
+    tmpfs_node* node = new tmpfs_node(child, name);
     children.push_back(*node);
     return 0;
 }
 
-libcxx::intrusive_ptr<inode> Directory::find_child(const char* name)
+libcxx::intrusive_ptr<inode> directory::find_child(const char* name)
 {
     for (auto& i : children) {
         if (!libcxx::strcmp(i.name, name)) {
@@ -174,5 +174,5 @@ libcxx::intrusive_ptr<inode> Directory::find_child(const char* name)
     }
     return libcxx::intrusive_ptr<inode>(nullptr);
 }
-} // namespace InitFS
+} // namespace tmpfs
 } // namespace filesystem

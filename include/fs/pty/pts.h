@@ -7,7 +7,7 @@
 
 namespace filesystem
 {
-class ptsfs : public tmpfs
+class ptsfs : public tmpfs::driver
 {
 public:
     ptsfs();
@@ -17,7 +17,7 @@ public:
 
 private:
     libcxx::list<tty::pty, &tty::pty::node> ptys;
-    InitFS::Directory* root;
+    tmpfs::directory* root;
 };
 
 } // namespace filesystem

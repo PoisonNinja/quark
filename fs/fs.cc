@@ -19,7 +19,7 @@ void init()
     tty::init();
 
     // Register the filesystem drivers
-    drivers::add("tmpfs", new tmpfs());
+    drivers::add("tmpfs", new tmpfs::driver());
     drivers::add("ptsfs", new ptsfs());
 
     vgafb* vga     = new vgafb();

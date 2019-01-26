@@ -186,10 +186,10 @@ size_t strlen(const char *str)
 char *strrchr(const char *str, int c)
 {
     char *last = nullptr;
-    while (*str++ != '\0') {
+    do {
         if (*str == c)
             last = (char *)str;
-    }
+    } while (*str++ != '\0');
     return last;
 }
 

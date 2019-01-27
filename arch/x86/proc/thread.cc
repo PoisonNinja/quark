@@ -301,7 +301,7 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     thread* kthread = new thread(p);
     libcxx::memset(&kthread->tcontext, 0, sizeof(kthread->tcontext));
     addr_t stack =
-        reinterpret_cast<addr_t>(new uint8_t[0x1000] + 0x1000) & ~15UL;
+        reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
 #ifdef X86_64
     kthread->tcontext.rdi    = reinterpret_cast<addr_t>(data);
     kthread->tcontext.rip    = reinterpret_cast<addr_t>(entry_point);

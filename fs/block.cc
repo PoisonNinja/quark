@@ -6,11 +6,11 @@
 
 namespace filesystem
 {
-class BlockWrapper : public kdevice
+class block_wrapper : public kdevice
 {
 public:
-    BlockWrapper(block_device* bd);
-    ~BlockWrapper();
+    block_wrapper(block_device* bd);
+    ~block_wrapper();
 
     ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                  void* cookie) override;
@@ -22,18 +22,18 @@ private:
     block_device* blkdev;
 };
 
-BlockWrapper::BlockWrapper(block_device* bd)
+block_wrapper::block_wrapper(block_device* bd)
     : kdevice(BLK)
     , blkdev(bd)
 {
 }
 
-BlockWrapper::~BlockWrapper()
+block_wrapper::~block_wrapper()
 {
 }
 
-ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
-                           void* cookie)
+ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
+                            void* cookie)
 {
     // TODO: Eventually implement a more intelligent scheduler
     size_t processed = 0;
@@ -100,8 +100,8 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
     return count;
 }
 
-ssize_t BlockWrapper::write(const uint8_t* buffer, size_t count, off_t offset,
-                            void* cookie)
+ssize_t block_wrapper::write(const uint8_t* buffer, size_t count, off_t offset,
+                             void* cookie)
 {
     // TODO: Eventually implement a more intelligent scheduler
     return 0;
@@ -113,7 +113,7 @@ block_device::~block_device()
 
 bool register_blockdev(dev_t major, block_device* blkdev)
 {
-    BlockWrapper* bw = new BlockWrapper(blkdev);
+    block_wrapper* bw = new block_wrapper(blkdev);
     register_kdevice(BLK, major, bw);
     return true;
 }

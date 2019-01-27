@@ -135,6 +135,7 @@ class ext2_base_inode : public filesystem::inode
 public:
     ext2_base_inode(ino_t ino, ext2_instance* parent,
                     ext2_real_inode real_inode);
+    void read_data_block(unsigned block_number, uint8_t* buffer);
 
 protected:
     ext2_real_inode disk_inode;
@@ -144,6 +145,10 @@ protected:
 class ext2_file : public ext2_base_inode
 {
 public:
+    ext2_file(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode);
+    virtual ~ext2_file();
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                         void* cookie) override;
 };
 
 class ext2_dir : public ext2_base_inode

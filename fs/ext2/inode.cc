@@ -14,7 +14,7 @@ void ext2_instance::read_inode(ino_t ino, ext2_real_inode* out)
         (((ino - 1) % this->sb.inodes_per_group) * this->sb.inode_size) /
         this->geometry.block_size;
 
-    uint8_t buffer[1024];
+    uint8_t buffer[this->geometry.block_size];
 
     read_block(buffer, this->bg_table[block_table_index].inode_table +
                            inode_block_offset);
@@ -29,6 +29,8 @@ void ext2_instance::read_inode(ino_t ino, ext2_real_inode* out)
 
 ext2_base_inode::ext2_base_inode(ino_t ino, ext2_instance* parent,
                                  ext2_real_inode real_inode)
+    : disk_inode(real_inode)
+    , instance(parent)
 {
     // Copy over the information
     this->ino  = ino;
@@ -38,18 +40,23 @@ ext2_base_inode::ext2_base_inode(ino_t ino, ext2_instance* parent,
     this->gid  = this->disk_inode.gid;
 }
 
-ext2_dir::ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode)
-    : ext2_base_inode(ino, parent, real_inode)
+void ext2_base_inode::read_data_block(unsigned block_number, uint8_t* buffer)
 {
-}
-
-ext2_dir::~ext2_dir()
-{
-}
-
-libcxx::intrusive_ptr<inode> ext2_dir::lookup(const char* name, int flags,
-                                              mode_t mode)
-{
+    size_t real_block = 0;
+    // Resolve the on-disk block #
+    if (block_number < 12) {
+        // No indirection needed
+        real_block = this->disk_inode.block[block_number];
+    } else if (block_number <
+               12 + ((this->instance->geometry.block_size) / 4)) {
+        // Level-one indirection
+    } else {
+        // TODO: Implement level-two and level-three indirection
+        log::printk(log::log_level::WARNING,
+                    "ext2: Level two/three indirection not supported yet\n");
+        return;
+    }
+    this->instance->read_block(buffer, real_block);
 }
 } // namespace ext2
 } // namespace filesystem

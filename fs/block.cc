@@ -51,7 +51,7 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         auto sglist =
             memory::dma::make_sglist(this->blkdev->sg_max_count(),
                                      this->blkdev->sg_max_size(), to_process);
-        log::printk(log::log_level::INFO,
+        log::printk(log::log_level::DEBUG,
                     "block: sglist contains %p bytes in %llX regions\n",
                     sglist->total_size, sglist->num_regions);
         filesystem::block_request request;
@@ -60,8 +60,9 @@ ssize_t BlockWrapper::read(uint8_t* buffer, size_t count, off_t offset,
         request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
         request.sglist = libcxx::move(sglist);
-        log::printk(log::log_level::INFO, "block: 0x%zX sectors, 0x%zX start\n",
-                    request.num_sectors, request.start);
+        log::printk(log::log_level::DEBUG,
+                    "block: 0x%zX sectors, 0x%zX start\n", request.num_sectors,
+                    request.start);
 
         if (blkdev->request(&request)) {
             for (auto& region : request.sglist->list) {

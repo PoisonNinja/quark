@@ -1,5 +1,7 @@
 #include <fs/ext2/ext2.h>
+#include <fs/vnode.h>
 #include <kernel/init.h>
+#include <lib/math.h>
 
 namespace filesystem
 {
@@ -15,12 +17,73 @@ driver::~driver()
 
 bool driver::mount(superblock* sb)
 {
-    return false;
+    ext2_instance* ext2_fs = new ext2_instance();
+    sb->source->read(reinterpret_cast<uint8_t*>(&ext2_fs->sb),
+                     sizeof(ext2_superblock), 1024, nullptr);
+    if (ext2_fs->sb.magic != ext2_magic) {
+        log::printk(log::log_level::ERROR,
+                    "ext2: Bad magic. Expected %X, got %X\n", ext2_magic,
+                    ext2_fs->sb.magic);
+        return false;
+    }
+    ext2_fs->block_device = sb->source;
+
+    // Initialize geometry
+    ext2_fs->geometry.block_size = 1024 << ext2_fs->sb.log_block_size;
+    // TODO: Detect this
+    if (ext2_fs->sb.rev_level < 1) {
+        ext2_fs->geometry.inode_size = 128;
+    } else {
+        ext2_fs->geometry.inode_size = ext2_fs->sb.inode_size;
+    }
+
+    /*
+     * If block size is 1024 the block group descriptor table starts in block 1,
+     * otherwise in block 0, offset 1024
+     */
+    if (ext2_fs->geometry.block_size == 1024) {
+        ext2_fs->geometry.bg_table_start = 2;
+    } else {
+        ext2_fs->geometry.bg_table_start = 1;
+    }
+    if (libcxx::div_round_up(ext2_fs->sb.blocks_count,
+                             ext2_fs->sb.blocks_per_group) !=
+        libcxx::div_round_up(ext2_fs->sb.inodes_count,
+                             ext2_fs->sb.inodes_per_group)) {
+        log::printk(log::log_level::ERROR, "ext2: Got two different answers "
+                                           "for # of block groups, aborting\n");
+        return false;
+    }
+    ext2_fs->geometry.num_block_groups = libcxx::div_round_up(
+        ext2_fs->sb.blocks_count, ext2_fs->sb.blocks_per_group);
+
+    // Print geometry
+    log::printk(log::log_level::INFO, "ext2: Version: %d.%d\n",
+                ext2_fs->sb.rev_level, ext2_fs->sb.minor_rev_level);
+    log::printk(log::log_level::INFO, "ext2: Block size: %d bytes\n",
+                1024 << ext2_fs->geometry.block_size);
+    log::printk(log::log_level::INFO, "ext2: # of block groups: %zu\n",
+                1024 << ext2_fs->geometry.num_block_groups);
+
+    // Initialize block group descriptor table
+
+    // ext2 root inode is always 2
+    sb->root = ext2_fs->root =
+        libcxx::intrusive_ptr<ext2_dir>(new ext2_dir(ext2_fs, 2));
+
+    return true;
 }
 
 uint32_t driver::flags()
 {
     return 0;
+}
+
+ssize_t ext2_instance::read_block(uint8_t* buffer, uint32_t block_number)
+{
+    return this->block_device->read(buffer, this->geometry.block_size,
+                                    this->geometry.block_size * block_number,
+                                    nullptr);
 }
 
 namespace

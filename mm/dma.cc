@@ -61,7 +61,7 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total)
 
         region.virtual_base = dma_region.allocate(0, real_size).second;
         memory::virt::map_range(region.virtual_base, region.physical_base,
-                                region.size, PAGE_WRITABLE);
+                                region.real_size, PAGE_WRITABLE);
         list.push_back(region);
         num_regions++;
         total_size += region.size;

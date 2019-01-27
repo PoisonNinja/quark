@@ -83,7 +83,9 @@ bool driver::mount(superblock* sb)
     // Copy into the bg_table
     ext2_fs->bg_table =
         new ext2_bg_descriptor[ext2_fs->geometry.num_block_groups];
-    libcxx::memcpy(ext2_fs->bg_table, bg_buffer, sizeof(*ext2_fs->bg_table));
+    libcxx::memcpy(ext2_fs->bg_table, bg_buffer,
+                   ext2_fs->geometry.num_block_groups *
+                       sizeof(ext2_bg_descriptor));
 
     // Clean up the buffer
     delete bg_buffer;

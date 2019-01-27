@@ -63,9 +63,30 @@ bool driver::mount(superblock* sb)
     log::printk(log::log_level::INFO, "ext2: Block size: %d bytes\n",
                 1024 << ext2_fs->geometry.block_size);
     log::printk(log::log_level::INFO, "ext2: # of block groups: %zu\n",
-                1024 << ext2_fs->geometry.num_block_groups);
+                ext2_fs->geometry.num_block_groups);
 
     // Initialize block group descriptor table
+    // First calculate how many blocks we need to read
+    size_t num_bgd_blocks = libcxx::div_round_up(
+        ext2_fs->geometry.num_block_groups * sizeof(ext2_bg_descriptor),
+        ext2_fs->geometry.block_size);
+    log::printk(log::log_level::INFO, "ext2: # blocks in bg table: %zu\n",
+                num_bgd_blocks);
+
+    // Allocate memory
+    uint8_t* bg_buffer =
+        new uint8_t[num_bgd_blocks * ext2_fs->geometry.block_size];
+
+    // Read in the entire data
+    ext2_fs->read_block(bg_buffer, ext2_fs->geometry.bg_table_start);
+
+    // Copy into the bg_table
+    ext2_fs->bg_table =
+        new ext2_bg_descriptor[ext2_fs->geometry.num_block_groups];
+    libcxx::memcpy(ext2_fs->bg_table, bg_buffer, sizeof(*ext2_fs->bg_table));
+
+    // Clean up the buffer
+    delete bg_buffer;
 
     // ext2 root inode is always 2
     sb->root = ext2_fs->root =

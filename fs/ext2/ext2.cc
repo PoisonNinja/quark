@@ -89,8 +89,10 @@ bool driver::mount(superblock* sb)
     delete bg_buffer;
 
     // ext2 root inode is always 2
+    ext2_real_inode root;
+    ext2_fs->read_inode(2, &root);
     sb->root = ext2_fs->root =
-        libcxx::intrusive_ptr<ext2_dir>(new ext2_dir(ext2_fs, 2));
+        libcxx::intrusive_ptr<ext2_dir>(new ext2_dir(2, ext2_fs, root));
 
     return true;
 }

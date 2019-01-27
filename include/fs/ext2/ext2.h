@@ -138,7 +138,10 @@ public:
 class ext2_dir : public filesystem::inode
 {
 public:
-    ext2_dir(ext2_instance* parent, ino_t ino);
+    ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode);
+    virtual ~ext2_dir();
+    virtual libcxx::intrusive_ptr<inode> lookup(const char* name, int flags,
+                                                mode_t mode) override;
 
 private:
     ext2_real_inode disk_inode;
@@ -156,6 +159,7 @@ class ext2_instance
 {
 public:
     ssize_t read_block(uint8_t* buffer, uint32_t block_number);
+    void read_inode(ino_t ino, ext2_real_inode* out);
 
     libcxx::intrusive_ptr<vnode> block_device;
     libcxx::intrusive_ptr<ext2_dir> root;

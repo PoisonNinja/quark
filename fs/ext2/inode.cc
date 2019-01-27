@@ -27,9 +27,8 @@ void ext2_instance::read_inode(ino_t ino, ext2_real_inode* out)
     libcxx::memcpy(out, buffer + inode_data_offset, sizeof(ext2_real_inode));
 }
 
-ext2_dir::ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode)
-    : instance(parent)
-    , disk_inode(real_inode)
+ext2_base_inode::ext2_base_inode(ino_t ino, ext2_instance* parent,
+                                 ext2_real_inode real_inode)
 {
     // Copy over the information
     this->ino  = ino;
@@ -37,6 +36,11 @@ ext2_dir::ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode)
     this->size = this->disk_inode.size;
     this->uid  = this->disk_inode.uid;
     this->gid  = this->disk_inode.gid;
+}
+
+ext2_dir::ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode)
+    : ext2_base_inode(ino, parent, real_inode)
+{
 }
 
 ext2_dir::~ext2_dir()

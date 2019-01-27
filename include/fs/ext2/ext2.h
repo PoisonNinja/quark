@@ -130,22 +130,29 @@ struct ext2_dirent {
 
 class ext2_instance;
 
-class ext2_file : public filesystem::inode
+class ext2_base_inode : public filesystem::inode
+{
+public:
+    ext2_base_inode(ino_t ino, ext2_instance* parent,
+                    ext2_real_inode real_inode);
+
+protected:
+    ext2_real_inode disk_inode;
+    ext2_instance* instance;
+};
+
+class ext2_file : public ext2_base_inode
 {
 public:
 };
 
-class ext2_dir : public filesystem::inode
+class ext2_dir : public ext2_base_inode
 {
 public:
     ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode);
     virtual ~ext2_dir();
     virtual libcxx::intrusive_ptr<inode> lookup(const char* name, int flags,
                                                 mode_t mode) override;
-
-private:
-    ext2_real_inode disk_inode;
-    ext2_instance* instance;
 };
 
 struct ext2_calculated_geometry {

@@ -1,5 +1,5 @@
-global _ZN6String6memsetEPvim:function
-_ZN6String6memsetEPvim:
+global _ZN6libcxx6memsetEPvim:function
+_ZN6libcxx6memsetEPvim:
     push ebp
     mov ebp, esp
     push esi

@@ -1,7 +1,7 @@
 ; Based on Linux memcpy but converted to AT&T syntax
 
-global _ZN6String6memcpyEPvPKvm:function
-_ZN6String6memcpyEPvPKvm:
+global _ZN6libcxx6memcpyEPvPKvm:function
+_ZN6libcxx6memcpyEPvPKvm:
     push ebp              ; Base pointer (function prologue)
     mov ebp, esp
     push esi              ; Callee-saved

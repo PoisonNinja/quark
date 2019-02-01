@@ -5,7 +5,6 @@ namespace filesystem
 {
 namespace ext2
 {
-
 ext2_dir::ext2_dir(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode)
     : ext2_base_inode(ino, parent, real_inode)
 {

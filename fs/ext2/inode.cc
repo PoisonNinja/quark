@@ -49,6 +49,8 @@ void ext2_base_inode::read_data_block(unsigned block_number, uint8_t* buffer)
         real_block = this->disk_inode.block[block_number];
     } else if (block_number <
                12 + ((this->instance->geometry.block_size) / 4)) {
+        log::printk(log::log_level::WARNING,
+                    "ext2: Level one indirection not supported yet\n");
         // Level-one indirection
     } else {
         // TODO: Implement level-two and level-three indirection

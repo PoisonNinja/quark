@@ -30,7 +30,6 @@ bool driver::mount(superblock* sb)
 
     // Initialize geometry
     ext2_fs->geometry.block_size = 1024 << ext2_fs->sb.log_block_size;
-    // TODO: Detect this
     if (ext2_fs->sb.rev_level < 1) {
         ext2_fs->geometry.inode_size = 128;
     } else {
@@ -61,7 +60,7 @@ bool driver::mount(superblock* sb)
     log::printk(log::log_level::INFO, "ext2: Version: %d.%d\n",
                 ext2_fs->sb.rev_level, ext2_fs->sb.minor_rev_level);
     log::printk(log::log_level::INFO, "ext2: Block size: %d bytes\n",
-                1024 << ext2_fs->geometry.block_size);
+                ext2_fs->geometry.block_size);
     log::printk(log::log_level::INFO, "ext2: # of block groups: %zu\n",
                 ext2_fs->geometry.num_block_groups);
 
@@ -83,6 +82,7 @@ bool driver::mount(superblock* sb)
     // Copy into the bg_table
     ext2_fs->bg_table =
         new ext2_bg_descriptor[ext2_fs->geometry.num_block_groups];
+
     libcxx::memcpy(ext2_fs->bg_table, bg_buffer,
                    ext2_fs->geometry.num_block_groups *
                        sizeof(ext2_bg_descriptor));

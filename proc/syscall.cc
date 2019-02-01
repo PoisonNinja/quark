@@ -256,7 +256,8 @@ static long sys_fork()
 #else
     child_thread->tcontext.eax = 0;
 #endif
-    child_thread->tcontext.kernel_stack = (addr_t) new uint8_t[0x1000] + 0x1000;
+    child_thread->tcontext.kernel_stack =
+        reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
     scheduler::insert(child_thread);
     return child->pid;
 }

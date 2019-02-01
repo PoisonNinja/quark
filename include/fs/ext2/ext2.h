@@ -68,7 +68,7 @@ struct ext2_superblock {
     /* Journaling Support */
     uint8_t journal_uuid[16];
     uint32_t journal_inum;
-    uint32_t jounral_dev;
+    uint32_t journal_dev;
     uint32_t last_orphan;
 
     /* Directory Indexing Support */
@@ -81,7 +81,6 @@ struct ext2_superblock {
     uint32_t default_mount_options;
     uint32_t first_meta_bg;
     uint8_t _unused[760];
-
 } __attribute__((packed));
 
 struct ext2_bg_descriptor {

@@ -39,8 +39,6 @@ void init()
 
     droot->mkdir("dev", 0666);
     droot->mkdir("tmp", 0666);
-    droot->mkdir("dev/pts", 0666);
-    droot->mount("", "dev/pts", "ptsfs", 0);
 
     scheduler::get_current_process()->set_cwd(droot);
     scheduler::get_current_process()->set_root(droot);

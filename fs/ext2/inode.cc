@@ -11,8 +11,8 @@ void ext2_instance::read_inode(ino_t ino, ext2_real_inode* out)
         (this->geometry.block_size / sizeof(ext2_bg_descriptor));
 
     size_t inode_block_offset =
-        (((ino - 1) % this->sb.inodes_per_group) * this->sb.inode_size) /
-        this->geometry.block_size;
+        (((ino - 1) % this->sb.inodes_per_group) /
+         (this->geometry.block_size / sizeof(ext2_real_inode)));
 
     uint8_t buffer[this->geometry.block_size];
 

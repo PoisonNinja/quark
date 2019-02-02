@@ -1,6 +1,6 @@
-# add_definitions(
-#     -DX86
-# )
+add_definitions(
+    -DX86
+)
 
 if (ARCH STREQUAL "x86_64")
     add_definitions(

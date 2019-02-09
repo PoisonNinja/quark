@@ -196,10 +196,10 @@ descriptor::open(const char* name, int flags, mode_t mode)
     libcxx::intrusive_ptr<vnode> curr_vnode = this->vno;
     while ((current = libcxx::strtok_r(path, "/", &path))) {
         log::printk(log::log_level::DEBUG, "[descriptor->open] %s\n", current);
-        int checked_flags   = flags;
+        int checked_flags   = oflags_to_descriptor(flags);
         mode_t checked_mode = mode;
-        if (libcxx::strcmp(current, filename)) {
-            checked_flags = O_RDONLY;
+        if (*path != '\0') {
+            checked_flags = F_READ;
             mode          = 0;
         }
         curr_vnode = curr_vnode->lookup(current, checked_flags, checked_mode);

@@ -8,8 +8,10 @@ namespace filesystem
 {
 
 enum descriptor_flags {
-    F_READ  = 0x1,
-    F_WRITE = 0x2,
+    F_READ  = (1 << 0),
+    F_WRITE = (1 << 1),
+    // Kernel internal stuff
+    F_NOMOUNT = (1 << 31), // Don't follow the last mountpoint
 };
 
 constexpr int oflags_to_descriptor(int o_flag)

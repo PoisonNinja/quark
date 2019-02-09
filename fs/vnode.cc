@@ -45,10 +45,26 @@ int vnode::mknod(const char* name, mode_t mode, dev_t dev)
     return this->ino->mknod(name, mode, dev);
 }
 
+bool vnode::mounted()
+{
+    return !(this->mounts.empty());
+}
+
 int vnode::mount(filesystem::mount* mt)
 {
     this->mounts.push_front(*mt);
     return 0;
+}
+
+libcxx::pair<bool, struct mount*> vnode::umount()
+{
+    if (this->mounts.empty()) {
+        return libcxx::pair<bool, struct mount*>(false, nullptr);
+    } else {
+        struct mount* mt = &(this->mounts.front());
+        this->mounts.erase(this->mounts.begin());
+        return libcxx::make_pair(true, mt);
+    }
 }
 
 libcxx::intrusive_ptr<vnode> vnode::lookup(const char* name, int flags,

@@ -160,20 +160,41 @@ int descriptor::mount(const char* source, const char* target, const char* type,
      * Retrieve the driver first so we can check if the driver actually
      * wants a real block device or doesn't care (e.g. procfs)
      */
-    driver* driver = drivers::get(type);
-    if (!driver) {
-        log::printk(log::log_level::WARNING, "Failed to locate driver for %s\n",
-                    type);
-        return -EINVAL;
+    driver* driver = nullptr;
+    int o_flags    = O_RDONLY;
+    if (!(flags & static_cast<unsigned>(mount_flags::MS_MOVE))) {
+        driver = drivers::get(type);
+        if (!driver) {
+            log::printk(log::log_level::WARNING,
+                        "Failed to locate driver for %s\n", type);
+            return -EINVAL;
+        }
+    } else {
+        o_flags |= O_NOMOUNT;
     }
-    auto [err, target_desc] = this->open(target, O_RDONLY, 0);
+    auto [err, target_desc] = this->open(target, o_flags, 0);
     if (!target_desc) {
         return -ENOENT;
     }
-    auto source_result = this->open(source, O_RDONLY, 0);
+    auto source_result = this->open(source, o_flags, 0);
     auto source_desc   = source_result.second;
     if (!source_desc && !(driver->flags() & driver_pseudo)) {
         return -ENOENT;
+    }
+    if (flags & static_cast<unsigned>(mount_flags::MS_MOVE)) {
+        // Verify that source is actually a mountpoint
+        if (!source_desc->vno->mounted()) {
+            kernel::panic("Source not mounted!\n");
+            return -EINVAL;
+        }
+        // Verify that target is not the current root
+        if (target_desc == scheduler::get_current_process()->get_root()) {
+            kernel::panic("Target cannot be root!\n");
+            return -EINVAL;
+        }
+        auto [success, mt] = source_desc->vno->umount();
+        target_desc->vno->mount(mt);
+        return 0;
     }
     superblock* sb = new superblock();
     sb->path       = source;

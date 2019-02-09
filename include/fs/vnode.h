@@ -34,7 +34,9 @@ public:
     bool seekable();
 
     // VFS operations
+    bool mounted();
     int mount(mount* mt);
+    libcxx::pair<bool, struct mount*> umount();
 
 private:
     libcxx::list<filesystem::mount, &mount::node> mounts;

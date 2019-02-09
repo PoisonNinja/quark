@@ -1,3 +1,4 @@
+#include <fs/descriptor.h>
 #include <fs/fs.h>
 #include <fs/stat.h>
 #include <fs/vcache.h>
@@ -81,12 +82,15 @@ libcxx::intrusive_ptr<vnode> vnode::lookup(const char* name, int flags,
     } else {
         // New Vnodes cannot have a mountpoint so we can bypass this check
         // if the vnode was just created
-        if (!retvnode->mounts.empty()) {
-            superblock* newsb = retvnode->mounts.front().sb;
-            log::printk(log::log_level::DEBUG,
-                        "Transitioning mountpoints, superblock at %p\n", newsb);
-            return libcxx::intrusive_ptr<vnode>(
-                new vnode(newsb, newsb->root, 0));
+        if (!(flags & descriptor_flags::F_NOMOUNT)) {
+            if (!retvnode->mounts.empty()) {
+                superblock* newsb = retvnode->mounts.front().sb;
+                log::printk(log::log_level::DEBUG,
+                            "Transitioning mountpoints, superblock at %p\n",
+                            newsb);
+                return libcxx::intrusive_ptr<vnode>(
+                    new vnode(newsb, newsb->root, 0));
+            }
         }
     }
     return retvnode;

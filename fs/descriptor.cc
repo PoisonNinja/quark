@@ -201,6 +201,10 @@ descriptor::open(const char* name, int flags, mode_t mode)
         if (*path != '\0') {
             checked_flags = F_READ;
             mode          = 0;
+        } else {
+            if (flags & O_NOMOUNT) {
+                checked_flags |= F_NOMOUNT;
+            }
         }
         curr_vnode = curr_vnode->lookup(current, checked_flags, checked_mode);
         if (!curr_vnode) {

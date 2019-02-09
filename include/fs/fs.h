@@ -15,9 +15,12 @@ namespace filesystem
 #define O_NOFOLLOW 0x1000
 #define O_PATH 0x2000
 
+// Extensions
+#define O_NOMOUNT 0x4000
+
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
 
 void init();
-}  // namespace filesystem
+} // namespace filesystem

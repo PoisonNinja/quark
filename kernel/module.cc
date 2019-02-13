@@ -237,9 +237,10 @@ bool unload_module(const char* name)
             for (size_t i = 0; i < it->shnum; i++) {
                 delete[] reinterpret_cast<uint8_t*>(it->sections[i]);
             }
+            auto ptr = &(*it);
             delete[] it->sections;
             modules.erase(it);
-            delete &(*it);
+            delete ptr;
             return true;
         }
     }

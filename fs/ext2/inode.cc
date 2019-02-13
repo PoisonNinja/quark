@@ -47,18 +47,43 @@ void ext2_base_inode::read_data_block(unsigned block_number, uint8_t* buffer)
     if (block_number < 12) {
         // No indirection needed
         real_block = this->disk_inode.block[block_number];
-    } else if (block_number <
-               12 + ((this->instance->geometry.block_size) / 4)) {
-        log::printk(log::log_level::WARNING,
-                    "ext2: Level one indirection not supported yet\n");
+    } else if (block_number < 12 + ((this->instance->geometry.block_size) /
+                                    sizeof(uint32_t))) {
         // Level-one indirection
+        uint8_t buffer[this->instance->geometry.block_size];
+        this->instance->read_block(buffer, this->disk_inode.block[12]);
+        uint32_t* inode_table = reinterpret_cast<uint32_t*>(buffer);
+        real_block            = inode_table[block_number - 12];
+    } else if (block_number <
+               12 + ((this->instance->geometry.block_size) / sizeof(uint32_t)) +
+                   ((this->instance->geometry.block_size) / sizeof(uint32_t)) *
+                       ((this->instance->geometry.block_size) /
+                        sizeof(uint32_t))) {
+        // Level-two indirection
+        uint8_t dind_block[this->instance->geometry.block_size];
+        // 14th block contains double-block pointer
+        this->instance->read_block(dind_block, this->disk_inode.block[13]);
+        uint32_t* dind_table = reinterpret_cast<uint32_t*>(dind_block);
+        size_t dind_index =
+            (block_number - 12 -
+             ((this->instance->geometry.block_size) / sizeof(uint32_t))) /
+            ((this->instance->geometry.block_size) / sizeof(uint32_t));
+        uint8_t ind_block[this->instance->geometry.block_size];
+        this->instance->read_block(ind_block, dind_table[dind_index]);
+        size_t ind_index =
+            (block_number - 12 -
+             ((this->instance->geometry.block_size) / sizeof(uint32_t))) -
+            dind_index *
+                ((this->instance->geometry.block_size) / sizeof(uint32_t));
+        uint32_t* ind_table = reinterpret_cast<uint32_t*>(ind_block);
+        real_block          = ind_table[ind_index];
     } else {
-        // TODO: Implement level-two and level-three indirection
+        // TODO: Implement evel-three indirection
         log::printk(log::log_level::WARNING,
-                    "ext2: Level two/three indirection not supported yet\n");
+                    "ext2: Level three indirection not supported yet\n");
         return;
     }
     this->instance->read_block(buffer, real_block);
-}
+} // namespace ext2
 } // namespace ext2
 } // namespace filesystem

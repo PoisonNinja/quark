@@ -28,7 +28,7 @@ ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
 
     uint8_t tmp[this->instance->geometry.block_size];
 
-    while (current_block <= end_block) {
+    while (current_block <= end_block && processed < count) {
         this->read_data_block(current_block, tmp);
         if (current >
             libcxx::round_down(current, this->instance->geometry.block_size)) {

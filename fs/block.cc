@@ -38,6 +38,7 @@ ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
     // TODO: Eventually implement a more intelligent scheduler
     size_t processed = 0;
     size_t current   = offset;
+    size_t remaining = count;
 
     /*
      * Build sglist. It's possible that we may not get a sglist that's capable
@@ -66,6 +67,7 @@ ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
 
         if (blkdev->request(&request)) {
             for (auto& region : request.sglist->list) {
+                size_t to_copy = 0;
                 if (current >
                     libcxx::round_down(current, blkdev->sector_size())) {
                     log::printk(log::log_level::DEBUG,
@@ -73,23 +75,30 @@ ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
                     size_t distance =
                         current -
                         libcxx::round_down(current, blkdev->sector_size());
+                    to_copy = region.size - distance;
+                    if (remaining < to_copy) {
+                        to_copy = remaining;
+                    }
                     log::printk(log::log_level::DEBUG,
                                 "block: Block offset 0x%zX\n", distance);
                     libcxx::memcpy(
                         buffer + processed,
                         reinterpret_cast<void*>(region.virtual_base + distance),
-                        region.size - distance);
-                    processed += region.size - distance;
-                    current += region.size - distance;
+                        to_copy);
                 } else {
                     log::printk(log::log_level::DEBUG,
                                 "block: Aligned disk read :)\n");
+                    to_copy = region.size;
+                    if (remaining < to_copy) {
+                        to_copy = remaining;
+                    }
                     libcxx::memcpy(buffer + processed,
                                    reinterpret_cast<void*>(region.virtual_base),
-                                   region.size);
-                    processed += region.size;
-                    current += region.size;
+                                   to_copy);
                 }
+                processed += to_copy;
+                current += to_copy;
+                remaining -= to_copy;
             }
         } else {
             log::printk(log::log_level::ERROR, "block: Request failed\n");

@@ -59,11 +59,11 @@ public:
         delete[] _data;
     }
 
-    size_t capacity()
+    size_t capacity() const
     {
         return _capacity;
     }
-    size_t size()
+    size_t size() const
     {
         return _size;
     }

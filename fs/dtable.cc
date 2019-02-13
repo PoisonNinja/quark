@@ -16,6 +16,12 @@ dtable::~dtable()
 {
 }
 
+dtable& dtable::operator=(const dtable& other)
+{
+    this->fds = other.fds;
+    return *this;
+}
+
 int dtable::add(libcxx::intrusive_ptr<descriptor> desc)
 {
     for (unsigned i = 0; i < fds.size(); i++) {
@@ -53,6 +59,8 @@ libcxx::intrusive_ptr<descriptor> dtable::get(int index)
 
 int dtable::copy(int oldfd, int newfd)
 {
+    log::printk(log::log_level::INFO, "%d %d %zu\n", oldfd, newfd,
+                this->fds.size());
     this->fds[oldfd] = this->fds[newfd];
     return oldfd;
 }

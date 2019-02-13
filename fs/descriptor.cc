@@ -5,6 +5,7 @@
 #include <fs/stat.h>
 #include <kernel.h>
 #include <lib/string.h>
+#include <proc/sched.h>
 
 namespace filesystem
 {

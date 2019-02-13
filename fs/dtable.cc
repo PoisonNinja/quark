@@ -59,8 +59,6 @@ libcxx::intrusive_ptr<descriptor> dtable::get(int index)
 
 int dtable::copy(int oldfd, int newfd)
 {
-    log::printk(log::log_level::INFO, "%d %d %zu\n", oldfd, newfd,
-                this->fds.size());
     this->fds[oldfd] = this->fds[newfd];
     return oldfd;
 }

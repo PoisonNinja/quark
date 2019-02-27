@@ -325,6 +325,18 @@ static long sys_kill(pid_t pid, int signum)
     return 0;
 }
 
+static long sys_chdir(const char* path)
+{
+    log::printk(log::log_level::DEBUG, "[sys_chdir] %s\n", path);
+    auto [err, dir] =
+        get_start(path)->open(path, filesystem::descriptor_flags::F_READ, 0);
+    if (err) {
+        return err;
+    }
+    scheduler::get_current_process()->set_cwd(dir);
+    return 0;
+}
+
 static long sys_mkdir(const char* path, mode_t mode)
 {
     log::printk(log::log_level::DEBUG, "[sys_mkdir] %s %X\n", path, mode);
@@ -396,6 +408,18 @@ static long sys_mknod(const char* path, mode_t mode, dev_t dev)
     return get_start(path)->mknod(path, mode, dev);
 }
 
+static long sys_chroot(const char* path)
+{
+    log::printk(log::log_level::DEBUG, "[sys_chroot] %s\n", path);
+    auto [err, dir] =
+        get_start(path)->open(path, filesystem::descriptor_flags::F_READ, 0);
+    if (err) {
+        return err;
+    }
+    scheduler::get_current_process()->set_root(dir);
+    return 0;
+}
+
 static long sys_mount(const char* source, const char* target,
                       const char* filesystemtype, unsigned long mountflags,
                       const void* data)
@@ -441,10 +465,12 @@ void init()
     syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit]        = reinterpret_cast<void*>(sys_exit);
     syscall_table[SYS_kill]        = reinterpret_cast<void*>(sys_kill);
+    syscall_table[SYS_chdir]       = reinterpret_cast<void*>(sys_chdir);
     syscall_table[SYS_mkdir]       = reinterpret_cast<void*>(sys_mkdir);
     syscall_table[SYS_sigpending]  = reinterpret_cast<void*>(sys_sigpending);
     syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
     syscall_table[SYS_mknod]       = reinterpret_cast<void*>(sys_mknod);
+    syscall_table[SYS_chroot]      = reinterpret_cast<void*>(sys_chroot);
     syscall_table[SYS_mount]       = reinterpret_cast<void*>(sys_mount);
     syscall_table[SYS_init_module] = reinterpret_cast<void*>(sys_init_module);
     syscall_table[SYS_delete_module] =

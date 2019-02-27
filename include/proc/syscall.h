@@ -25,10 +25,12 @@ namespace syscall
 #define SYS_execve 59
 #define SYS_exit 60
 #define SYS_kill 62
+#define SYS_chdir 80
 #define SYS_mkdir 83
 #define SYS_sigpending 127
 #define SYS_sigaltstack 131
 #define SYS_mknod 133
+#define SYS_chroot 161
 #define SYS_mount 165
 #define SYS_umount 166
 #define SYS_init_module 175

@@ -238,6 +238,9 @@ void vma::reset()
     }
     // Reset the rb tree
     this->sections.reset();
+
+    this->lower_bound = this->upper_bound = this->highest_mapped = 0;
+    this->lowest = this->highest = nullptr;
     // Good to go, we can use all functionality again
 }
 } // namespace memory

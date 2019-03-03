@@ -88,7 +88,7 @@ bool driver::mount(superblock* sb)
                        sizeof(ext2_bg_descriptor));
 
     // Clean up the buffer
-    delete bg_buffer;
+    delete[] bg_buffer;
 
     // ext2 root inode is always 2
     ext2_real_inode root;

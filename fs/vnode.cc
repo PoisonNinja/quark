@@ -123,8 +123,6 @@ libcxx::pair<int, void*> vnode::open(const char* name)
 ssize_t vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
     if (this->kdev) {
-        log::printk(log::log_level::DEBUG,
-                    "kdev, intercepting read with cookie\n");
         return this->kdev->read(buffer, count, offset, cookie);
     }
     return ino->read(buffer, count, offset, cookie);
@@ -134,8 +132,6 @@ ssize_t vnode::write(const uint8_t* buffer, size_t count, off_t offset,
                      void* cookie)
 {
     if (this->kdev) {
-        log::printk(log::log_level::DEBUG,
-                    "kdev, intercepting write with cookie\n");
         return this->kdev->write(buffer, count, offset, cookie);
     }
     return ino->write(buffer, count, offset, cookie);

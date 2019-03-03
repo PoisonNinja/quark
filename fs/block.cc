@@ -52,26 +52,18 @@ ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
         auto sglist =
             memory::dma::make_sglist(this->blkdev->sg_max_count(),
                                      this->blkdev->sg_max_size(), to_process);
-        log::printk(log::log_level::DEBUG,
-                    "block: sglist contains %p bytes in %llX regions\n",
-                    sglist->total_size, sglist->num_regions);
         filesystem::block_request request;
         request.command     = filesystem::block_request_type::READ;
         request.num_sectors = sglist->total_size / blkdev->sector_size();
         request.start = libcxx::round_down(current, blkdev->sector_size()) /
                         blkdev->sector_size();
         request.sglist = libcxx::move(sglist);
-        log::printk(log::log_level::DEBUG,
-                    "block: 0x%zX sectors, 0x%zX start\n", request.num_sectors,
-                    request.start);
 
         if (blkdev->request(&request)) {
             for (auto& region : request.sglist->list) {
                 size_t to_copy = 0;
                 if (current >
                     libcxx::round_down(current, blkdev->sector_size())) {
-                    log::printk(log::log_level::DEBUG,
-                                "block: Unaligned disk read :(\n");
                     size_t distance =
                         current -
                         libcxx::round_down(current, blkdev->sector_size());
@@ -79,15 +71,11 @@ ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
                     if (remaining < to_copy) {
                         to_copy = remaining;
                     }
-                    log::printk(log::log_level::DEBUG,
-                                "block: Block offset 0x%zX\n", distance);
                     libcxx::memcpy(
                         buffer + processed,
                         reinterpret_cast<void*>(region.virtual_base + distance),
                         to_copy);
                 } else {
-                    log::printk(log::log_level::DEBUG,
-                                "block: Aligned disk read :)\n");
                     to_copy = region.size;
                     if (remaining < to_copy) {
                         to_copy = remaining;

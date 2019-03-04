@@ -76,6 +76,8 @@ void __copy_pd_entry(struct page_table* new_pd, struct page_table* old_pd,
                            sizeof(struct page));
             addr_t new_pt            = memory::physical::allocate();
             new_pd->pages[i].address = new_pt / 0x1000;
+            memory::x86::invlpg((addr_t)memory::x86::decode_fractal(
+                memory::x86::copy_entry, pml4_index, pdpt_index, i));
             __copy_pt_entry(
                 (struct page_table*)memory::x86::decode_fractal(
                     memory::x86::copy_entry, pml4_index, pdpt_index, i),
@@ -96,6 +98,9 @@ void __copy_pdpt_entry(struct page_table* new_pdpt, struct page_table* old_pdpt,
                            sizeof(struct page));
             addr_t new_pd              = memory::physical::allocate();
             new_pdpt->pages[i].address = new_pd / 0x1000;
+            memory::x86::invlpg((addr_t)memory::x86::decode_fractal(
+                memory::x86::copy_entry, memory::x86::recursive_entry,
+                pml4_index, i));
             __copy_pd_entry((struct page_table*)memory::x86::decode_fractal(
                                 memory::x86::copy_entry,
                                 memory::x86::recursive_entry, pml4_index, i),
@@ -180,6 +185,9 @@ addr_t fork()
             addr_t new_pdpt = memory::physical::allocate();
             // Set the page address
             new_pml4->pages[i].address = new_pdpt / 0x1000;
+            memory::x86::invlpg((addr_t)memory::x86::decode_fractal(
+                memory::x86::copy_entry, memory::x86::recursive_entry,
+                memory::x86::recursive_entry, i));
 #ifdef X86_64
             __copy_pdpt_entry(
                 (struct page_table*)memory::x86::decode_fractal(

@@ -301,6 +301,7 @@ static long sys_execve(const char* path, const char* old_argv[],
     if (!scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
                                                argc, argv, envc, envp, ctx)) {
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
+        return -ENOEXEC;
     }
     delete[] raw;
     load_registers(ctx);

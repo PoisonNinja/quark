@@ -44,16 +44,16 @@ bool unmap(addr_t v)
         !pt->pages[memory::x86::pt_index(v)].present)
         return false;
 #endif
+    pt->pages[memory::x86::pt_index(v)].present = 0;
     if (!pt->pages[memory::x86::pt_index(v)].hardware) {
         memory::physical::free(pt->pages[memory::x86::pt_index(v)].address *
                                0x1000);
-        memory::x86::invlpg(reinterpret_cast<addr_t>(v));
     }
-    pt->pages[memory::x86::pt_index(v)].present = 0;
+    memory::x86::invlpg(reinterpret_cast<addr_t>(v));
     if (__table_is_empty(pt)) {
+        pd->pages[memory::x86::pd_index(v)].present = 0;
         memory::physical::free(pd->pages[memory::x86::pd_index(v)].address *
                                0x1000);
-        pd->pages[memory::x86::pd_index(v)].present = 0;
         /*
          * TODO: This unconditionally invalidates the mapping even if
          * nothing changed. Perhaps, we should only do this if the mapping or
@@ -62,14 +62,14 @@ bool unmap(addr_t v)
         memory::x86::invlpg(reinterpret_cast<addr_t>(pt));
 #ifdef X86_64
         if (__table_is_empty(pd)) {
+            pdpt->pages[memory::x86::pdpt_index(v)].present = 0;
             memory::physical::free(
                 pdpt->pages[memory::x86::pdpt_index(v)].address * 0x1000);
-            pdpt->pages[memory::x86::pdpt_index(v)].present = 0;
             memory::x86::invlpg(reinterpret_cast<addr_t>(pd));
             if (__table_is_empty(pdpt)) {
+                pml4->pages[memory::x86::pml4_index(v)].present = 0;
                 memory::physical::free(
                     pml4->pages[memory::x86::pml4_index(v)].address * 0x1000);
-                pml4->pages[memory::x86::pml4_index(v)].present = 0;
                 memory::x86::invlpg(reinterpret_cast<addr_t>(pdpt));
             }
         }

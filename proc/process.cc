@@ -85,10 +85,10 @@ process* process::fork()
 void process::exit()
 {
     for (auto& section : *vma) {
-        memory::virt::unmap_range(section.start(), section.end());
+        memory::virt::unmap_range(section.start(), section.size());
     }
     this->vma->reset();
-    // memory::physical::free(this->address_space);
+    memory::physical::free(this->address_space);
     scheduler::remove_process(this->pid);
     delete this->vma;
 }

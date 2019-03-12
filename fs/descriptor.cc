@@ -213,7 +213,6 @@ descriptor::open(const char* name, int flags, mode_t mode)
 {
     char* path = libcxx::strdup(name);
     char* current;
-    char* filename = basename(name);
     libcxx::intrusive_ptr<descriptor> ret(nullptr);
     libcxx::intrusive_ptr<vnode> curr_vnode = this->vno;
     while ((current = libcxx::strtok_r(path, "/", &path))) {
@@ -246,6 +245,11 @@ descriptor::open(const char* name, int flags, mode_t mode)
     }
     delete[] path;
     return libcxx::make_pair(0, ret);
+}
+
+int descriptor::poll(poll_register_func_t& callback)
+{
+    return this->vno->poll(callback);
 }
 
 ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)

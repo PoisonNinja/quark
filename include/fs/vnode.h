@@ -3,6 +3,7 @@
 #include <fs/dev.h>
 #include <fs/inode.h>
 #include <fs/mount.h>
+#include <fs/poll.h>
 #include <lib/list.h>
 #include <lib/memory.h>
 #include <lib/utility.h>
@@ -26,6 +27,7 @@ public:
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
     virtual libcxx::pair<int, void*> open(const char* name);
+    int poll(poll_register_func_t& callback);
     ssize_t read(uint8_t* buffer, size_t count, off_t offset, void* cookie);
     ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
                   void* cookie);

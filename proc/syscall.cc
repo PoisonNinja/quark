@@ -1,5 +1,6 @@
 #include <arch/mm/layout.h>
 #include <errno.h>
+#include <fs/poll.h>
 #include <fs/stat.h>
 #include <kernel.h>
 #include <kernel/module.h>
@@ -92,6 +93,15 @@ static long sys_fstat(int fd, struct filesystem::stat* st)
         return -EBADF;
     }
     return scheduler::get_current_process()->fds.get(fd)->stat(st);
+}
+
+static long sys_poll(struct filesystem::pollfd* fds, filesystem::nfds_t nfds,
+                     int timeout)
+{
+    log::printk(log::log_level::DEBUG, "[sys_poll]: %p, %zU, %d\n", fds, nfds,
+                timeout);
+    filesystem::poll_table poller(fds, nfds);
+    return poller.poll(timeout);
 }
 
 static long sys_lseek(int fd, off_t offset, int whence)
@@ -453,6 +463,7 @@ void init()
     syscall_table[SYS_close]       = reinterpret_cast<void*>(sys_close);
     syscall_table[SYS_stat]        = reinterpret_cast<void*>(sys_stat);
     syscall_table[SYS_fstat]       = reinterpret_cast<void*>(sys_fstat);
+    syscall_table[SYS_poll]        = reinterpret_cast<void*>(sys_poll);
     syscall_table[SYS_lseek]       = reinterpret_cast<void*>(sys_lseek);
     syscall_table[SYS_mmap]        = reinterpret_cast<void*>(sys_mmap);
     syscall_table[SYS_sigaction]   = reinterpret_cast<void*>(sys_sigaction);

@@ -41,6 +41,11 @@ libcxx::pair<int, void*> inode::open(const char*)
     return libcxx::pair<int, void*>(0, nullptr);
 }
 
+int inode::poll(poll_register_func_t& callback)
+{
+    return -EBADF;
+}
+
 libcxx::intrusive_ptr<inode> inode::lookup(const char*, int, mode_t)
 {
     return libcxx::intrusive_ptr<inode>(nullptr);

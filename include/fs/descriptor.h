@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs/inode.h>
+#include <fs/poll.h>
 #include <fs/vnode.h>
 #include <lib/memory.h>
 
@@ -32,6 +33,7 @@ public:
               unsigned long flags);
     libcxx::pair<int, libcxx::intrusive_ptr<descriptor>>
     open(const char* name, int flags, mode_t mode);
+    int poll(poll_register_func_t& callback);
     ssize_t pread(uint8_t* buffer, size_t count, off_t offset);
     ssize_t pwrite(const uint8_t* buffer, size_t count, off_t offset);
     ssize_t read(uint8_t* buffer, size_t count);

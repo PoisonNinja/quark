@@ -6,6 +6,7 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/driver.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/dtable.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/fs.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/poll.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/inode.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/tty.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/vcache.cc

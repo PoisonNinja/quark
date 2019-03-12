@@ -62,7 +62,6 @@ ssize_t Intel8042::write(const uint8_t*, size_t, off_t, void*)
 void Intel8042::handler(int, void* dev_id, struct interrupt_context*)
 {
     this->buffer[this->head++ % buffer_size] = inb(0x60);
-    log::printk(log::log_level::INFO, "Key event, %p\n", this);
     this->queue.wakeup();
 }
 

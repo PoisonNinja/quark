@@ -14,7 +14,9 @@ poll_table::poll_table(struct pollfd* fds, size_t size)
         poll_table_elem elem;
         elem.registered = false;
         elem.fd         = new pollfd;
+        elem.queue      = nullptr;
         libcxx::memcpy(elem.fd, fds + i, sizeof(struct pollfd));
+        targets.push_back(elem);
     }
 } // namespace filesystem
 
@@ -77,7 +79,9 @@ int poll_table::poll(time_t timeout)
     // Now let's clean up :)
     for (auto& elem : targets) {
         // Remove us
-        elem.queue->remove();
+        if (elem.queue) {
+            elem.queue->remove();
+        }
         delete elem.fd;
     }
     // TODO: Update the user fds

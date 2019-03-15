@@ -1,6 +1,5 @@
 target_sources(quark.kernel
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/buddy.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/dma.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/heap.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/mm.cc

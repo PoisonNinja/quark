@@ -98,7 +98,7 @@ static long sys_fstat(int fd, struct filesystem::stat* st)
 static long sys_poll(struct filesystem::pollfd* fds, filesystem::nfds_t nfds,
                      int timeout)
 {
-    log::printk(log::log_level::DEBUG, "[sys_poll]: %p, %zU, %d\n", fds, nfds,
+    log::printk(log::log_level::DEBUG, "[sys_poll]: %p, %zu, %d\n", fds, nfds,
                 timeout);
     filesystem::poll_table poller(fds, nfds);
     return poller.poll(timeout);

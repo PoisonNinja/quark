@@ -10,7 +10,7 @@ class wait_queue;
 
 namespace filesystem
 {
-using nfds_t = size_t;
+using nfds_t = unsigned int;
 
 struct pollfd {
     int fd;

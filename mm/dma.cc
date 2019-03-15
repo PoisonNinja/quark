@@ -71,7 +71,6 @@ sglist::~sglist()
     for (auto region : this->list) {
         memory::virt::unmap_range(region.virtual_base, region.real_size);
         dma_region.free(region.virtual_base, region.real_size);
-        memory::physical::free(region.physical_base, region.real_size);
     }
 }
 

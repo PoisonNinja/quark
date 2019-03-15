@@ -25,13 +25,13 @@ libcxx::pair<bool, region> allocate(size_t size)
         return libcxx::make_pair(false, region);
     }
     region.virtual_base  = virt_address;
-    region.physical_base = memory::physical::allocate(size);
+    region.physical_base = memory::physical::allocate();
     region.size          = size;
     region.real_size     = size;
     if (!memory::virt::map_range(region.virtual_base, region.physical_base,
                                  region.size, PAGE_WRITABLE)) {
         memory::vmalloc::free(region.virtual_base);
-        memory::physical::free(region.physical_base, region.size);
+        memory::physical::free(region.physical_base);
         return libcxx::make_pair(false, region);
     }
     return libcxx::make_pair(true, region);
@@ -44,10 +44,8 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total)
     size_t allocated = 0;
     while (allocated < total && num_regions <= max_elements) {
         // We always try to allocate the maximum size
-        size_t alloc_size =
-            (max_element_size < total) ? max_element_size : total;
-        auto [physical_base, real_size] =
-            memory::physical::try_allocate(alloc_size);
+        size_t real_size   = 0x1000;
+        auto physical_base = memory::physical::allocate();
         region region;
         region.physical_base = physical_base;
         region.real_size     = real_size;

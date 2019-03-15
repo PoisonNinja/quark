@@ -47,13 +47,12 @@ ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
                 to_copy = remaining;
             }
             libcxx::memcpy(buffer + processed, tmp, to_copy);
-            processed += this->instance->geometry.block_size;
-            current += this->instance->geometry.block_size;
+            processed += to_copy;
+            current += to_copy;
             remaining -= to_copy;
         }
         current_block++;
     }
-
     return processed;
 } // namespace ext2
 } // namespace ext2

@@ -26,8 +26,8 @@ poll_table::~poll_table()
 
 int poll_table::poll(time_t timeout)
 {
-    auto proc = scheduler::get_current_process();
-    int revents;
+    auto proc   = scheduler::get_current_process();
+    int revents = 0;
     // TODO: Use timer
     /*
      * The way this works is pretty funky. Every time we run this the poll
@@ -67,7 +67,8 @@ int poll_table::poll(time_t timeout)
                 // TODO: Respect pollfd->event
                 found = true;
                 // TODO: Sanitize this?
-                revents |= this->targets[i].fd->revents = res;
+                revents |= user_fds[i].revents = this->targets[i].fd->revents =
+                    res;
             }
         }
         // No gotos :(

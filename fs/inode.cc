@@ -43,7 +43,8 @@ libcxx::pair<int, void*> inode::open(const char*)
 
 int inode::poll(poll_register_func_t& callback)
 {
-    return -EBADF;
+    // Regular files are always ready to read, unless overridden
+    return POLLIN;
 }
 
 libcxx::intrusive_ptr<inode> inode::lookup(const char*, int, mode_t)

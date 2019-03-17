@@ -143,7 +143,7 @@ int kdevice::ioctl(unsigned long, char*, void* cookie)
 int kdevice::poll(poll_register_func_t& callback)
 {
     // TODO: Correct?
-    return -EBADF;
+    return POLLIN;
 }
 
 ssize_t kdevice::read(uint8_t*, size_t, off_t, void*)

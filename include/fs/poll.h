@@ -18,19 +18,21 @@ struct pollfd {
     short revents;
 };
 
-#define POLLERR (1 << 0)
-#define POLLHUP (1 << 1)
-#define POLLNVAL (1 << 2)
+#define POLLIN 1    /* Set if data to read. */
+#define POLLPRI 2   /* Set if urgent data to read. */
+#define POLLOUT 4   /* Set if writing data wouldn't block. */
+#define POLLERR 8   /* An error occured. */
+#define POLLHUP 16  /* Shutdown or close happened. */
+#define POLLNVAL 32 /* Invalid file descriptor. */
 
-#define POLLIN (1 << 3)
-#define POLLRDNORM (1 << 4)
-#define POLLRDBAND (1 << 5)
-#define POLLPRI (1 << 6)
-#define POLLOUT (1 << 7)
-#define POLLWRNORM (1 << 8)
-#define POLLWRBAND (1 << 9)
+#define NPOLLFILE 64 /* Number of canonical fd's in one call to poll(). */
 
-#define POLL__ONLY_REVENTS (POLLERR | POLLHUP | POLLNVAL)
+/* The following values are defined by XPG4. */
+#define POLLRDNORM POLLIN
+#define POLLRDBAND POLLPRI
+#define POLLWRNORM POLLOUT
+#define POLLWRBAND POLLOUT
+
 class poll_table;
 
 using poll_register_func_t = libcxx::function<void(scheduler::wait_queue&), 64>;

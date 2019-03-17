@@ -17,7 +17,8 @@ class Intel8042 : public filesystem::kdevice
 public:
     Intel8042();
 
-    virtual int poll(filesystem::poll_register_func_t& callback) override;
+    virtual int poll(filesystem::poll_register_func_t& callback,
+                     void* cookie) override;
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie) override;
     virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
@@ -43,7 +44,7 @@ Intel8042::Intel8042()
     interrupt::register_handler(interrupt::irq_to_interrupt(1), *h);
 }
 
-int Intel8042::poll(filesystem::poll_register_func_t& callback)
+int Intel8042::poll(filesystem::poll_register_func_t& callback, void* cookie)
 {
     /*
      * Register this thread with the queue

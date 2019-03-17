@@ -140,7 +140,7 @@ int kdevice::ioctl(unsigned long, char*, void* cookie)
     return -ENOSYS;
 }
 
-int kdevice::poll(poll_register_func_t& callback)
+int kdevice::poll(poll_register_func_t& callback, void* cookie)
 {
     // TODO: Correct?
     return POLLIN;

@@ -35,7 +35,7 @@ public:
     // A subset of Inode operations
     virtual libcxx::pair<int, void*> open(const char* name);
     virtual int ioctl(unsigned long request, char* argp, void* cookie);
-    virtual int poll(poll_register_func_t& callback);
+    virtual int poll(poll_register_func_t& callback, void* cookie);
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie);
     virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,

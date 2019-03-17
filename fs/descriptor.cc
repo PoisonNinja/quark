@@ -249,7 +249,7 @@ descriptor::open(const char* name, int flags, mode_t mode)
 
 int descriptor::poll(poll_register_func_t& callback)
 {
-    return this->vno->poll(callback);
+    return this->vno->poll(callback, this->cookie);
 }
 
 ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)

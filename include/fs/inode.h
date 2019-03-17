@@ -27,7 +27,7 @@ public:
     virtual int mkdir(const char* name, mode_t mode);
     virtual int mknod(const char* name, mode_t mode, dev_t dev);
     virtual libcxx::pair<int, void*> open(const char* name);
-    virtual int poll(poll_register_func_t& callback);
+    virtual int poll(poll_register_func_t& callback, void* cookie);
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie);
     virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,

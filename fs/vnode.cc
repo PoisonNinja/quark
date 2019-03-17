@@ -120,12 +120,12 @@ libcxx::pair<int, void*> vnode::open(const char* name)
     return this->ino->open(name);
 }
 
-int vnode::poll(poll_register_func_t& callback)
+int vnode::poll(poll_register_func_t& callback, void* cookie)
 {
     if (this->kdev) {
-        return this->kdev->poll(callback);
+        return this->kdev->poll(callback, cookie);
     }
-    return this->ino->poll(callback);
+    return this->ino->poll(callback, cookie);
 }
 
 ssize_t vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)

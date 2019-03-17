@@ -67,9 +67,8 @@ int poll_table::poll(time_t timeout)
                 // TODO: Respect pollfd->event
                 found = true;
                 // TODO: Sanitize this?
-                revents |= user_fds[i].revents = this->targets[i].fd->revents =
-                    res;
             }
+            revents |= user_fds[i].revents = this->targets[i].fd->revents = res;
         }
         // No gotos :(
         if (found)

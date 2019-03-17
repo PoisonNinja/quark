@@ -140,6 +140,12 @@ int kdevice::ioctl(unsigned long, char*, void* cookie)
     return -ENOSYS;
 }
 
+int kdevice::poll(poll_register_func_t& callback)
+{
+    // TODO: Correct?
+    return -EBADF;
+}
+
 ssize_t kdevice::read(uint8_t*, size_t, off_t, void*)
 {
     return -EBADF;

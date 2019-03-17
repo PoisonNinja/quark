@@ -122,6 +122,9 @@ libcxx::pair<int, void*> vnode::open(const char* name)
 
 int vnode::poll(poll_register_func_t& callback)
 {
+    if (this->kdev) {
+        return this->kdev->poll(callback);
+    }
     return this->ino->poll(callback);
 }
 

@@ -17,6 +17,7 @@ class Intel8042 : public filesystem::kdevice
 public:
     Intel8042();
 
+    virtual int poll(filesystem::poll_register_func_t& callback) override;
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
                          void* cookie) override;
     virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
@@ -40,6 +41,18 @@ Intel8042::Intel8042()
         libcxx::bind(&Intel8042::handler, this, _1, _2, _3), "keyboard",
         reinterpret_cast<void*>(this));
     interrupt::register_handler(interrupt::irq_to_interrupt(1), *h);
+}
+
+int Intel8042::poll(filesystem::poll_register_func_t& callback)
+{
+    /*
+     * Register this thread with the queue
+     */
+    callback(this->queue);
+    if (this->head != this->tail) {
+        return POLLIN;
+    }
+    return 0;
 }
 
 ssize_t Intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)

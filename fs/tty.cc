@@ -31,6 +31,11 @@ int tty::ioctl(unsigned long request, char* argp, void* cookie)
     return 0;
 }
 
+int tty::poll(filesystem::poll_register_func_t& callback, void* cookie)
+{
+    return POLLIN;
+}
+
 ssize_t tty::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
 {
     return -ENOSYS;
@@ -42,55 +47,42 @@ ssize_t tty::write(const uint8_t* /*buffer*/, size_t /*size*/,
     return -ENOSYS;
 }
 
-class TTYDevice : public filesystem::kdevice
-{
-public:
-    TTYDevice(tty* driver);
-
-    int ioctl(unsigned long request, char* argp, void* cookie) override;
-
-    libcxx::pair<int, void*> open(const char* name) override;
-
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                 void* cookie) override;
-    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                  void* cookie) override;
-
-private:
-    tty* t;
-};
-
-TTYDevice::TTYDevice(tty* tty)
+tty_device::tty_device(tty* tty)
     : kdevice(CHR)
     , t(tty)
 {
 }
 
-int TTYDevice::ioctl(unsigned long request, char* argp, void* cookie)
+int tty_device::ioctl(unsigned long request, char* argp, void* cookie)
 {
     return this->t->ioctl(request, argp, cookie);
 }
 
-libcxx::pair<int, void*> TTYDevice::open(const char* name)
+libcxx::pair<int, void*> tty_device::open(const char* name)
 {
     return this->t->open(name);
 }
 
-ssize_t TTYDevice::read(uint8_t* buffer, size_t count, off_t /* offset */,
-                        void* cookie)
+int tty_device::poll(filesystem::poll_register_func_t& callback, void* cookie)
+{
+    return this->t->poll(callback, cookie);
+}
+
+ssize_t tty_device::read(uint8_t* buffer, size_t count, off_t /* offset */,
+                         void* cookie)
 {
     return this->t->read(buffer, count, cookie);
 }
 
-ssize_t TTYDevice::write(const uint8_t* buffer, size_t count,
-                         off_t /* offset */, void* cookie)
+ssize_t tty_device::write(const uint8_t* buffer, size_t count,
+                          off_t /* offset */, void* cookie)
 {
     return this->t->write(buffer, count, cookie);
 }
 
 bool register_tty(dev_t major, tty* driver)
 {
-    TTYDevice* tty = new TTYDevice(driver);
+    tty_device* tty = new tty_device(driver);
     register_kdevice(CHR, (major) ? major : tty_major, tty);
     return true;
 }

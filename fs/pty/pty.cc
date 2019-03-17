@@ -40,6 +40,15 @@ ssize_t pty::mwrite(const uint8_t* buffer, size_t count)
     return count;
 }
 
+int pty::mpoll(filesystem::poll_register_func_t& callback)
+{
+    callback(this->mqueue);
+    if (this->mhead != this->mtail) {
+        return POLLIN;
+    }
+    return 0;
+}
+
 ssize_t pty::sread(uint8_t* buffer, size_t count)
 {
     size_t read = 0;
@@ -59,6 +68,15 @@ ssize_t pty::swrite(const uint8_t* buffer, size_t count)
     }
     this->mqueue.wakeup();
     return count;
+}
+
+int pty::spoll(filesystem::poll_register_func_t& callback)
+{
+    callback(this->squeue);
+    if (this->shead != this->stail) {
+        return POLLIN;
+    }
+    return 0;
 }
 
 } // namespace tty

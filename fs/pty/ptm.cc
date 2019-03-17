@@ -33,6 +33,11 @@ int ptmx::ioctl(unsigned long request, char* argp, void* cookie)
     return 0;
 }
 
+int ptmx::poll(filesystem::poll_register_func_t& callback, void* cookie)
+{
+    return static_cast<pty*>(cookie)->mpoll(callback);
+}
+
 ssize_t ptmx::read(uint8_t* buffer, size_t count, void* cookie)
 {
     return static_cast<pty*>(cookie)->mread(buffer, count);

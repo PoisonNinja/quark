@@ -27,6 +27,8 @@ public:
 
     virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
 
+    virtual int poll(filesystem::poll_register_func_t& callback,
+                     void* cookie) override;
     virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
     virtual ssize_t write(const uint8_t* buffer, size_t count,
                           void* cookie) override;
@@ -43,6 +45,11 @@ PTS::PTS(pty* p)
 int PTS::ioctl(unsigned long request, char* argp, void* cookie)
 {
     return 0;
+}
+
+int PTS::poll(filesystem::poll_register_func_t& callback, void* cookie)
+{
+    return p->spoll(callback);
 }
 
 ssize_t PTS::read(uint8_t* buffer, size_t count, void* cookie)

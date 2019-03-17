@@ -16,10 +16,28 @@ public:
     virtual libcxx::pair<int, void*> open(const char* name);
     virtual int ioctl(unsigned long request, char* argp, void* cookie);
 
+    virtual int poll(filesystem::poll_register_func_t& callback, void* cookie);
     virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie);
     virtual ssize_t write(const uint8_t* buffer, size_t count, void* cookie);
+};
+
+class tty_device : public filesystem::kdevice
+{
+public:
+    tty_device(tty* driver);
+
+    int ioctl(unsigned long request, char* argp, void* cookie) override;
+
+    libcxx::pair<int, void*> open(const char* name) override;
+
+    int poll(filesystem::poll_register_func_t& callback, void* cookie);
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                 void* cookie) override;
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
+                  void* cookie) override;
 
 private:
+    tty* t;
 };
 
 bool register_tty(dev_t major, tty* tty);

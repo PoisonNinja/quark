@@ -19,9 +19,11 @@ public:
 
     ssize_t mread(uint8_t* buffer, size_t count);
     ssize_t mwrite(const uint8_t* buffer, size_t count);
+    int mpoll(filesystem::poll_register_func_t& callback);
 
     ssize_t sread(uint8_t* buffer, size_t count);
     ssize_t swrite(const uint8_t* buffer, size_t count);
+    int spoll(filesystem::poll_register_func_t& callback);
 
     libcxx::node<pty> node;
 

@@ -121,7 +121,8 @@ page_directory:
     times 766 dd 0
     dd (page_table_lower_4mib + 0x7)              ; Higher half mapping
     dd (page_table_higher_4mib + 0x7)
-    times 253 dd 0
+    times 252 dd 0
+    dd (page_table_phys + 0x7)                    ; Physical
     dd (page_directory + 0x7)                     ; Fractal
 
 align 4096
@@ -132,6 +133,7 @@ page_table_lower_4mib:
     %assign i i+1
     %endrep
 
+align 4096
 page_table_higher_4mib:
     %assign i 1024
     %rep 1024
@@ -139,6 +141,12 @@ page_table_higher_4mib:
     %assign i i+1
     %endrep
 
+align 4096
+page_table_phys:
+    dd (page_phys + 0x083)
+    times 1023 dd 0
+
+align 4096
 page_phys:
     times 1024 dd 0
 

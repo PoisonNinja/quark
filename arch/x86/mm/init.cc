@@ -44,7 +44,7 @@ void arch_init(struct boot::info &info)
                          (reinterpret_cast<struct multiboot_tag_mmap *>(tag))
                              ->entry_size)) {
                     log::printk(log::log_level::INFO,
-                                "    [%p - %p] Type: 0x%x\n",
+                                "    [%p - %p] Type: 0x%X\n",
                                 static_cast<addr_t>(mmap->addr),
                                 static_cast<addr_t>(mmap->addr) +
                                     static_cast<addr_t>(mmap->len),
@@ -60,6 +60,29 @@ void arch_init(struct boot::info &info)
                     }
                 }
             } break;
+        }
+    }
+
+    // Preload the top level page table entries
+#ifdef X86_64
+    struct memory::virt::page_table *top_level =
+        (struct memory::virt::page_table *)memory::x86::decode_fractal(
+            memory::x86::recursive_entry, memory::x86::recursive_entry,
+            memory::x86::recursive_entry, memory::x86::recursive_entry);
+#else
+    struct memory::virt::page_table *top_level =
+        (struct memory::virt::page_table *)memory::x86::decode_fractal(
+            memory::x86::recursive_entry, memory::x86::recursive_entry);
+
+#endif
+#ifdef X86_64
+    for (int i = 256; i < 512; i++) {
+#else
+    for (int i = 768; i < 1024; i++) {
+#endif
+        if (!top_level->pages[i].present) {
+            top_level->pages[i].present = 1;
+            top_level->pages[i].address = memory::physical::allocate() / 0x1000;
         }
     }
 } // namespace memory

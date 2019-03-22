@@ -30,6 +30,6 @@ constexpr addr_t HEAP_START    = 0xE0000000; // Slot 896
 // 1020 - Copy mapping (for fork)
 constexpr addr_t STACK_START   = 0xFF800000; // Slot 1022
 // 1023 - Fractal mapping
-constexpr addr_t VMA = 0xC0000000;
+constexpr addr_t VMA           = 0xC0000000;
 // clang-format on
 #endif

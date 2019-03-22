@@ -52,13 +52,16 @@ int pty::mpoll(filesystem::poll_register_func_t& callback)
 ssize_t pty::sread(uint8_t* buffer, size_t count)
 {
     size_t read = 0;
+    if (this->shead == this->stail) {
+        this->squeue.wait(scheduler::wait_interruptible);
+    }
     while (read < count) {
         if (this->shead == this->stail) {
-            this->squeue.wait(scheduler::wait_interruptible);
+            return read;
         }
         buffer[read++] = this->sbuf[this->stail++ % pty_size];
     }
-    return count;
+    return read;
 }
 
 ssize_t pty::swrite(const uint8_t* buffer, size_t count)

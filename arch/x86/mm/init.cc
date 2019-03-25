@@ -4,6 +4,7 @@
 #include <arch/mm/virtual.h>
 #include <boot/info.h>
 #include <kernel.h>
+#include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
 
@@ -81,8 +82,21 @@ void arch_init(struct boot::info &info)
     for (int i = 768; i < 1024; i++) {
 #endif
         if (!top_level->pages[i].present) {
-            top_level->pages[i].present = 1;
+#ifdef X86_64
+            struct memory::virt::page_table *second_level =
+                (struct memory::virt::page_table *)memory::x86::decode_fractal(
+                    memory::x86::recursive_entry, memory::x86::recursive_entry,
+                    memory::x86::recursive_entry, i);
+#else
+            struct memory::virt::page_table *second_level =
+                (struct memory::virt::page_table *)memory::x86::decode_fractal(
+                    memory::x86::recursive_entry, i);
+#endif
+            top_level->pages[i].present  = 1;
+            top_level->pages[i].writable = 1;
             top_level->pages[i].address = memory::physical::allocate() / 0x1000;
+            memory::x86::invlpg((addr_t)second_level);
+            libcxx::memset(second_level, 0, sizeof(*second_level));
         }
     }
 } // namespace memory

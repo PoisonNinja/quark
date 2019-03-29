@@ -84,18 +84,21 @@ void arch_init(struct boot::info &info)
         if (!top_level->pages[i].present) {
 #ifdef X86_64
             struct memory::virt::page_table *second_level =
-                (struct memory::virt::page_table *)memory::x86::decode_fractal(
-                    memory::x86::recursive_entry, memory::x86::recursive_entry,
-                    memory::x86::recursive_entry, i);
+                static_cast<struct memory::virt::page_table *>(
+                    memory::x86::decode_fractal(memory::x86::recursive_entry,
+                                                memory::x86::recursive_entry,
+                                                memory::x86::recursive_entry,
+                                                i));
 #else
             struct memory::virt::page_table *second_level =
-                (struct memory::virt::page_table *)memory::x86::decode_fractal(
-                    memory::x86::recursive_entry, i);
+                static_cast<struct memory::virt::page_table *>(
+                    memory::x86::decode_fractal(memory::x86::recursive_entry,
+                                                i));
 #endif
             top_level->pages[i].present  = 1;
             top_level->pages[i].writable = 1;
             top_level->pages[i].address = memory::physical::allocate() / 0x1000;
-            memory::x86::invlpg((addr_t)second_level);
+            memory::x86::invlpg(reinterpret_cast<addr_t>(second_level));
             libcxx::memset(second_level, 0, sizeof(*second_level));
         }
     }

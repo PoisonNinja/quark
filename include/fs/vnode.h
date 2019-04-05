@@ -20,17 +20,16 @@ public:
     vnode(superblock* sb, libcxx::intrusive_ptr<inode> inode, dev_t rdev);
 
     // Standard file operations
-    int ioctl(unsigned long request, char* argp, void* cookie);
+    int ioctl(unsigned long request, char* argp);
     int link(const char* name, libcxx::intrusive_ptr<vnode> node);
     libcxx::intrusive_ptr<vnode> lookup(const char* name, int flags,
                                         mode_t mode);
     int mkdir(const char* name, mode_t mode);
     int mknod(const char* name, mode_t mode, dev_t dev);
     virtual libcxx::pair<int, void*> open(const char* name);
-    int poll(poll_register_func_t& callback, void* cookie);
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset, void* cookie);
-    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                  void* cookie);
+    int poll(poll_register_func_t& callback);
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset);
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset);
     int stat(struct stat* st);
 
     bool seekable();

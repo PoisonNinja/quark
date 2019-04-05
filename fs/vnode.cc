@@ -21,12 +21,12 @@ vnode::vnode(superblock* sb, libcxx::intrusive_ptr<inode> inode, dev_t rdev)
     this->kdev = nullptr;
 }
 
-int vnode::ioctl(unsigned long request, char* argp, void* cookie)
+int vnode::ioctl(unsigned long request, char* argp)
 {
     if (this->kdev) {
-        return this->kdev->ioctl(request, argp, cookie);
+        return this->kdev->ioctl(request, argp);
     }
-    return this->ino->ioctl(request, argp, cookie);
+    return this->ino->ioctl(request, argp);
 }
 
 int vnode::link(const char* name, libcxx::intrusive_ptr<vnode> node)
@@ -120,29 +120,28 @@ libcxx::pair<int, void*> vnode::open(const char* name)
     return this->ino->open(name);
 }
 
-int vnode::poll(poll_register_func_t& callback, void* cookie)
+int vnode::poll(poll_register_func_t& callback)
 {
     if (this->kdev) {
-        return this->kdev->poll(callback, cookie);
+        return this->kdev->poll(callback);
     }
-    return this->ino->poll(callback, cookie);
+    return this->ino->poll(callback);
 }
 
-ssize_t vnode::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+ssize_t vnode::read(uint8_t* buffer, size_t count, off_t offset)
 {
     if (this->kdev) {
-        return this->kdev->read(buffer, count, offset, cookie);
+        return this->kdev->read(buffer, count, offset);
     }
-    return ino->read(buffer, count, offset, cookie);
+    return ino->read(buffer, count, offset);
 }
 
-ssize_t vnode::write(const uint8_t* buffer, size_t count, off_t offset,
-                     void* cookie)
+ssize_t vnode::write(const uint8_t* buffer, size_t count, off_t offset)
 {
     if (this->kdev) {
-        return this->kdev->write(buffer, count, offset, cookie);
+        return this->kdev->write(buffer, count, offset);
     }
-    return ino->write(buffer, count, offset, cookie);
+    return ino->write(buffer, count, offset);
 }
 
 int vnode::stat(struct stat* st)

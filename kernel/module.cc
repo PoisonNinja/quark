@@ -183,6 +183,12 @@ bool load_module(void* binary)
                 mod->sections[sym->st_shndx] + sym->st_value);
             ctor_end = mod->sections[sym->st_shndx] + sym->st_value;
         }
+        // if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC &&
+        //     ELF64_ST_TYPE(sym->st_info) != STT_OBJECT)
+        //     continue;
+        // symbols::load_symbol(libcxx::pair<const char*, addr_t>(
+        //     string_table + sym->st_name,
+        //     mod->sections[sym->st_shndx] + sym->st_value));
     }
 
     /*

@@ -78,7 +78,7 @@ descriptor::descriptor(libcxx::intrusive_ptr<vnode> vnode, int flags)
 
 int descriptor::ioctl(unsigned long request, char* argp)
 {
-    return this->vno->ioctl(request, argp);
+    return this->vno->ioctl(request, argp, this->cookie);
 }
 
 int descriptor::link(const char* name, libcxx::intrusive_ptr<descriptor> node)
@@ -249,7 +249,7 @@ descriptor::open(const char* name, int flags, mode_t mode)
 
 int descriptor::poll(poll_register_func_t& callback)
 {
-    return this->vno->poll(callback);
+    return this->vno->poll(callback, this->cookie);
 }
 
 ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
@@ -259,7 +259,7 @@ ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    return vno->read(buffer, count, offset);
+    return vno->read(buffer, count, offset, this->cookie);
 }
 
 ssize_t descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
@@ -269,7 +269,7 @@ ssize_t descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    return vno->write(buffer, count, offset);
+    return vno->write(buffer, count, offset, this->cookie);
 }
 
 bool descriptor::seekable()
@@ -304,7 +304,7 @@ ssize_t descriptor::write(const uint8_t* buffer, size_t count)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    ssize_t ret = this->vno->write(buffer, count, current_offset);
+    ssize_t ret = this->vno->write(buffer, count, current_offset, this->cookie);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
         current_offset += ret;

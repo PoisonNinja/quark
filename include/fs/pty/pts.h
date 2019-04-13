@@ -7,17 +7,4 @@
 
 namespace filesystem
 {
-class ptsfs : public tmpfs::driver
-{
-public:
-    ptsfs();
-    // Returns minor
-    bool register_pty(tty::pty* pty);
-    bool mount(superblock* sb) override;
-
-private:
-    libcxx::list<tty::pty, &tty::pty::node> ptys;
-    tmpfs::directory* root;
-};
-
 } // namespace filesystem

@@ -20,7 +20,7 @@ void init()
 
     // Register the filesystem drivers
     drivers::add("tmpfs", new tmpfs::driver());
-    drivers::add("ptsfs", new ptsfs());
+    // drivers::add("ptsfs", new ptsfs());
 
     vgafb* vga     = new vgafb();
     auto vga_major = filesystem::locate_class(filesystem::CHR);

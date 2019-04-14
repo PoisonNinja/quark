@@ -25,11 +25,13 @@ class tty_driver
 {
 public:
     tty_driver();
-    virtual ssize_t write(const uint8_t* buffer, size_t count, void* cookie);
-    void set_core(tty_core* core);
-    struct termios* get_termios();
+    virtual libcxx::pair<int, void*> open(const char* name);
+    virtual ssize_t write(const uint8_t* buffer, size_t count);
 
-private:
+public:
+    void set_core(tty_core* core);
+
+protected:
     tty_core* core;
 };
 
@@ -50,11 +52,10 @@ public:
 
 private:
     tty_driver* driver;
-
     char* buffer;
 };
 
-bool register_tty(tty_driver* driver, dev_t major, dev_t minor);
+tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor);
 
 void init();
 } // namespace tty

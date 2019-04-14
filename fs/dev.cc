@@ -62,7 +62,7 @@ bool register_class(device_class c, dev_t major)
         case BLK:
             if (blkdev[major]) {
                 log::printk(log::log_level::WARNING,
-                            "Block device already exists with major %llX\n",
+                            "Block device already exists with major %llu\n",
                             major);
                 return false;
             }
@@ -71,7 +71,7 @@ bool register_class(device_class c, dev_t major)
         case CHR:
             if (chrdev[major]) {
                 log::printk(log::log_level::WARNING,
-                            "Character device already exists with major %llX\n",
+                            "Character device already exists with major %llu\n",
                             major);
                 return false;
             }

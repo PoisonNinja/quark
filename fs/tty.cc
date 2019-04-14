@@ -16,10 +16,16 @@ namespace filesystem
 namespace tty
 {
 tty_driver::tty_driver()
+    : core(nullptr)
 {
 }
 
-ssize_t tty_driver::write(const uint8_t* buffer, size_t count, void* cookie)
+libcxx::pair<int, void*> tty_driver::open(const char* name)
+{
+    return libcxx::pair<int, void*>(0, nullptr);
+}
+
+ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
 {
     // Act as a sink
     return count;
@@ -27,10 +33,10 @@ ssize_t tty_driver::write(const uint8_t* buffer, size_t count, void* cookie)
 
 void tty_driver::set_core(tty_core* core)
 {
-    if (core) {
+    if (this->core) {
         log::printk(log::log_level::WARNING,
-                    "tty: Uhh, you already have a core driver registered, this "
-                    "is probably not what you want\n");
+                    "tty: Uhh, you already have a core driver, this is "
+                    "probably not what you want\n");
     }
     this->core = core;
 }
@@ -43,35 +49,35 @@ tty_core::tty_core(tty_driver* driver)
 
 int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    // return this->t->ioctl(request, argp, cookie);
 }
 
 libcxx::pair<int, void*> tty_core::open(const char* name)
 {
-    // return this->t->open(name);
+    return this->driver->open(name);
 }
 
 int tty_core::poll(filesystem::poll_register_func_t& callback, void* cookie)
 {
-    // return this->t->poll(callback, cookie);
 }
 
 ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
                        void* cookie)
 {
-    // return this->t->read(buffer, count, cookie);
 }
 
 ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
                         void* cookie)
 {
-    // return this->t->write(buffer, count, cookie);
 }
 
-bool register_tty(tty_driver* driver, dev_t major, dev_t minor)
+ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
+{
+}
+
+tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor)
 {
     if (!driver) {
-        return false;
+        return nullptr;
     }
     if (!major) {
         major = tty_major;
@@ -81,7 +87,7 @@ bool register_tty(tty_driver* driver, dev_t major, dev_t minor)
     tty_core* tty = new tty_core(driver);
     driver->set_core(tty);
     register_kdevice(filesystem::CHR, major, tty);
-    return true;
+    return tty;
 }
 
 void init()

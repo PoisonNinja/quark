@@ -59,7 +59,7 @@ int ptsfs::register_ptm(tty::ptm* ptm)
     ptm->set_pts(pts);
     int real_index = index++;
     tty::register_tty(pts, pts_major, real_index, 0);
-    libcxx::sprintf(name, "pts%d", real_index);
+    libcxx::sprintf(name, "%d", real_index);
     this->root->mknod(name, S_IFCHR | 0644, mkdev(pts_major, real_index));
     return real_index;
 }

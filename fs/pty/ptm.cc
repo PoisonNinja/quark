@@ -45,7 +45,6 @@ ptmx::ptmx(ptsfs* fs)
 
 int ptmx::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    log::printk(log::log_level::INFO, "ptmx::ioctl\n");
     *reinterpret_cast<int*>(argp) = static_cast<ptmx_metadata*>(cookie)->index;
     return 0;
 }

@@ -33,7 +33,7 @@ class ptsfs : public tmpfs::driver
 {
 public:
     ptsfs();
-    libcxx::pair<int, tty::tty_core*> register_ptm(tty::ptm* ptm);
+    int register_ptm(tty::ptm* ptm);
     bool mount(superblock* sb) override;
 
 private:

@@ -2,6 +2,7 @@
 
 #include <fs/dev.h>
 #include <fs/inode.h>
+#include <proc/sched.h>
 
 namespace filesystem
 {
@@ -52,10 +53,19 @@ public:
 
 private:
     tty_driver* driver;
-    char* buffer;
+
+    // TODO: Replace with flip buffer
+    char buffer[4096];
+    size_t head, tail;
+    scheduler::wait_queue queue;
 };
 
-tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor);
+enum tty_flags {
+    tty_no_register = 0x1,
+};
+
+tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
+                       unsigned flags);
 
 void init();
 } // namespace tty

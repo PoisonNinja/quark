@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fs/dev.h>
+#include <fs/pty/ptm.h>
 #include <fs/pty/pts.h>
 #include <fs/stat.h>
 #include <fs/tty.h>
@@ -24,6 +25,7 @@ libcxx::pair<int, void*> pts::open(const char* name)
 
 ssize_t pts::write(const uint8_t* buffer, size_t count)
 {
+    return this->master->notify(buffer, count);
 }
 
 ssize_t pts::notify(const uint8_t* buffer, size_t count)
@@ -50,14 +52,15 @@ bool ptsfs::mount(superblock* sb)
     return true;
 }
 
-libcxx::pair<int, tty::tty_core*> ptsfs::register_ptm(tty::ptm* ptm)
+int ptsfs::register_ptm(tty::ptm* ptm)
 {
     char name[128];
-    tty::pts* pts      = new tty::pts(ptm);
-    int real_index     = index++;
-    tty::tty_core* tty = tty::register_tty(pts, pts_major, real_index);
-    libcxx::sprintf(name, "pts%zu", real_index);
+    tty::pts* pts = new tty::pts(ptm);
+    ptm->set_pts(pts);
+    int real_index = index++;
+    tty::register_tty(pts, pts_major, real_index, 0);
+    libcxx::sprintf(name, "pts%d", real_index);
     this->root->mknod(name, S_IFCHR | 0644, mkdev(pts_major, real_index));
-    return libcxx::make_pair(real_index, tty);
+    return real_index;
 }
 } // namespace filesystem

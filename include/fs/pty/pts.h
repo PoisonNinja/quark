@@ -20,6 +20,8 @@ public:
 
     ssize_t notify(const uint8_t* buffer, size_t count);
 
+    void init_termios(struct ktermios& termios) override;
+
 private:
     ptm* master;
 };

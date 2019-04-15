@@ -31,6 +31,10 @@ ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
     return count;
 }
 
+void tty_driver::init_termios(struct ktermios& termios)
+{
+}
+
 void tty_driver::set_core(tty_core* core)
 {
     if (this->core) {
@@ -41,9 +45,10 @@ void tty_driver::set_core(tty_core* core)
     this->core = core;
 }
 
-tty_core::tty_core(tty_driver* driver)
+tty_core::tty_core(tty_driver* driver, struct ktermios& termios)
     : kdevice(CHR)
     , driver(driver)
+    , termios(termios)
     , head(0)
     , tail(0)
 {
@@ -51,6 +56,7 @@ tty_core::tty_core(tty_driver* driver)
 
 int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
 {
+    return 0;
 }
 
 libcxx::pair<int, void*> tty_core::open(const char* name)
@@ -89,6 +95,9 @@ ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
 ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
 {
     size_t i;
+    if (this->termios.c_lflag & ECHO) {
+        this->driver->write(buffer, count);
+    }
     for (i = 0; i < count; i++) {
         this->buffer[this->head++ % 4096] = buffer[i];
     }
@@ -109,7 +118,9 @@ tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
             register_class(filesystem::CHR, major);
         }
     }
-    tty_core* tty = new tty_core(driver);
+    struct ktermios kterm;
+    driver->init_termios(kterm);
+    tty_core* tty = new tty_core(driver, kterm);
     driver->set_core(tty);
     if (!(flags & tty_no_register)) {
         register_kdevice(filesystem::CHR, major, tty);

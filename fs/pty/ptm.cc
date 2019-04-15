@@ -27,6 +27,15 @@ ssize_t ptm::write(const uint8_t* buffer, size_t count)
     return this->slave->notify(buffer, count);
 }
 
+void ptm::init_termios(struct ktermios& termios)
+{
+    termios.c_iflag  = 0;
+    termios.c_oflag  = 0;
+    termios.c_cflag  = 0;
+    termios.c_lflag  = 0;
+    termios.c_ispeed = termios.c_ospeed = 38400;
+}
+
 ssize_t ptm::notify(const uint8_t* buffer, size_t count)
 {
     return this->core->notify(buffer, count);

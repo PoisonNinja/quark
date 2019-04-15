@@ -32,6 +32,15 @@ ssize_t pts::notify(const uint8_t* buffer, size_t count)
 {
     return this->core->notify(buffer, count);
 }
+
+void pts::init_termios(struct ktermios& termios)
+{
+    termios.c_iflag  = ICRNL | IXON;
+    termios.c_oflag  = OPOST | ONLCR;
+    termios.c_cflag  = B38400 | CS8 | CREAD | HUPCL;
+    termios.c_lflag  = ISIG | ICANON | ECHO | ECHOE | ECHOK | IEXTEN;
+    termios.c_ispeed = termios.c_ospeed = 38400;
+}
 } // namespace tty
 
 namespace

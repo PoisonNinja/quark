@@ -248,7 +248,7 @@ private:
 
     // TODO: Replace with flip buffer
     char ibuffer[4096];
-    size_t ihead, itail;
+    size_t itail;
 
     char buffer[4096];
     size_t head, tail;

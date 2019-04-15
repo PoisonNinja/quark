@@ -53,7 +53,6 @@ tty_core::tty_core(tty_driver* driver, struct ktermios& termios)
     : kdevice(CHR)
     , driver(driver)
     , termios(termios)
-    , ihead(0)
     , itail(0)
     , head(0)
     , tail(0)
@@ -109,7 +108,7 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
     for (i = 0; i < count; i++) {
         char c = buffer[i];
         if (this->termios.c_lflag & ICANON) {
-            this->ibuffer[this->ihead++ % 4096] = c;
+            this->ibuffer[this->itail++] = c;
             if (this->termios.c_lflag & ECHO) {
                 this->driver->write(&buffer[i], 1);
             }
@@ -130,9 +129,10 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
 
 ssize_t tty_core::dump_input()
 {
-    while (this->itail <= this->ihead) {
-        this->buffer[this->head++ % 4096] = this->ibuffer[this->itail++ % 4096];
+    for (size_t i = 0; i < this->itail; i++) {
+        this->buffer[this->head++ % 4096] = this->ibuffer[i];
     }
+    this->itail = 0;
     this->queue.wakeup();
     return 0;
 }

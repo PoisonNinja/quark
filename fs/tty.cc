@@ -108,6 +108,14 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
     for (i = 0; i < count; i++) {
         char c = buffer[i];
         if (this->termios.c_lflag & ICANON) {
+            if (c == this->termios.c_cc[VERASE]) {
+                if (this->itail) {
+                    this->ibuffer[--this->itail] = '\0';
+                }
+                const uint8_t eraser[3] = {'\010', ' ', '\010'};
+                this->driver->write(eraser, 3);
+                continue;
+            }
             this->ibuffer[this->itail++] = c;
             if (this->termios.c_lflag & ECHO) {
                 this->driver->write(&buffer[i], 1);
@@ -115,7 +123,7 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
             if (c == '\n' ||
                 (this->termios.c_cc[VEOL] && c == this->termios.c_cc[VEOL])) {
                 dump_input();
-                break;
+                continue;
             }
         } else if (this->termios.c_lflag & ECHO) {
             this->driver->write(&buffer[i], 1);

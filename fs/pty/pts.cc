@@ -40,6 +40,7 @@ void pts::init_termios(struct ktermios& termios)
     termios.c_cflag  = B38400 | CS8 | CREAD | HUPCL;
     termios.c_lflag  = ISIG | ICANON | ECHO | ECHOE | ECHOK | IEXTEN;
     termios.c_ispeed = termios.c_ospeed = 38400;
+    libcxx::memcpy(termios.c_cc, init_cc, num_init_cc);
 }
 } // namespace tty
 

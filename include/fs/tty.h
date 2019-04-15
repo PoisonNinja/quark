@@ -196,6 +196,9 @@ typedef unsigned int tcflag_t;
 
 #define NCCS 32
 
+extern const char* init_cc;
+extern const size_t num_init_cc;
+
 struct ktermios {
     tcflag_t c_iflag; /* input modes */
     tcflag_t c_oflag; /* output modes */
@@ -237,11 +240,16 @@ public:
     ssize_t notify(const uint8_t* buffer, size_t count);
 
 private:
+    ssize_t dump_input();
+
     tty_driver* driver;
 
     struct ktermios termios;
 
     // TODO: Replace with flip buffer
+    char ibuffer[4096];
+    size_t ihead, itail;
+
     char buffer[4096];
     size_t head, tail;
     scheduler::wait_queue queue;

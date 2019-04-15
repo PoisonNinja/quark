@@ -15,6 +15,10 @@ namespace filesystem
 {
 namespace tty
 {
+const char* init_cc =
+    "\003\034\177\025\004\0\1\0\021\023\032\0\022\017\027\026\0";
+const size_t num_init_cc = 18;
+
 tty_driver::tty_driver()
     : core(nullptr)
 {
@@ -49,6 +53,8 @@ tty_core::tty_core(tty_driver* driver, struct ktermios& termios)
     : kdevice(CHR)
     , driver(driver)
     , termios(termios)
+    , ihead(0)
+    , itail(0)
     , head(0)
     , tail(0)
 {
@@ -76,10 +82,15 @@ int tty_core::poll(filesystem::poll_register_func_t& callback, void* cookie)
 ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
                        void* cookie)
 {
+    if (!count)
+        return 0;
     size_t read = 0;
+    if (this->head == this->tail) {
+        this->queue.wait(scheduler::wait_interruptible);
+    }
     while (read < count) {
-        if (this->head == this->tail) {
-            this->queue.wait(scheduler::wait_interruptible);
+        if (this->tail == this->head) {
+            return read;
         }
         buffer[read++] = this->buffer[this->tail++ % 4096];
     }
@@ -95,14 +106,35 @@ ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
 ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
 {
     size_t i;
-    if (this->termios.c_lflag & ECHO) {
-        this->driver->write(buffer, count);
-    }
     for (i = 0; i < count; i++) {
-        this->buffer[this->head++ % 4096] = buffer[i];
+        char c = buffer[i];
+        if (this->termios.c_lflag & ICANON) {
+            this->ibuffer[this->ihead++ % 4096] = c;
+            if (this->termios.c_lflag & ECHO) {
+                this->driver->write(&buffer[i], 1);
+            }
+            if (c == '\n' ||
+                (this->termios.c_cc[VEOL] && c == this->termios.c_cc[VEOL])) {
+                dump_input();
+                break;
+            }
+        } else if (this->termios.c_lflag & ECHO) {
+            this->driver->write(&buffer[i], 1);
+        } else {
+            this->buffer[this->head++ % 4096] = buffer[i];
+            this->queue.wakeup();
+        }
+    }
+    return i;
+}
+
+ssize_t tty_core::dump_input()
+{
+    while (this->itail <= this->ihead) {
+        this->buffer[this->head++ % 4096] = this->ibuffer[this->itail++ % 4096];
     }
     this->queue.wakeup();
-    return i;
+    return 0;
 }
 
 tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,

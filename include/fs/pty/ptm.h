@@ -1,7 +1,6 @@
 #pragma once
 
 #include <fs/inode.h>
-#include <fs/pty/pty.h>
 #include <fs/tty.h>
 
 namespace filesystem

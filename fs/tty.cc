@@ -111,9 +111,9 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
             if (c == this->termios.c_cc[VERASE]) {
                 if (this->itail) {
                     this->ibuffer[--this->itail] = '\0';
+                    const uint8_t eraser[3]      = {'\010', ' ', '\010'};
+                    this->driver->write(eraser, 3);
                 }
-                const uint8_t eraser[3] = {'\010', ' ', '\010'};
-                this->driver->write(eraser, 3);
                 continue;
             }
             this->ibuffer[this->itail++] = c;

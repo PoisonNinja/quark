@@ -44,9 +44,6 @@ void init()
     vroot->link(".", vroot);
     vroot->link("..", vroot);
 
-    droot->mkdir("dev", 0666);
-    droot->mkdir("tmp", 0666);
-
     scheduler::get_current_process()->set_cwd(droot);
     scheduler::get_current_process()->set_root(droot);
 }

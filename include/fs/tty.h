@@ -194,7 +194,7 @@ typedef unsigned int tcflag_t;
 extern const char* init_cc;
 extern const size_t num_init_cc;
 
-struct ktermios {
+struct termios {
     tcflag_t c_iflag; /* input modes */
     tcflag_t c_oflag; /* output modes */
     tcflag_t c_cflag; /* control modes */
@@ -210,7 +210,7 @@ public:
     tty_driver();
     virtual libcxx::pair<int, void*> open(const char* name);
     virtual ssize_t write(const uint8_t* buffer, size_t count);
-    virtual void init_termios(struct ktermios& termios);
+    virtual void init_termios(struct termios& termios);
 
 public:
     void set_core(tty_core* core);
@@ -222,7 +222,7 @@ protected:
 class tty_core : public kdevice
 {
 public:
-    tty_core(tty_driver* driver, struct ktermios& termios);
+    tty_core(tty_driver* driver, struct termios& termios);
     int ioctl(unsigned long request, char* argp, void* cookie) override final;
     libcxx::pair<int, void*> open(const char* name) override;
     int poll(filesystem::poll_register_func_t& callback, void* cookie) override;
@@ -239,7 +239,7 @@ private:
 
     tty_driver* driver;
 
-    struct ktermios termios;
+    struct termios termios;
 
     // TODO: Replace with flip buffer
     char ibuffer[4096];

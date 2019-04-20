@@ -33,7 +33,7 @@ ssize_t pts::notify(const uint8_t* buffer, size_t count)
     return this->core->notify(buffer, count);
 }
 
-void pts::init_termios(struct ktermios& termios)
+void pts::init_termios(struct termios& termios)
 {
     termios.c_iflag  = ICRNL | IXON;
     termios.c_oflag  = OPOST | ONLCR;

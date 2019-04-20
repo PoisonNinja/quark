@@ -35,7 +35,7 @@ ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
     return count;
 }
 
-void tty_driver::init_termios(struct ktermios& termios)
+void tty_driver::init_termios(struct termios& termios)
 {
 }
 
@@ -49,7 +49,7 @@ void tty_driver::set_core(tty_core* core)
     this->core = core;
 }
 
-tty_core::tty_core(tty_driver* driver, struct ktermios& termios)
+tty_core::tty_core(tty_driver* driver, struct termios& termios)
     : kdevice(CHR)
     , driver(driver)
     , termios(termios)
@@ -158,7 +158,7 @@ tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
             register_class(filesystem::CHR, major);
         }
     }
-    struct ktermios kterm;
+    struct termios kterm;
     driver->init_termios(kterm);
     tty_core* tty = new tty_core(driver, kterm);
     driver->set_core(tty);

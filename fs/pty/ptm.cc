@@ -28,7 +28,7 @@ ssize_t ptm::write(const uint8_t* buffer, size_t count)
     return this->slave->notify(buffer, count);
 }
 
-void ptm::init_termios(struct ktermios& termios)
+void ptm::init_termios(struct termios& termios)
 {
     termios.c_iflag  = 0;
     termios.c_oflag  = 0;

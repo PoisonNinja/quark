@@ -1,4 +1,5 @@
 #include <fs/dev.h>
+#include <fs/ioctl.h>
 #include <fs/pty/ptm.h>
 #include <fs/pty/pts.h>
 #include <fs/stat.h>

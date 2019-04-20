@@ -204,10 +204,18 @@ struct termios {
     speed_t c_ospeed; /* output speed */
 };
 
+struct winsize {
+    unsigned short ws_row;    /* rows, in characters */
+    unsigned short ws_col;    /* columns, in characters */
+    unsigned short ws_xpixel; /* horizontal size, pixels - not used */
+    unsigned short ws_ypixel; /* vertical size, pixels - not used */
+};
+
 class tty_driver
 {
 public:
     tty_driver();
+    virtual int ioctl(unsigned long request, char* argp);
     virtual libcxx::pair<int, void*> open(const char* name);
     virtual ssize_t write(const uint8_t* buffer, size_t count);
     virtual void init_termios(struct termios& termios);
@@ -233,6 +241,7 @@ public:
 
 public:
     ssize_t notify(const uint8_t* buffer, size_t count);
+    void winch(const struct winsize* ws);
 
 private:
     ssize_t dump_input();
@@ -240,6 +249,7 @@ private:
     tty_driver* driver;
 
     struct termios termios;
+    struct winsize ws;
 
     // TODO: Replace with flip buffer
     char ibuffer[4096];

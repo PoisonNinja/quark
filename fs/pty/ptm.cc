@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fs/dev.h>
 #include <fs/ioctl.h>
 #include <fs/pty/ptm.h>
@@ -13,7 +14,7 @@ namespace tty
 namespace
 {
 struct ptmx_metadata {
-    struct tty_core* tty;
+    struct tty_core* ptm;
     size_t index;
 };
 } // namespace
@@ -21,6 +22,16 @@ struct ptmx_metadata {
 ptm::ptm()
     : slave(nullptr)
 {
+}
+
+int ptm::ioctl(unsigned long command, char* argp)
+{
+    switch (command) {
+        case TIOCSWINSZ:
+            this->slave->winch(reinterpret_cast<struct winsize*>(argp));
+            return 0;
+    }
+    return -EINVAL;
 }
 
 ssize_t ptm::write(const uint8_t* buffer, size_t count)
@@ -60,7 +71,7 @@ int ptmx::ioctl(unsigned long request, char* argp, void* cookie)
             static_cast<ptmx_metadata*>(cookie)->index;
         return 0;
     }
-    return static_cast<ptmx_metadata*>(cookie)->tty->ioctl(request, argp,
+    return static_cast<ptmx_metadata*>(cookie)->ptm->ioctl(request, argp,
                                                            cookie);
 }
 
@@ -68,26 +79,26 @@ libcxx::pair<int, void*> ptmx::open(const char* name)
 {
     ptm* master         = new ptm();
     ptmx_metadata* meta = new ptmx_metadata;
-    meta->tty           = register_tty(master, 0, 0, tty_no_register);
+    meta->ptm           = register_tty(master, 0, 0, tty_no_register);
     meta->index         = this->fs->register_ptm(master);
     return libcxx::pair<int, void*>(0, meta);
 }
 
 int ptmx::poll(filesystem::poll_register_func_t& callback, void* cookie)
 {
-    return static_cast<ptmx_metadata*>(cookie)->tty->poll(callback, cookie);
+    return static_cast<ptmx_metadata*>(cookie)->ptm->poll(callback, cookie);
 }
 
 ssize_t ptmx::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
 {
-    return static_cast<ptmx_metadata*>(cookie)->tty->read(buffer, count, offset,
+    return static_cast<ptmx_metadata*>(cookie)->ptm->read(buffer, count, offset,
                                                           cookie);
 }
 
 ssize_t ptmx::write(const uint8_t* buffer, size_t count, off_t offset,
                     void* cookie)
 {
-    return static_cast<ptmx_metadata*>(cookie)->tty->write(buffer, count,
+    return static_cast<ptmx_metadata*>(cookie)->ptm->write(buffer, count,
                                                            offset, cookie);
 }
 

@@ -33,6 +33,11 @@ ssize_t pts::notify(const uint8_t* buffer, size_t count)
     return this->core->notify(buffer, count);
 }
 
+void pts::winch(const struct winsize* sz)
+{
+    this->core->winch(sz);
+}
+
 void pts::init_termios(struct termios& termios)
 {
     termios.c_iflag  = ICRNL | IXON;

@@ -26,6 +26,12 @@ tty_driver::tty_driver()
 {
 }
 
+int tty_driver::ioctl(unsigned long request, char* argp)
+{
+    // TODO: Probably should be ENOIOCTLCMD
+    return -EINVAL;
+}
+
 libcxx::pair<int, void*> tty_driver::open(const char* name)
 {
     return libcxx::pair<int, void*>(0, nullptr);
@@ -80,9 +86,12 @@ int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
             }
             libcxx::memcpy(&this->termios, argp, sizeof(this->termios));
             return 0;
+        case TIOCGWINSZ:
+            libcxx::memcpy(argp, &this->ws, sizeof(this->ws));
+            return 0;
     }
-    // TODO: Probably should be ENOIOCTLCMD
-    return -EINVAL;
+    // We don't know how to handle it, punt it to the driver
+    return this->driver->ioctl(request, argp);
 }
 
 libcxx::pair<int, void*> tty_core::open(const char* name)
@@ -154,6 +163,12 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
         }
     }
     return i;
+}
+
+void tty_core::winch(const struct winsize* ws)
+{
+    this->ws = *ws;
+    // TODO: Notify userspace through signals
 }
 
 ssize_t tty_core::dump_input()

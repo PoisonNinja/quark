@@ -1,9 +1,11 @@
 #include <errno.h>
 #include <fs/dev.h>
+#include <fs/ioctl.h>
 #include <fs/stat.h>
 #include <fs/tty.h>
 #include <kernel.h>
 #include <lib/murmur.h>
+#include <lib/string.h>
 #include <lib/unordered_map.h>
 
 namespace
@@ -61,7 +63,26 @@ tty_core::tty_core(tty_driver* driver, struct termios& termios)
 
 int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    return 0;
+    switch (request) {
+        case TCGETS:
+            libcxx::memcpy(argp, &this->termios, sizeof(this->termios));
+            return 0;
+        case TCSETSW:
+            // TODO: Discard input
+        case TCSETSF:
+        // TODO: Flush
+        case TCSETS:
+            if (this->termios.c_iflag & ICANON &&
+                !((reinterpret_cast<struct termios*>(argp))->c_iflag &
+                  ICANON)) {
+                // Switching out of ICANON
+                this->dump_input();
+            }
+            libcxx::memcpy(&this->termios, argp, sizeof(this->termios));
+            return 0;
+    }
+    // TODO: Probably should be ENOIOCTLCMD
+    return -EINVAL;
 }
 
 libcxx::pair<int, void*> tty_core::open(const char* name)

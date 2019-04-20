@@ -54,8 +54,13 @@ ptmx::ptmx(ptsfs* fs)
 
 int ptmx::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    *reinterpret_cast<int*>(argp) = static_cast<ptmx_metadata*>(cookie)->index;
-    return 0;
+    if (request == TIOCGPTN) {
+        *reinterpret_cast<int*>(argp) =
+            static_cast<ptmx_metadata*>(cookie)->index;
+        return 0;
+    }
+    return static_cast<ptmx_metadata*>(cookie)->tty->ioctl(request, argp,
+                                                           cookie);
 }
 
 libcxx::pair<int, void*> ptmx::open(const char* name)

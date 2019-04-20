@@ -129,7 +129,19 @@ ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
 ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
                         void* cookie)
 {
-    return this->driver->write(buffer, count);
+    libcxx::vector<uint8_t> real_buffer(count);
+    for (size_t i = 0; i < count; i++) {
+        if (this->termios.c_oflag & ONLCR && buffer[i] == '\n') {
+            real_buffer.push_back('\n');
+            real_buffer.push_back('\r');
+            continue;
+        }
+        if (this->termios.c_oflag & ONLRET && buffer[i] == '\r') {
+            continue;
+        }
+        real_buffer.push_back(buffer[i]);
+    }
+    return this->driver->write(real_buffer.data(), real_buffer.size());
 }
 
 ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
@@ -137,6 +149,22 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
     size_t i;
     for (i = 0; i < count; i++) {
         char c = buffer[i];
+        if (this->termios.c_iflag & ISTRIP) {
+            // Strip the eigth bit
+            c &= 0b01111111;
+        }
+        if (this->termios.c_iflag & IGNCR && c == '\r') {
+            // Drop carriage returns
+            continue;
+        }
+        if (this->termios.c_iflag & ICRNL && c == '\r') {
+            // Convert carriage returns to newlines
+            c = '\n';
+        }
+        if (this->termios.c_iflag & INLCR && c == '\n') {
+            // Convert newlines to carriage returns
+            c = '\r';
+        }
         if (this->termios.c_lflag & ICANON) {
             if (c == this->termios.c_cc[VERASE]) {
                 if (this->itail) {

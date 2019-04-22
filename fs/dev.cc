@@ -137,7 +137,7 @@ libcxx::pair<int, void*> kdevice::open(const char*)
 
 int kdevice::ioctl(unsigned long, char*, void* cookie)
 {
-    return -ENOSYS;
+    return -EINVAL;
 }
 
 int kdevice::poll(poll_register_func_t& callback, void* cookie)

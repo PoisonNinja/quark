@@ -1,90 +1,235 @@
 #include <errno.h>
 #include <fs/dev.h>
+#include <fs/ioctl.h>
 #include <fs/stat.h>
 #include <fs/tty.h>
 #include <kernel.h>
+#include <lib/murmur.h>
+#include <lib/string.h>
+#include <lib/unordered_map.h>
 
 namespace
 {
 dev_t tty_major = 0;
-}
+} // namespace
 
 namespace filesystem
 {
 namespace tty
 {
-tty::tty()
+const char* init_cc =
+    "\003\034\177\025\004\0\1\0\021\023\032\0\022\017\027\026\0";
+const size_t num_init_cc = 18;
+
+tty_driver::tty_driver()
+    : core(nullptr)
 {
 }
 
-tty::~tty()
+int tty_driver::ioctl(unsigned long request, char* argp)
 {
+    // TODO: Probably should be ENOIOCTLCMD
+    return -EINVAL;
 }
 
-libcxx::pair<int, void*> tty::open(const char* name)
+libcxx::pair<int, void*> tty_driver::open(const char* name)
 {
     return libcxx::pair<int, void*>(0, nullptr);
 }
 
-int tty::ioctl(unsigned long request, char* argp, void* cookie)
+ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
 {
+    // Act as a sink
+    return count;
+}
+
+void tty_driver::init_termios(struct termios& termios)
+{
+}
+
+void tty_driver::set_core(tty_core* core)
+{
+    if (this->core) {
+        log::printk(log::log_level::WARNING,
+                    "tty: Uhh, you already have a core driver, this is "
+                    "probably not what you want\n");
+    }
+    this->core = core;
+}
+
+tty_core::tty_core(tty_driver* driver, struct termios& termios)
+    : kdevice(CHR)
+    , driver(driver)
+    , termios(termios)
+    , itail(0)
+    , head(0)
+    , tail(0)
+{
+}
+
+int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
+{
+    switch (request) {
+        case TCGETS:
+            libcxx::memcpy(argp, &this->termios, sizeof(this->termios));
+            return 0;
+        case TCSETSW:
+            // TODO: Discard input
+        case TCSETSF:
+        // TODO: Flush
+        case TCSETS:
+            if (this->termios.c_iflag & ICANON &&
+                !((reinterpret_cast<struct termios*>(argp))->c_iflag &
+                  ICANON)) {
+                // Switching out of ICANON
+                this->dump_input();
+            }
+            libcxx::memcpy(&this->termios, argp, sizeof(this->termios));
+            return 0;
+        case TIOCGWINSZ:
+            libcxx::memcpy(argp, &this->ws, sizeof(this->ws));
+            return 0;
+    }
+    // We don't know how to handle it, punt it to the driver
+    return this->driver->ioctl(request, argp);
+}
+
+libcxx::pair<int, void*> tty_core::open(const char* name)
+{
+    return this->driver->open(name);
+}
+
+int tty_core::poll(filesystem::poll_register_func_t& callback, void* cookie)
+{
+    callback(this->queue);
+    if (this->head != this->tail) {
+        return POLLIN;
+    }
     return 0;
 }
 
-int tty::poll(filesystem::poll_register_func_t& callback, void* cookie)
+ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
+                       void* cookie)
 {
-    return POLLIN;
+    if (!count)
+        return 0;
+    size_t read = 0;
+    if (this->head == this->tail) {
+        this->queue.wait(scheduler::wait_interruptible);
+    }
+    while (read < count) {
+        if (this->tail == this->head) {
+            return read;
+        }
+        buffer[read++] = this->buffer[this->tail++ % 4096];
+    }
+    return count;
 }
 
-ssize_t tty::read(uint8_t* /*buffer*/, size_t /*size*/, void* /* cookie */)
+ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
+                        void* cookie)
 {
-    return -ENOSYS;
+    libcxx::vector<uint8_t> real_buffer(count);
+    for (size_t i = 0; i < count; i++) {
+        if (this->termios.c_oflag & ONLCR && buffer[i] == '\n') {
+            real_buffer.push_back('\n');
+            real_buffer.push_back('\r');
+            continue;
+        }
+        if (this->termios.c_oflag & ONLRET && buffer[i] == '\r') {
+            continue;
+        }
+        real_buffer.push_back(buffer[i]);
+    }
+    return this->driver->write(real_buffer.data(), real_buffer.size());
 }
 
-ssize_t tty::write(const uint8_t* /*buffer*/, size_t /*size*/,
-                   void* /* cookie */)
+ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
 {
-    return -ENOSYS;
+    size_t i;
+    for (i = 0; i < count; i++) {
+        char c = buffer[i];
+        if (this->termios.c_iflag & ISTRIP) {
+            // Strip the eigth bit
+            c &= 0b01111111;
+        }
+        if (this->termios.c_iflag & IGNCR && c == '\r') {
+            // Drop carriage returns
+            continue;
+        }
+        if (this->termios.c_iflag & ICRNL && c == '\r') {
+            // Convert carriage returns to newlines
+            c = '\n';
+        }
+        if (this->termios.c_iflag & INLCR && c == '\n') {
+            // Convert newlines to carriage returns
+            c = '\r';
+        }
+        if (this->termios.c_lflag & ICANON) {
+            if (c == this->termios.c_cc[VERASE]) {
+                if (this->itail) {
+                    this->ibuffer[--this->itail] = '\0';
+                    const uint8_t eraser[3]      = {'\010', ' ', '\010'};
+                    this->driver->write(eraser, 3);
+                }
+                continue;
+            }
+            this->ibuffer[this->itail++] = c;
+            if (this->termios.c_lflag & ECHO) {
+                this->driver->write(&buffer[i], 1);
+            }
+            if (c == '\n' ||
+                (this->termios.c_cc[VEOL] && c == this->termios.c_cc[VEOL])) {
+                dump_input();
+                continue;
+            }
+        } else if (this->termios.c_lflag & ECHO) {
+            this->driver->write(&buffer[i], 1);
+        } else {
+            this->buffer[this->head++ % 4096] = buffer[i];
+            this->queue.wakeup();
+        }
+    }
+    return i;
 }
 
-tty_device::tty_device(tty* tty)
-    : kdevice(CHR)
-    , t(tty)
+void tty_core::winch(const struct winsize* ws)
 {
+    this->ws = *ws;
+    // TODO: Notify userspace through signals
 }
 
-int tty_device::ioctl(unsigned long request, char* argp, void* cookie)
+ssize_t tty_core::dump_input()
 {
-    return this->t->ioctl(request, argp, cookie);
+    for (size_t i = 0; i < this->itail; i++) {
+        this->buffer[this->head++ % 4096] = this->ibuffer[i];
+    }
+    this->itail = 0;
+    this->queue.wakeup();
+    return 0;
 }
 
-libcxx::pair<int, void*> tty_device::open(const char* name)
+tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
+                       unsigned flags)
 {
-    return this->t->open(name);
-}
-
-int tty_device::poll(filesystem::poll_register_func_t& callback, void* cookie)
-{
-    return this->t->poll(callback, cookie);
-}
-
-ssize_t tty_device::read(uint8_t* buffer, size_t count, off_t /* offset */,
-                         void* cookie)
-{
-    return this->t->read(buffer, count, cookie);
-}
-
-ssize_t tty_device::write(const uint8_t* buffer, size_t count,
-                          off_t /* offset */, void* cookie)
-{
-    return this->t->write(buffer, count, cookie);
-}
-
-bool register_tty(dev_t major, tty* driver)
-{
-    tty_device* tty = new tty_device(driver);
-    register_kdevice(CHR, (major) ? major : tty_major, tty);
-    return true;
+    if (!driver) {
+        return nullptr;
+    }
+    if (!(flags & tty_no_register)) {
+        if (!major) {
+            major = tty_major;
+        } else {
+            register_class(filesystem::CHR, major);
+        }
+    }
+    struct termios kterm;
+    driver->init_termios(kterm);
+    tty_core* tty = new tty_core(driver, kterm);
+    driver->set_core(tty);
+    if (!(flags & tty_no_register)) {
+        register_kdevice(filesystem::CHR, major, tty);
+    }
+    return tty;
 }
 
 void init()

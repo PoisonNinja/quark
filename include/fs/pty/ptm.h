@@ -5,26 +5,42 @@
 
 namespace filesystem
 {
+class ptsfs;
+
 namespace tty
 {
-class ptmx : public tty
+class pts;
+
+class ptm : public tty_driver
 {
 public:
-    ptmx();
-    virtual ~ptmx();
+    ptm();
+    int ioctl(unsigned long command, char* argp) override;
+    ssize_t write(const uint8_t* buffer, size_t count) override;
 
-    virtual libcxx::pair<int, void*> open(const char* name) override;
-    virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
+    ssize_t notify(const uint8_t* buffer, size_t count);
 
-    virtual int poll(filesystem::poll_register_func_t& callback,
-                     void* cookie) override;
-    virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
-    virtual ssize_t write(const uint8_t* buffer, size_t count,
-                          void* cookie) override;
+    void init_termios(struct termios& termios) override;
+    void set_pts(pts* slave);
 
 private:
-    size_t next_pty_number;
+    pts* slave;
 };
 
+class ptmx : public kdevice
+{
+public:
+    ptmx(ptsfs* fs);
+    int ioctl(unsigned long request, char* argp, void* cookie) override;
+    libcxx::pair<int, void*> open(const char* name) override;
+    int poll(filesystem::poll_register_func_t& callback, void* cookie) override;
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
+                 void* cookie) override;
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
+                  void* cookie) override;
+
+private:
+    ptsfs* fs;
+};
 } // namespace tty
 } // namespace filesystem

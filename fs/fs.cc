@@ -20,7 +20,14 @@ void init()
 
     // Register the filesystem drivers
     drivers::add("tmpfs", new tmpfs::driver());
-    drivers::add("ptsfs", new ptsfs());
+
+    // Initialize the pts layer
+    auto ptsfs = new filesystem::ptsfs();
+    drivers::add("ptsfs", ptsfs);
+    filesystem::tty::ptmx* p = new filesystem::tty::ptmx(ptsfs);
+    log::printk(log::log_level::INFO, "Registering ptmx character device\n");
+    filesystem::register_class(filesystem::CHR, 5);
+    filesystem::register_kdevice(filesystem::CHR, 5, p);
 
     vgafb* vga     = new vgafb();
     auto vga_major = filesystem::locate_class(filesystem::CHR);
@@ -36,9 +43,6 @@ void init()
         new descriptor(vroot, F_READ | F_WRITE));
     vroot->link(".", vroot);
     vroot->link("..", vroot);
-
-    droot->mkdir("dev", 0666);
-    droot->mkdir("tmp", 0666);
 
     scheduler::get_current_process()->set_cwd(droot);
     scheduler::get_current_process()->set_root(droot);

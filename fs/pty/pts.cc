@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fs/dev.h>
+#include <fs/pty/ptm.h>
 #include <fs/pty/pts.h>
 #include <fs/stat.h>
 #include <fs/tty.h>
@@ -8,63 +9,55 @@
 #include <lib/printf.h>
 #include <lib/string.h>
 
-// HACK
-#include <proc/sched.h>
-
-namespace
-{
-constexpr int pty_major = 134;
-}
-
 namespace filesystem
 {
 namespace tty
 {
-class PTS : public tty
+pts::pts(ptm* master)
+    : master(master)
 {
-public:
-    PTS(pty* p);
-
-    virtual int ioctl(unsigned long request, char* argp, void* cookie) override;
-
-    virtual int poll(filesystem::poll_register_func_t& callback,
-                     void* cookie) override;
-    virtual ssize_t read(uint8_t* buffer, size_t count, void* cookie) override;
-    virtual ssize_t write(const uint8_t* buffer, size_t count,
-                          void* cookie) override;
-
-private:
-    pty* p;
-};
-
-PTS::PTS(pty* p)
-{
-    this->p = p;
 }
 
-int PTS::ioctl(unsigned long request, char* argp, void* cookie)
+libcxx::pair<int, void*> pts::open(const char* name)
 {
-    return 0;
+    return libcxx::pair<int, void*>(0, nullptr);
 }
 
-int PTS::poll(filesystem::poll_register_func_t& callback, void* cookie)
+ssize_t pts::write(const uint8_t* buffer, size_t count)
 {
-    return p->spoll(callback);
+    return this->master->notify(buffer, count);
 }
 
-ssize_t PTS::read(uint8_t* buffer, size_t count, void* cookie)
+ssize_t pts::notify(const uint8_t* buffer, size_t count)
 {
-    return p->sread(buffer, count);
-}
-ssize_t PTS::write(const uint8_t* buffer, size_t count, void* cookie)
-{
-    return p->swrite(buffer, count);
+    return this->core->notify(buffer, count);
 }
 
+void pts::winch(const struct winsize* sz)
+{
+    this->core->winch(sz);
+}
+
+void pts::init_termios(struct termios& termios)
+{
+    termios.c_iflag  = ICRNL | IXON;
+    termios.c_oflag  = OPOST | ONLCR;
+    termios.c_cflag  = B38400 | CS8 | CREAD | HUPCL;
+    termios.c_lflag  = ISIG | ICANON | ECHO | ECHOE | ECHOK | IEXTEN;
+    termios.c_ispeed = termios.c_ospeed = 38400;
+    libcxx::memcpy(termios.c_cc, init_cc, num_init_cc);
+}
 } // namespace tty
-ptsfs::ptsfs()
+
+namespace
 {
-    filesystem::register_class(filesystem::CHR, pty_major);
+constexpr dev_t pts_major = 134;
+}
+
+ptsfs::ptsfs()
+    : index(0)
+{
+    filesystem::register_class(filesystem::CHR, pts_major);
     this->root = new tmpfs::directory(0, 0, 0755);
 }
 
@@ -74,13 +67,15 @@ bool ptsfs::mount(superblock* sb)
     return true;
 }
 
-bool ptsfs::register_pty(tty::pty* pty)
+int ptsfs::register_ptm(tty::ptm* ptm)
 {
     char name[128];
-    tty::PTS* pts = new tty::PTS(pty);
-    tty::register_tty(pty_major, pts);
-    libcxx::sprintf(name, "pts%d", pty->index());
-    this->root->mknod(name, S_IFCHR | 0644, mkdev(pty_major, pty->index()));
-    return true;
+    tty::pts* pts = new tty::pts(ptm);
+    ptm->set_pts(pts);
+    int real_index = index++;
+    tty::register_tty(pts, pts_major, real_index, 0);
+    libcxx::sprintf(name, "%d", real_index);
+    this->root->mknod(name, S_IFCHR | 0644, mkdev(pts_major, real_index));
+    return real_index;
 }
 } // namespace filesystem

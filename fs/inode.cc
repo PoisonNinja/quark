@@ -17,7 +17,7 @@ inode::~inode()
 
 int inode::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    return -EBADF;
+    return -EINVAL;
 }
 
 int inode::link(const char*, libcxx::intrusive_ptr<inode>)

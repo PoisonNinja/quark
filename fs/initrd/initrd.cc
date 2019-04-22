@@ -27,6 +27,24 @@ size_t decode_octal(char size[12])
     return total;
 }
 
+const char* types[] = {
+    "Regular File",
+    "Directory",
+    "Unknown",
+};
+
+const char* decode_type(char type)
+{
+    switch (type) {
+        case '0':
+            return types[0];
+        case '5':
+            return types[1];
+        default:
+            return types[2];
+    }
+}
+
 bool parse(addr_t initrd)
 {
     addr_t current = initrd;
@@ -51,8 +69,8 @@ bool parse(addr_t initrd)
         }
         size_t size = decode_octal(header->size);
         log::printk(log::log_level::INFO,
-                    "initrd: Name: %s, Size: %zu, Type: %u\n", header->name,
-                    size, header->typeflag);
+                    "initrd: Name: %s, Size: %zu, Type: %s\n", header->name,
+                    size, decode_type(header->typeflag));
         switch (header->typeflag) {
             case '0': {
                 auto [err, file] =

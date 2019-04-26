@@ -4,7 +4,7 @@
 #include <kernel.h>
 #include <kernel/init.h>
 #include <lib/functional.h>
-#include <proc/sched.h>
+#include <proc/wait.h>
 
 using namespace libcxx::placeholders;
 

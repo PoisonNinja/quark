@@ -2,7 +2,7 @@
 
 #include <fs/dev.h>
 #include <fs/inode.h>
-#include <proc/sched.h>
+#include <proc/wait.h>
 
 namespace filesystem
 {

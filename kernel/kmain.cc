@@ -53,6 +53,11 @@ void init_stage2(void*)
     load_registers(ctx);
 }
 
+void kidle_trampoline(void*)
+{
+    return scheduler::idle();
+}
+
 void init_stage1()
 {
     addr_t cloned  = memory::virt::fork();
@@ -64,7 +69,10 @@ void init_stage1()
 
     thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
     scheduler::insert(stage2);
-    scheduler::idle();
+    create_kernel_thread(scheduler::get_current_process(), kidle_trampoline,
+                         nullptr);
+    initp->wait(0);
+    kernel::panic("init exited!\n");
 }
 
 void kmain(struct boot::info& info)

@@ -16,6 +16,8 @@
 #include <proc/sched.h>
 #include <proc/syscall.h>
 
+namespace
+{
 void init_stage2(void*)
 {
     process* parent = scheduler::get_current_process();
@@ -74,6 +76,7 @@ void init_stage1()
     initp->wait(0);
     kernel::panic("init exited!\n");
 }
+} // namespace
 
 void kmain(struct boot::info& info)
 {

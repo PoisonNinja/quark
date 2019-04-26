@@ -63,7 +63,7 @@ void kidle_trampoline(void*)
 void init_stage1()
 {
     addr_t cloned  = memory::virt::fork();
-    process* initp = new process(nullptr);
+    process* initp = new process(scheduler::get_current_process());
     scheduler::add_process(initp);
     initp->set_root(scheduler::get_current_process()->get_root());
     initp->set_cwd(scheduler::get_current_process()->get_cwd());
@@ -73,7 +73,7 @@ void init_stage1()
     scheduler::insert(stage2);
     create_kernel_thread(scheduler::get_current_process(), kidle_trampoline,
                          nullptr);
-    initp->wait(0);
+    scheduler::get_current_process()->wait(1, nullptr, 0);
     kernel::panic("init exited!\n");
 }
 } // namespace

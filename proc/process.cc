@@ -1,4 +1,5 @@
 #include <arch/mm/layout.h>
+#include <errno.h>
 #include <kernel.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
@@ -96,10 +97,32 @@ void process::exit(bool is_signal, int val)
     delete this->vma;
 }
 
-int process::wait(int options)
+pid_t process::wait(pid_t pid, int* status, int options)
 {
-    this->waiters.wait(scheduler::wait_interruptible);
-    return this->exit_reason;
+    int reason = -1;
+    if (children.empty()) {
+        *status = -ECHILD;
+        return -1;
+    }
+    // Verify that the target child exists
+    if (pid > 0) {
+        bool found = false;
+        for (auto& proc : children) {
+            if (proc.pid == pid) {
+                found = true;
+            }
+        }
+        if (!found) {
+            *status = -ECHILD;
+            return -1;
+        }
+    }
+    int ret = this->waiters.wait(scheduler::wait_interruptible);
+    if (ret) {
+        // Got interrupted by a signal :(
+    }
+    for (;;)
+        asm("hlt");
 }
 
 void process::send_signal(int signum)

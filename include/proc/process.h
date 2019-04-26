@@ -33,7 +33,7 @@ public:
 
     void exit(bool is_signal, int val);
 
-    int wait(int options);
+    pid_t wait(pid_t pid, int* status, int options);
 
     process* fork();
 

@@ -24,7 +24,7 @@ public:
     ~thread();
     bool load(addr_t binary, int argc, const char *argv[], int envc,
               const char *envp[], struct thread_context &ctx);
-    void exit();
+    void exit(bool is_signal, int val);
 
     tid_t tid;
     thread_state state;

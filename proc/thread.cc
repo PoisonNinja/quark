@@ -17,7 +17,7 @@ thread::~thread()
 {
 }
 
-void thread::exit()
+void thread::exit(bool is_signal, int val)
 {
     // Only the thread can kill itself
     if (this != scheduler::get_current_thread()) {
@@ -25,7 +25,8 @@ void thread::exit()
                     "Only the thread can kill itself\n");
         return;
     }
+    // TODO: We need to clean up!
     scheduler::remove(this);
-    this->parent->remove_thread(this);
+    this->parent->thread_exit(this, is_signal, val);
     scheduler::yield();
 }

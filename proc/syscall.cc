@@ -321,7 +321,7 @@ static long sys_execve(const char* path, const char* old_argv[],
 static void sys_exit(int val)
 {
     log::printk(log::log_level::DEBUG, "[sys_exit] = %d\n", val);
-    scheduler::get_current_thread()->exit();
+    scheduler::get_current_thread()->exit(false, val);
 }
 
 static long sys_kill(pid_t pid, int signum)

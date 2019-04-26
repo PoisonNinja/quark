@@ -33,7 +33,7 @@ void thread::handle_signal(struct interrupt_context* ctx)
 
     if (signum == SIGKILL) {
         log::printk(log::log_level::DEBUG, "[signal]: SIGKILL, killing\n");
-        this->exit();
+        this->exit(true, signum);
     }
 
     struct sigaction* action = &this->parent->signal_actions[signum];
@@ -51,21 +51,21 @@ void thread::handle_signal(struct interrupt_context* ctx)
         log::printk(log::log_level::WARNING,
                     "[signal]: SIG_DFL with SIGSTOP, you "
                     "should probably implement it. Killing for now\n");
-        this->exit();
+        this->exit(true, SIGSTOP);
     }
 
     if (signum == SIGCONT) {
         log::printk(log::log_level::WARNING,
                     "[signal]: SIGCONT, you "
                     "should probably implement it. Killing for now\n");
-        this->exit();
+        this->exit(true, SIGCONT);
     }
 
     if (action->sa_handler == SIG_DFL) {
         log::printk(
             log::log_level::DEBUG,
             "[signal]: SIG_DFL with default action of SIGKILl, killing\n");
-        this->exit();
+        this->exit(true, SIGKILL);
     }
 
     log::printk(log::log_level::DEBUG, "[signal] Has a sa_handler, calling\n");

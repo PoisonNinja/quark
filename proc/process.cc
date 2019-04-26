@@ -6,10 +6,11 @@
 #include <proc/sched.h>
 
 process::process(process* parent)
+    : pid(scheduler::get_free_pid())
+    , vma(new memory::vma(USER_START, USER_END))
+    , exit_reason(-1)
+    , parent(parent)
 {
-    this->parent = parent;
-    this->pid    = scheduler::get_free_pid();
-    this->vma    = new memory::vma(USER_START, USER_END);
     for (int i = 1; i < NSIGS; i++) {
         this->signal_actions[i].sa_handler = SIG_DFL;
         this->signal_actions[i].sa_flags   = 0;
@@ -52,7 +53,7 @@ void process::add_thread(thread* thread)
     threads.push_back(*thread);
 }
 
-void process::remove_thread(thread* thread)
+void process::thread_exit(thread* thread, bool is_signal, int val)
 {
     for (auto it = threads.begin(); it != threads.end(); ++it) {
         auto& value = *it;
@@ -64,7 +65,7 @@ void process::remove_thread(thread* thread)
     if (threads.empty()) {
         log::printk(log::log_level::DEBUG,
                     "Last thread exiting, process %d terminating\n", this->pid);
-        this->exit();
+        this->exit(is_signal, val);
     }
 }
 
@@ -82,12 +83,14 @@ process* process::fork()
     return child;
 }
 
-void process::exit()
+void process::exit(bool is_signal, int val)
 {
     for (auto& section : *vma) {
         memory::virt::unmap_range(section.start(), section.size());
     }
     this->vma->reset();
+    this->exit_reason = val;
+    this->waiters.wakeup();
     // memory::physical::free(this->address_space);
     scheduler::remove_process(this->pid);
     delete this->vma;

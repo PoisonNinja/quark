@@ -15,7 +15,7 @@ public:
     pid_t pid;
     addr_t address_space;
     void add_thread(thread* thread);
-    void remove_thread(thread* thread);
+    void thread_exit(thread* thread, bool is_signal, int val);
 
     void set_cwd(libcxx::intrusive_ptr<filesystem::descriptor> desc);
     void set_root(libcxx::intrusive_ptr<filesystem::descriptor> desc);
@@ -30,7 +30,7 @@ public:
     addr_t tls_memsz;
     addr_t tls_alignment;
 
-    void exit();
+    void exit(bool is_signal, int val);
 
     process* fork();
 

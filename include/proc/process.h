@@ -5,6 +5,7 @@
 #include <lib/list.h>
 #include <mm/vma.h>
 #include <proc/thread.h>
+#include <proc/wait.h>
 #include <types.h>
 
 class process
@@ -32,6 +33,8 @@ public:
 
     void exit(bool is_signal, int val);
 
+    int wait(int options);
+
     process* fork();
 
     memory::vma* vma;
@@ -44,6 +47,10 @@ public:
     addr_t sigreturn;
 
 private:
+    scheduler::wait_queue waiters;
+
+    int exit_reason;
+
     libcxx::intrusive_ptr<filesystem::descriptor> cwd;
     libcxx::intrusive_ptr<filesystem::descriptor> root;
 

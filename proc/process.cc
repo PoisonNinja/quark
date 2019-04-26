@@ -96,6 +96,12 @@ void process::exit(bool is_signal, int val)
     delete this->vma;
 }
 
+int process::wait(int options)
+{
+    this->waiters.wait(scheduler::wait_interruptible);
+    return this->exit_reason;
+}
+
 void process::send_signal(int signum)
 {
     // TODO: Broadcast SIGSTOP, SIGCONT, certain signals to all threads

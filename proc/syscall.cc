@@ -324,6 +324,13 @@ static void sys_exit(int val)
     scheduler::get_current_thread()->exit(false, val);
 }
 
+static long sys_wait(pid_t pid, int* status, int options)
+{
+    log::printk(log::log_level::INFO, "[sys_wait] %lld %p %d\n", pid, status,
+                options);
+    return scheduler::get_current_process()->wait(pid, status, options);
+}
+
 static long sys_kill(pid_t pid, int signum)
 {
     log::printk(log::log_level::DEBUG, "[sys_kill] %u %d\n", pid, signum);
@@ -476,6 +483,7 @@ void init()
     syscall_table[SYS_fork]        = reinterpret_cast<void*>(sys_fork);
     syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);
     syscall_table[SYS_exit]        = reinterpret_cast<void*>(sys_exit);
+    syscall_table[SYS_wait]        = reinterpret_cast<void*>(sys_wait);
     syscall_table[SYS_kill]        = reinterpret_cast<void*>(sys_kill);
     syscall_table[SYS_chdir]       = reinterpret_cast<void*>(sys_chdir);
     syscall_table[SYS_mkdir]       = reinterpret_cast<void*>(sys_mkdir);

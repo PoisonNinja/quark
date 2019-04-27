@@ -25,6 +25,7 @@ namespace syscall
 #define SYS_fork 57
 #define SYS_execve 59
 #define SYS_exit 60
+#define SYS_wait 61
 #define SYS_kill 62
 #define SYS_chdir 80
 #define SYS_mkdir 83

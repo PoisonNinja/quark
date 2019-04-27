@@ -62,12 +62,7 @@ void kidle_trampoline(void*)
 
 void init_stage1()
 {
-    addr_t cloned  = memory::virt::fork();
-    process* initp = new process(scheduler::get_current_process());
-    scheduler::add_process(initp);
-    initp->set_root(scheduler::get_current_process()->get_root());
-    initp->set_cwd(scheduler::get_current_process()->get_cwd());
-    initp->address_space = cloned;
+    process* initp = scheduler::get_current_process()->fork();
 
     thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
     scheduler::insert(stage2);

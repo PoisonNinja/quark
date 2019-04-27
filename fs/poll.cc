@@ -3,7 +3,7 @@
 #include <lib/string.h>
 #include <proc/process.h>
 #include <proc/sched.h>
-#include <proc/wait.h>
+#include <proc/wq.h>
 
 namespace filesystem
 {

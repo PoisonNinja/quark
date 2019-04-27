@@ -1,5 +1,5 @@
 #include <proc/sched.h>
-#include <proc/wait.h>
+#include <proc/wq.h>
 
 namespace scheduler
 {

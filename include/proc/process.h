@@ -5,7 +5,7 @@
 #include <lib/list.h>
 #include <mm/vma.h>
 #include <proc/thread.h>
-#include <proc/wait.h>
+#include <proc/wq.h>
 #include <types.h>
 
 class process

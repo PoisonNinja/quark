@@ -326,7 +326,7 @@ static void sys_exit(int val)
 
 static long sys_wait(pid_t pid, int* status, int options)
 {
-    log::printk(log::log_level::INFO, "[sys_wait] %lld %p %d\n", pid, status,
+    log::printk(log::log_level::DEBUG, "[sys_wait] %lld %p %d\n", pid, status,
                 options);
     return scheduler::get_current_process()->wait(pid, status, options);
 }

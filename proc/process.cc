@@ -151,9 +151,13 @@ found:
     if (status)
         *status = zombie->exit_reason;
 
-    // TODO: Reap the zombie
+    pid_t ret = zombie->pid;
 
-    return zombie->pid;
+    // TODO: Reap the zombie
+    this->zombies.erase(this->zombies.iterator_to(*zombie));
+    delete &zombie;
+
+    return ret;
 }
 
 void process::notify_exit(process* child)

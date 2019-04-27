@@ -15,6 +15,7 @@ public:
     ~process();
     pid_t pid;
     addr_t address_space;
+
     void add_thread(thread* thread);
     void thread_exit(thread* thread, bool is_signal, int val);
 
@@ -34,12 +35,13 @@ public:
     void exit(bool is_signal, int val);
 
     pid_t wait(pid_t pid, int* status, int options);
+    void notify_exit(process* child);
 
     process* fork();
 
     memory::vma* vma;
 
-    libcxx::node<process> child_node;
+    libcxx::node<process> list_node;
 
     void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];
@@ -47,6 +49,7 @@ public:
     addr_t sigreturn;
 
 private:
+    // waitpid stuff
     scheduler::wait_queue waiters;
 
     int exit_reason;
@@ -55,6 +58,7 @@ private:
     libcxx::intrusive_ptr<filesystem::descriptor> root;
 
     process* parent;
-    libcxx::list<process, &process::child_node> children;
+    libcxx::list<process, &process::list_node> zombies;
+    libcxx::list<process, &process::list_node> children;
     libcxx::list<thread, &thread::process_node> threads;
 };

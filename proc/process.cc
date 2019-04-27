@@ -5,6 +5,7 @@
 #include <mm/virtual.h>
 #include <proc/process.h>
 #include <proc/sched.h>
+#include <proc/wait.h>
 
 process::process(process* parent)
     : pid(scheduler::get_free_pid())
@@ -91,38 +92,76 @@ void process::exit(bool is_signal, int val)
     }
     this->vma->reset();
     this->exit_reason = val;
-    this->waiters.wakeup();
+    if (this->parent) {
+        this->parent->notify_exit(this);
+    }
     // memory::physical::free(this->address_space);
-    scheduler::remove_process(this->pid);
     delete this->vma;
+    scheduler::remove_process(this->pid);
 }
 
 pid_t process::wait(pid_t pid, int* status, int options)
 {
-    int reason = -1;
     if (children.empty()) {
-        *status = -ECHILD;
+        if (status)
+            *status = -ECHILD;
         return -1;
     }
     // Verify that the target child exists
     if (pid > 0) {
         bool found = false;
+        // Search through children
         for (auto& proc : children) {
             if (proc.pid == pid) {
                 found = true;
             }
         }
+        // Search through zombies
+        for (auto& proc : zombies) {
+            if (proc.pid == pid) {
+                found = true;
+            }
+        }
         if (!found) {
-            *status = -ECHILD;
+            if (status)
+                *status = -ECHILD;
             return -1;
         }
     }
-    int ret = this->waiters.wait(scheduler::wait_interruptible);
-    if (ret) {
-        // Got interrupted by a signal :(
+    process* zombie = nullptr;
+    while (1) {
+        for (auto& z : zombies) {
+            if (z.pid == pid || pid == -1) {
+                zombie = &z;
+                goto found;
+            }
+        }
+        if (options & WNOHANG) {
+            return 0;
+        }
+        int ret = this->waiters.wait(scheduler::wait_interruptible);
+        if (ret) {
+            if (status)
+                *status = -EINTR;
+            return -1;
+        }
     }
-    for (;;)
-        asm("hlt");
+
+found:
+    if (status)
+        *status = zombie->exit_reason;
+
+    // TODO: Reap the zombie
+
+    return zombie->pid;
+}
+
+void process::notify_exit(process* child)
+{
+    this->waiters.wakeup();
+    // TODO: Do intial cleanup, such as adding into zombie queue
+    this->children.erase(this->children.iterator_to(*child));
+    this->zombies.push_front(*child);
 }
 
 void process::send_signal(int signum)

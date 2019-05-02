@@ -55,7 +55,7 @@ thread* next()
 {
     thread* next = nullptr;
     if (run_queue.empty()) {
-        next = kidle;
+        kernel::panic("sched: Nothing to run!\n");
     } else {
         next = &(run_queue.front());
         remove(next);

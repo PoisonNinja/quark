@@ -12,16 +12,16 @@ namespace scheduler
 namespace
 {
 libcxx::list<thread, &thread::scheduler_node> run_queue;
-thread* current_thread;
-process* kernel_process;
-thread* kidle;
+thread* current_thread  = nullptr;
+process* kernel_process = nullptr;
+thread* kidle           = nullptr;
 
-ptable ptable;
+::ptable ptable;
 
 bool _online = false;
 } // namespace
 
-void idle()
+void idle(void*)
 {
     while (1) {
         // TODO: Get rid of hlt
@@ -55,7 +55,7 @@ thread* next()
 {
     thread* next = nullptr;
     if (run_queue.empty()) {
-        kernel::panic("sched: Nothing to run!\n");
+        next = kidle;
     } else {
         next = &(run_queue.front());
         remove(next);
@@ -114,6 +114,7 @@ void init()
      */
     current_thread = kinit;
     _online        = true;
+    kidle          = create_kernel_thread(kernel_process, idle, nullptr);
     log::printk(log::log_level::INFO, "scheduler initialized\n");
 }
 

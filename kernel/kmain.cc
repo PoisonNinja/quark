@@ -55,19 +55,11 @@ void init_stage2(void*)
     load_registers(ctx);
 }
 
-void kidle_trampoline(void*)
-{
-    return scheduler::idle();
-}
-
 void init_stage1()
 {
     process* initp = scheduler::get_current_process()->fork();
-
     thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
     scheduler::insert(stage2);
-    scheduler::insert(create_kernel_thread(scheduler::get_current_process(),
-                                           kidle_trampoline, nullptr));
     scheduler::get_current_process()->wait(-1, nullptr, 0);
     kernel::panic("init exited!\n");
 }

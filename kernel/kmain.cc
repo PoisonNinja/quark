@@ -66,8 +66,8 @@ void init_stage1()
 
     thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
     scheduler::insert(stage2);
-    create_kernel_thread(scheduler::get_current_process(), kidle_trampoline,
-                         nullptr);
+    scheduler::insert(create_kernel_thread(scheduler::get_current_process(),
+                                           kidle_trampoline, nullptr));
     scheduler::get_current_process()->wait(-1, nullptr, 0);
     kernel::panic("init exited!\n");
 }

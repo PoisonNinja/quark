@@ -114,8 +114,12 @@ void init()
      */
     current_thread = kinit;
     _online        = true;
-    kidle          = create_kernel_thread(kernel_process, idle, nullptr);
     log::printk(log::log_level::INFO, "scheduler initialized\n");
+}
+
+void late_init()
+{
+    kidle = create_kernel_thread(kernel_process, idle, nullptr);
 }
 
 process* get_current_process()

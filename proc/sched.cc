@@ -46,7 +46,6 @@ bool insert(thread* thread)
 
 bool remove(thread* thread)
 {
-    thread->state = thread_state::UNMANAGED;
     run_queue.erase(run_queue.iterator_to(*thread));
     return true;
 }

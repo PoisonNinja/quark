@@ -336,9 +336,11 @@ static long sys_kill(pid_t pid, int signum)
     log::printk(log::log_level::DEBUG, "[sys_kill] %u %d\n", pid, signum);
     process* process = scheduler::find_process(pid);
     if (!process) {
+        log::printk(log::log_level::WARNING,
+                    "Failed to find process with PID %d\n", pid);
         return -ESRCH;
     }
-    log::printk(log::log_level::DEBUG, "Found process at %p\n", process);
+    log::printk(log::log_level::DEBUG, "Found process %d\n", process->pid);
     process->send_signal(signum);
     return 0;
 }

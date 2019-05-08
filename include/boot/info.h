@@ -11,6 +11,5 @@ struct info {
     addr_t kernel_end;
     addr_t initrd_start;
     addr_t initrd_end;
-    addr_t highest;
 };
 }  // namespace boot

@@ -162,8 +162,8 @@ found:
 
 void process::notify_exit(process* child)
 {
-    this->send_signal(SIGCHLD);
     this->waiters.wakeup();
+    this->send_signal(SIGCHLD);
     // TODO: Do initial cleanup, such as adding into zombie queue
     this->children.erase(this->children.iterator_to(*child));
     this->zombies.push_front(*child);

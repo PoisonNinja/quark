@@ -156,10 +156,6 @@ bool load_module(void* binary)
         // We only want to consider functions
         // if (ELF_ST_TYPE(sym->st_info) != STT_FUNC)
         //     continue;
-        symbols::load_symbol(libcxx::make_pair(
-            string_table + sym->st_name,
-            reinterpret_cast<addr_t>(mod->sections[sym->st_shndx] +
-                                     sym->st_value)));
         if (!libcxx::strcmp(string_table + sym->st_name, "init")) {
             log::printk(log::log_level::DEBUG,
                         "[load_module] Located init point at %p\n",
@@ -186,6 +182,11 @@ bool load_module(void* binary)
                 "[load_module] Located __constructors_end point at %p\n",
                 mod->sections[sym->st_shndx] + sym->st_value);
             ctor_end = mod->sections[sym->st_shndx] + sym->st_value;
+        } else {
+            symbols::load_symbol(libcxx::make_pair(
+                string_table + sym->st_name,
+                reinterpret_cast<addr_t>(mod->sections[sym->st_shndx] +
+                                         sym->st_value)));
         }
     }
 

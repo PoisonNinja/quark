@@ -156,9 +156,6 @@ bool load_module(void* binary)
         // We only want to consider functions
         // if (ELF_ST_TYPE(sym->st_info) != STT_FUNC)
         //     continue;
-        if (sym->st_shndx == SHN_ABS) {
-            continue;
-        }
         if (!libcxx::strcmp(string_table + sym->st_name, "init")) {
             log::printk(log::log_level::DEBUG,
                         "[load_module] Located init point at %p\n",

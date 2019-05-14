@@ -182,11 +182,6 @@ bool load_module(void* binary)
                 "[load_module] Located __constructors_end point at %p\n",
                 mod->sections[sym->st_shndx] + sym->st_value);
             ctor_end = mod->sections[sym->st_shndx] + sym->st_value;
-        } else {
-            symbols::load_symbol(libcxx::make_pair(
-                string_table + sym->st_name,
-                reinterpret_cast<addr_t>(mod->sections[sym->st_shndx] +
-                                         sym->st_value)));
         }
     }
 

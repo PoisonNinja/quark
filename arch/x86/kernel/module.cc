@@ -36,7 +36,7 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
                  * symbol. Otherwise, it's an internal reference that we need
                  * to resolve
                  */
-                if (sym->st_shndx == 0) {
+                if (sym->st_shndx == SHN_UNDEF) {
                     addr_t temp =
                         symbols::resolve_name(string_table + sym->st_name);
                     if (!temp) {
@@ -46,7 +46,7 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
                         return false;
                     }
                     symaddr = temp;
-                } else {
+                } else if (sym->st_shndx < SHN_LORESERVE) {
                     /*
                      * Internal reference. st_shndx stores the index of the
                      * section containing the target symbol and st_value

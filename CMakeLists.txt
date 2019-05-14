@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.9)
 set(QUARK_VERSION_MAJOR "0")
 set(QUARK_VERSION_MINOR "0")
 set(QUARK_VERSION_PATCH "3")
-set(QUARK_VERSION_SUFFIX "-dev")
+set(QUARK_VERSION_SUFFIX "")
 set(QUARK_VERSION "${QUARK_VERSION_MAJOR}.${QUARK_VERSION_MINOR}.${QUARK_VERSION_PATCH}${QUARK_VERSION_SUFFIX}")
 
 # Block in-source builds to prevent cluttering up the source directory

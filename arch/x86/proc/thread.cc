@@ -180,7 +180,8 @@ bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
         log::printk(log::log_level::ERROR, "Failed to locate envp\n");
         return false;
     }
-    if ((stack_zone = parent->vma->allocate(USER_START, 0x1000)).first) {
+    if ((stack_zone = parent->vma->allocate_reverse(USER_START, 0x1000))
+            .first) {
         log::printk(log::log_level::DEBUG, "Stack located at %p\n",
                     stack_zone.second);
     } else {

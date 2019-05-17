@@ -26,24 +26,15 @@ set(CMAKE_SYSTEM_VERSION    1)
 set(ARCH "x86_64" CACHE STRING "Architecture to build for")
 message(STATUS "Architecture: " ${ARCH})
 
-# Some architectures (x86_64 and i686 for example) share the same source
-# directory, so we need to respect that configuration. They will internally
-# select the correct code when necessary based on the ARCH variable
-set(SRC_ARCH ${ARCH})
-if (SRC_ARCH STREQUAL "x86_64" OR SRC_ARCH STREQUAL "i686")
-    set(SRC_ARCH "x86")
-endif()
-message(STATUS "Source architecture: " ${SRC_ARCH})
-
 # Check if the architecture folder exists
-set(ARCH_PATH "${CMAKE_SOURCE_DIR}/arch/${SRC_ARCH}")
+set(ARCH_PATH "${CMAKE_SOURCE_DIR}/arch/${ARCH}")
 if(NOT EXISTS ${ARCH_PATH})
     message(FATAL_ERROR "Unable to locate architecture directory. Perhaps your ARCH is wrong?")
 endif()
 message(STATUS "Architecture folder: " ${ARCH_PATH})
 
 # Check if the architecture include folder exists
-set(ARCH_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/arch/include/${SRC_ARCH}")
+set(ARCH_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/arch/include/${ARCH}")
 if(NOT EXISTS ${ARCH_INCLUDE_PATH})
     message(FATAL_ERROR "Unable to locate architecture include directory. Perhaps your ARCH is wrong?")
 endif()

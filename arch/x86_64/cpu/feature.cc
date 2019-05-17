@@ -16,7 +16,7 @@ struct cpuid_regs {
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
 {
@@ -211,5 +211,5 @@ void print(core& cpu)
     log::printk(log::log_level::INFO, "CPU Family:   %X\n", cpu.family);
     log::printk(log::log_level::INFO, "CPU Model:    %X\n", cpu.model);
 }
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

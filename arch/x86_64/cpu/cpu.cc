@@ -6,7 +6,7 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 extern "C" void syscall_sysret_wrapper();
 
@@ -17,8 +17,8 @@ void init()
     // Add the BSP to the core manager
     cpu::add_core(&bsp);
     // Perform feature detections and print them out
-    cpu::x86::detect(bsp);
-    cpu::x86::print(bsp);
+    cpu::x86_64::detect(bsp);
+    cpu::x86_64::print(bsp);
     gdt::init();
     idt::init();
     /*
@@ -32,17 +32,17 @@ void init()
      */
     uint64_t star = ((((0x20ULL | 3) - 16) << 16) | ((0x8ULL))) << 32;
     // Write STAR (segments)
-    cpu::x86::wrmsr(msr_star, star);
+    cpu::x86_64::wrmsr(msr_star, star);
     // Write LSTAR (syscall entry point)
-    cpu::x86::wrmsr(msr_lstar,
-                    reinterpret_cast<uint64_t>(&syscall_sysret_wrapper));
+    cpu::x86_64::wrmsr(msr_lstar,
+                       reinterpret_cast<uint64_t>(&syscall_sysret_wrapper));
     /*
      * Write FMASK. Bits set here (currently IF) are unset in RFLAGS. We don't
      * want interrupts during a syscall
      */
-    cpu::x86::wrmsr(msr_fmask, 0x200);
+    cpu::x86_64::wrmsr(msr_fmask, 0x200);
 }
-} // namespace x86
+} // namespace x86_64
 
 void halt()
 {

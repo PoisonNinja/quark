@@ -9,7 +9,7 @@ struct info;
 
 namespace memory
 {
-namespace x86
+namespace x86_64
 {
 // Slot #s
 constexpr addr_t recursive_entry = 510;
@@ -79,5 +79,5 @@ constexpr void* decode_fractal(uint32_t pd, uint32_t pt)
 #endif
 
 bool is_valid_physical_memory(addr_t m, struct boot::info& info);
-} // namespace x86
+} // namespace x86_64
 } // namespace memory

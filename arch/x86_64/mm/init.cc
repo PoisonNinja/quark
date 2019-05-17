@@ -53,8 +53,8 @@ void arch_init(struct boot::info &info)
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
                              i += memory::virt::PAGE_SIZE) {
-                            if (memory::x86::is_valid_physical_memory(i,
-                                                                      info)) {
+                            if (memory::x86_64::is_valid_physical_memory(
+                                    i, info)) {
                                 memory::physical::free(i);
                             }
                         }
@@ -66,21 +66,21 @@ void arch_init(struct boot::info &info)
 
     // Preload the top level page table entries
     struct memory::virt::page_table *top_level =
-        (struct memory::virt::page_table *)memory::x86::decode_fractal(
-            memory::x86::recursive_entry, memory::x86::recursive_entry,
-            memory::x86::recursive_entry, memory::x86::recursive_entry);
+        (struct memory::virt::page_table *)memory::x86_64::decode_fractal(
+            memory::x86_64::recursive_entry, memory::x86_64::recursive_entry,
+            memory::x86_64::recursive_entry, memory::x86_64::recursive_entry);
     for (int i = 256; i < 512; i++) {
         if (!top_level->pages[i].present) {
             struct memory::virt::page_table *second_level =
                 static_cast<struct memory::virt::page_table *>(
-                    memory::x86::decode_fractal(memory::x86::recursive_entry,
-                                                memory::x86::recursive_entry,
-                                                memory::x86::recursive_entry,
-                                                i));
+                    memory::x86_64::decode_fractal(
+                        memory::x86_64::recursive_entry,
+                        memory::x86_64::recursive_entry,
+                        memory::x86_64::recursive_entry, i));
             top_level->pages[i].present  = 1;
             top_level->pages[i].writable = 1;
             top_level->pages[i].address = memory::physical::allocate() / 0x1000;
-            memory::x86::invlpg(reinterpret_cast<addr_t>(second_level));
+            memory::x86_64::invlpg(reinterpret_cast<addr_t>(second_level));
             libcxx::memset(second_level, 0, sizeof(*second_level));
         }
     }

@@ -4,9 +4,9 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
-// Common x86 MSRs
+// Common x86_64 MSRs
 constexpr uint64_t msr_sysenter_cs  = 0x174;
 constexpr uint64_t msr_sysenter_esp = 0x175;
 constexpr uint64_t msr_sysenter_eip = 0x176;
@@ -39,5 +39,5 @@ static inline uint64_t rdmsr(uint64_t msr)
 }
 
 void init();
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

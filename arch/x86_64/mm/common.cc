@@ -7,7 +7,7 @@
 
 namespace memory
 {
-namespace x86
+namespace x86_64
 {
 bool is_valid_physical_memory(addr_t m, struct boot::info &info)
 {
@@ -34,5 +34,5 @@ bool is_valid_physical_memory(addr_t m, struct boot::info &info)
     }
     return true;
 }
-} // namespace x86
+} // namespace x86_64
 } // namespace memory

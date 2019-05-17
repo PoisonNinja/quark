@@ -3,7 +3,7 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 namespace gdt
 {
@@ -116,5 +116,5 @@ addr_t get_stack()
     return gdt::tss.stack0;
 }
 } // namespace TSS
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

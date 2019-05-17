@@ -5,7 +5,7 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 // Based on Linux
 enum feature_index {
@@ -435,5 +435,5 @@ inline void set_feature(core& cpu, uint32_t bit)
 
 void detect(core& cpu);
 void print(core& cpu);
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

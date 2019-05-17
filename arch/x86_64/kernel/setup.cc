@@ -24,7 +24,7 @@ addr_t early_allocate();
 } // namespace physical
 } // namespace memory
 
-namespace x86
+namespace x86_64
 {
 extern "C" {
 void *__constructors_start;
@@ -88,7 +88,7 @@ void init(uint32_t magic, struct multiboot_fixed *multiboot)
         }
     }
     // Bootstrap the IDT and GDT
-    cpu::x86::init();
+    cpu::x86_64::init();
 
     /*
      * Initialize our physical memory early allocator so we can start using
@@ -108,7 +108,7 @@ extern "C" {
 void asm_to_cxx_trampoline(uint32_t magic, struct multiboot_fixed *multiboot)
 {
     libcxx::constructors_initialize(&__constructors_start, &__constructors_end);
-    x86::init(magic, multiboot);
+    x86_64::init(magic, multiboot);
 }
 }
-} // namespace x86
+} // namespace x86_64

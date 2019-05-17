@@ -18,8 +18,8 @@ void* signal_return_location = (void*)&signal_return;
 
 void set_thread_base(thread_context* thread)
 {
-    cpu::x86::wrmsr(cpu::x86::msr_kernel_gs_base,
-                    reinterpret_cast<uint64_t>(thread));
+    cpu::x86_64::wrmsr(cpu::x86_64::msr_kernel_gs_base,
+                       reinterpret_cast<uint64_t>(thread));
 }
 
 void encode_tcontext(struct interrupt_context* ctx,
@@ -222,18 +222,18 @@ bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.rflags        = 0x200;
     // TODO: INSECURE! This allows all programs IOPORT access!
     ctx.rflags |= 0x3000;
-    ctx.kernel_stack = cpu::x86::TSS::get_stack();
+    ctx.kernel_stack = cpu::x86_64::TSS::get_stack();
     return true;
 }
 
 void set_stack(addr_t stack)
 {
-    cpu::x86::TSS::set_stack(stack);
+    cpu::x86_64::TSS::set_stack(stack);
 }
 
 addr_t get_stack()
 {
-    return cpu::x86::TSS::get_stack();
+    return cpu::x86_64::TSS::get_stack();
 }
 
 thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)

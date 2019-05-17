@@ -27,7 +27,7 @@ struct page {
     uint32_t nx : 1;
 };
 
-// x86_64 = 512 pages, x86 = 1024 pages
+// x86_64 = 512 pages
 struct page_table {
     struct page pages[PAGE_SIZE / sizeof(struct page)];
 };

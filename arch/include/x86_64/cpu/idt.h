@@ -4,7 +4,7 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 namespace idt
 {
@@ -25,5 +25,5 @@ struct Entry {
 
 void init();
 } // namespace idt
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

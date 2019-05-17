@@ -73,7 +73,7 @@ addr_t early_allocate()
                 mmap->addr += memory::virt::PAGE_SIZE;
                 mmap->len -= memory::virt::PAGE_SIZE;
                 // Check if it's in a restricted area
-                if (memory::x86::is_valid_physical_memory(i, *info)) {
+                if (memory::x86_64::is_valid_physical_memory(i, *info)) {
                     return i;
                 }
             }

@@ -2,7 +2,7 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 namespace idt
 {
@@ -147,5 +147,5 @@ void init()
     idt::idt_load(reinterpret_cast<addr_t>(&descriptor));
 }
 } // namespace idt
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

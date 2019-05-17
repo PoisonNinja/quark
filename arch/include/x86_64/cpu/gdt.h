@@ -4,7 +4,7 @@
 
 namespace cpu
 {
-namespace x86
+namespace x86_64
 {
 namespace gdt
 {
@@ -51,5 +51,5 @@ struct Entry {
 void set_stack(addr_t stack);
 addr_t get_stack();
 } // namespace TSS
-} // namespace x86
+} // namespace x86_64
 } // namespace cpu

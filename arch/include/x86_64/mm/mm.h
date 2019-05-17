@@ -12,19 +12,9 @@ namespace memory
 namespace x86
 {
 // Slot #s
-#ifdef X86_64
 constexpr addr_t recursive_entry = 510;
 constexpr addr_t copy_entry      = 508;
-#else
-constexpr addr_t recursive_entry = 1023;
-constexpr addr_t copy_entry      = 1020;
-#endif
 
-/*
- * x86_64 and x86 differ slightly in the number of bits and offset for each
- * index
- */
-#ifdef X86_64
 constexpr addr_t pml4_index(addr_t x)
 {
     return ((x >> 39) & 0x1FF);
@@ -41,35 +31,17 @@ constexpr addr_t pt_index(addr_t x)
 {
     return ((x >> 12) & 0x1FF);
 }
-#else
-constexpr addr_t pd_index(addr_t x)
-{
-    return ((x >> 22) & 0x3FF);
-}
-constexpr addr_t pt_index(addr_t x)
-{
-    return ((x >> 12) & 0x3FF);
-}
-#endif
 
 static inline addr_t read_cr3(void)
 {
     addr_t value;
-#ifdef X86_64
     __asm__("mov %%cr3, %%rax" : "=a"(value));
-#else
-    __asm__("mov %%cr3, %%eax" : "=a"(value));
-#endif
     return value;
 }
 
 static inline void write_cr3(addr_t value)
 {
-#ifdef X86_64
     __asm__("mov %%rax, %%cr3" : : "a"(value));
-#else
-    __asm__("mov %%eax, %%cr3" : : "a"(value));
-#endif
 }
 
 static inline void invlpg(addr_t addr)

@@ -78,10 +78,8 @@ static void set_entry(struct idt::Entry* entry, addr_t offset,
     entry->zero          = 0;
     entry->attributes    = attributes;
     entry->offset_middle = (offset >> 16) & 0xFFFF;
-#ifdef X86_64
-    entry->offset_high = (offset >> 32) & 0xFFFFFFFF;
-    entry->zero_two    = 0;
-#endif
+    entry->offset_high   = (offset >> 32) & 0xFFFFFFFF;
+    entry->zero_two      = 0;
 }
 
 void init()

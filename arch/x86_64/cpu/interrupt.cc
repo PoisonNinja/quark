@@ -18,7 +18,6 @@ void enable(void)
 
 void dump(interrupt_context* ctx)
 {
-#ifdef X86_64
     log::printk(log::log_level::ERROR, "RAX = %p RBX = %p RCX = %p RDX = %p\n",
                 ctx->rax, ctx->rbx, ctx->rcx, ctx->rdx);
     log::printk(log::log_level::ERROR, "RSI = %p RDI = %p RBP = %p RSP = %p\n",
@@ -30,15 +29,6 @@ void dump(interrupt_context* ctx)
     log::printk(log::log_level::ERROR,
                 "RIP = %p CS  = %p DS  = %p RFLAGS = %p\n", ctx->rip, ctx->cs,
                 ctx->ds, ctx->rflags);
-#else
-    log::printk(log::log_level::ERROR, "EAX = %p EBX = %p ECX = %p EDX = %p\n",
-                ctx->eax, ctx->ebx, ctx->ecx, ctx->edx);
-    log::printk(log::log_level::ERROR, "ESI = %p EDI = %p EBP = %p ESP = %p\n",
-                ctx->esi, ctx->edi, ctx->ebp, ctx->esp);
-    log::printk(log::log_level::ERROR,
-                "EIP = %p CS  = %p DS  = %p EFLAGS = %p\n", ctx->eip, ctx->cs,
-                ctx->ds, ctx->eflags);
-#endif
     log::printk(log::log_level::ERROR, "Exception #%d, error code 0x%X\n",
                 ctx->int_no, ctx->err_code);
 }
@@ -57,11 +47,7 @@ bool interrupts_enabled(void)
 bool is_userspace(struct interrupt_context* ctx)
 {
     // The CS values being compared to are the selectors for user code segment
-#ifdef X86_64
     return (ctx->cs == 0x23);
-#else
-    return (ctx->cs == 0x1B);
-#endif
 }
 
 bool is_exception(int int_no)

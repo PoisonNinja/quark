@@ -9,7 +9,6 @@ namespace virt
 {
 bool test(addr_t v)
 {
-#ifdef X86_64
     struct page_table* pml4 = (struct page_table*)memory::x86::decode_fractal(
         memory::x86::recursive_entry, memory::x86::recursive_entry,
         memory::x86::recursive_entry, memory::x86::recursive_entry);
@@ -27,15 +26,6 @@ bool test(addr_t v)
         !pd->pages[memory::x86::pd_index(v)].present ||
         !pt->pages[memory::x86::pt_index(v)].present)
         return false;
-#else
-    struct page_table* pd = (struct page_table*)memory::x86::decode_fractal(
-        memory::x86::recursive_entry, memory::x86::recursive_entry);
-    struct page_table* pt = (struct page_table*)memory::x86::decode_fractal(
-        memory::x86::recursive_entry, memory::x86::pd_index(v));
-    if (!pd->pages[memory::x86::pd_index(v)].present ||
-        !pt->pages[memory::x86::pt_index(v)].present)
-        return false;
-#endif
     return true;
 }
 } // namespace virt

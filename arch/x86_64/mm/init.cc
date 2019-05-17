@@ -65,36 +65,18 @@ void arch_init(struct boot::info &info)
     }
 
     // Preload the top level page table entries
-#ifdef X86_64
     struct memory::virt::page_table *top_level =
         (struct memory::virt::page_table *)memory::x86::decode_fractal(
             memory::x86::recursive_entry, memory::x86::recursive_entry,
             memory::x86::recursive_entry, memory::x86::recursive_entry);
-#else
-    struct memory::virt::page_table *top_level =
-        (struct memory::virt::page_table *)memory::x86::decode_fractal(
-            memory::x86::recursive_entry, memory::x86::recursive_entry);
-
-#endif
-#ifdef X86_64
     for (int i = 256; i < 512; i++) {
-#else
-    for (int i = 768; i < 1024; i++) {
-#endif
         if (!top_level->pages[i].present) {
-#ifdef X86_64
             struct memory::virt::page_table *second_level =
                 static_cast<struct memory::virt::page_table *>(
                     memory::x86::decode_fractal(memory::x86::recursive_entry,
                                                 memory::x86::recursive_entry,
                                                 memory::x86::recursive_entry,
                                                 i));
-#else
-            struct memory::virt::page_table *second_level =
-                static_cast<struct memory::virt::page_table *>(
-                    memory::x86::decode_fractal(memory::x86::recursive_entry,
-                                                i));
-#endif
             top_level->pages[i].present  = 1;
             top_level->pages[i].writable = 1;
             top_level->pages[i].address = memory::physical::allocate() / 0x1000;

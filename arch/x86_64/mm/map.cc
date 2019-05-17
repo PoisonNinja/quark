@@ -26,15 +26,11 @@ static inline void __set_flags(struct page* page, uint8_t flags)
     page->global   = (flags & PAGE_GLOBAL) ? 1 : 0;
     page->cow      = (flags & PAGE_COW) ? 1 : 0;
     page->hardware = (flags & PAGE_HARDWARE) ? 1 : 0;
-    // Only x86_64 has NX, i686 does with PAE but we don't support it
-#ifdef X86_64
-    page->nx = (flags & PAGE_NX) ? 1 : 0;
-#endif
+    page->nx       = (flags & PAGE_NX) ? 1 : 0;
 }
 
 bool map(addr_t v, addr_t p, int flags)
 {
-#ifdef X86_64
     struct page_table* pml4 = (struct page_table*)memory::x86::decode_fractal(
         memory::x86::recursive_entry, memory::x86::recursive_entry,
         memory::x86::recursive_entry, memory::x86::recursive_entry);
@@ -47,15 +43,8 @@ bool map(addr_t v, addr_t p, int flags)
     struct page_table* pt = (struct page_table*)memory::x86::decode_fractal(
         memory::x86::recursive_entry, memory::x86::pml4_index(v),
         memory::x86::pdpt_index(v), memory::x86::pd_index(v));
-#else
-    struct page_table* pd = (struct page_table*)memory::x86::decode_fractal(
-        memory::x86::recursive_entry, memory::x86::recursive_entry);
-    struct page_table* pt = (struct page_table*)memory::x86::decode_fractal(
-        memory::x86::recursive_entry, memory::x86::pd_index(v));
-#endif
     int r = 0;
-#ifdef X86_64
-    r = __set_address(&pml4->pages[memory::x86::pml4_index(v)]);
+    r     = __set_address(&pml4->pages[memory::x86::pml4_index(v)]);
     __set_flags(&pml4->pages[memory::x86::pml4_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));
     /*
@@ -78,7 +67,6 @@ bool map(addr_t v, addr_t p, int flags)
     if (r) {
         libcxx::memset(pd, 0, sizeof(struct page_table));
     }
-#endif
     r = __set_address(&pd->pages[memory::x86::pd_index(v)]);
     __set_flags(&pd->pages[memory::x86::pd_index(v)],
                 PAGE_WRITABLE | ((flags & PAGE_USER) ? PAGE_USER : 0));

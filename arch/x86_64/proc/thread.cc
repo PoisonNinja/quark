@@ -16,18 +16,15 @@ void* signal_return_location = (void*)&signal_return;
 
 #define ROUND_UP(x, y) ((((x) + ((y)-1)) / y) * y)
 
-#ifdef X86_64
 void set_thread_base(thread_context* thread)
 {
     cpu::x86::wrmsr(cpu::x86::msr_kernel_gs_base,
                     reinterpret_cast<uint64_t>(thread));
 }
-#endif
 
 void encode_tcontext(struct interrupt_context* ctx,
                      struct thread_context* thread_ctx)
 {
-#ifdef X86_64
     thread_ctx->rax    = ctx->rax;
     thread_ctx->rbx    = ctx->rbx;
     thread_ctx->rcx    = ctx->rcx;
@@ -51,27 +48,11 @@ void encode_tcontext(struct interrupt_context* ctx,
     thread_ctx->ds     = ctx->ds;
     thread_ctx->fs     = ctx->fs;
     thread_ctx->gs     = ctx->gs;
-#else
-    thread_ctx->edi    = ctx->edi;
-    thread_ctx->esi    = ctx->esi;
-    thread_ctx->ebp    = ctx->ebp;
-    thread_ctx->ebx    = ctx->ebx;
-    thread_ctx->edx    = ctx->edx;
-    thread_ctx->ecx    = ctx->ecx;
-    thread_ctx->eax    = ctx->eax;
-    thread_ctx->eip    = ctx->eip;
-    thread_ctx->eflags = ctx->eflags;
-    thread_ctx->ds     = ctx->ds;
-    thread_ctx->cs     = ctx->cs;
-    thread_ctx->esp    = ctx->esp;
-    thread_ctx->ss     = ctx->ss;
-#endif
 }
 
 void decode_tcontext(struct interrupt_context* ctx,
                      struct thread_context* thread_ctx)
 {
-#ifdef X86_64
     ctx->rax    = thread_ctx->rax;
     ctx->rbx    = thread_ctx->rbx;
     ctx->rcx    = thread_ctx->rcx;
@@ -95,42 +76,18 @@ void decode_tcontext(struct interrupt_context* ctx,
     ctx->ds     = thread_ctx->ds;
     ctx->fs     = thread_ctx->fs;
     ctx->gs     = thread_ctx->gs;
-#else
-    ctx->edi           = thread_ctx->edi;
-    ctx->esi           = thread_ctx->esi;
-    ctx->ebp           = thread_ctx->ebp;
-    ctx->ebx           = thread_ctx->ebx;
-    ctx->edx           = thread_ctx->edx;
-    ctx->ecx           = thread_ctx->ecx;
-    ctx->eax           = thread_ctx->eax;
-    ctx->eip           = thread_ctx->eip;
-    ctx->eflags        = thread_ctx->eflags;
-    ctx->ds            = thread_ctx->ds;
-    ctx->cs            = thread_ctx->cs;
-    ctx->esp           = thread_ctx->esp;
-    ctx->ss            = thread_ctx->ss;
-#endif
 }
 
 void save_context(interrupt_context* ctx, struct thread_context* tcontext)
 {
     encode_tcontext(ctx, tcontext);
-#ifndef X86_64
-    tcontext->fs = cpu::x86::gdt::get_fs();
-    tcontext->gs = cpu::x86::gdt::get_gs();
-#endif
 }
 
 void load_context(interrupt_context* ctx, struct thread_context* tcontext)
 {
     decode_tcontext(ctx, tcontext);
     set_stack(tcontext->kernel_stack);
-#ifdef X86_64
     set_thread_base(tcontext);
-#else
-    cpu::x86::gdt::set_fs(tcontext->fs);
-    cpu::x86::gdt::set_gs(tcontext->gs);
-#endif
 }
 
 bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
@@ -253,7 +210,6 @@ bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
     libcxx::memset(reinterpret_cast<void*>(stack_zone.second), 0, 0x1000);
 
     libcxx::memset(&ctx, 0, sizeof(ctx));
-#ifdef X86_64
     ctx.rip = entry;
     ctx.rdi = argc;
     ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
@@ -266,23 +222,6 @@ bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.rflags        = 0x200;
     // TODO: INSECURE! This allows all programs IOPORT access!
     ctx.rflags |= 0x3000;
-#else
-    ctx.eip = entry;
-    ctx.cs  = 0x18 | 3;
-    ctx.ds  = 0x20 | 3;
-    ctx.ss  = 0x20 | 3;
-    ctx.gs  = reinterpret_cast<uint32_t>(uthread);
-    ctx.esp = ctx.ebp =
-        (reinterpret_cast<addr_t>(stack_zone.second) + 0x1000) & ~15UL;
-    // Arguments are passed on the stack
-    uint32_t* stack = reinterpret_cast<uint32_t*>(ctx.esp);
-    stack[-1]       = reinterpret_cast<uint32_t>(target_envp);
-    stack[-2]       = reinterpret_cast<uint32_t>(target_argv);
-    stack[-3]       = argc;
-    ctx.esp -= 16;
-    ctx.eflags = 0x200;
-    ctx.eflags |= 0x3000;
-#endif
     ctx.kernel_stack = cpu::x86::TSS::get_stack();
     return true;
 }
@@ -303,27 +242,14 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     libcxx::memset(&kthread->tcontext, 0, sizeof(kthread->tcontext));
     addr_t stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
-#ifdef X86_64
-    kthread->tcontext.rdi    = reinterpret_cast<addr_t>(data);
-    kthread->tcontext.rip    = reinterpret_cast<addr_t>(entry_point);
-    kthread->tcontext.rbp    = reinterpret_cast<addr_t>(stack);
-    kthread->tcontext.rsp    = reinterpret_cast<addr_t>(stack);
-    kthread->tcontext.cs     = 0x8;
-    kthread->tcontext.ds     = 0x10;
-    kthread->tcontext.ss     = 0x10;
-    kthread->tcontext.rflags = 0x200;
-#else
-    kthread->tcontext.eip    = reinterpret_cast<addr_t>(entry_point);
-    kthread->tcontext.ebp    = reinterpret_cast<addr_t>(stack);
-    kthread->tcontext.esp    = reinterpret_cast<addr_t>(stack);
-    kthread->tcontext.cs     = 0x8;
-    kthread->tcontext.ds     = 0x10;
-    kthread->tcontext.ss     = 0x10;
-    kthread->tcontext.eflags = 0x200;
-    uint32_t* stack_ptr = reinterpret_cast<uint32_t*>(kthread->tcontext.esp);
-    stack_ptr[-1]       = reinterpret_cast<uint32_t>(data);
-    kthread->tcontext.esp -= 8;
-#endif
+    kthread->tcontext.rdi          = reinterpret_cast<addr_t>(data);
+    kthread->tcontext.rip          = reinterpret_cast<addr_t>(entry_point);
+    kthread->tcontext.rbp          = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.rsp          = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.cs           = 0x8;
+    kthread->tcontext.ds           = 0x10;
+    kthread->tcontext.ss           = 0x10;
+    kthread->tcontext.rflags       = 0x200;
     kthread->tcontext.kernel_stack = stack;
     return kthread;
 }

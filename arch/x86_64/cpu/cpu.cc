@@ -8,11 +8,7 @@ namespace cpu
 {
 namespace x86
 {
-#ifdef X86_64
 extern "C" void syscall_sysret_wrapper();
-#else
-void init_syscalls();
-#endif
 
 core bsp;
 
@@ -25,7 +21,6 @@ void init()
     cpu::x86::print(bsp);
     gdt::init();
     idt::init();
-#ifdef X86_64
     /*
      * RPL=3 CS=0x23, RPL=0 CS=0x8
      *
@@ -46,10 +41,6 @@ void init()
      * want interrupts during a syscall
      */
     cpu::x86::wrmsr(msr_fmask, 0x200);
-#else
-    // Install the system call handler for i686
-    cpu::x86::init_syscalls();
-#endif
 }
 } // namespace x86
 

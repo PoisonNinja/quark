@@ -19,10 +19,8 @@ struct Entry {
     uint8_t zero;
     uint8_t attributes;
     uint16_t offset_middle;
-#ifdef X86_64
     uint32_t offset_high;
     uint32_t zero_two;
-#endif
 } __attribute__((packed));
 
 void init();

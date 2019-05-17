@@ -12,11 +12,7 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
          * is stuck in the past. rela adds an explicit r_addend member whereas
          * rel has an implicit addend.
          */
-#ifdef X86_64
         if (mod->shdrs[i].sh_type == SHT_RELA) {
-#else
-        if (mod->shdrs[i].sh_type == SHT_REL) {
-#endif
             for (uint32_t x = 0; x < mod->shdrs[i].sh_size;
                  x += mod->shdrs[i].sh_entsize) {
                 /*
@@ -60,12 +56,7 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
                 target += rel->r_offset;
 
                 addr_t addend;
-#ifdef X86_64
                 addend = rel->r_addend;
-#else
-                // The addend is stored at the target itself
-                addend = (*(addr_t*)(target));
-#endif
 
                 switch (ELF_R_TYPE(rel->r_info)) {
                     // case R_386_32

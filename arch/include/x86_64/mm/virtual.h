@@ -22,18 +22,14 @@ struct page {
     uint32_t cow : 1;
     uint32_t hardware : 1;
     uint32_t available_1 : 1;
-#ifdef X86_64
     uint64_t address : 40;
     uint32_t available_2 : 11;
     uint32_t nx : 1;
-#else
-    uint32_t address : 20;
-#endif
 };
 
 // x86_64 = 512 pages, x86 = 1024 pages
 struct page_table {
     struct page pages[PAGE_SIZE / sizeof(struct page)];
 };
-}  // namespace virt
-}  // namespace memory
+} // namespace virt
+} // namespace memory

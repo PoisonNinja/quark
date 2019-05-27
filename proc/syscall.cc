@@ -261,11 +261,7 @@ static long sys_fork()
                    &scheduler::get_current_thread()->tcontext,
                    sizeof(child_thread->tcontext));
     // Child process gets 0 returned from fork
-#ifdef X86_64
     child_thread->tcontext.rax = 0;
-#else
-    child_thread->tcontext.eax = 0;
-#endif
     child_thread->tcontext.kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
     scheduler::insert(child_thread);

@@ -21,8 +21,6 @@ dd 8
 multiboot2_end:
 
 NO_CPUID_STRING: db "No CPUID support!", 0
-%ifdef X86_64
-; These obviously don't apply to i686
 NO_LONG_MODE: db "No long mode support! Use a 32-bit build!", 0
 NO_SSE_STRING: db "No SSE2 support! Use a 32-bit build!", 0
 
@@ -112,47 +110,6 @@ align 4096
 phys_pml0:
     times 512 dq 0
 
-%else
-
-align 4096
-page_directory:
-    dd (page_table_lower_4mib + 0x7)              ; Identity map
-    dd (page_table_higher_4mib + 0x7)             ; Identity map
-    times 766 dd 0
-    dd (page_table_lower_4mib + 0x7)              ; Higher half mapping
-    dd (page_table_higher_4mib + 0x7)
-    times 252 dd 0
-    dd (page_table_phys + 0x7)                    ; Physical
-    dd (page_directory + 0x7)                     ; Fractal
-
-align 4096
-page_table_lower_4mib:
-    %assign i 0
-    %rep 1024
-    dd (i << 12) | 0x083
-    %assign i i+1
-    %endrep
-
-align 4096
-page_table_higher_4mib:
-    %assign i 1024
-    %rep 1024
-    dd (i << 12) | 0x083
-    %assign i i+1
-    %endrep
-
-align 4096
-page_table_phys:
-    dd (page_phys + 0x083)
-    times 1023 dd 0
-
-align 4096
-page_phys:
-    times 1024 dd 0
-
-extern asm_to_cxx_trampoline
-%endif
-
 halt32:
     cli
     hlt
@@ -202,7 +159,6 @@ noCPUID:
     call print_string
     jmp halt32
 
-%ifdef X86_64
 noLongMode:
     mov ebx, NO_LONG_MODE
     call print_string
@@ -212,7 +168,6 @@ noSSE2:
     mov ebx, NO_SSE_STRING
     call print_string
     jmp halt32
-%endif
 
 global bootstrap32
 bootstrap32:
@@ -238,7 +193,6 @@ bootstrap32:
     cmp eax, 0
     je noCPUID
 
-%ifdef X86_64
     mov eax, 0x80000000
     cpuid
     cmp eax, 0x80000001                  ; Compare the A-register with 0x80000001.
@@ -261,7 +215,6 @@ bootstrap32:
     mov eax, cr4
     bts eax, 5
     mov cr4, eax
-%endif
 
     ; Set control register flags
     mov eax, cr0
@@ -273,16 +226,11 @@ bootstrap32:
     or ax, 3 << 9
     mov cr4, eax
 
-%ifdef X86_64
     ; Create long mode page table and init CR3 to
     ; point to the base of the PML4 page table
     mov eax, pml4
-%else
-    mov eax, page_directory
-%endif
     mov cr3, eax
 
-%ifdef X86_64
     ; Enable Long mode, SYSCALL / SYSRET instructions, and NX bit
     mov ecx, 0xC0000080
     rdmsr
@@ -290,14 +238,12 @@ bootstrap32:
     bts eax, 8
     bts eax, 0
     wrmsr
-%endif
 
     ; enable paging to activate long mode
     mov eax, cr0
     bts eax, 31
     mov cr0, eax
 
-%ifdef X86_64
     lgdt [gdt64.pointer]         ; Load the 64-bit global descriptor table.
 
     jmp 0x08:(trampoline)
@@ -306,32 +252,3 @@ bits 64
 trampoline:
     mov rcx, bootstrap64
     jmp rcx
-%else
-    jmp higher_half
-
-
-section .text
-higher_half:
-    ; Allocate a stack
-    mov esp, stack + 0x4000
-
-    ; Remove identity mapping
-    mov [page_directory], dword 0
-
-    ; Fixup multiboot
-    add esi, 0xC0000000
-
-    ; Push magic and struct on stack to pass as arguments to C++ code
-    push esi
-    push edi
-
-    call asm_to_cxx_trampoline
-
-    jmp halt32
-
-; x86_64 has it's stack declared elsewhere
-section .bss
-global stack
-stack:
-    resb 0x4000
-%endif

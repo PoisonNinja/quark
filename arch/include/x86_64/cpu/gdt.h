@@ -23,14 +23,6 @@ struct Entry {
     uint8_t base_high;
 } __attribute__((packed));
 
-#ifndef X86_64
-addr_t get_fs();
-addr_t get_gs();
-
-void set_fs(addr_t base);
-void set_gs(addr_t base);
-#endif
-
 void init();
 } // namespace gdt
 

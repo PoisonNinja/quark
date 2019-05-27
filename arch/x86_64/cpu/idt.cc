@@ -46,10 +46,6 @@ extern "C" void isr28(void);
 extern "C" void isr29(void);
 extern "C" void isr30(void);
 extern "C" void isr31(void);
-// x86_64 doesn't use interrupts for system calls
-#ifndef X86_64
-extern "C" void isr128(void);
-#endif
 extern "C" void isr129(void);
 extern "C" void irq0(void);
 extern "C" void irq1(void);
@@ -133,12 +129,6 @@ void init()
     idt::set_entry(&entries[45], reinterpret_cast<addr_t>(irq13), 0x08, 0x8E);
     idt::set_entry(&entries[46], reinterpret_cast<addr_t>(irq14), 0x08, 0x8E);
     idt::set_entry(&entries[47], reinterpret_cast<addr_t>(irq15), 0x08, 0x8E);
-
-#ifndef X86_64
-    // System call vector. Attributes: interrupt gate, user mode accessible
-    idt::set_entry(&entries[0x80], reinterpret_cast<addr_t>(isr128), 0x08,
-                   0xEE);
-#endif
 
     // Yield vector
     idt::set_entry(&entries[0x81], reinterpret_cast<addr_t>(isr129), 0x08,

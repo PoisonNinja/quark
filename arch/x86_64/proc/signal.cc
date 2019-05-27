@@ -7,11 +7,6 @@
 
 struct stack_frame {
     uint64_t ret_location;
-#ifndef X86_64
-    uint32_t signum;
-    siginfo_t* siginfo_address;
-    ucontext_t* ucontext_address;
-#endif
     ucontext_t ucontext;
     siginfo_t siginfo;
 };

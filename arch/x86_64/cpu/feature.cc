@@ -28,13 +28,6 @@ static void cpuid(uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx)
 
 void detect_intel(core& cpu)
 {
-    // i686 starts with Pentium Pro, family 6
-#ifndef X86_64
-    if (cpu.family < 0x6) {
-        kernel::panic("Your processor is too old! This kernel is compiled for "
-                      "i686, try using a Pentium Pro or newer\n");
-    }
-#endif
     /*
      * Linux based - Family 0x6, Model >= 0xE and Family 0xF, Model >= 0x3
      * support constant TSC

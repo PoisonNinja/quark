@@ -7,8 +7,8 @@ extern void arch_init(struct boot::info& info);
 
 void init(struct boot::info& info)
 {
-    physical::init(info);
     arch_init(info);
+    physical::init(info);
     physical::finalize();
 }
 } // namespace memory

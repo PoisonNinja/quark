@@ -9,7 +9,8 @@
 // clang-format off
 constexpr addr_t USER_START    = 0x400000;
 constexpr addr_t USER_END      = 0x7FFFFFFFFFFF;
-constexpr addr_t HEAP_START    = 0xFFFF880000000000; // Slot 256
+constexpr addr_t PHYS_START    = 0xFFFF800000000000; // Slot 256
+constexpr addr_t HEAP_START    = 0xFFFFFA0000000000; // Slot 500
 constexpr addr_t VMALLOC_START = 0xFFFFFC0000000000; // Slot 504
 constexpr addr_t VMALLOC_END   = 0xFFFFFC8000000000; // Slot 505
 constexpr addr_t DMA_START     = 0xFFFFFC8000000000; // Slot 505

@@ -1,30 +1,52 @@
+#include <arch/mm/layout.h>
 #include <arch/mm/virtual.h>
+#include <kernel.h>
 #include <mm/physical.h>
 #include <mm/stack.h>
 #include <mm/virtual.h>
 
 void stack::push(addr_t address)
 {
-    if (this->used == this->size) {
-        this->expand();
+    auto elem = reinterpret_cast<stack::stack_elem*>(address + PHYS_START);
+    if (this->top) {
+        top->prev = elem;
     }
-    this->base[this->used++] = address;
+    elem->next = this->top;
+    elem->prev = nullptr;
+    this->top  = elem;
+    this->size++;
+}
+
+void stack::remove(addr_t address)
+{
+    auto elem = reinterpret_cast<stack::stack_elem*>(address + PHYS_START);
+    if (elem->next) {
+        elem->next->prev = elem->prev;
+    }
+    if (elem->prev) {
+        elem->prev->next = elem->next;
+    }
+    if (elem == this->top) {
+        this->top = elem->next;
+    }
+    this->size--;
 }
 
 addr_t stack::pop()
 {
-    return this->base[--this->used];
+    if (!this->size) {
+        kernel::panic("Attempted to pop empty stack\n");
+    }
+    addr_t ret = reinterpret_cast<addr_t>(this->top) - PHYS_START;
+    this->top  = this->top->next;
+    if (this->top) {
+        this->top->prev = nullptr;
+    }
+    this->size--;
+    return ret;
 }
 
 bool stack::empty()
 {
-    return this->used == 0;
-}
-
-void stack::expand()
-{
-    addr_t phys = memory::physical::allocate();
-    addr_t virt = reinterpret_cast<addr_t>(this->base + this->size);
-    memory::virt::map(virt, phys, PAGE_WRITABLE);
-    this->size += memory::virt::PAGE_SIZE / sizeof(addr_t);
+    return this->size == 0;
 }

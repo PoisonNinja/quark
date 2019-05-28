@@ -5,25 +5,21 @@
 
 class stack
 {
+private:
+    struct stack_elem {
+        stack_elem *next, *prev;
+    };
+
 public:
-    stack(addr_t* base)
-        : base(base)
-        , size(0)
-        , used(0){};
+    stack()
+        : size(0)
+        , top(nullptr){};
     void push(addr_t address);
+    void remove(addr_t address);
     addr_t pop();
     bool empty();
 
 private:
-    void expand();
-
-    addr_t* base;
     size_t size;
-    size_t used;
+    stack_elem* top;
 };
-
-constexpr size_t stack_overhead(size_t total_memory, size_t block_size)
-{
-    return total_memory / block_size /
-           (memory::virt::PAGE_SIZE / sizeof(addr_t));
-}

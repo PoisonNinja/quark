@@ -135,8 +135,12 @@ void arch_init(struct boot::info &info)
             } break;
         }
     }
+}
 
-    // Preload the top level page table entries
+void arch_post_init(struct boot::info &info)
+{
+    // Preload the top level page table entries to synchronize them between
+    // threads
     struct memory::virt::page_table *top_level =
         (struct memory::virt::page_table *)memory::x86_64::decode_fractal(
             memory::x86_64::recursive_entry, memory::x86_64::recursive_entry,
@@ -156,5 +160,5 @@ void arch_init(struct boot::info &info)
             libcxx::memset(second_level, 0, sizeof(*second_level));
         }
     }
-} // namespace memory
+}
 } // namespace memory

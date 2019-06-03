@@ -121,7 +121,9 @@ void arch_init(struct boot::info &info)
                                     static_cast<addr_t>(mmap->len),
                                 static_cast<addr_t>(mmap->type));
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
-                        for (addr_t i = mmap->addr; i < mmap->addr + mmap->len;
+                        for (addr_t i = mmap->addr;
+                             i <
+                             memory::virt::align_down(mmap->addr + mmap->len);
                              i += memory::virt::PAGE_SIZE) {
                             if (memory::x86_64::is_valid_physical_memory(
                                     i, info)) {

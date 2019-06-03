@@ -161,7 +161,6 @@ bootstrap32:
     ; without SSE2 or long mode would cause a crash
     call wipe_screen
 
-    pushfd                               ;Save EFLAGS
     pushfd                               ;Store EFLAGS
     xor dword [esp],0x00200000           ;Invert the ID bit in stored EFLAGS
     popfd                                ;Load stored EFLAGS (with ID bit inverted)

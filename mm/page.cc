@@ -9,7 +9,7 @@ namespace pagedb
 {
 namespace
 {
-struct page* pages = reinterpret_cast<struct page*>(PHYS_START);
+struct page* pages = reinterpret_cast<struct page*>(PAGEDB_START);
 addr_t highest     = 0;
 } // namespace
 void init(boot::info& info)

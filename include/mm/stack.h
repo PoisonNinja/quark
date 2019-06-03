@@ -3,13 +3,13 @@
 #include <mm/virtual.h>
 #include <types.h>
 
+namespace memory
+{
+struct page;
+};
+
 class stack
 {
-private:
-    struct stack_elem {
-        stack_elem *next, *prev;
-    };
-
 public:
     stack()
         : size(0)
@@ -21,5 +21,5 @@ public:
 
 private:
     size_t size;
-    stack_elem* top;
+    struct memory::page* top;
 };

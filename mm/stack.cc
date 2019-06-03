@@ -1,33 +1,34 @@
 #include <arch/mm/layout.h>
 #include <arch/mm/virtual.h>
 #include <kernel.h>
+#include <mm/page.h>
 #include <mm/physical.h>
 #include <mm/stack.h>
 #include <mm/virtual.h>
 
 void stack::push(addr_t address)
 {
-    auto elem = reinterpret_cast<stack::stack_elem*>(address + PHYS_START);
+    struct memory::page* pg = memory::pagedb::get(address);
     if (this->top) {
-        top->prev = elem;
+        top->prev = pg;
     }
-    elem->next = this->top;
-    elem->prev = nullptr;
-    this->top  = elem;
+    pg->next  = this->top;
+    pg->prev  = nullptr;
+    this->top = pg;
     this->size++;
 }
 
 void stack::remove(addr_t address)
 {
-    auto elem = reinterpret_cast<stack::stack_elem*>(address + PHYS_START);
-    if (elem->next) {
-        elem->next->prev = elem->prev;
+    struct memory::page* pg = memory::pagedb::get(address);
+    if (pg->next) {
+        pg->next->prev = pg->prev;
     }
-    if (elem->prev) {
-        elem->prev->next = elem->next;
+    if (pg->prev) {
+        pg->prev->next = pg->next;
     }
-    if (elem == this->top) {
-        this->top = elem->next;
+    if (pg == this->top) {
+        this->top = pg->next;
     }
     this->size--;
 }
@@ -37,7 +38,7 @@ addr_t stack::pop()
     if (!this->size) {
         kernel::panic("Attempted to pop empty stack\n");
     }
-    addr_t ret = reinterpret_cast<addr_t>(this->top) - PHYS_START;
+    addr_t ret = memory::pagedb::addr(this->top);
     this->top  = this->top->next;
     if (this->top) {
         this->top->prev = nullptr;

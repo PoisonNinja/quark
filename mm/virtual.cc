@@ -54,12 +54,12 @@ bool protect_range(addr_t v, size_t size, int flags)
     return true;
 }
 
-bool unmap_range(addr_t v, size_t size)
+bool unmap_range(addr_t v, size_t size, int flags)
 {
     v    = memory::virt::align_down(v);
     size = memory::virt::align_up(size);
     for (addr_t i = 0; i < size; i += PAGE_SIZE) {
-        if (!memory::virt::unmap(v + i)) {
+        if (!memory::virt::unmap(v + i, flags)) {
             return false;
         }
     }

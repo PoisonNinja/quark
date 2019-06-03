@@ -14,7 +14,9 @@ namespace virt
 #define PAGE_NX 0x8
 #define PAGE_HUGE 0x10
 #define PAGE_COW 0x20
-#define PAGE_HARDWARE 0x40
+
+// Flags that control unmap behavior
+#define UNMAP_FREE 0x1 // Free backing physical page
 
 // Userspace flags
 #define PROT_READ 0x1
@@ -49,8 +51,8 @@ bool map_range(addr_t v, size_t size, int flags);
 bool protect(addr_t v, int flags);
 bool protect_range(addr_t v, size_t size, int flags);
 
-bool unmap(addr_t v);
-bool unmap_range(addr_t v, size_t size);
+bool unmap(addr_t v, int flags);
+bool unmap_range(addr_t v, size_t size, int flags);
 
 bool test(addr_t v);
 

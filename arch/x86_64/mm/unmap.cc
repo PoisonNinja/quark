@@ -1,6 +1,7 @@
 #include <arch/mm/mm.h>
 #include <arch/mm/virtual.h>
 #include <mm/physical.h>
+#include <mm/virtual.h>
 
 namespace memory
 {
@@ -15,7 +16,7 @@ static inline bool __table_is_empty(struct page_table* table)
     return true;
 }
 
-bool unmap(addr_t v)
+bool unmap(addr_t v, int flags)
 {
     struct page_table* pml4 =
         (struct page_table*)memory::x86_64::decode_fractal(
@@ -37,7 +38,7 @@ bool unmap(addr_t v)
         !pt->pages[memory::x86_64::pt_index(v)].present)
         return false;
     pt->pages[memory::x86_64::pt_index(v)].present = 0;
-    if (!pt->pages[memory::x86_64::pt_index(v)].hardware) {
+    if (flags & UNMAP_FREE) {
         memory::physical::free(pt->pages[memory::x86_64::pt_index(v)].address *
                                0x1000);
     }

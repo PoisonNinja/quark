@@ -6,6 +6,8 @@
 #include <mm/stack.h>
 #include <mm/virtual.h>
 
+namespace memory
+{
 void stack::push(addr_t address)
 {
     struct memory::page* pg = memory::pagedb::get(address);
@@ -51,3 +53,4 @@ bool stack::empty()
 {
     return this->size == 0;
 }
+} // namespace memory

@@ -6,7 +6,6 @@
 namespace memory
 {
 struct page;
-};
 
 class stack
 {
@@ -23,3 +22,4 @@ private:
     size_t size;
     struct memory::page* top;
 };
+}; // namespace memory

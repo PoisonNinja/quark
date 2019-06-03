@@ -5,6 +5,8 @@
 #include <mm/buddy.h>
 #include <mm/virtual.h>
 
+namespace memory
+{
 namespace
 {
 constexpr addr_t buddy_address(addr_t x, unsigned int order)
@@ -85,3 +87,4 @@ bool buddy::available(size_t size)
     }
     return false;
 }
+} // namespace memory

@@ -4,6 +4,8 @@
 #include <mm/stack.h>
 #include <types.h>
 
+namespace memory
+{
 constexpr size_t max_num_orders = 28 - 12;
 
 struct buddy_order;
@@ -26,3 +28,4 @@ private:
     size_t max_order;
     struct buddy_order* orders;
 };
+} // namespace memory

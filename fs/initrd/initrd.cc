@@ -113,7 +113,7 @@ void init(struct boot::info& info)
     } else {
         log::printk(log::log_level::INFO, "initrd: Initrd loaded\n");
     }
-    memory::virt::unmap_range(virt, size);
+    memory::virt::unmap_range(virt, memory::virt::align_down(size), UNMAP_FREE);
 }
 } // namespace initrd
 } // namespace filesystem

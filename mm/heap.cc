@@ -21,7 +21,8 @@ void *map_heap(size_t size)
 void free_heap(void *start, size_t size)
 {
     size *= memory::virt::PAGE_SIZE;
-    memory::virt::unmap_range(reinterpret_cast<addr_t>(start), size);
+    memory::virt::unmap_range(reinterpret_cast<addr_t>(start), size,
+                              UNMAP_FREE);
 }
 
 int liballoc_lock(void)

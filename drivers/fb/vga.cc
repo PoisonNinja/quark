@@ -20,7 +20,7 @@ vgafb::vgafb()
 {
     addr_t virt = memory::vmalloc::allocate(VGA_BUFFER_SIZE);
     if (!memory::virt::map_range(virt, VGA_BUFFER_BASE, VGA_BUFFER_SIZE,
-                                 PAGE_WRITABLE | PAGE_HARDWARE)) {
+                                 PAGE_WRITABLE)) {
         log::printk(log::log_level::WARNING, "Failed to map VGA buffer\n");
         return;
     }

@@ -88,7 +88,7 @@ process* process::fork()
 void process::exit(bool is_signal, int val)
 {
     for (auto& section : *vma) {
-        memory::virt::unmap_range(section.start(), section.size());
+        memory::virt::unmap_range(section.start(), section.size(), UNMAP_FREE);
     }
     this->vma->reset();
     this->exit_reason = val;

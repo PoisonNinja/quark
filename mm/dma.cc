@@ -71,7 +71,8 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total)
 sglist::~sglist()
 {
     for (auto region : this->list) {
-        memory::virt::unmap_range(region.virtual_base, region.real_size);
+        memory::virt::unmap_range(region.virtual_base, region.real_size, 0);
+        memory::physical::free(region.physical_base, region.real_size);
         dma_region.free(region.virtual_base, region.real_size);
     }
 }

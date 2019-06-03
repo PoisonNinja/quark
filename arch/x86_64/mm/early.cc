@@ -48,7 +48,10 @@ void init_early_alloc(struct boot::info *b)
                               mmap_tag))
                              ->entry_size)) {
                     // Look for the highest memory address (needed for buddy)
-                    if (memory::virt::align_up(tmp->addr + tmp->len) > highest)
+                    if (memory::virt::align_up(tmp->addr + tmp->len) >
+                            highest &&
+                        (tmp->type == MULTIBOOT_MEMORY_AVAILABLE ||
+                         tmp->type == MULTIBOOT_MEMORY_ACPI_RECLAIMABLE))
                         highest = memory::virt::align_up(tmp->addr + tmp->len);
                 }
                 break;

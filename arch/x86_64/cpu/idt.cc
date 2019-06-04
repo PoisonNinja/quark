@@ -8,9 +8,9 @@ namespace idt
 {
 constexpr size_t num_entries = 256;
 
-static struct idt::Entry entries[num_entries];
+static struct idt::entry entries[num_entries];
 static struct idt::descriptor descriptor = {
-    .limit  = sizeof(struct idt::Entry) * num_entries - 1,
+    .limit  = sizeof(struct idt::entry) * num_entries - 1,
     .offset = reinterpret_cast<addr_t>(&entries),
 };
 
@@ -66,7 +66,7 @@ extern "C" void irq15(void);
 
 extern "C" void idt_load(addr_t);
 
-static void set_entry(struct idt::Entry* entry, addr_t offset,
+static void set_entry(struct idt::entry* entry, addr_t offset,
                       uint16_t selector, uint8_t attributes)
 {
     entry->offset_low    = offset & 0xFFFF;

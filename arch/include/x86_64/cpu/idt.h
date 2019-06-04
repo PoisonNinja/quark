@@ -13,7 +13,7 @@ struct descriptor {
     addr_t offset;
 } __attribute__((packed));
 
-struct Entry {
+struct entry {
     uint16_t offset_low;
     uint16_t selector;
     uint8_t zero;

@@ -98,6 +98,7 @@ interrupt::handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
+    // Print a message in case something goes wrong when initializing
     log::printk(log::log_level::INFO, "Initializing scheduler...\n");
     interrupt::register_handler(0x81, yield_handler);
     kernel_process                = new process(nullptr);
@@ -113,7 +114,7 @@ void init()
      */
     current_thread = kinit;
     _online        = true;
-    log::printk(log::log_level::INFO, "scheduler initialized\n");
+    log::printk(log::log_level::INFO, "Scheduler initialized\n");
 }
 
 void late_init()

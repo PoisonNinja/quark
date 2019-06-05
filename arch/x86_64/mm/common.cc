@@ -9,14 +9,9 @@ namespace memory
 {
 namespace x86_64
 {
-bool is_valid_physical_memory(addr_t m, struct boot::info &info)
+bool is_valid_physical_memory(addr_t m, struct boot::info &info,
+                              addr_t multiboot_start, addr_t multiboot_end)
 {
-    struct multiboot_fixed *multiboot =
-        reinterpret_cast<struct multiboot_fixed *>(info.architecture_data);
-    addr_t multiboot_start =
-        memory::virt::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
-    addr_t multiboot_end = memory::virt::align_up(
-        reinterpret_cast<addr_t>(multiboot) - VMA + multiboot->total_size);
     if (m >= memory::virt::align_down(info.kernel_start) &&
         m < memory::virt::align_up(info.kernel_end)) {
         log::printk(log::log_level::DEBUG,

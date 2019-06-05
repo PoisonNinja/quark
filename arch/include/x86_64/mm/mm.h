@@ -69,6 +69,7 @@ constexpr void* decode_fractal(uint64_t pml4, uint64_t pdp, uint64_t pd,
     return reinterpret_cast<void*>(address);
 }
 
-bool is_valid_physical_memory(addr_t m, struct boot::info& info);
+bool is_valid_physical_memory(addr_t m, struct boot::info& info,
+                              addr_t multiboot_start, addr_t multiboot_end);
 } // namespace x86_64
 } // namespace memory

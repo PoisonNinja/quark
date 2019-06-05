@@ -10,6 +10,8 @@ namespace
 multiboot_memory_map_t *mmap      = nullptr;
 struct multiboot_tag *mmap_tag    = nullptr;
 struct multiboot_fixed *multiboot = nullptr;
+addr_t multiboot_start            = 0;
+addr_t multiboot_end              = 0;
 struct boot::info *info           = nullptr;
 } // namespace
 
@@ -23,6 +25,10 @@ void init_early_alloc(struct boot::info *b)
     info           = b;
     multiboot =
         reinterpret_cast<struct multiboot_fixed *>(info->architecture_data);
+    multiboot_start =
+        memory::virt::align_down(reinterpret_cast<addr_t>(multiboot) - VMA);
+    multiboot_end = memory::virt::align_up(reinterpret_cast<addr_t>(multiboot) -
+                                           VMA + multiboot->total_size);
     struct multiboot_tag *tag;
     // Iterate through tags to find memory tag
     for (tag = reinterpret_cast<struct multiboot_tag *>(
@@ -91,7 +97,8 @@ addr_t early_allocate()
                 mmap->addr += memory::virt::PAGE_SIZE;
                 mmap->len -= memory::virt::PAGE_SIZE;
                 // Check if it's in a restricted area
-                if (memory::x86_64::is_valid_physical_memory(i, *info)) {
+                if (memory::x86_64::is_valid_physical_memory(
+                        i, *info, multiboot_start, multiboot_end)) {
                     return i;
                 }
             }

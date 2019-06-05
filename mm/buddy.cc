@@ -42,15 +42,12 @@ buddy::~buddy()
 {
 }
 
-addr_t buddy::alloc(size_t size)
+addr_t buddy::__alloc(unsigned order)
 {
-    size_t order = libcxx::log2(size);
-    if (order < this->min_order)
-        order = this->min_order;
     if (order > this->max_order)
         kernel::panic("OOM");
     if (this->orders[order].free_stack->empty()) {
-        addr_t a = this->alloc(libcxx::pow2(order + 1));
+        addr_t a = this->__alloc(order + 1);
         this->orders[order].free_stack->push(a);
         this->orders[order].free_stack->push(a + libcxx::pow2(order));
     }
@@ -59,9 +56,22 @@ addr_t buddy::alloc(size_t size)
     return addr;
 }
 
-void buddy::free(addr_t addr, size_t size)
+addr_t buddy::alloc(size_t size)
 {
-    uint32_t order = libcxx::log2(size);
+    unsigned order = libcxx::log2(size);
+    if (order < this->min_order) {
+        order = this->min_order;
+    }
+    if (order > this->max_order) {
+        kernel::panic("Unable to satisfy such a large request\n");
+    }
+    addr_t addr = this->__alloc(order);
+    total_free -= libcxx::pow2(order);
+    return addr;
+}
+
+void buddy::__free(addr_t addr, unsigned order)
+{
     if (order > this->max_order) {
         return;
     }
@@ -69,12 +79,23 @@ void buddy::free(addr_t addr, size_t size)
     addr_t buddy_addr = buddy_address(addr, order);
     if (!this->orders[order].bitset->test(buddy_index(buddy_addr, order))) {
         this->orders[order].free_stack->remove(buddy_addr);
-        this->free((addr < buddy_addr) ? addr : buddy_addr,
-                   libcxx::pow2(order + 1));
+        this->__free((addr < buddy_addr) ? addr : buddy_addr, order + 1);
     } else {
         this->orders[order].free_stack->push(addr);
-        return;
     }
+}
+
+void buddy::free(addr_t addr, size_t size)
+{
+    unsigned order = libcxx::log2(size);
+    if (order < this->min_order) {
+        order = this->min_order;
+    }
+    if (order > this->max_order) {
+        kernel::panic("Unable to free such a large block of memory\n");
+    }
+    this->__free(addr, order);
+    total_free += libcxx::pow2(order);
 }
 
 bool buddy::available(size_t size)

@@ -23,6 +23,9 @@ public:
     bool available(size_t size);
 
 private:
+    addr_t __alloc(unsigned order);
+    void __free(addr_t addr, unsigned order);
+
     size_t size;
     size_t min_order;
     size_t max_order;

@@ -27,10 +27,11 @@ struct buddy_order {
 buddy::buddy(size_t s, size_t min, size_t max)
 {
     // TODO: Perform sanity checks
-    this->size      = s;
-    this->min_order = min;
-    this->max_order = max;
-    this->orders    = new buddy_order[max + 1];
+    this->size       = s;
+    this->total_free = 0;
+    this->min_order  = min;
+    this->max_order  = max;
+    this->orders     = new buddy_order[max + 1];
     for (size_t i = min; i <= max; i++) {
         this->orders[i].free_stack = new stack();
         this->orders[i].bitset =
@@ -107,5 +108,10 @@ bool buddy::available(size_t size)
         }
     }
     return false;
+}
+
+size_t buddy::total()
+{
+    return total_free;
 }
 } // namespace memory

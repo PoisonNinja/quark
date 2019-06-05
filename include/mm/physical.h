@@ -13,6 +13,8 @@ addr_t allocate(size_t size);
 void free(addr_t address);
 void free(addr_t address, size_t size);
 
+size_t available();
+
 /*
  * Tries allocating chunks of memory starting at max_size and slowly decreasing
  * size until we finally get some memory

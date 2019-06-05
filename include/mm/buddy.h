@@ -22,11 +22,14 @@ public:
     // Returns whether there is physical memory chunks available for this size
     bool available(size_t size);
 
+    size_t total();
+
 private:
     addr_t __alloc(unsigned order);
     void __free(addr_t addr, unsigned order);
 
     size_t size;
+    size_t total_free;
     size_t min_order;
     size_t max_order;
     struct buddy_order* orders;

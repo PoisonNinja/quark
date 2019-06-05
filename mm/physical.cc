@@ -59,6 +59,11 @@ void free(addr_t address, size_t size)
     allocator->free(address, size);
 }
 
+size_t available()
+{
+    return allocator->total();
+}
+
 /*
  * Unfortunately there is no way to implement this without somewhat relying on
  * the properties of the buddy allocator, so this probably won't even work if

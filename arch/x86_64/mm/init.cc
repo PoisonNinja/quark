@@ -12,6 +12,36 @@
 
 namespace memory
 {
+namespace
+{
+size_t max_valid_size(addr_t address, struct boot::info &info,
+                      addr_t mboot_start, addr_t mboot_end, addr_t zone_end)
+{
+    int num_zeros = __builtin_ctzll(address);
+    // TODO: Use MAX_ORDER instead of magic number
+    if (num_zeros > 28)
+        num_zeros = 28;
+    size_t buddy_size;
+    for (buddy_size = (1 << num_zeros); buddy_size > memory::virt::PAGE_SIZE;
+         buddy_size >>= 1) {
+        addr_t end = address + buddy_size;
+        if (end > zone_end)
+            continue;
+        else if (address <= info.kernel_start && end >= info.kernel_end)
+            continue;
+        else if (address <= info.initrd_start && end >= info.initrd_end)
+            continue;
+        else if (address <= mboot_start && end >= mboot_end)
+            continue;
+        else if (!memory::x86_64::is_valid_physical_memory(
+                     end, info, mboot_start, mboot_end))
+            continue;
+        break;
+    }
+    return buddy_size;
+}
+} // namespace
+
 void arch_init(struct boot::info &info)
 {
     struct multiboot_fixed *multiboot =
@@ -54,12 +84,18 @@ void arch_init(struct boot::info &info)
                                 static_cast<addr_t>(mmap->type));
                     if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                         for (addr_t i = mmap->addr;
-                             i <
-                             memory::virt::align_down(mmap->addr + mmap->len);
-                             i += memory::virt::PAGE_SIZE) {
+                             i < memory::virt::align_down(mmap->addr +
+                                                          mmap->len);) {
                             if (memory::x86_64::is_valid_physical_memory(
-                                    i, info)) {
-                                memory::physical::free(i);
+                                    i, info, multiboot_start, multiboot_end)) {
+                                size_t size = max_valid_size(
+                                    i, info, multiboot_start, multiboot_end,
+                                    memory::virt::align_down(mmap->addr +
+                                                             mmap->len));
+                                memory::physical::free(i, size);
+                                i += size;
+                            } else {
+                                i += memory::virt::PAGE_SIZE;
                             }
                         }
                     }

@@ -25,7 +25,7 @@ void init(boot::info& info)
 struct page* get(addr_t address)
 {
     if (address > highest) {
-        kernel::panic("Attempted to get page beyond highest, %pX vs %pX\n",
+        kernel::panic("Attempted to get page beyond highest, %p vs %p\n",
                       address, highest);
     }
     addr_t real = memory::virt::align_down(address);

@@ -1,4 +1,5 @@
 #include <boot/info.h>
+#include <kernel.h>
 #include <mm/page.h>
 #include <mm/physical.h>
 
@@ -23,5 +24,8 @@ void init(struct boot::info& info)
     arch_init(info);
     physical::finalize();
     arch_post_init(info);
+    log::printk(log::log_level::INFO,
+                "Initialized with %zu bytes of free memory\n",
+                physical::available());
 }
 } // namespace memory

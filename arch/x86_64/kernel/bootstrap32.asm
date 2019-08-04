@@ -149,11 +149,16 @@ noSSE2:
     call print_string
     jmp halt32
 
+stack32:
+    times 16 db 0 
+
 global bootstrap32
 bootstrap32:
     ; Back up the multiboot data in the registers (magic, info struct)
     mov esi, ebx
     mov edi, eax
+
+    mov esp, stack32
 
     ; Why don't we use the nice SSE2 optimized memset implementation in asm?
     ; At this point, we don't know whether this is a SSE2 compatible or even

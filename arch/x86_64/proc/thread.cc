@@ -220,9 +220,7 @@ bool thread::load(addr_t binary, int argc, const char* argv[], int envc,
     ctx.fs  = reinterpret_cast<uint64_t>(uthread);
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone.second) + 0x1000;
     ctx.rflags        = 0x200;
-    // TODO: INSECURE! This allows all programs IOPORT access!
-    ctx.rflags |= 0x3000;
-    ctx.kernel_stack = cpu::x86_64::TSS::get_stack();
+    ctx.kernel_stack  = cpu::x86_64::TSS::get_stack();
     return true;
 }
 

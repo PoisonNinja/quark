@@ -39,10 +39,8 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                 phdr->p_vaddr = addr;
                 log::printk(log::log_level::DEBUG,
                             "TLS section will be at %p\n", phdr->p_vaddr);
-                process->tls_base      = phdr->p_vaddr;
-                process->tls_filesz    = phdr->p_filesz;
-                process->tls_memsz     = phdr->p_memsz;
-                process->tls_alignment = phdr->p_align;
+                process->set_tls_data(phdr->p_paddr, phdr->p_filesz,
+                                      phdr->p_memsz, phdr->p_align);
             }
             log::printk(log::log_level::DEBUG, "Flags:            %X\n",
                         phdr->p_flags);

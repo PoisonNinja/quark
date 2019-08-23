@@ -15,7 +15,9 @@ public:
     ~process();
 
     pid_t pid;
-    addr_t address_space;
+
+    addr_t get_address_space() const;
+    void set_address_space(addr_t address);
 
     void add_thread(thread* thread);
     void thread_exit(thread* thread, bool is_signal, int val);
@@ -27,11 +29,10 @@ public:
     libcxx::intrusive_ptr<filesystem::descriptor> get_root();
     filesystem::dtable fds;
 
-    // TLS stuff
-    addr_t tls_base;
-    addr_t tls_filesz;
-    addr_t tls_memsz;
-    addr_t tls_alignment;
+    void set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
+                      addr_t alignment);
+
+    memory::vma& get_vma();
 
     void exit(bool is_signal, int val);
 
@@ -42,8 +43,6 @@ public:
     int load(addr_t binary, int argc, const char* argv[], int envc,
              const char* envp[], struct thread_context& ctx);
 
-    memory::vma* vma;
-
     libcxx::node<process> list_node;
 
     void send_signal(int signum);
@@ -52,6 +51,16 @@ public:
     addr_t sigreturn;
 
 private:
+    addr_t address_space;
+
+    // TLS stuff
+    addr_t tls_base;
+    addr_t tls_filesz;
+    addr_t tls_memsz;
+    addr_t tls_alignment;
+
+    memory::vma vma;
+
     // waitpid stuff
     scheduler::wait_queue waiters;
 

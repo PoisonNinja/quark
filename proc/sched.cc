@@ -68,11 +68,13 @@ void switch_context(struct interrupt_context* ctx, thread* current,
 {
     save_context(ctx, &current->tcontext);
     if (current) {
-        if (current->parent->address_space != next->parent->address_space) {
-            memory::virt::set_address_space_root(next->parent->address_space);
+        if (current->parent->get_address_space() !=
+            next->parent->get_address_space()) {
+            memory::virt::set_address_space_root(
+                next->parent->get_address_space());
         }
     } else {
-        memory::virt::set_address_space_root(next->parent->address_space);
+        memory::virt::set_address_space_root(next->parent->get_address_space());
     }
     load_context(ctx, &next->tcontext);
 }
@@ -101,8 +103,8 @@ void init()
     // Print a message in case something goes wrong when initializing
     log::printk(log::log_level::INFO, "Initializing scheduler...\n");
     interrupt::register_handler(0x81, yield_handler);
-    kernel_process                = new process(nullptr);
-    kernel_process->address_space = memory::virt::get_address_space_root();
+    kernel_process = new process(nullptr);
+    kernel_process->set_address_space(memory::virt::get_address_space_root());
     // TODO: Move this to architecture specific
     thread* kinit = new thread(kernel_process);
     scheduler::insert(kinit);

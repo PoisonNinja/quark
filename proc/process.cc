@@ -17,7 +17,7 @@ void* signal_return_location = reinterpret_cast<void*>(&signal_return);
 
 process::process(process* parent)
     : pid(scheduler::get_free_pid())
-    , vma(new memory::vma(USER_START, USER_END))
+    , vma(USER_START, USER_END)
     , exit_reason(-1)
     , parent(parent)
 {
@@ -29,6 +29,16 @@ process::process(process* parent)
 
 process::~process()
 {
+}
+
+addr_t process::get_address_space() const
+{
+    return this->address_space;
+}
+
+void process::set_address_space(addr_t address)
+{
+    this->address_space = address;
 }
 
 void process::set_cwd(libcxx::intrusive_ptr<filesystem::descriptor> desc)
@@ -49,6 +59,15 @@ libcxx::intrusive_ptr<filesystem::descriptor> process::get_cwd()
 libcxx::intrusive_ptr<filesystem::descriptor> process::get_root()
 {
     return root;
+}
+
+void process::set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
+                           addr_t alignment)
+{
+    this->tls_base      = base;
+    this->tls_filesz    = filesz;
+    this->tls_memsz     = memsz;
+    this->tls_alignment = alignment;
 }
 
 void process::add_thread(thread* thread)
@@ -88,7 +107,7 @@ process* process::fork()
     child->fds    = this->fds;
     child->set_root(this->get_root());
     child->set_cwd(this->get_cwd());
-    child->vma           = new memory::vma(*this->vma);
+    child->vma           = this->vma;
     child->address_space = cloned;
     return child;
 }
@@ -125,35 +144,35 @@ int process::load(addr_t binary, int argc, const char* argv[], int envc,
     size_t tls_size = tls_raw_size + sizeof(struct uthread);
     tls_size        = libcxx::round_up(tls_size, this->tls_alignment);
 
-    if ((argv_zone = this->vma->allocate(USER_START, argv_size)).first) {
+    if ((argv_zone = this->vma.allocate(USER_START, argv_size)).first) {
         log::printk(log::log_level::DEBUG, "argv located at %p\n",
                     argv_zone.second);
     } else {
         log::printk(log::log_level::ERROR, "Failed to locate argv\n");
         return false;
     }
-    if ((envp_zone = this->vma->allocate(USER_START, envp_size)).first) {
+    if ((envp_zone = this->vma.allocate(USER_START, envp_size)).first) {
         log::printk(log::log_level::DEBUG, "envp located at %p\n",
                     envp_zone.second);
     } else {
         log::printk(log::log_level::ERROR, "Failed to locate envp\n");
         return false;
     }
-    if ((stack_zone = this->vma->allocate_reverse(USER_START, 0x1000)).first) {
+    if ((stack_zone = this->vma.allocate_reverse(USER_START, 0x1000)).first) {
         log::printk(log::log_level::DEBUG, "Stack located at %p\n",
                     stack_zone.second);
     } else {
         log::printk(log::log_level::ERROR, "Failed to locate stack\n");
         return false;
     }
-    if ((sigreturn_zone = this->vma->allocate(USER_START, 0x1000)).first) {
+    if ((sigreturn_zone = this->vma.allocate(USER_START, 0x1000)).first) {
         log::printk(log::log_level::DEBUG, "Sigreturn page located at %p\n",
                     sigreturn_zone.second);
     } else {
         log::printk(log::log_level::ERROR, "Failed to locate sigreturn page\n");
         return false;
     }
-    if ((tls_zone = this->vma->allocate(USER_START, tls_size)).first) {
+    if ((tls_zone = this->vma.allocate(USER_START, tls_size)).first) {
         log::printk(log::log_level::DEBUG, "TLS copy located at %p\n",
                     tls_zone.second);
     } else {
@@ -228,16 +247,15 @@ int process::load(addr_t binary, int argc, const char* argv[], int envc,
 
 void process::exit(bool is_signal, int val)
 {
-    for (auto& section : *vma) {
+    for (auto& section : vma) {
         memory::virt::unmap_range(section.start(), section.size(), UNMAP_FREE);
     }
-    this->vma->reset();
+    this->vma.reset();
     this->exit_reason = val;
     if (this->parent) {
         this->parent->notify_exit(this);
     }
     // memory::physical::free(this->address_space);
-    delete this->vma;
     scheduler::remove_process(this->pid);
 }
 

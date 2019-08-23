@@ -44,7 +44,7 @@ void init_stage2(void*)
         "hello=world",
     };
     struct thread_context ctx;
-    if (!scheduler::get_current_thread()->load(
+    if (scheduler::get_current_process()->load(
             reinterpret_cast<addr_t>(init_raw), argc, argv, envc, envp, ctx)) {
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
     } else {

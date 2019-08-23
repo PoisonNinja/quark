@@ -304,7 +304,7 @@ static long sys_execve(const char* path, const char* old_argv[],
     file->read(raw, st.st_size);
     scheduler::get_current_process()->vma->reset();
     struct thread_context ctx;
-    if (!scheduler::get_current_thread()->load(reinterpret_cast<addr_t>(raw),
+    if (scheduler::get_current_process()->load(reinterpret_cast<addr_t>(raw),
                                                argc, argv, envc, envp, ctx)) {
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
         return -ENOEXEC;

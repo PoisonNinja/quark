@@ -13,6 +13,7 @@ class process
 public:
     process(process* p);
     ~process();
+
     pid_t pid;
     addr_t address_space;
 
@@ -38,6 +39,8 @@ public:
     void notify_exit(process* child);
 
     process* fork();
+    int load(addr_t binary, int argc, const char* argv[], int envc,
+             const char* envp[], struct thread_context& ctx);
 
     memory::vma* vma;
 

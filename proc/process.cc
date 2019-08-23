@@ -245,6 +245,47 @@ int process::load(addr_t binary, int argc, const char* argv[], int envc,
     return 0;
 }
 
+void* process::mmap(addr_t addr, size_t length, int prot, int flags, int fd,
+                    off_t offset)
+{
+    if (flags & MAP_SHARED) {
+        log::printk(log::log_level::WARNING,
+                    "[mmap] Userspace mmap requested "
+                    "MMAP_SHARED, you should probably implement"
+                    "this\n");
+        return MAP_FAILED;
+    }
+    if (!(flags & MAP_ANONYMOUS)) {
+        log::printk(log::log_level::WARNING,
+                    "[mmap] Userspace mmap requested file "
+                    "mapping, you should probably implement "
+                    "this\n");
+        return MAP_FAILED;
+    }
+    if (!(flags & MAP_FIXED)) {
+        log::printk(log::log_level::DEBUG, "[mmap] Kernel selecting mapping\n");
+        auto [ret, placement] = this->vma.locate_range(
+            (addr) ? reinterpret_cast<addr_t>(addr) : USER_START, length);
+        if (!ret) {
+            log::printk(log::log_level::WARNING,
+                        "[sys_mmap] Failed to allocate area for mmap\n");
+            return MAP_FAILED;
+        }
+        log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n",
+                    placement);
+        this->vma.add_vmregion(placement, length);
+        int flags = memory::virt::prot_to_flags(prot);
+        memory::virt::map_range(placement, length, flags);
+        return reinterpret_cast<void*>(placement);
+    } else {
+        log::printk(log::log_level::WARNING,
+                    "[sys_mmap] Userspace mmap requested "
+                    "MAP_FIXED, you should probably implement "
+                    "it\n");
+        return MAP_FAILED;
+    }
+}
+
 void process::exit(bool is_signal, int val)
 {
     for (auto& section : vma) {

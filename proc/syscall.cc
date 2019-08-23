@@ -120,47 +120,9 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
                 "[sys_mmap] = %p, %p, %zX, %u, %u, %d, %zX\n", mmap_data,
                 mmap_data->addr, mmap_data->length, mmap_data->prot,
                 mmap_data->flags, mmap_data->fd, mmap_data->offset);
-    if (mmap_data->flags & MAP_SHARED) {
-        log::printk(log::log_level::WARNING,
-                    "[sys_mmap] Userspace mmap requested "
-                    "MMAP_SHARED, you should probably implement"
-                    "this\n");
-        return MAP_FAILED;
-    }
-    if (!(mmap_data->flags & MAP_ANONYMOUS)) {
-        log::printk(log::log_level::WARNING,
-                    "[sys_mmap] Userspace mmap requested file "
-                    "mapping, you should probably implement "
-                    "this\n");
-        return MAP_FAILED;
-    }
-    if (!(mmap_data->flags & MAP_FIXED)) {
-        log::printk(log::log_level::DEBUG,
-                    "[sys_mmap] Kernel selecting mapping\n");
-        auto [ret, placement] =
-            scheduler::get_current_process()->vma->locate_range(
-                (mmap_data->addr) ? reinterpret_cast<addr_t>(mmap_data->addr)
-                                  : USER_START,
-                mmap_data->length);
-        if (!ret) {
-            log::printk(log::log_level::WARNING,
-                        "[sys_mmap] Failed to allocate area for mmap\n");
-            return MAP_FAILED;
-        }
-        log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n",
-                    placement);
-        scheduler::get_current_process()->vma->add_vmregion(placement,
-                                                            mmap_data->length);
-        int flags = memory::virt::prot_to_flags(mmap_data->prot);
-        memory::virt::map_range(placement, mmap_data->length, flags);
-        return reinterpret_cast<void*>(placement);
-    } else {
-        log::printk(log::log_level::WARNING,
-                    "[sys_mmap] Userspace mmap requested "
-                    "MAP_FIXED, you should probably implement "
-                    "it\n");
-        return MAP_FAILED;
-    }
+    return scheduler::get_current_process()->mmap(
+        reinterpret_cast<addr_t>(mmap_data->addr), mmap_data->length,
+        mmap_data->prot, mmap_data->flags, mmap_data->fd, mmap_data->offset);
 }
 
 static long sys_sigaction(int signum, struct sigaction* act,

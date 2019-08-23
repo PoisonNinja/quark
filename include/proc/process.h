@@ -29,10 +29,11 @@ public:
     libcxx::intrusive_ptr<filesystem::descriptor> get_root();
     filesystem::dtable fds;
 
+    void* mmap(addr_t addr, size_t length, int prot, int flags, int fd,
+               off_t offset);
+
     void set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
                       addr_t alignment);
-
-    memory::vma& get_vma();
 
     void exit(bool is_signal, int val);
 

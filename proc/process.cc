@@ -284,7 +284,7 @@ void* process::mmap(addr_t addr, size_t length, int prot, int flags,
             return MAP_FAILED;
         }
     }
-    // Remove old mappins
+    // Remove old mappings
     this->munmap(addr, length);
     this->vma.add_vmregion(placement, length);
     int real_flags = memory::virt::prot_to_flags(prot);
@@ -292,6 +292,8 @@ void* process::mmap(addr_t addr, size_t length, int prot, int flags,
                             real_flags | PAGE_WRITABLE | PAGE_USER);
     if (!(flags & MAP_ANONYMOUS)) {
         file->pread(reinterpret_cast<uint8_t*>(placement), length, offset);
+    } else {
+        libcxx::memset(reinterpret_cast<void*>(placement), 0, length);
     }
     if (!(real_flags & PAGE_WRITABLE)) {
         memory::virt::protect_range(placement, length, real_flags | PAGE_USER);

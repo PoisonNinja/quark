@@ -69,15 +69,34 @@ load(libcxx::intrusive_ptr<filesystem::descriptor> file)
             process->mmap(phdr->p_vaddr, phdr->p_memsz, prot, flags, file,
                           phdr->p_offset);
             if (phdr->p_filesz < phdr->p_memsz) {
+                // We're supposed to zero out the remaining
                 log::printk(log::log_level::DEBUG,
-                            "Memory size is larger than file size, "
-                            "zeroing rest of segment...\n");
-                log::printk(log::log_level::DEBUG, "Zeroing %p, size 0x%X\n",
-                            phdr->p_filesz + phdr->p_vaddr,
-                            phdr->p_memsz - phdr->p_filesz);
-                libcxx::memset(
-                    reinterpret_cast<void*>(phdr->p_filesz + phdr->p_vaddr), 0,
-                    phdr->p_memsz - phdr->p_filesz);
+                            "Memory size is larger than file size\n");
+                /*
+                 * There are two possible scenarios*
+                 *
+                 * First case, memsz will still fit into the same page as
+                 * before, we don't need anything else.
+                 *
+                 * Second case, memsz will spill over into additional page(s),
+                 * we'll simply map another anonymous page beyond.
+                 */
+                if (memory::virt::align_down(phdr->p_vaddr + phdr->p_memsz) ==
+                    memory::virt::align_down(phdr->p_vaddr + phdr->p_filesz)) {
+                    libcxx::memset(
+                        reinterpret_cast<void*>(phdr->p_vaddr + phdr->p_filesz),
+                        0, phdr->p_memsz - phdr->p_filesz);
+                } else {
+                    addr_t file_end = phdr->p_vaddr + phdr->p_filesz;
+                    addr_t mem_end  = phdr->p_vaddr + phdr->p_memsz;
+                    addr_t page_end =
+                        memory::virt::align_up(phdr->p_vaddr + phdr->p_filesz);
+                    libcxx::memset(reinterpret_cast<void*>(file_end), 0,
+                                   page_end - file_end);
+                    size_t to_map = memory::virt::align_up(mem_end - page_end);
+                    process->mmap(page_end, to_map, prot, flags | MAP_ANONYMOUS,
+                                  nullptr, 0);
+                }
             }
         }
     }

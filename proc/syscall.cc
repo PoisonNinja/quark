@@ -122,7 +122,7 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
                 mmap_data->flags, mmap_data->fd, mmap_data->offset);
     return scheduler::get_current_process()->mmap(
         reinterpret_cast<addr_t>(mmap_data->addr), mmap_data->length,
-        mmap_data->prot, mmap_data->flags, mmap_data->fd, mmap_data->offset);
+        mmap_data->prot, mmap_data->flags, nullptr, mmap_data->offset);
 }
 
 static long sys_sigaction(int signum, struct sigaction* act,
@@ -258,20 +258,12 @@ static long sys_execve(const char* path, const char* old_argv[],
         delete[] argv;
         return -ENOENT;
     }
-    struct filesystem::stat st;
-    file->stat(&st);
-    log::printk(log::log_level::DEBUG,
-                "[sys_execve] binary has size of %zu bytes\n", st.st_size);
-    uint8_t* raw = new uint8_t[st.st_size];
-    file->read(raw, st.st_size);
-    scheduler::get_current_process()->vma->reset();
     struct thread_context ctx;
-    if (scheduler::get_current_process()->load(reinterpret_cast<addr_t>(raw),
-                                               argc, argv, envc, envp, ctx)) {
+    if (scheduler::get_current_process()->load(file, argc, argv, envc, envp,
+                                               ctx)) {
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
         return -ENOEXEC;
     }
-    delete[] raw;
     load_registers(ctx);
     __builtin_unreachable();
 }

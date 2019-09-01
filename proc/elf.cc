@@ -9,10 +9,13 @@
 
 namespace elf
 {
-libcxx::pair<bool, addr_t> load(addr_t binary)
+libcxx::pair<bool, addr_t>
+load(libcxx::intrusive_ptr<filesystem::descriptor> file)
 {
+    uint8_t buffer[sizeof(elf_ehdr)];
+    file->pread(buffer, sizeof(elf_ehdr), 0);
     process* process = scheduler::get_current_process();
-    elf_ehdr* header = reinterpret_cast<elf_ehdr*>(binary);
+    elf_ehdr* header = reinterpret_cast<elf_ehdr*>(buffer);
     if (libcxx::memcmp(header->e_ident, ELFMAG, 4)) {
         log::printk(log::log_level::ERROR,
                     "Binary passed in is not an ELF file!\n");
@@ -23,25 +26,19 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
     log::printk(log::log_level::DEBUG, "Program header offset: %p\n",
                 header->e_phoff);
     for (int i = 0; i < header->e_phnum; i++) {
-        elf_phdr* phdr = reinterpret_cast<elf_phdr*>(binary + header->e_phoff +
-                                                     (header->e_phentsize * i));
+        uint8_t phdr_buffer[sizeof(elf_phdr)];
+        file->pread(phdr_buffer, sizeof(elf_phdr),
+                    header->e_phoff + (header->e_phentsize * i));
+        elf_phdr* phdr = reinterpret_cast<elf_phdr*>(phdr_buffer);
         log::printk(log::log_level::DEBUG, "Header type: %X\n", phdr->p_type);
-        if (phdr->p_type == PT_LOAD || phdr->p_type == PT_TLS) {
-            if (phdr->p_type == PT_TLS) {
-                log::printk(log::log_level::DEBUG, "Found TLS section\n");
-                auto [found, addr] =
-                    process->vma->locate_range(USER_START, phdr->p_memsz);
-                if (!found) {
-                    log::printk(log::log_level::ERROR,
-                                "Failed to locate section\n");
-                    return libcxx::pair<bool, addr_t>(false, 0);
-                }
-                phdr->p_vaddr = addr;
-                log::printk(log::log_level::DEBUG,
-                            "TLS section will be at %p\n", phdr->p_vaddr);
-                process->set_tls_data(phdr->p_paddr, phdr->p_filesz,
-                                      phdr->p_memsz, phdr->p_align);
-            }
+        if (phdr->p_type == PT_TLS) {
+            log::printk(log::log_level::DEBUG, "Found TLS section\n");
+            log::printk(log::log_level::DEBUG, "TLS section will be at %p\n",
+                        phdr->p_vaddr);
+            process->set_tls_data(phdr->p_offset, phdr->p_filesz, phdr->p_memsz,
+                                  phdr->p_align);
+        }
+        if (phdr->p_type == PT_LOAD) {
             log::printk(log::log_level::DEBUG, "Flags:            %X\n",
                         phdr->p_flags);
             log::printk(log::log_level::DEBUG, "Offset:           %p\n",
@@ -56,25 +53,9 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                         phdr->p_memsz);
             log::printk(log::log_level::DEBUG, "Align:            %p\n",
                         phdr->p_align);
-            if (!process->vma->add_vmregion(phdr->p_vaddr, phdr->p_memsz)) {
-                log::printk(log::log_level::ERROR, "Failed to add section\n");
-                return libcxx::pair<bool, addr_t>(false, 0);
-            }
-            /*
-             * Writable by default so kernel can access, we'll update this later
-             */
-            int flags = PAGE_USER | PAGE_WRITABLE;
-            if (!(phdr->p_flags & PF_X)) {
-                flags |= PAGE_NX; // Set NX bit if requested
-            }
-            memory::virt::map_range(phdr->p_vaddr, phdr->p_memsz, flags);
-
-            log::printk(log::log_level::DEBUG,
-                        "Copying from %p -> %p, size %X\n",
-                        binary + phdr->p_offset, phdr->p_vaddr, phdr->p_filesz);
-            libcxx::memcpy(reinterpret_cast<void*>(phdr->p_vaddr),
-                           reinterpret_cast<void*>(binary + phdr->p_offset),
-                           phdr->p_filesz);
+            process->mmap(phdr->p_vaddr, phdr->p_memsz, PROT_WRITE | PROT_EXEC,
+                          MAP_FILE | MAP_PRIVATE | MAP_FIXED, file,
+                          phdr->p_offset);
             if (phdr->p_filesz < phdr->p_memsz) {
                 log::printk(log::log_level::DEBUG,
                             "Memory size is larger than file size, "
@@ -85,11 +66,6 @@ libcxx::pair<bool, addr_t> load(addr_t binary)
                 libcxx::memset(
                     reinterpret_cast<void*>(phdr->p_filesz + phdr->p_vaddr), 0,
                     phdr->p_memsz - phdr->p_filesz);
-            }
-            if (!(phdr->p_flags & PF_W)) {
-                // Remove write access if requested
-                memory::virt::protect_range(phdr->p_vaddr, phdr->p_memsz,
-                                            flags & ~PAGE_WRITABLE);
             }
         }
     }

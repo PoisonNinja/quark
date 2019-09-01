@@ -28,12 +28,6 @@ void init_stage2(void*)
         for (;;)
             cpu::halt();
     }
-    struct filesystem::stat st;
-    init->stat(&st);
-    log::printk(log::log_level::DEBUG, "init binary has size of %zu bytes\n",
-                st.st_size);
-    uint8_t* init_raw = new uint8_t[st.st_size];
-    init->read(init_raw, st.st_size);
     int argc           = 2;
     const char* argv[] = {
         "/sbin/init",
@@ -44,14 +38,13 @@ void init_stage2(void*)
         "hello=world",
     };
     struct thread_context ctx;
-    if (scheduler::get_current_process()->load(
-            reinterpret_cast<addr_t>(init_raw), argc, argv, envc, envp, ctx)) {
+    if (scheduler::get_current_process()->load(init, argc, argv, envc, envp,
+                                               ctx)) {
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
     } else {
         log::printk(log::log_level::DEBUG,
                     "Preparing to jump into userspace\n");
     }
-    delete[] init_raw;
     load_registers(ctx);
 }
 

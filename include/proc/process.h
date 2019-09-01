@@ -44,8 +44,9 @@ public:
     void notify_exit(process* child);
 
     process* fork();
-    int load(addr_t binary, int argc, const char* argv[], int envc,
-             const char* envp[], struct thread_context& ctx);
+    int load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
+             const char* argv[], int envc, const char* envp[],
+             struct thread_context& ctx);
 
     libcxx::node<process> list_node;
 

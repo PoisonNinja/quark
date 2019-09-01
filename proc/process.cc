@@ -112,10 +112,12 @@ process* process::fork()
     return child;
 }
 
-int process::load(addr_t binary, int argc, const char* argv[], int envc,
-                  const char* envp[], struct thread_context& ctx)
+int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
+                  const char* argv[], int envc, const char* envp[],
+                  struct thread_context& ctx)
 {
-    auto [success, entry] = elf::load(binary);
+    this->vma.reset();
+    auto [success, entry] = elf::load(file);
     /*
      * elf::load returns a pair. The first parameter (bool) indicates status,
      * and second parameter is the entry address. If the first parameter is

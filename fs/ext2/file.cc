@@ -18,7 +18,6 @@ ext2_file::~ext2_file()
 ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
                         void* cookie)
 {
-    log::printk(log::log_level::INFO, "ext2: %zu\n", count);
     size_t start_block = offset / this->instance->geometry.block_size;
     size_t end_block   = (offset + count) / this->instance->geometry.block_size;
 
@@ -58,7 +57,6 @@ ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
         }
         current_block++;
     }
-    log::printk(log::log_level::INFO, "ext2: Processed: %zu\n", processed);
     return processed;
 } // namespace ext2
 } // namespace ext2

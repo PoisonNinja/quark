@@ -72,11 +72,8 @@ vma::~vma()
     this->reset();
 }
 
-bool vma::add_vmregion(addr_t start, size_t size)
+bool vma::add_vmregion(vmregion* section)
 {
-    start             = memory::virt::align_down(start);
-    size              = memory::virt::align_up(size);
-    vmregion* section = new vmregion(start, size);
     // TODO: Sanity checks for overlaps, exceeding bounds
     // Of course, that probably requires support from rbtree
     auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
@@ -91,6 +88,14 @@ bool vma::add_vmregion(addr_t start, size_t size)
     }
     this->sections.insert(*section, func);
     return true;
+}
+
+bool vma::add_vmregion(addr_t start, size_t size)
+{
+    start             = memory::virt::align_down(start);
+    size              = memory::virt::align_up(size);
+    vmregion* section = new vmregion(start, size);
+    return this->add_vmregion(section);
 }
 
 libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
@@ -219,18 +224,89 @@ found_highest:
     return libcxx::make_pair(true, gap_end);
 }
 
-void vma::free(addr_t addr, size_t size)
+int vma::split(vmregion* region, addr_t addr)
 {
-    vmregion* node = find(addr);
-    auto func      = libcxx::bind(&vma::calculate_largest_subgap, this,
+    /*
+     * Very stupid algorithm, basically we remove the old element and
+     * insert the two new ones back in
+     */
+    // Splitting at addr
+    vmregion* dup = new vmregion(*region);
+    this->remove_node(region);
+
+    // Adjust boundaries
+    dup->_size     = addr - region->_start;
+    region->_start = addr;
+    region->_size -= dup->_size;
+
+    this->add_vmregion(dup);
+    this->add_vmregion(region);
+    return 0;
+}
+
+void vma::remove_node(vmregion* node)
+{
+    if (!node) {
+        return;
+    }
+    auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
-    node           = this->sections.remove(*node, func);
+    node      = this->sections.remove(*node, func);
     if (node == lowest) {
         lowest = this->sections.next(node);
     } else if (node == highest) {
         highest = this->sections.prev(node);
     }
     delete node;
+}
+
+libcxx::pair<int, libcxx::vector<libcxx::pair<addr_t, size_t>>>
+vma::free(addr_t addr, size_t size)
+{
+    addr_t end    = addr + size;
+    vmregion* vma = find(addr);
+    libcxx::vector<libcxx::pair<addr_t, size_t>> vmas;
+    if (!vma) {
+        return libcxx::make_pair(0, vmas);
+    }
+    vmregion* prev = this->sections.prev(vma);
+    if (vma->start() > end) {
+        return libcxx::make_pair(0, vmas);
+    }
+    if (vma->start() < addr) {
+        this->split(vma, addr);
+        prev = vma;
+    }
+    vmregion* last = find(end);
+    if (last && last->start() < end) {
+        this->split(last, end);
+    }
+    vma = (prev) ? this->sections.next(prev) : this->sections.get_root();
+    do {
+        // Compute addresses to insert into vmas
+        {
+            addr_t zone_start = libcxx::max(vma->start(), addr);
+            if (zone_start < vma->end()) {
+                addr_t zone_end = libcxx::min(vma->end(), end);
+                if (zone_end > vma->start() && zone_end != zone_start) {
+                    vmas.push_back(
+                        libcxx::make_pair(zone_start, zone_end - zone_start));
+                }
+            }
+        }
+
+        // Remove the nodes
+        this->remove_node(vma);
+        auto old_vma = vma;
+        vma          = this->sections.next(vma);
+        delete old_vma;
+    } while (vma && vma->start() < end);
+    if (vma) {
+        this->sections.prev(vma) = prev;
+    } else {
+        this->highest_mapped = (prev) ? prev->end() : 0;
+    }
+    return libcxx::make_pair(0, vmas);
 }
 
 vmregion* vma::find(addr_t addr)
@@ -240,8 +316,9 @@ vmregion* vma::find(addr_t addr)
     while (curr) {
         if (curr->end() > addr) {
             ret = curr;
-            if (ret->start() <= addr)
+            if (ret->start() <= addr) {
                 break;
+            }
             curr = this->sections.left(curr);
         } else
             curr = this->sections.right(curr);

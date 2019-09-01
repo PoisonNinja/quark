@@ -2,6 +2,7 @@
 
 #include <lib/rb.h>
 #include <lib/utility.h>
+#include <lib/vector.h>
 
 namespace memory
 {
@@ -80,7 +81,8 @@ public:
     libcxx::pair<bool, addr_t> locate_range_reverse(addr_t hint, size_t size);
     libcxx::pair<bool, addr_t> allocate(addr_t hint, size_t size);
     libcxx::pair<bool, addr_t> allocate_reverse(addr_t hint, size_t size);
-    void free(addr_t addr, size_t size);
+    libcxx::pair<int, libcxx::vector<libcxx::pair<addr_t, size_t>>>
+    free(addr_t addr, size_t size);
     vmregion* find(addr_t addr);
 
     vma::iterator begin()
@@ -97,6 +99,10 @@ public:
     void reset();
 
 private:
+    int split(struct vmregion* region, addr_t addr);
+    bool add_vmregion(vmregion* region);
+    void remove_node(vmregion* node);
+
     addr_t lower_bound, upper_bound;
     addr_t highest_mapped;
 

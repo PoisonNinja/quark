@@ -18,6 +18,7 @@ ext2_file::~ext2_file()
 ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
                         void* cookie)
 {
+    log::printk(log::log_level::INFO, "ext2: %zu\n", count);
     size_t start_block = offset / this->instance->geometry.block_size;
     size_t end_block   = (offset + count) / this->instance->geometry.block_size;
 
@@ -35,12 +36,16 @@ ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
             size_t in_block_offset =
                 current - libcxx::round_down(
                               current, this->instance->geometry.block_size);
-            libcxx::memcpy(buffer + processed, tmp + in_block_offset,
-                           this->instance->geometry.block_size -
-                               in_block_offset);
-            processed += this->instance->geometry.block_size - in_block_offset;
-            current += this->instance->geometry.block_size - in_block_offset;
-            remaining -= this->instance->geometry.block_size - in_block_offset;
+            size_t to_copy =
+                this->instance->geometry.block_size - in_block_offset;
+            if (remaining <
+                this->instance->geometry.block_size - in_block_offset) {
+                to_copy = remaining;
+            }
+            libcxx::memcpy(buffer + processed, tmp + in_block_offset, to_copy);
+            processed += to_copy;
+            current += to_copy;
+            remaining -= to_copy;
         } else {
             size_t to_copy = this->instance->geometry.block_size;
             if (remaining < this->instance->geometry.block_size) {
@@ -53,6 +58,7 @@ ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
         }
         current_block++;
     }
+    log::printk(log::log_level::INFO, "ext2: Processed: %zu\n", processed);
     return processed;
 } // namespace ext2
 } // namespace ext2

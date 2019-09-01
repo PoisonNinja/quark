@@ -33,8 +33,6 @@ load(libcxx::intrusive_ptr<filesystem::descriptor> file)
         log::printk(log::log_level::DEBUG, "Header type: %X\n", phdr->p_type);
         if (phdr->p_type == PT_TLS) {
             log::printk(log::log_level::DEBUG, "Found TLS section\n");
-            log::printk(log::log_level::DEBUG, "TLS section will be at %p\n",
-                        phdr->p_vaddr);
             process->set_tls_data(phdr->p_offset, phdr->p_filesz, phdr->p_memsz,
                                   phdr->p_align);
         }
@@ -53,8 +51,22 @@ load(libcxx::intrusive_ptr<filesystem::descriptor> file)
                         phdr->p_memsz);
             log::printk(log::log_level::DEBUG, "Align:            %p\n",
                         phdr->p_align);
-            process->mmap(phdr->p_vaddr, phdr->p_memsz, PROT_WRITE | PROT_EXEC,
-                          MAP_FILE | MAP_PRIVATE | MAP_FIXED, file,
+            // Compute the mmap prot from ELF flags
+            int prot = 0;
+            if (phdr->p_flags & PF_R) {
+                prot |= PROT_READ;
+            }
+            if (phdr->p_flags & PF_W) {
+                prot |= PROT_WRITE;
+            }
+            if (phdr->p_flags & PF_X) {
+                prot |= PROT_EXEC;
+            }
+
+            // Compute mmap flags
+            int flags = MAP_FIXED | MAP_PRIVATE;
+
+            process->mmap(phdr->p_vaddr, phdr->p_memsz, prot, flags, file,
                           phdr->p_offset);
             if (phdr->p_filesz < phdr->p_memsz) {
                 log::printk(log::log_level::DEBUG,

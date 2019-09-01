@@ -245,45 +245,68 @@ int process::load(addr_t binary, int argc, const char* argv[], int envc,
     return 0;
 }
 
-void* process::mmap(addr_t addr, size_t length, int prot, int flags, int fd,
+void* process::mmap(addr_t addr, size_t length, int prot, int flags,
+                    libcxx::intrusive_ptr<filesystem::descriptor> file,
                     off_t offset)
 {
     if (flags & MAP_SHARED) {
         log::printk(log::log_level::WARNING,
-                    "[mmap] Userspace mmap requested "
+                    "[mmap] mmap requested "
                     "MMAP_SHARED, you should probably implement"
                     "this\n");
         return MAP_FAILED;
     }
     if (!(flags & MAP_ANONYMOUS)) {
-        log::printk(log::log_level::WARNING,
-                    "[mmap] Userspace mmap requested file "
-                    "mapping, you should probably implement "
-                    "this\n");
-        return MAP_FAILED;
+        if (!file) {
+            log::printk(log::log_level::WARNING,
+                        "[mmap] Non-existent file descriptor");
+            return MAP_FAILED;
+        }
+        // TODO: Verify the file is actually usable
     }
+    addr_t placement = addr;
     if (!(flags & MAP_FIXED)) {
         log::printk(log::log_level::DEBUG, "[mmap] Kernel selecting mapping\n");
-        auto [ret, placement] = this->vma.locate_range(
+        auto [ret, value] = this->vma.locate_range(
             (addr) ? reinterpret_cast<addr_t>(addr) : USER_START, length);
         if (!ret) {
             log::printk(log::log_level::WARNING,
                         "[sys_mmap] Failed to allocate area for mmap\n");
             return MAP_FAILED;
         }
-        log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n",
-                    placement);
-        this->vma.add_vmregion(placement, length);
-        int flags = memory::virt::prot_to_flags(prot);
-        memory::virt::map_range(placement, length, flags);
-        return reinterpret_cast<void*>(placement);
+        log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n", value);
     } else {
-        log::printk(log::log_level::WARNING,
-                    "[sys_mmap] Userspace mmap requested "
-                    "MAP_FIXED, you should probably implement "
-                    "it\n");
-        return MAP_FAILED;
+        log::printk(log::log_level::DEBUG,
+                    "[mmap] mmap requested with fixed address %p\n", addr);
+        if (this->vma.find(addr) || this->vma.find(addr + length)) {
+            return MAP_FAILED;
+        }
     }
+    // Remove old mappins
+    this->munmap(addr, length);
+    this->vma.add_vmregion(placement, length);
+    int real_flags = memory::virt::prot_to_flags(prot);
+    memory::virt::map_range(placement, length,
+                            real_flags | PAGE_WRITABLE | PAGE_USER);
+    if (!(flags & MAP_ANONYMOUS)) {
+        file->pread(reinterpret_cast<uint8_t*>(placement), length, offset);
+    }
+    if (!(real_flags & PAGE_WRITABLE)) {
+        memory::virt::protect_range(placement, length, real_flags | PAGE_USER);
+    }
+    return reinterpret_cast<void*>(placement);
+}
+
+int process::munmap(addr_t addr, size_t length)
+{
+    // Let vma do most of the hard work, but we'll need to unmap ourselves
+    auto [ret, zones] = this->vma.free(addr, length);
+    if (!ret) {
+        for (auto zone : zones) {
+            memory::virt::unmap_range(zone.first, zone.second, UNMAP_FREE);
+        }
+    }
+    return ret;
 }
 
 void process::exit(bool is_signal, int val)

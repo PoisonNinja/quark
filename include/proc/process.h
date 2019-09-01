@@ -29,8 +29,11 @@ public:
     libcxx::intrusive_ptr<filesystem::descriptor> get_root();
     filesystem::dtable fds;
 
-    void* mmap(addr_t addr, size_t length, int prot, int flags, int fd,
+    // Memory ops
+    void* mmap(addr_t addr, size_t length, int prot, int flags,
+               libcxx::intrusive_ptr<filesystem::descriptor> file,
                off_t offset);
+    int munmap(addr_t addr, size_t length);
 
     void set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
                       addr_t alignment);

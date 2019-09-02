@@ -211,7 +211,7 @@ static long sys_getpid()
 {
     // Return process ID not thread ID
     log::printk(log::log_level::DEBUG, "[sys_getpid]\n");
-    return scheduler::get_current_process()->pid;
+    return scheduler::get_current_process()->get_pid();
 }
 
 static long sys_fork()
@@ -227,7 +227,7 @@ static long sys_fork()
     child_thread->tcontext.kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
     scheduler::insert(child_thread);
-    return child->pid;
+    return child->get_pid();
 }
 
 static long sys_execve(const char* path, const char* old_argv[],
@@ -290,7 +290,8 @@ static long sys_kill(pid_t pid, int signum)
                     "Failed to find process with PID %d\n", pid);
         return -ESRCH;
     }
-    log::printk(log::log_level::DEBUG, "Found process %d\n", process->pid);
+    log::printk(log::log_level::DEBUG, "Found process %d\n",
+                process->get_pid());
     process->send_signal(signum);
     return 0;
 }

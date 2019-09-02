@@ -31,6 +31,11 @@ process::~process()
 {
 }
 
+pid_t process::get_pid()
+{
+    return pid;
+}
+
 addr_t process::get_address_space() const
 {
     return this->address_space;
@@ -245,6 +250,11 @@ int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     ctx.kernel_stack  = cpu::x86_64::TSS::get_stack();
     scheduler::get_current_thread()->tcontext = ctx;
     return 0;
+}
+
+addr_t process::get_sigreturn()
+{
+    return this->sigreturn;
 }
 
 void* process::mmap(addr_t addr, size_t length, int prot, int flags,

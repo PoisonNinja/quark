@@ -8,7 +8,7 @@ ptable::ptable()
 process* ptable::get(pid_t pid)
 {
     for (auto wrapper : list) {
-        if (wrapper.p->pid == pid) {
+        if (wrapper.p->get_pid() == pid) {
             return wrapper.p;
         }
     }
@@ -27,7 +27,7 @@ bool ptable::remove(pid_t pid)
 {
     for (auto it = list.begin(); it != list.end(); ++it) {
         auto& value = *it;
-        if (value.p->pid == pid) {
+        if (value.p->get_pid() == pid) {
             list.erase(it);
             this->size--;
             return true;

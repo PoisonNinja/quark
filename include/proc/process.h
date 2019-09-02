@@ -14,7 +14,7 @@ public:
     process(process* p);
     ~process();
 
-    pid_t pid;
+    pid_t get_pid();
 
     addr_t get_address_space() const;
     void set_address_space(addr_t address);
@@ -28,6 +28,8 @@ public:
     libcxx::intrusive_ptr<filesystem::descriptor> get_cwd();
     libcxx::intrusive_ptr<filesystem::descriptor> get_root();
     filesystem::dtable fds;
+
+    addr_t get_sigreturn();
 
     // Memory ops
     void* mmap(addr_t addr, size_t length, int prot, int flags,
@@ -53,10 +55,11 @@ public:
     void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];
 
-    addr_t sigreturn;
-
 private:
+    pid_t pid;
+
     addr_t address_space;
+    addr_t sigreturn;
 
     // TLS stuff
     addr_t tls_base;

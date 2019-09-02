@@ -32,7 +32,7 @@ void thread::setup_signal(struct ksignal* ksig,
 
     libcxx::memcpy(&frame->siginfo, ksig->siginfo, sizeof(frame->siginfo));
     libcxx::memcpy(&frame->ucontext, ksig->ucontext, sizeof(frame->ucontext));
-    frame->ret_location = this->parent->sigreturn;
+    frame->ret_location = this->parent->get_sigreturn();
 
     log::printk(log::log_level::DEBUG, "Going to return to gadget at %p\n",
                 frame->ret_location);

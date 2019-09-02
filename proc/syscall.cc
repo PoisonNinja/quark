@@ -264,6 +264,8 @@ static long sys_execve(const char* path, const char* old_argv[],
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
         return -ENOEXEC;
     }
+    delete[] envp;
+    delete[] argv;
     load_registers(ctx);
     __builtin_unreachable();
 }

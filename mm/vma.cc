@@ -14,7 +14,8 @@ vmregion::vmregion(addr_t start, size_t size)
 }
 
 vmregion::vmregion(vmregion& other)
-    : vmregion(other._start, other._size)
+    : _start(other._start)
+    , _size(other._size)
 {
 }
 
@@ -63,17 +64,23 @@ vma::vma(addr_t lower_bound, addr_t upper_bound)
 }
 
 vma::vma(const vma& other)
-    : vma(other.lower_bound, other.upper_bound)
+    : lower_bound(other.lower_bound)
+    , upper_bound(other.upper_bound)
+    , highest_mapped(other.lower_bound)
+    , lowest(nullptr)
+    , highest(nullptr)
 {
+    for (auto vmr = other.lowest; vmr != nullptr;
+         vmr      = other.sections.next(vmr)) {
+        memory::vmregion* dup = new memory::vmregion(*vmr);
+        this->add_vmregion(dup);
+    }
 }
 
 vma& vma::operator=(const vma& other)
 {
-    this->lower_bound    = other.lower_bound;
-    this->upper_bound    = other.upper_bound;
-    this->highest_mapped = other.lower_bound;
-    this->lowest         = nullptr;
-    this->highest        = nullptr;
+    vma tmp(other);
+    this->swap(tmp);
     return *this;
 }
 

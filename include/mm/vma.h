@@ -77,6 +77,19 @@ public:
     vma& operator=(const vma& other);
     ~vma();
 
+    // Doesn't make sense to ever move a VMA
+    vma(const vma&& other) = delete;
+    vma& operator=(const vma&& other) = delete;
+
+    void swap(vma& other)
+    {
+        libcxx::swap(lower_bound, other.lower_bound);
+        libcxx::swap(upper_bound, other.upper_bound);
+        libcxx::swap(highest_mapped, other.lower_bound);
+        libcxx::swap(lowest, other.lowest);
+        libcxx::swap(highest, other.highest);
+    }
+
     bool add_vmregion(addr_t start, size_t size);
     libcxx::pair<bool, addr_t> locate_range(addr_t hint, size_t size);
     libcxx::pair<bool, addr_t> locate_range_reverse(addr_t hint, size_t size);

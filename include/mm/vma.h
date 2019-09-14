@@ -73,7 +73,8 @@ public:
     };
 
     vma(addr_t lower_bound, addr_t upper_bound);
-    vma(vma& other);
+    vma(const vma& other);
+    vma& operator=(const vma& other);
     ~vma();
 
     bool add_vmregion(addr_t start, size_t size);

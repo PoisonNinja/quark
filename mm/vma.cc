@@ -62,9 +62,19 @@ vma::vma(addr_t lower_bound, addr_t upper_bound)
 {
 }
 
-vma::vma(vma& other)
+vma::vma(const vma& other)
     : vma(other.lower_bound, other.upper_bound)
 {
+}
+
+vma& vma::operator=(const vma& other)
+{
+    this->lower_bound    = other.lower_bound;
+    this->upper_bound    = other.upper_bound;
+    this->highest_mapped = other.lower_bound;
+    this->lowest         = nullptr;
+    this->highest        = nullptr;
+    return *this;
 }
 
 vma::~vma()

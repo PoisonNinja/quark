@@ -47,23 +47,23 @@ public:
 
     // Functions for traversal
     T* get_root();
-    T*& left(T* t)
+    T*& left(T* t) const
     {
         return (t->*Link).left;
     }
-    T*& right(T* t)
+    T*& right(T* t) const
     {
         return (t->*Link).right;
     }
-    T*& parent(T* t)
+    T*& parent(T* t) const
     {
         return (t->*Link).parent;
     }
-    T*& prev(T* t)
+    T*& prev(T* t) const
     {
         return (t->*Link).prev;
     }
-    T*& next(T* t)
+    T*& next(T* t) const
     {
         return (t->*Link).next;
     }

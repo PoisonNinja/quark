@@ -28,6 +28,11 @@ struct rbnode {
         , parent(nullptr)
         , prev(nullptr)
         , next(nullptr){};
+    // It doesn't make sense to copy a rbnode, only move
+    rbnode(const rbnode& other) = delete;
+    rbnode(rbnode&& other)      = default;
+    rbnode& operator=(const rbnode& other) = delete;
+    rbnode& operator=(rbnode&& other) = default;
 
     Color color;
     T *left, *right, *parent, *prev, *next;
@@ -214,10 +219,9 @@ T* rbtree<T, Link>::remove(T* value, rb_callback_t callback)
 {
     T* node = value;
     if (left(node) && right(node)) {
-        auto node_orig = node->*Link;
-        *node          = *next(node);
-        node->*Link    = node_orig;
-        node           = next(node);
+        auto& predecessor = *(prev(node));
+        *node             = libcxx::move(predecessor);
+        node              = prev(node);
     }
     T* pullup = left(node) ? left(node) : right(node);
     if (pullup) {

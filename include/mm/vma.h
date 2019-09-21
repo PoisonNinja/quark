@@ -10,7 +10,10 @@ class vmregion
 {
 public:
     vmregion(addr_t start, size_t size);
-    vmregion(vmregion& other);
+    vmregion(const vmregion& other) = delete;
+    vmregion(vmregion&& other)      = default;
+    vmregion& operator=(const vmregion& other) = delete;
+    vmregion& operator=(vmregion&& other) = default;
 
     libcxx::rbnode<vmregion> node;
 

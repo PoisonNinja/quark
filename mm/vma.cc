@@ -13,12 +13,6 @@ vmregion::vmregion(addr_t start, size_t size)
 {
 }
 
-vmregion::vmregion(vmregion& other)
-    : _start(other._start)
-    , _size(other._size)
-{
-}
-
 addr_t vmregion::start() const
 {
     return _start;
@@ -72,8 +66,7 @@ vma::vma(const vma& other)
 {
     for (auto vmr = other.lowest; vmr != nullptr;
          vmr      = other.sections.next(vmr)) {
-        memory::vmregion* dup = new memory::vmregion(*vmr);
-        this->add_vmregion(dup);
+        this->add_vmregion(vmr->start(), vmr->size());
     }
 }
 
@@ -248,15 +241,14 @@ int vma::split(vmregion* region, addr_t addr)
      * insert the two new ones back in
      */
     // Splitting at addr
-    vmregion* dup = new vmregion(*region);
     this->remove_node(region);
 
     // Adjust boundaries
-    dup->_size     = addr - region->_start;
-    region->_start = addr;
-    region->_size -= dup->_size;
+    this->add_vmregion(region->start(), addr - region->start());
 
-    this->add_vmregion(dup);
+    region->_start = addr;
+    region->_size -= addr - region->start();
+
     this->add_vmregion(region);
     return 0;
 }

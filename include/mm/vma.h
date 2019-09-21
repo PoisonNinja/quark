@@ -10,11 +10,22 @@ class vmregion
 {
 public:
     vmregion(addr_t start, size_t size);
+
+    /*
+     * Disable copy constructor because duplicating address regions is
+     * dangerous. Furthermore, rb has copy constructor disabled too, so enabling
+     * it will cause build errors anyways.
+     *
+     * Instead, the right practice is to first remove the old vmregion, adjust
+     * it's addresses, then create a new vmregion with the address you want.
+     * Then, insert both back into the tree.
+     */
     vmregion(const vmregion& other) = delete;
     vmregion(vmregion&& other)      = default;
     vmregion& operator=(const vmregion& other) = delete;
     vmregion& operator=(vmregion&& other) = default;
 
+    // Unfortunately must be public so rb can access it
     libcxx::rbnode<vmregion> node;
 
     bool operator==(const vmregion& b) const;

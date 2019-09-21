@@ -28,7 +28,11 @@ struct rbnode {
         , parent(nullptr)
         , prev(nullptr)
         , next(nullptr){};
-    // It doesn't make sense to copy a rbnode, only move
+    /*
+     * It doesn't make sense to copy a rbnode, only move. If you copy a rbnode,
+     * it'll basically be orphaned as no other node will point to it, but it's
+     * own pointers will point to other nodes.
+     */
     rbnode(const rbnode& other) = delete;
     rbnode(rbnode&& other)      = default;
     rbnode& operator=(const rbnode& other) = delete;

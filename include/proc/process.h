@@ -50,12 +50,13 @@ public:
              const char* argv[], int envc, const char* envp[],
              struct thread_context& ctx);
 
-    libcxx::node<process> list_node;
-
     void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];
 
 private:
+    libcxx::node<process> list_node;
+    friend class libcxx::list<process, &process::list_node>;
+
     pid_t pid;
 
     addr_t address_space;

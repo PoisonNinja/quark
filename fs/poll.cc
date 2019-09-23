@@ -56,7 +56,7 @@ int poll_table::poll(time_t timeout)
     while (1) {
         bool found = false;
         for (size_t i = 0; i < user_fds_size; i++) {
-            auto desc = proc->fds.get(user_fds[i].fd);
+            auto desc = proc->get_desc(user_fds[i].fd);
             if (!desc) {
                 // TODO: Correct errno?
                 return -EINVAL;

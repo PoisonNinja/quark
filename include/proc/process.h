@@ -27,7 +27,11 @@ public:
 
     libcxx::intrusive_ptr<filesystem::descriptor> get_cwd();
     libcxx::intrusive_ptr<filesystem::descriptor> get_root();
-    filesystem::dtable fds;
+
+    int install_desc(libcxx::intrusive_ptr<filesystem::descriptor> file);
+    libcxx::intrusive_ptr<filesystem::descriptor> get_desc(int fd);
+    int copy_desc(int oldfd, int newfd);
+    bool remove_desc(int fd);
 
     addr_t get_sigreturn();
 
@@ -58,6 +62,8 @@ private:
     friend class libcxx::list<process, &process::list_node>;
 
     pid_t pid;
+
+    filesystem::dtable fds;
 
     addr_t address_space;
     addr_t sigreturn;

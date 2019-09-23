@@ -66,6 +66,26 @@ libcxx::intrusive_ptr<filesystem::descriptor> process::get_root()
     return root;
 }
 
+int process::install_desc(libcxx::intrusive_ptr<filesystem::descriptor> file)
+{
+    return this->fds.add(file);
+}
+
+libcxx::intrusive_ptr<filesystem::descriptor> process::get_desc(int fd)
+{
+    return this->fds.get(fd);
+}
+
+int process::copy_desc(int oldfd, int newfd)
+{
+    return this->fds.copy(oldfd, newfd);
+}
+
+bool process::remove_desc(int fd)
+{
+    return this->fds.remove(fd);
+}
+
 void process::set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
                            addr_t alignment)
 {

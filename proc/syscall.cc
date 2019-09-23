@@ -31,10 +31,10 @@ static long sys_read(int fd, void* buffer, size_t count)
 {
     log::printk(log::log_level::DEBUG, "[sys_read] = %d, %p, %p\n", fd, buffer,
                 count);
-    if (!scheduler::get_current_process()->fds.get(fd)) {
+    if (!scheduler::get_current_process()->get_desc(fd)) {
         return -EBADF;
     }
-    return scheduler::get_current_process()->fds.get(fd)->read(
+    return scheduler::get_current_process()->get_desc(fd)->read(
         static_cast<uint8_t*>(buffer), count);
 }
 
@@ -42,10 +42,10 @@ static long sys_write(int fd, const void* buffer, size_t count)
 {
     log::printk(log::log_level::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer,
                 count);
-    if (!scheduler::get_current_process()->fds.get(fd)) {
+    if (!scheduler::get_current_process()->get_desc(fd)) {
         return -EBADF;
     }
-    return scheduler::get_current_process()->fds.get(fd)->write(
+    return scheduler::get_current_process()->get_desc(fd)->write(
         static_cast<const uint8_t*>(buffer), count);
 }
 
@@ -57,19 +57,14 @@ static long sys_open(const char* path, int flags, mode_t mode)
     if (!file) {
         return -ENOENT;
     }
-    int ret = scheduler::get_current_process()->fds.add(file);
-    if (scheduler::get_current_process()->fds.get(ret) != file) {
-        log::printk(log::log_level::ERROR,
-                    "WTF, someone is lying about the file descriptor...\n");
-        return -1;
-    }
+    int ret = scheduler::get_current_process()->install_desc(file);
     return ret;
 }
 
 static long sys_close(int fd)
 {
     log::printk(log::log_level::DEBUG, "[sys_close] = %d\n", fd);
-    if (!scheduler::get_current_process()->fds.remove(fd)) {
+    if (!scheduler::get_current_process()->remove_desc(fd)) {
         return -1;
     } else {
         return 0;
@@ -89,10 +84,10 @@ static long sys_stat(const char* path, struct filesystem::stat* st)
 static long sys_fstat(int fd, struct filesystem::stat* st)
 {
     log::printk(log::log_level::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
-    if (!scheduler::get_current_process()->fds.get(fd)) {
+    if (!scheduler::get_current_process()->get_desc(fd)) {
         return -EBADF;
     }
-    return scheduler::get_current_process()->fds.get(fd)->stat(st);
+    return scheduler::get_current_process()->get_desc(fd)->stat(st);
 }
 
 static long sys_poll(struct filesystem::pollfd* fds, filesystem::nfds_t nfds,
@@ -108,10 +103,11 @@ static long sys_lseek(int fd, off_t offset, int whence)
 {
     log::printk(log::log_level::DEBUG, "[sys_lseek] = %d, %llu, %d\n", fd,
                 offset, whence);
-    if (!scheduler::get_current_process()->fds.get(fd)) {
+    if (!scheduler::get_current_process()->get_desc(fd)) {
         return -EBADF;
     }
-    return scheduler::get_current_process()->fds.get(fd)->lseek(offset, whence);
+    return scheduler::get_current_process()->get_desc(fd)->lseek(offset,
+                                                                 whence);
 }
 
 static void* sys_mmap(struct mmap_wrapper* mmap_data)
@@ -185,26 +181,26 @@ static long sys_ioctl(int fd, unsigned long request, char* argp)
 {
     log::printk(log::log_level::DEBUG, "[sys_ioctl] = %d, 0x%lX, %p\n", fd,
                 request, argp);
-    if (!scheduler::get_current_process()->fds.get(fd)) {
+    if (!scheduler::get_current_process()->get_desc(fd)) {
         return -EBADF;
     }
-    return scheduler::get_current_process()->fds.get(fd)->ioctl(request, argp);
+    return scheduler::get_current_process()->get_desc(fd)->ioctl(request, argp);
 }
 
 static long sys_dup(int oldfd)
 {
     log::printk(log::log_level::DEBUG, "[sys_dup] = %d\n", oldfd);
-    auto desc = scheduler::get_current_process()->fds.get(oldfd);
+    auto desc = scheduler::get_current_process()->get_desc(oldfd);
     if (!desc) {
         return -EBADF;
     }
-    return scheduler::get_current_process()->fds.add(desc);
+    return scheduler::get_current_process()->install_desc(desc);
 }
 
 static long sys_dup2(int oldfd, int newfd)
 {
     log::printk(log::log_level::DEBUG, "[sys_dup2] = %d %d\n", oldfd, newfd);
-    return scheduler::get_current_process()->fds.copy(oldfd, newfd);
+    return scheduler::get_current_process()->copy_desc(oldfd, newfd);
 }
 
 static long sys_getpid()

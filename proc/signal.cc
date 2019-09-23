@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <proc/sched.h>
@@ -128,11 +129,107 @@ bool thread::send_signal(int signum)
     // TODO: Check if signal is pending already and return ESIGPENDING
     signal::sigaddset(&this->signal_pending, signum);
     this->refresh_signal();
-    if (this->signal_required &&
+    if (this->is_signal_pending() &&
         this->state == thread_state::SLEEPING_INTERRUPTIBLE) {
         scheduler::insert(this);
     }
     return true;
+}
+
+void thread::handle_sigreturn(ucontext_t* uctx)
+{
+    thread_context tctx;
+    /*
+     * The syscall handler saves the userspace context, so we copy it into
+     * tctx to get certain registers (DS, ES, SS) preloaded for us. The
+     * rest of the state will get overriden by the stored mcontext
+     */
+    libcxx::memcpy(&tctx, &this->tcontext, sizeof(tctx));
+    // Unset on_stack
+    if (this->signal_stack.ss_flags & SS_ONSTACK) {
+        this->signal_stack.ss_flags &= ~SS_ONSTACK;
+    }
+    // Restore signal mask
+    this->signal_mask = uctx->uc_sigmask;
+    signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
+    load_registers(tctx);
+}
+
+int thread::sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
+{
+    if (oldset) {
+        *oldset = this->signal_mask;
+    }
+    if (how == SIG_SETMASK) {
+        this->signal_mask = *set;
+    } else if (how == SIG_BLOCK) {
+        signal::sigorset(&this->signal_mask, set);
+    } else if (how == SIG_UNBLOCK) {
+        sigset_t dup = *set;
+        signal::signotset(&dup, &dup);
+        signal::sigandset(&this->signal_mask, &dup);
+    } else {
+        return -EINVAL;
+    }
+    return 0;
+}
+
+int thread::sigpending(sigset_t* set)
+{
+    if (!set) {
+        return -EFAULT;
+    }
+    sigset_t pending = scheduler::get_current_thread()->signal_pending;
+    /*
+     * Signals that are both blocked and ignored are NOT added to the mask
+     * of pending signals.
+     *
+     * However, signals that are merely blocked will be added
+     */
+    sigset_t blocked_and_ignored;
+    // Get the list of blocked signals
+    signal::sigorset(&blocked_and_ignored,
+                     &scheduler::get_current_thread()->signal_mask);
+    // Remove signals that are NOT ignored
+    for (int i = 1; i < NSIGS; i++) {
+        // TODO: Also check if SIG_DFL is set but the default action is to
+        // ignore
+        if (scheduler::get_current_process()->signal_actions[i].sa_handler !=
+            SIG_IGN) {
+            signal::sigdelset(&blocked_and_ignored, i);
+        }
+    }
+    // Invert the set so that signals that are both blocked and ignored are
+    // unset
+    signal::signotset(&blocked_and_ignored, &blocked_and_ignored);
+    // AND the two sets together to basically unset blocked and ignored
+    signal::sigandset(&pending, &blocked_and_ignored);
+
+    *set = pending;
+
+    /*
+     * TODO: Figure out what happens if a signal is handled right after this
+     * system call returns.
+     *
+     * System calls will check for pending signals before returning and will
+     * handle them before returning so it's possible that the set returned
+     * still has the bit set even though the signal is already handled.
+     */
+    return 0;
+}
+
+int thread::sigaltstack(const stack_t* ss, stack_t* oldss)
+{
+    // TODO: EFAULT?
+    if (oldss) {
+        libcxx::memcpy(oldss, &scheduler::get_current_thread()->signal_stack,
+                       sizeof(*oldss));
+    }
+    if (ss) {
+        libcxx::memcpy(&scheduler::get_current_thread()->signal_stack, ss,
+                       sizeof(*ss));
+    }
+    return 0;
 }
 
 void thread::refresh_signal()
@@ -152,6 +249,11 @@ void thread::refresh_signal()
     // TODO: Extend heuristics to ignore actions that would result in the
     // signal being ignored (e.g. SIG_DFL with default ignored or SIG_IGN)
     this->signal_required = !signal::sigisemptyset(&possible);
+}
+
+bool thread::is_signal_pending()
+{
+    return this->signal_required;
 }
 
 namespace signal

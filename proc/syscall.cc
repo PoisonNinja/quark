@@ -139,42 +139,13 @@ static long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
 {
     log::printk(log::log_level::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set,
                 oldset);
-    if (oldset) {
-        *oldset = scheduler::get_current_thread()->signal_mask;
-    }
-    if (how == SIG_SETMASK) {
-        scheduler::get_current_thread()->signal_mask = *set;
-    } else if (how == SIG_BLOCK) {
-        signal::sigorset(&scheduler::get_current_thread()->signal_mask, set);
-    } else if (how == SIG_UNBLOCK) {
-        sigset_t dup = *set;
-        signal::signotset(&dup, &dup);
-        signal::sigandset(&scheduler::get_current_thread()->signal_mask, &dup);
-    } else {
-        return -EINVAL;
-    }
-    return 0;
+    return scheduler::get_current_thread()->sigprocmask(how, set, oldset);
 }
 
 static void sys_sigreturn(ucontext_t* uctx)
 {
     log::printk(log::log_level::DEBUG, "[sys_return] %p\n", uctx);
-    thread_context tctx;
-    /*
-     * The syscall handler saves the userspace context, so we copy it into
-     * tctx to get certain registers (DS, ES, SS) preloaded for us. The
-     * rest of the state will get overriden by the stored mcontext
-     */
-    libcxx::memcpy(&tctx, &scheduler::get_current_thread()->tcontext,
-                   sizeof(tctx));
-    // Unset on_stack
-    if (scheduler::get_current_thread()->signal_stack.ss_flags & SS_ONSTACK) {
-        scheduler::get_current_thread()->signal_stack.ss_flags &= ~SS_ONSTACK;
-    }
-    // Restore signal mask
-    scheduler::get_current_thread()->signal_mask = uctx->uc_sigmask;
-    signal::decode_mcontext(&uctx->uc_mcontext, &tctx);
-    load_registers(tctx);
+    scheduler::get_current_thread()->handle_sigreturn(uctx);
 }
 
 static long sys_ioctl(int fd, unsigned long request, char* argp)
@@ -314,60 +285,14 @@ static long sys_mkdir(const char* path, mode_t mode)
 
 static long sys_sigpending(sigset_t* set)
 {
-    if (!set) {
-        return -EFAULT;
-    }
-    sigset_t pending = scheduler::get_current_thread()->signal_pending;
-    /*
-     * Signals that are both blocked and ignored are NOT added to the mask
-     * of pending signals.
-     *
-     * However, signals that are merely blocked will be added
-     */
-    sigset_t blocked_and_ignored;
-    // Get the list of blocked signals
-    signal::sigorset(&blocked_and_ignored,
-                     &scheduler::get_current_thread()->signal_mask);
-    // Remove signals that are NOT ignored
-    for (int i = 1; i < NSIGS; i++) {
-        // TODO: Also check if SIG_DFL is set but the default action is to
-        // ignore
-        if (scheduler::get_current_process()->signal_actions[i].sa_handler !=
-            SIG_IGN) {
-            signal::sigdelset(&blocked_and_ignored, i);
-        }
-    }
-    // Invert the set so that signals that are both blocked and ignored are
-    // unset
-    signal::signotset(&blocked_and_ignored, &blocked_and_ignored);
-    // AND the two sets together to basically unset blocked and ignored
-    signal::sigandset(&pending, &blocked_and_ignored);
-
-    *set = pending;
-
-    /*
-     * TODO: Figure out what happens if a signal is handled right after this
-     * system call returns.
-     *
-     * System calls will check for pending signals before returning and will
-     * handle them before returning so it's possible that the set returned
-     * still has the bit set even though the signal is already handled.
-     */
-    return 0;
+    log::printk(log::log_level::DEBUG, "[sys_sigpending] %p\n", set);
+    return scheduler::get_current_thread()->sigpending(set);
 }
 
 static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
 {
     log::printk(log::log_level::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
-    if (oldss) {
-        libcxx::memcpy(oldss, &scheduler::get_current_thread()->signal_stack,
-                       sizeof(*oldss));
-    }
-    if (ss) {
-        libcxx::memcpy(&scheduler::get_current_thread()->signal_stack, ss,
-                       sizeof(*ss));
-    }
-    return 0;
+    return scheduler::get_current_thread()->sigaltstack(ss, oldss);
 }
 
 static long sys_mknod(const char* path, mode_t mode, dev_t dev)

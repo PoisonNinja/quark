@@ -7,8 +7,7 @@ thread::thread(process* p)
 {
     parent = p;
     parent->add_thread(this);
-    this->signal_count    = 0;
-    this->signal_required = false;
+    this->signal_count = 0;
     signal::sigemptyset(&this->signal_mask);
     signal::sigemptyset(&this->signal_pending);
 }

@@ -31,6 +31,16 @@ public:
     libcxx::node<thread> scheduler_node;
     process *parent;
 
+    // Don't you just love signals?
+    bool is_signal_pending();
+    void handle_signal(struct interrupt_context *ctx);
+    void handle_sigreturn(ucontext_t *uctx);
+    int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+    int sigpending(sigset_t *set);
+    int sigaltstack(const stack_t *ss, stack_t *oldss);
+    bool send_signal(int signal);
+
+private:
     // Signals
     size_t signal_count;
     bool signal_required;
@@ -38,10 +48,6 @@ public:
     sigset_t signal_pending;
     stack_t signal_stack;
 
-    void handle_signal(struct interrupt_context *ctx);
-    bool send_signal(int signal);
-
-private:
     void setup_signal(struct ksignal *ksig,
                       struct thread_context *original_state,
                       struct thread_context *new_state);

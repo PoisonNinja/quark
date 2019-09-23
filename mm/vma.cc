@@ -64,8 +64,7 @@ vma::vma(const vma& other)
     , lowest(nullptr)
     , highest(nullptr)
 {
-    for (auto vmr = other.lowest; vmr != nullptr;
-         vmr      = other.sections.next(vmr)) {
+    for (auto vmr = other.lowest; vmr != nullptr; vmr = other.tree.next(vmr)) {
         this->add_vmregion(vmr->start(), vmr->size());
     }
 }
@@ -96,7 +95,7 @@ bool vma::add_vmregion(vmregion* section)
     if ((lowest && section->start() < lowest->start()) || !lowest) {
         lowest = section;
     }
-    this->sections.insert(*section, func);
+    this->tree.insert(*section, func);
     return true;
 }
 
@@ -110,7 +109,7 @@ bool vma::add_vmregion(addr_t start, size_t size)
 
 libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
 {
-    vmregion* curr    = sections.get_root();
+    vmregion* curr    = tree.get_root();
     addr_t high_limit = this->upper_bound - size;
     addr_t low_limit  = this->lower_bound;
     addr_t ret        = 0;
@@ -127,33 +126,32 @@ libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
         // TODO: Check
         // If it's not, we are free to place it anywhere
         // Basically a port of Linux's algorithm
-        if (gap_end >= low_limit && this->sections.left(curr)) {
-            if (this->sections.left(curr)->largest_subgap >= size) {
-                curr = this->sections.left(curr);
+        if (gap_end >= low_limit && this->tree.left(curr)) {
+            if (this->tree.left(curr)->largest_subgap >= size) {
+                curr = this->tree.left(curr);
                 continue;
             }
         }
-        gap_start = this->sections.prev(curr)
-                        ? (this->sections.prev(curr)->end())
-                        : low_limit;
+        gap_start =
+            this->tree.prev(curr) ? (this->tree.prev(curr)->end()) : low_limit;
     check_current:
         if (gap_end >= low_limit && gap_end > gap_start &&
             gap_end - gap_start >= size) {
             goto found;
         }
-        if (this->sections.right(curr)) {
-            if (this->sections.right(curr)->largest_subgap >= size) {
-                curr = this->sections.right(curr);
+        if (this->tree.right(curr)) {
+            if (this->tree.right(curr)->largest_subgap >= size) {
+                curr = this->tree.right(curr);
                 continue;
             }
         }
         while (true) {
             auto prev = curr;
-            if (!this->sections.parent(curr))
+            if (!this->tree.parent(curr))
                 goto check_highest;
-            curr = this->sections.parent(curr);
-            if (prev == this->sections.left(curr)) {
-                gap_start = this->sections.prev(curr)->end();
+            curr = this->tree.parent(curr);
+            if (prev == this->tree.left(curr)) {
+                gap_start = this->tree.prev(curr)->end();
                 gap_end   = curr->start();
                 goto check_current;
             }
@@ -170,7 +168,7 @@ found:
 
 libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
 {
-    vmregion* curr    = sections.get_root();
+    vmregion* curr    = tree.get_root();
     addr_t high_limit = this->upper_bound - size;
     addr_t low_limit  = this->lower_bound;
     addr_t gap_end    = this->upper_bound;
@@ -183,11 +181,10 @@ libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
         return libcxx::pair<bool, addr_t>(false, 0);
     }
     while (true) {
-        gap_start =
-            this->sections.prev(curr) ? this->sections.prev(curr)->end() : 0;
-        if (gap_start <= high_limit && this->sections.right(curr)) {
-            if (this->sections.right(curr)->largest_subgap >= size) {
-                curr = this->sections.right(curr);
+        gap_start = this->tree.prev(curr) ? this->tree.prev(curr)->end() : 0;
+        if (gap_start <= high_limit && this->tree.right(curr)) {
+            if (this->tree.right(curr)->largest_subgap >= size) {
+                curr = this->tree.right(curr);
                 continue;
             }
         }
@@ -201,23 +198,22 @@ libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
             gap_end - gap_start >= size) {
             goto found;
         }
-        if (this->sections.left(curr)) {
-            if (this->sections.left(curr)->largest_subgap >= size) {
-                curr = this->sections.left(curr);
+        if (this->tree.left(curr)) {
+            if (this->tree.left(curr)->largest_subgap >= size) {
+                curr = this->tree.left(curr);
                 continue;
             }
         }
         while (true) {
             auto prev = curr;
-            if (!this->sections.parent(curr)) {
+            if (!this->tree.parent(curr)) {
                 // TODO: ENOMEM
                 return libcxx::pair<bool, addr_t>(false, 0);
             }
-            curr = this->sections.parent(curr);
-            if (prev == this->sections.right(curr)) {
-                gap_start = (this->sections.prev(curr))
-                                ? this->sections.prev(curr)->end()
-                                : 0;
+            curr = this->tree.parent(curr);
+            if (prev == this->tree.right(curr)) {
+                gap_start =
+                    (this->tree.prev(curr)) ? this->tree.prev(curr)->end() : 0;
                 gap_end = curr->start();
                 goto check_current;
             }
@@ -260,11 +256,11 @@ void vma::remove_node(vmregion* node)
     }
     auto func = libcxx::bind(&vma::calculate_largest_subgap, this,
                              libcxx::placeholders::_1);
-    node      = this->sections.remove(*node, func);
+    node      = this->tree.remove(*node, func);
     if (node == lowest) {
-        lowest = this->sections.next(node);
+        lowest = this->tree.next(node);
     } else if (node == highest) {
-        highest = this->sections.prev(node);
+        highest = this->tree.prev(node);
     }
     delete node;
 }
@@ -278,7 +274,7 @@ vma::free(addr_t addr, size_t size)
     if (!vma) {
         return libcxx::make_pair(0, vmas);
     }
-    vmregion* prev = this->sections.prev(vma);
+    vmregion* prev = this->tree.prev(vma);
     if (vma->start() > end) {
         return libcxx::make_pair(0, vmas);
     }
@@ -290,7 +286,7 @@ vma::free(addr_t addr, size_t size)
     if (last && last->start() < end) {
         this->split(last, end);
     }
-    vma = (prev) ? this->sections.next(prev) : this->sections.get_root();
+    vma = (prev) ? this->tree.next(prev) : this->tree.get_root();
     do {
         // Compute addresses to insert into vmas
         {
@@ -307,11 +303,11 @@ vma::free(addr_t addr, size_t size)
         // Remove the nodes
         this->remove_node(vma);
         auto old_vma = vma;
-        vma          = this->sections.next(vma);
+        vma          = this->tree.next(vma);
         delete old_vma;
     } while (vma && vma->start() < end);
     if (vma) {
-        this->sections.prev(vma) = prev;
+        this->tree.prev(vma) = prev;
     } else {
         this->highest_mapped = (prev) ? prev->end() : 0;
     }
@@ -320,7 +316,7 @@ vma::free(addr_t addr, size_t size)
 
 vmregion* vma::find(addr_t addr)
 {
-    vmregion* curr = sections.get_root();
+    vmregion* curr = tree.get_root();
     vmregion* ret  = nullptr;
     while (curr) {
         if (curr->end() > addr) {
@@ -328,9 +324,9 @@ vmregion* vma::find(addr_t addr)
             if (ret->start() <= addr) {
                 break;
             }
-            curr = this->sections.left(curr);
+            curr = this->tree.left(curr);
         } else
-            curr = this->sections.right(curr);
+            curr = this->tree.right(curr);
     }
     return ret;
 }
@@ -338,13 +334,13 @@ vmregion* vma::find(addr_t addr)
 void vma::calculate_largest_subgap(vmregion* section)
 {
     size_t max = 0;
-    if (this->sections.prev(section)) {
-        max = section->start() - this->sections.prev(section)->end();
+    if (this->tree.prev(section)) {
+        max = section->start() - this->tree.prev(section)->end();
     } else {
         max = section->start() - this->lower_bound;
     }
-    if (this->sections.next(section)) {
-        addr_t gap = this->sections.next(section)->start() - section->end();
+    if (this->tree.next(section)) {
+        addr_t gap = this->tree.next(section)->start() - section->end();
         if (gap > max)
             max = gap;
     } else {
@@ -352,14 +348,14 @@ void vma::calculate_largest_subgap(vmregion* section)
         if (gap > max)
             max = gap;
     }
-    if (this->sections.left(section)) {
-        if (this->sections.left(section)->largest_subgap > max) {
-            max = this->sections.left(section)->largest_subgap;
+    if (this->tree.left(section)) {
+        if (this->tree.left(section)->largest_subgap > max) {
+            max = this->tree.left(section)->largest_subgap;
         }
     }
-    if (this->sections.right(section)) {
-        if (this->sections.right(section)->largest_subgap > max) {
-            max = this->sections.right(section)->largest_subgap;
+    if (this->tree.right(section)) {
+        if (this->tree.right(section)->largest_subgap > max) {
+            max = this->tree.right(section)->largest_subgap;
         }
     }
     section->largest_subgap = max;
@@ -393,12 +389,12 @@ void vma::reset()
      */
     vmregion* region = lowest;
     while (region != nullptr) {
-        vmregion* next = this->sections.next(region);
+        vmregion* next = this->tree.next(region);
         delete region;
         region = next;
     }
     // Reset the rb tree
-    this->sections.reset();
+    this->tree.reset();
 
     this->highest_mapped = 0;
     this->lowest = this->highest = nullptr;

@@ -139,6 +139,6 @@ private:
     void traverse();
     void calculate_largest_subgap(vmregion* section);
 
-    libcxx::rbtree<vmregion, &vmregion::node> sections;
+    libcxx::rbtree<vmregion, &vmregion::node> tree;
 };
 } // namespace memory

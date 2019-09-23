@@ -20,16 +20,18 @@ enum class thread_state {
 class thread
 {
 public:
-    thread(process *p);
+    thread(process *p, tid_t tid);
     ~thread();
     void exit(bool is_signal, int val);
 
-    tid_t tid;
     thread_state state;
     struct thread_context tcontext; // Thread execution state
+
+    tid_t get_tid();
+    process *get_process();
+
     libcxx::node<thread> process_node;
     libcxx::node<thread> scheduler_node;
-    process *parent;
 
     // Don't you just love signals?
     bool is_signal_pending();
@@ -41,6 +43,9 @@ public:
     bool send_signal(int signal);
 
 private:
+    tid_t tid;
+    process *parent;
+
     // Signals
     size_t signal_count;
     bool signal_required;

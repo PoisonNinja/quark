@@ -97,7 +97,7 @@ addr_t get_stack()
 
 thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
 {
-    thread* kthread = new thread(p);
+    thread* kthread = p->create_thread();
     libcxx::memset(&kthread->tcontext, 0, sizeof(kthread->tcontext));
     addr_t stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;

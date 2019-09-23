@@ -95,18 +95,6 @@ void process::set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
     this->tls_alignment = alignment;
 }
 
-void process::add_thread(thread* thread)
-{
-    if (threads.empty()) {
-        // First node shares same PID
-        thread->tid = this->pid;
-    } else {
-        // Rest of them increment the PID
-        thread->tid = scheduler::get_free_pid();
-    }
-    threads.push_back(*thread);
-}
-
 void process::thread_exit(thread* thread, bool is_signal, int val)
 {
     if (!thread) {
@@ -413,6 +401,18 @@ found:
     delete &zombie;
 
     return ret;
+}
+
+thread* process::create_thread()
+{
+    tid_t tid = this->pid;
+    if (!threads.empty()) {
+        // Rest of them increment the PID
+        tid = scheduler::get_free_pid();
+    }
+    thread* t = new thread(this, tid);
+    this->threads.push_back(*t);
+    return t;
 }
 
 void process::notify_exit(process* child)

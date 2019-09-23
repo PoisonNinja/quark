@@ -13,7 +13,7 @@ extern "C" void syscall_trampoline(struct interrupt_context* ctx)
     log::printk(log::log_level::DEBUG,
                 "Received fast system call %d from PID %d, %lX %lX %lX "
                 "%lX %lX\n",
-                ctx->rax, scheduler::get_current_thread()->tid, ctx->rdi,
+                ctx->rax, scheduler::get_current_thread()->get_tid(), ctx->rdi,
                 ctx->rsi, ctx->rdx, ctx->r10, ctx->r8);
     if (ctx->rax > 256 || !syscall_table[ctx->rax]) {
         log::printk(log::log_level::ERROR, "Received invalid syscall #%d\n",

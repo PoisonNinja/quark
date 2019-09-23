@@ -185,7 +185,7 @@ static long sys_fork()
 {
     log::printk(log::log_level::DEBUG, "[sys_fork]\n");
     process* child       = scheduler::get_current_process()->fork();
-    thread* child_thread = new thread(child);
+    thread* child_thread = child->create_thread();
     libcxx::memcpy(&child_thread->tcontext,
                    &scheduler::get_current_thread()->tcontext,
                    sizeof(child_thread->tcontext));

@@ -3,10 +3,10 @@
 #include <proc/sched.h>
 #include <proc/thread.h>
 
-thread::thread(process* p)
+thread::thread(process* p, tid_t tid)
 {
-    parent = p;
-    parent->add_thread(this);
+    parent             = p;
+    this->tid          = tid;
     this->signal_count = 0;
     signal::sigemptyset(&this->signal_mask);
     signal::sigemptyset(&this->signal_pending);
@@ -14,6 +14,16 @@ thread::thread(process* p)
 
 thread::~thread()
 {
+}
+
+tid_t thread::get_tid()
+{
+    return this->tid;
+}
+
+process* thread::get_process()
+{
+    return this->parent;
 }
 
 void thread::exit(bool is_signal, int val)

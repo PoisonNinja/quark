@@ -19,7 +19,6 @@ public:
     addr_t get_address_space() const;
     void set_address_space(addr_t address);
 
-    void add_thread(thread* thread);
     void thread_exit(thread* thread, bool is_signal, int val);
 
     void set_cwd(libcxx::intrusive_ptr<filesystem::descriptor> desc);
@@ -53,6 +52,8 @@ public:
     int load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
              const char* argv[], int envc, const char* envp[],
              struct thread_context& ctx);
+
+    thread* create_thread();
 
     void send_signal(int signum);
     struct sigaction signal_actions[NSIGS];

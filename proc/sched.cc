@@ -68,13 +68,14 @@ void switch_context(struct interrupt_context* ctx, thread* current,
 {
     save_context(ctx, &current->tcontext);
     if (current) {
-        if (current->parent->get_address_space() !=
-            next->parent->get_address_space()) {
+        if (current->get_process()->get_address_space() !=
+            next->get_process()->get_address_space()) {
             memory::virt::set_address_space_root(
-                next->parent->get_address_space());
+                next->get_process()->get_address_space());
         }
     } else {
-        memory::virt::set_address_space_root(next->parent->get_address_space());
+        memory::virt::set_address_space_root(
+            next->get_process()->get_address_space());
     }
     load_context(ctx, &next->tcontext);
 }
@@ -106,7 +107,7 @@ void init()
     kernel_process = new process(nullptr);
     kernel_process->set_address_space(memory::virt::get_address_space_root());
     // TODO: Move this to architecture specific
-    thread* kinit = new thread(kernel_process);
+    thread* kinit = kernel_process->create_thread();
     scheduler::insert(kinit);
     /*
      * Set kinit as current_thread, so on the first task switch caused by the
@@ -126,7 +127,7 @@ void late_init()
 
 process* get_current_process()
 {
-    return current_thread->parent;
+    return current_thread->get_process();
 }
 
 thread* get_current_thread()

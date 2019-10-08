@@ -24,9 +24,7 @@ void init_stage2(void*)
     libcxx::intrusive_ptr<filesystem::descriptor> root = parent->get_root();
     auto [err, init] = root->open("/sbin/init", O_RDONLY, 0);
     if (err) {
-        log::printk(log::log_level::ERROR, "Failed to open init\n");
-        for (;;)
-            cpu::halt();
+        kernel::panic("Failed to open init\n");
     }
     int argc           = 2;
     const char* argv[] = {
@@ -40,7 +38,7 @@ void init_stage2(void*)
     struct thread_context ctx;
     if (scheduler::get_current_process()->load(init, argc, argv, envc, envp,
                                                ctx)) {
-        log::printk(log::log_level::ERROR, "Failed to load thread state\n");
+        kernel::panic("Failed to open init\n");
     } else {
         log::printk(log::log_level::DEBUG,
                     "Preparing to jump into userspace\n");

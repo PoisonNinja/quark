@@ -66,7 +66,7 @@ thread* next()
 void switch_context(struct interrupt_context* ctx, thread* current,
                     thread* next)
 {
-    save_context(ctx, &current->tcontext);
+    current->save_state(ctx);
     if (current) {
         if (current->get_process()->get_address_space() !=
             next->get_process()->get_address_space()) {
@@ -77,7 +77,7 @@ void switch_context(struct interrupt_context* ctx, thread* current,
         memory::virt::set_address_space_root(
             next->get_process()->get_address_space());
     }
-    load_context(ctx, &next->tcontext);
+    next->load_state(ctx);
 }
 
 void switch_next(struct interrupt_context* ctx)

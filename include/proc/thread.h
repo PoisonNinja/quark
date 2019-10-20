@@ -33,6 +33,9 @@ public:
     libcxx::node<thread> process_node;
     libcxx::node<thread> scheduler_node;
 
+    void load_state(interrupt_context *ctx);
+    void save_state(interrupt_context *ctx);
+
     // Don't you just love signals?
     bool is_signal_pending();
     void handle_signal(struct interrupt_context *ctx);
@@ -63,11 +66,6 @@ void encode_tcontext(struct interrupt_context *ctx,
                      struct thread_context *thread_ctx);
 void decode_tcontext(struct interrupt_context *ctx,
                      struct thread_context *thread_ctx);
-
-void save_context(struct interrupt_context *ctx,
-                  struct thread_context *tcontext);
-void load_context(struct interrupt_context *ctx,
-                  struct thread_context *tcontext);
 
 thread *create_kernel_thread(process *p, void (*entry_point)(void *),
                              void *data);

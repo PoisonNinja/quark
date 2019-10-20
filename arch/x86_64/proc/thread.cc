@@ -73,16 +73,16 @@ void decode_tcontext(struct interrupt_context* ctx,
     ctx->gs     = thread_ctx->gs;
 }
 
-void save_context(interrupt_context* ctx, struct thread_context* tcontext)
+void thread::save_state(interrupt_context* ctx)
 {
-    encode_tcontext(ctx, tcontext);
+    encode_tcontext(ctx, &this->tcontext);
 }
 
-void load_context(interrupt_context* ctx, struct thread_context* tcontext)
+void thread::load_state(interrupt_context* ctx)
 {
-    decode_tcontext(ctx, tcontext);
-    set_stack(tcontext->kernel_stack);
-    set_thread_base(tcontext);
+    decode_tcontext(ctx, &this->tcontext);
+    set_stack(this->tcontext.kernel_stack);
+    set_thread_base(&this->tcontext);
 }
 
 void set_stack(addr_t stack)
@@ -118,6 +118,6 @@ extern "C" void load_register_state(struct interrupt_context* ctx);
 void load_registers(struct thread_context& tcontext)
 {
     struct interrupt_context ctx;
-    load_context(&ctx, &tcontext);
+    decode_tcontext(&ctx, &tcontext);
     load_register_state(&ctx);
 }

@@ -29,10 +29,6 @@ public:
     thread_context get_context();
     void set_context(thread_context &context);
 
-private:
-    struct thread_context tcontext; // Thread execution state
-    addr_t kernel_stack;
-
 public:
     tid_t get_tid();
     process *get_process();
@@ -57,9 +53,14 @@ public:
     int sigaltstack(const stack_t *ss, stack_t *oldss);
     bool send_signal(int signal);
 
-private:
+public:
     tid_t tid;
     process *parent;
+
+    struct {
+        struct thread_context tcontext; // Thread execution state
+        addr_t kernel_stack;
+    } tcb;
 
     // Signals
     size_t signal_count;

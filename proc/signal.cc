@@ -144,7 +144,7 @@ void thread::handle_sigreturn(ucontext_t* uctx)
      * tctx to get certain registers (DS, ES, SS) preloaded for us. The
      * rest of the state will get overriden by the stored mcontext
      */
-    libcxx::memcpy(&tctx, &this->tcontext, sizeof(tctx));
+    libcxx::memcpy(&tctx, &this->tcb.tcontext, sizeof(tctx));
     // Unset on_stack
     if (this->signal_stack.ss_flags & SS_ONSTACK) {
         this->signal_stack.ss_flags &= ~SS_ONSTACK;

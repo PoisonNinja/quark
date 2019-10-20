@@ -23,10 +23,9 @@ addr_t get_stack()
     return cpu::x86_64::TSS::get_stack();
 }
 
-void set_thread_base(thread_context* thread)
+void set_thread_base(addr_t base)
 {
-    cpu::x86_64::wrmsr(cpu::x86_64::msr_kernel_gs_base,
-                       reinterpret_cast<uint64_t>(thread));
+    cpu::x86_64::wrmsr(cpu::x86_64::msr_kernel_gs_base, base);
 }
 } // namespace
 
@@ -89,24 +88,24 @@ void decode_tcontext(struct interrupt_context* ctx,
 thread_context thread::get_context()
 {
     // A copy
-    return this->tcontext;
+    return this->tcb.tcontext;
 }
 
 void thread::set_context(thread_context& context)
 {
-    this->tcontext = context;
+    this->tcb.tcontext = context;
 }
 
 void thread::save_state(interrupt_context* ctx)
 {
-    encode_tcontext(ctx, &this->tcontext);
+    encode_tcontext(ctx, &this->tcb.tcontext);
 }
 
 void thread::load_state(interrupt_context* ctx)
 {
-    decode_tcontext(ctx, &this->tcontext);
-    set_stack(this->kernel_stack);
-    set_thread_base(&this->tcontext);
+    decode_tcontext(ctx, &this->tcb.tcontext);
+    set_stack(this->tcb.kernel_stack);
+    set_thread_base(reinterpret_cast<addr_t>(&this->tcb));
 }
 
 thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)

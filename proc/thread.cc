@@ -28,6 +28,22 @@ process* thread::get_process()
     return this->parent;
 }
 
+thread_state thread::get_state()
+{
+    return this->state;
+}
+
+void thread::set_state(thread_state state)
+{
+    if (this->state == state) {
+        log::printk(
+            log::log_level::WARNING,
+            "thread: Attempting to set state to same state for thread %u\n",
+            this->tid);
+    }
+    this->state = state;
+}
+
 void thread::exit(bool is_signal, int val)
 {
     // Only the thread can kill itself

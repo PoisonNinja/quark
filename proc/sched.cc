@@ -39,7 +39,7 @@ pid_t get_free_pid()
 
 bool insert(thread* thread)
 {
-    thread->state = thread_state::RUNNABLE;
+    thread->set_state(thread_state::RUNNABLE);
     run_queue.push_front(*thread);
     return true;
 }

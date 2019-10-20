@@ -24,12 +24,12 @@ public:
     ~thread();
     void exit(bool is_signal, int val);
 
-    thread_state state;
+    thread_state get_state();
+    void set_state(thread_state state);
 
     thread_context get_context();
     void set_context(thread_context &context);
 
-public:
     tid_t get_tid();
     process *get_process();
 
@@ -55,6 +55,7 @@ public:
 
 private:
     tid_t tid;
+    thread_state state;
     process *parent;
 
     struct {

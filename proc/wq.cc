@@ -8,9 +8,9 @@ int wait_queue::wait(int flags)
     thread* t = scheduler::get_current_thread();
     wait_queue_node node(t);
     this->waiters.push_back(node);
-    t->state = (flags & wait_interruptible)
-                   ? thread_state::SLEEPING_INTERRUPTIBLE
-                   : thread_state::SLEEPING_UNINTERRUPTIBLE;
+    t->set_state((flags & wait_interruptible)
+                     ? thread_state::SLEEPING_INTERRUPTIBLE
+                     : thread_state::SLEEPING_UNINTERRUPTIBLE);
     scheduler::remove(t);
     scheduler::yield();
     int ret = 0;
@@ -28,9 +28,9 @@ bool wait_queue::insert(int flags)
     thread* t             = scheduler::get_current_thread();
     wait_queue_node* node = new wait_queue_node(t);
     this->waiters.push_back(*node);
-    t->state = (flags & wait_interruptible)
-                   ? thread_state::SLEEPING_INTERRUPTIBLE
-                   : thread_state::SLEEPING_UNINTERRUPTIBLE;
+    t->set_state((flags & wait_interruptible)
+                     ? thread_state::SLEEPING_INTERRUPTIBLE
+                     : thread_state::SLEEPING_UNINTERRUPTIBLE);
     return true;
 }
 

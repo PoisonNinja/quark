@@ -42,6 +42,11 @@ Intel8042::Intel8042()
         libcxx::bind(&Intel8042::handler, this, _1, _2, _3), "keyboard",
         reinterpret_cast<void*>(this));
     interrupt::register_handler(interrupt::irq_to_interrupt(1), *h);
+    /*
+     * Read a single byte to allow the controller to continue sending input.
+     * We're going to lose this byte though.
+     */
+    inb(0x60);
 }
 
 int Intel8042::poll(filesystem::poll_register_func_t& callback, void* cookie)

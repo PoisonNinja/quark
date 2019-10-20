@@ -25,15 +25,23 @@ public:
     void exit(bool is_signal, int val);
 
     thread_state state;
+
     struct thread_context tcontext; // Thread execution state
+private:
     addr_t kernel_stack;
 
+public:
     tid_t get_tid();
     process *get_process();
 
     libcxx::node<thread> process_node;
     libcxx::node<thread> scheduler_node;
 
+    /*
+     * Warning: These functions are intended for scheduler use only! Calling
+     *          them otherwise will mess with CPU registers of the current task
+     *          which is probably not what you want!
+     */
     void load_state(interrupt_context *ctx);
     void save_state(interrupt_context *ctx);
 

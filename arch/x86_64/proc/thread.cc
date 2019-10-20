@@ -109,7 +109,6 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     kthread->tcontext.ds     = 0x10;
     kthread->tcontext.ss     = 0x10;
     kthread->tcontext.rflags = 0x200;
-    kthread->kernel_stack    = stack;
     return kthread;
 }
 

@@ -191,8 +191,6 @@ static long sys_fork()
                    sizeof(child_thread->tcontext));
     // Child process gets 0 returned from fork
     child_thread->tcontext.rax = 0;
-    child_thread->kernel_stack =
-        reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
     scheduler::insert(child_thread);
     return child->get_pid();
 }

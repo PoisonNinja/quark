@@ -8,6 +8,8 @@ thread::thread(process* p, tid_t tid)
     parent             = p;
     this->tid          = tid;
     this->signal_count = 0;
+    this->kernel_stack =
+        reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
     signal::sigemptyset(&this->signal_mask);
     signal::sigemptyset(&this->signal_pending);
 }

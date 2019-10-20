@@ -82,7 +82,4 @@ void decode_tcontext(struct interrupt_context *ctx,
 thread *create_kernel_thread(process *p, void (*entry_point)(void *),
                              void *data);
 
-void set_stack(addr_t stack);
-addr_t get_stack();
-
 void load_registers(struct thread_context &tcontext);

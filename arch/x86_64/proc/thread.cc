@@ -11,11 +11,24 @@
 #include <proc/thread.h>
 #include <proc/uthread.h>
 
+namespace
+{
+void set_stack(addr_t stack)
+{
+    cpu::x86_64::TSS::set_stack(stack);
+}
+
+addr_t get_stack()
+{
+    return cpu::x86_64::TSS::get_stack();
+}
+
 void set_thread_base(thread_context* thread)
 {
     cpu::x86_64::wrmsr(cpu::x86_64::msr_kernel_gs_base,
                        reinterpret_cast<uint64_t>(thread));
 }
+} // namespace
 
 void encode_tcontext(struct interrupt_context* ctx,
                      struct thread_context* thread_ctx)

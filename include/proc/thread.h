@@ -26,8 +26,11 @@ public:
 
     thread_state state;
 
-    struct thread_context tcontext; // Thread execution state
+    thread_context get_context();
+    void set_context(thread_context &context);
+
 private:
+    struct thread_context tcontext; // Thread execution state
     addr_t kernel_stack;
 
 public:

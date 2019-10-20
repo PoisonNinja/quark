@@ -186,11 +186,10 @@ static long sys_fork()
     log::printk(log::log_level::DEBUG, "[sys_fork]\n");
     process* child       = scheduler::get_current_process()->fork();
     thread* child_thread = child->create_thread();
-    libcxx::memcpy(&child_thread->tcontext,
-                   &scheduler::get_current_thread()->tcontext,
-                   sizeof(child_thread->tcontext));
+    thread_context ctx   = scheduler::get_current_thread()->get_context();
     // Child process gets 0 returned from fork
-    child_thread->tcontext.rax = 0;
+    ctx.rax = 0;
+    child_thread->set_context(ctx);
     scheduler::insert(child_thread);
     return child->get_pid();
 }

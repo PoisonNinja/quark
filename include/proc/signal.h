@@ -38,6 +38,9 @@
 #define SIGPWR 30
 #define SIGSYS 31
 
+#define SIGMIN 1
+#define SIGMAX 31
+
 #define SIG_ERR ((void (*)(int)) - 1)
 #define SIG_DFL ((void (*)(int))0)
 #define SIG_IGN ((void (*)(int))1)
@@ -105,7 +108,7 @@ typedef struct ucontext {
 struct ksignal {
     int signum;
     bool use_altstack;
-    struct sigaction* sa;
+    const struct sigaction* sa;
     siginfo_t* siginfo;
     ucontext_t* ucontext;
 };

@@ -126,13 +126,7 @@ static long sys_sigaction(int signum, struct sigaction* act,
 {
     log::printk(log::log_level::DEBUG, "[sys_sigaction]: %d %p %p\n", signum,
                 act, oldact);
-    process* current = scheduler::get_current_process();
-    if (oldact) {
-        libcxx::memcpy(oldact, &current->signal_actions[signum],
-                       sizeof(*oldact));
-    }
-    libcxx::memcpy(&current->signal_actions[signum], act, sizeof(*act));
-    return 0;
+    return scheduler::get_current_process()->sigaction(signum, act, oldact);
 }
 
 static long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)

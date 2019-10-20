@@ -37,7 +37,7 @@ void thread::handle_signal(struct interrupt_context* ctx)
         this->exit(true, signum);
     }
 
-    struct sigaction* action = &this->parent->signal_actions[signum];
+    const sigaction* action = this->parent->get_sigaction(signum);
 
     if (action->sa_handler == SIG_IGN ||
         (action->sa_handler == SIG_DFL &&
@@ -194,7 +194,7 @@ int thread::sigpending(sigset_t* set)
     for (int i = 1; i < NSIGS; i++) {
         // TODO: Also check if SIG_DFL is set but the default action is to
         // ignore
-        if (scheduler::get_current_process()->signal_actions[i].sa_handler !=
+        if (scheduler::get_current_process()->get_sigaction(i)->sa_handler !=
             SIG_IGN) {
             signal::sigdelset(&blocked_and_ignored, i);
         }

@@ -423,6 +423,25 @@ void process::notify_exit(process* child)
     this->zombies.push_front(*child);
 }
 
+int process::sigaction(int signum, struct sigaction* act,
+                       struct sigaction* oldact)
+{
+    if (oldact) {
+        libcxx::memcpy(oldact, &this->signal_actions[signum], sizeof(*oldact));
+    }
+    libcxx::memcpy(&this->signal_actions[signum], act, sizeof(*act));
+    return 0;
+}
+
+const struct sigaction* process::get_sigaction(int signum)
+{
+    if (signum >= SIGMIN && signum <= SIGMAX) {
+        return &this->signal_actions[signum];
+    } else {
+        return nullptr;
+    }
+}
+
 void process::send_signal(int signum)
 {
     // TODO: Broadcast SIGSTOP, SIGCONT, certain signals to all threads

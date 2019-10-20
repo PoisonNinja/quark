@@ -55,8 +55,9 @@ public:
 
     thread* create_thread();
 
+    int sigaction(int signum, struct sigaction* act, struct sigaction* oldact);
+    const struct sigaction* get_sigaction(int index);
     void send_signal(int signum);
-    struct sigaction signal_actions[NSIGS];
 
 private:
     libcxx::node<process> list_node;
@@ -76,6 +77,8 @@ private:
     addr_t tls_alignment;
 
     memory::vma vma;
+
+    struct sigaction signal_actions[NSIGS];
 
     // waitpid stuff
     scheduler::wait_queue waiters;

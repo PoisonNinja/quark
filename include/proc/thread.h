@@ -26,6 +26,7 @@ public:
 
     thread_state state;
     struct thread_context tcontext; // Thread execution state
+    addr_t kernel_stack;
 
     tid_t get_tid();
     process *get_process();

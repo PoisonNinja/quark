@@ -253,7 +253,6 @@ int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     ctx.fs  = reinterpret_cast<uint64_t>(uthread);
     ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
     ctx.rflags        = 0x200;
-    ctx.kernel_stack  = cpu::x86_64::TSS::get_stack();
     scheduler::get_current_thread()->tcontext = ctx;
     return 0;
 }

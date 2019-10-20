@@ -81,7 +81,7 @@ void thread::save_state(interrupt_context* ctx)
 void thread::load_state(interrupt_context* ctx)
 {
     decode_tcontext(ctx, &this->tcontext);
-    set_stack(this->tcontext.kernel_stack);
+    set_stack(this->kernel_stack);
     set_thread_base(&this->tcontext);
 }
 
@@ -101,15 +101,15 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     libcxx::memset(&kthread->tcontext, 0, sizeof(kthread->tcontext));
     addr_t stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
-    kthread->tcontext.rdi          = reinterpret_cast<addr_t>(data);
-    kthread->tcontext.rip          = reinterpret_cast<addr_t>(entry_point);
-    kthread->tcontext.rbp          = reinterpret_cast<addr_t>(stack);
-    kthread->tcontext.rsp          = reinterpret_cast<addr_t>(stack);
-    kthread->tcontext.cs           = 0x8;
-    kthread->tcontext.ds           = 0x10;
-    kthread->tcontext.ss           = 0x10;
-    kthread->tcontext.rflags       = 0x200;
-    kthread->tcontext.kernel_stack = stack;
+    kthread->tcontext.rdi    = reinterpret_cast<addr_t>(data);
+    kthread->tcontext.rip    = reinterpret_cast<addr_t>(entry_point);
+    kthread->tcontext.rbp    = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.rsp    = reinterpret_cast<addr_t>(stack);
+    kthread->tcontext.cs     = 0x8;
+    kthread->tcontext.ds     = 0x10;
+    kthread->tcontext.ss     = 0x10;
+    kthread->tcontext.rflags = 0x200;
+    kthread->kernel_stack    = stack;
     return kthread;
 }
 

@@ -26,7 +26,6 @@ struct thread_context {
     uint64_t ss;
     uint64_t gs;
     uint64_t fs;
-    uint64_t kernel_stack;
 };
 
 using greg_t = uint64_t;

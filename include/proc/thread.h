@@ -53,7 +53,7 @@ public:
     int sigaltstack(const stack_t *ss, stack_t *oldss);
     bool send_signal(int signal);
 
-public:
+private:
     tid_t tid;
     process *parent;
 

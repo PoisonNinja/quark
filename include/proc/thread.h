@@ -87,7 +87,6 @@ void encode_tcontext(struct interrupt_context *ctx,
 void decode_tcontext(struct interrupt_context *ctx,
                      struct thread_context *thread_ctx);
 
-thread *create_kernel_thread(process *p, void (*entry_point)(void *),
-                             void *data);
+thread *create_kernel_thread(process *p, void (*entry_point)());
 
 void load_registers(struct thread_context &tcontext);

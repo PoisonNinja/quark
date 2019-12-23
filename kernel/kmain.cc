@@ -18,8 +18,23 @@
 
 namespace
 {
-void init_stage2(void*)
+long long counter = 0;
+
+void worker()
 {
+    for (;;) {
+        log::printk(log::log_level::INFO, "Hello again, %d\n",
+                    scheduler::get_current_thread()->get_tid());
+    }
+}
+
+void init_stage2()
+{
+    for (;;) {
+        process* initp = scheduler::get_current_process();
+        thread* stage2 = create_kernel_thread(initp, worker);
+        scheduler::insert(stage2);
+    }
     process* parent = scheduler::get_current_process();
     libcxx::intrusive_ptr<filesystem::descriptor> root = parent->get_root();
     auto [err, init] = root->open("/sbin/init", O_RDONLY, 0);
@@ -49,7 +64,7 @@ void init_stage2(void*)
 void init_stage1()
 {
     process* initp = scheduler::get_current_process()->fork();
-    thread* stage2 = create_kernel_thread(initp, init_stage2, nullptr);
+    thread* stage2 = create_kernel_thread(initp, init_stage2);
     scheduler::late_init();
     scheduler::insert(stage2);
     scheduler::get_current_process()->wait(-1, nullptr, 0);

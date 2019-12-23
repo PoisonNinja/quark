@@ -21,7 +21,7 @@ thread* kidle           = nullptr;
 bool _online = false;
 } // namespace
 
-void idle(void*)
+void idle()
 {
     while (1) {
         // TODO: Get rid of hlt
@@ -124,7 +124,7 @@ void init()
 
 void late_init()
 {
-    kidle = create_kernel_thread(kernel_process, idle, nullptr);
+    kidle = create_kernel_thread(kernel_process, idle);
 }
 
 process* get_current_process()

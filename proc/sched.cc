@@ -82,9 +82,11 @@ void switch_context(struct interrupt_context* ctx, thread* current,
 
 void switch_next(struct interrupt_context* ctx)
 {
+    thread* old         = current_thread;
     thread* next_thread = next();
     switch_context(ctx, current_thread, next_thread);
     current_thread = next_thread;
+    old->switch_thread(next_thread);
     if (scheduler::online()) {
         if (scheduler::get_current_thread()->is_signal_pending()) {
             scheduler::get_current_thread()->handle_signal(ctx);

@@ -27,8 +27,14 @@ public:
     thread_state get_state();
     void set_state(thread_state state);
 
+    // For scheduler use
+    void switch_thread(thread *next);
+
     thread_context get_context();
     void set_context(thread_context &context);
+
+    addr_t get_stack();
+    void set_stack(addr_t addr);
 
     tid_t get_tid();
     process *get_process();

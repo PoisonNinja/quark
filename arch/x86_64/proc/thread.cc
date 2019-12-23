@@ -96,6 +96,16 @@ void thread::set_context(thread_context& context)
     this->tcb.tcontext = context;
 }
 
+addr_t thread::get_stack()
+{
+    return this->tcb.kernel_stack;
+}
+
+void thread::set_stack(addr_t addr)
+{
+    this->tcb.kernel_stack = addr;
+}
+
 void thread::save_state(interrupt_context* ctx)
 {
     encode_tcontext(ctx, &this->tcb.tcontext);
@@ -108,22 +118,25 @@ void thread::load_state(interrupt_context* ctx)
     set_thread_base(reinterpret_cast<addr_t>(&this->tcb));
 }
 
+extern "C" void do_task_switch(addr_t* old_stack, addr_t* new_stack,
+                               addr_t cr3);
+
+void thread::switch_thread(thread* next)
+{
+    do_task_switch(&this->tcb.kernel_stack, &next->tcb.kernel_stack,
+                   next->parent->get_address_space());
+}
+
 thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
 {
     thread* kthread = p->create_thread();
     struct thread_context ctx;
     libcxx::memset(&ctx, 0, sizeof(ctx));
-    addr_t stack =
-        reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
-    ctx.rdi    = reinterpret_cast<addr_t>(data);
-    ctx.rip    = reinterpret_cast<addr_t>(entry_point);
-    ctx.rbp    = reinterpret_cast<addr_t>(stack);
-    ctx.rsp    = reinterpret_cast<addr_t>(stack);
-    ctx.cs     = 0x8;
-    ctx.ds     = 0x10;
-    ctx.ss     = 0x10;
-    ctx.rflags = 0x200;
-    kthread->set_context(ctx);
+    addr_t* stack = reinterpret_cast<addr_t*>(kthread->get_stack());
+    stack[-1]     = (addr_t)entry_point;             // RIP
+    stack[-2]     = 0x200;                           // RFLAGS
+    stack[-3]     = reinterpret_cast<addr_t>(stack); // RBP
+    kthread->set_stack(reinterpret_cast<addr_t>(stack) - 64);
     return kthread;
 }
 

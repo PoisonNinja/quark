@@ -5,10 +5,10 @@
 
 thread::thread(process* p, tid_t tid)
 {
-    parent             = p;
-    this->tid          = tid;
-    this->signal_count = 0;
-    this->tcb.kernel_stack =
+    parent                  = p;
+    this->tid               = tid;
+    this->signal_count      = 0;
+    this->kernel_stack_base = this->tcb.kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
     for (int i = 0; i < 1; i++) {
         this->flags[i] = false;

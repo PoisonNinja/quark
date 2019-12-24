@@ -15,11 +15,6 @@ namespace
 {
 extern "C" void syscall_return();
 
-addr_t get_stack()
-{
-    return cpu::x86_64::TSS::get_stack();
-}
-
 void set_thread_base(addr_t base)
 {
     cpu::x86_64::wrmsr(cpu::x86_64::msr_kernel_gs_base, base);
@@ -133,7 +128,7 @@ extern "C" void do_task_switch(addr_t* old_stack, addr_t* new_stack);
 
 void thread::switch_thread(thread* next)
 {
-    cpu::x86_64::TSS::set_stack(next->tcb.kernel_stack);
+    cpu::x86_64::TSS::set_stack(next->kernel_stack_base);
     set_thread_base(reinterpret_cast<addr_t>(&next->tcb));
     do_task_switch(&this->tcb.kernel_stack, &next->tcb.kernel_stack);
 }

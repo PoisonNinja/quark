@@ -79,6 +79,8 @@ private:
         addr_t kernel_stack;
     } tcb;
 
+    addr_t kernel_stack_base;
+
     // Signals
     size_t signal_count;
     bool signal_required;

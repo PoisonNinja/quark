@@ -113,15 +113,13 @@ void thread::load_state(interrupt_context* ctx)
     set_thread_base(reinterpret_cast<addr_t>(&this->tcb));
 }
 
-extern "C" void do_task_switch(addr_t* old_stack, addr_t* new_stack,
-                               addr_t cr3);
+extern "C" void do_task_switch(addr_t* old_stack, addr_t* new_stack);
 
 void thread::switch_thread(thread* next)
 {
     cpu::x86_64::TSS::set_stack(next->tcb.kernel_stack);
     set_thread_base(reinterpret_cast<addr_t>(&next->tcb));
-    do_task_switch(&this->tcb.kernel_stack, &next->tcb.kernel_stack,
-                   next->parent->get_address_space());
+    do_task_switch(&this->tcb.kernel_stack, &next->tcb.kernel_stack);
 }
 
 thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)

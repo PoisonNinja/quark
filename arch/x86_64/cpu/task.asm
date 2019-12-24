@@ -1,7 +1,7 @@
 %include "common.inc"
 
-; void do_task_switch(addr_t* old_stack, addr_t* new_stack, addr_t cr3);
-; rdi = old stack, rsi = new stack, rdx = cr3
+; void do_task_switch(addr_t* old_stack, addr_t* new_stack);
+; rdi = old stack, rsi = new stack
 global do_task_switch
 do_task_switch:
     pushfq
@@ -14,8 +14,6 @@ do_task_switch:
 
     mov [rdi], rsp
     mov rsp, [rsi]
-
-    mov cr3, rdx
 
     pop r15
     pop r14

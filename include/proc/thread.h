@@ -40,6 +40,8 @@ public:
     thread_context get_context();
     void set_context(thread_context &context);
 
+    void fork_init();
+
     addr_t get_stack();
     void set_stack(addr_t addr);
 

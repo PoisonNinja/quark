@@ -2,6 +2,7 @@
 
 extern syscall_trampoline
 
+global syscall_return
 global syscall_sysret_wrapper
 syscall_sysret_wrapper:
     swapgs              ; Thread struct is saved in KernelGSBase, swap it into GS
@@ -45,6 +46,7 @@ syscall_sysret_wrapper:
     mov rdi, rsp
     call syscall_trampoline
 
+syscall_return:
     ; There isn't really a reason for system calls to be modifying FS and GS
     pop r15
     pop r15

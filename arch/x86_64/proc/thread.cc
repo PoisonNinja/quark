@@ -13,6 +13,8 @@
 
 namespace
 {
+extern "C" void syscall_return();
+
 addr_t get_stack()
 {
     return cpu::x86_64::TSS::get_stack();
@@ -91,6 +93,21 @@ void thread::set_context(thread_context& context)
     this->tcb.tcontext = context;
 }
 
+void thread::fork_init()
+{
+    this->tcb.kernel_stack -= sizeof(struct interrupt_context);
+    // sys_fork has already set everything up for us in tcontext
+    decode_tcontext(
+        reinterpret_cast<struct interrupt_context*>(this->tcb.kernel_stack),
+        &this->tcb.tcontext);
+    addr_t* stack = reinterpret_cast<addr_t*>(this->tcb.kernel_stack);
+    // Time to hack the stack
+    stack[-1] = reinterpret_cast<addr_t>(syscall_return); // RIP
+    stack[-2] = 0x200;                                    // RFLAGS
+    stack[-3] = reinterpret_cast<addr_t>(stack);          // RBP
+    this->tcb.kernel_stack -= 64;
+}
+
 addr_t thread::get_stack()
 {
     return this->tcb.kernel_stack;
@@ -128,9 +145,9 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     struct thread_context ctx;
     libcxx::memset(&ctx, 0, sizeof(ctx));
     addr_t* stack = reinterpret_cast<addr_t*>(kthread->get_stack());
-    stack[-1]     = (addr_t)entry_point;             // RIP
-    stack[-2]     = 0x200;                           // RFLAGS
-    stack[-3]     = reinterpret_cast<addr_t>(stack); // RBP
+    stack[-1]     = reinterpret_cast<addr_t>(entry_point); // RIP
+    stack[-2]     = 0x200;                                 // RFLAGS
+    stack[-3]     = reinterpret_cast<addr_t>(stack);       // RBP
     kthread->set_stack(reinterpret_cast<addr_t>(stack) - 64);
     return kthread;
 }

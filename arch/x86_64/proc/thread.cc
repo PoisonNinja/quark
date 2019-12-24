@@ -147,6 +147,7 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     stack[-1]     = reinterpret_cast<addr_t>(entry_point); // RIP
     stack[-2]     = 0x200;                                 // RFLAGS
     stack[-3]     = reinterpret_cast<addr_t>(stack);       // RBP
+    stack[-4] = stack[-5] = stack[-6] = stack[-7] = stack[-8] = 0;
     kthread->set_stack(reinterpret_cast<addr_t>(stack) - 64);
     return kthread;
 }

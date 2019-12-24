@@ -17,6 +17,10 @@ enum class thread_state {
     RUNNING,
 };
 
+enum class thread_flag : int {
+    RESCHEDULE = 0,
+};
+
 class thread
 {
 public:
@@ -26,6 +30,9 @@ public:
 
     thread_state get_state();
     void set_state(thread_state state);
+
+    bool get_flag(thread_flag flag);
+    void set_flag(thread_flag flag, bool value);
 
     // For scheduler use
     void switch_thread(thread *next);
@@ -62,6 +69,7 @@ public:
 private:
     tid_t tid;
     thread_state state;
+    bool flags[1];
     process *parent;
 
     struct {

@@ -10,6 +10,9 @@ thread::thread(process* p, tid_t tid)
     this->signal_count = 0;
     this->tcb.kernel_stack =
         reinterpret_cast<addr_t>(new uint8_t[0xF000] + 0xF000) & ~15UL;
+    for (int i = 0; i < 1; i++) {
+        this->flags[i] = false;
+    }
     signal::sigemptyset(&this->signal_mask);
     signal::sigemptyset(&this->signal_pending);
 }
@@ -31,6 +34,16 @@ process* thread::get_process()
 thread_state thread::get_state()
 {
     return this->state;
+}
+
+bool thread::get_flag(thread_flag flag)
+{
+    return this->flags[static_cast<int>(flag)];
+}
+
+void thread::set_flag(thread_flag flag, bool value)
+{
+    this->flags[static_cast<int>(flag)] = value;
 }
 
 void thread::set_state(thread_state state)

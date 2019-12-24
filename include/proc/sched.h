@@ -13,7 +13,7 @@ bool remove(thread* thread);
 
 void init();
 void late_init();
-void switch_next(struct interrupt_context* ctx);
+void switch_next();
 void yield();
 
 process* get_current_process();

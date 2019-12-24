@@ -63,10 +63,8 @@ thread* next()
     return next;
 }
 
-void switch_context(struct interrupt_context* ctx, thread* current,
-                    thread* next)
+void switch_context(thread* current, thread* next)
 {
-    current->save_state(ctx);
     if (current) {
         if (current->get_process()->get_address_space() !=
             next->get_process()->get_address_space()) {
@@ -77,26 +75,25 @@ void switch_context(struct interrupt_context* ctx, thread* current,
         memory::virt::set_address_space_root(
             next->get_process()->get_address_space());
     }
-    next->load_state(ctx);
 }
 
-void switch_next(struct interrupt_context* ctx)
+void switch_next()
 {
     thread* old         = current_thread;
     thread* next_thread = next();
-    switch_context(ctx, current_thread, next_thread);
+    switch_context(current_thread, next_thread);
     current_thread = next_thread;
     old->switch_thread(next_thread);
-    if (scheduler::online()) {
-        if (scheduler::get_current_thread()->is_signal_pending()) {
-            scheduler::get_current_thread()->handle_signal(ctx);
-        }
-    }
+    // if (scheduler::online()) {
+    //     if (scheduler::get_current_thread()->is_signal_pending()) {
+    //         scheduler::get_current_thread()->handle_signal(ctx);
+    //     }
+    // }
 }
 
 void yield_switch(int, void*, struct interrupt_context* ctx)
 {
-    switch_next(ctx);
+    switch_next();
 }
 
 interrupt::handler yield_handler(yield_switch, "yield", &yield_handler);

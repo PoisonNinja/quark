@@ -49,7 +49,7 @@ void dispatch(int int_no, struct interrupt_context* ctx)
                                        thread_flag::RESCHEDULE)) {
             scheduler::get_current_thread()->set_flag(thread_flag::RESCHEDULE,
                                                       false);
-            scheduler::switch_next(ctx);
+            scheduler::switch_next();
         }
     }
 }

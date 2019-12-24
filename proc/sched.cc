@@ -91,18 +91,15 @@ void switch_next()
     // }
 }
 
-void yield_switch(int, void*, struct interrupt_context* ctx)
+void yield()
 {
     switch_next();
 }
-
-interrupt::handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
     // Print a message in case something goes wrong when initializing
     log::printk(log::log_level::INFO, "Initializing scheduler...\n");
-    interrupt::register_handler(0x81, yield_handler);
     kernel_process = new process(nullptr);
     kernel_process->set_address_space(memory::virt::get_address_space_root());
     // TODO: Move this to architecture specific

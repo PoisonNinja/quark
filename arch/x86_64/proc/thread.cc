@@ -13,11 +13,6 @@
 
 namespace
 {
-void set_stack(addr_t stack)
-{
-    cpu::x86_64::TSS::set_stack(stack);
-}
-
 addr_t get_stack()
 {
     return cpu::x86_64::TSS::get_stack();
@@ -123,6 +118,8 @@ extern "C" void do_task_switch(addr_t* old_stack, addr_t* new_stack,
 
 void thread::switch_thread(thread* next)
 {
+    cpu::x86_64::TSS::set_stack(next->tcb.kernel_stack);
+    set_thread_base(reinterpret_cast<addr_t>(&next->tcb));
     do_task_switch(&this->tcb.kernel_stack, &next->tcb.kernel_stack,
                    next->parent->get_address_space());
 }

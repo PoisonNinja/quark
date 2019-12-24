@@ -104,7 +104,6 @@ void thread::fork_init()
     // Time to hack the stack
     stack[-1] = reinterpret_cast<addr_t>(syscall_return); // RIP
     stack[-2] = 0x200;                                    // RFLAGS
-    stack[-3] = reinterpret_cast<addr_t>(stack);          // RBP
     this->tcb.kernel_stack -= 64;
 }
 

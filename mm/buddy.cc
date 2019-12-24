@@ -46,7 +46,7 @@ buddy::~buddy()
 addr_t buddy::__alloc(unsigned order)
 {
     if (order > this->max_order)
-        kernel::panic("OOM");
+        kernel::panic("OOM\n");
     if (this->orders[order].free_stack->empty()) {
         addr_t a = this->__alloc(order + 1);
         this->orders[order].free_stack->push(a);

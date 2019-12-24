@@ -81,6 +81,9 @@ void switch_next()
 {
     thread* old         = current_thread;
     thread* next_thread = next();
+    if (next_thread == old) {
+        return;
+    }
     switch_context(current_thread, next_thread);
     current_thread = next_thread;
     old->switch_thread(next_thread);

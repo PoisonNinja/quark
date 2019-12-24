@@ -127,13 +127,15 @@ void thread::switch_thread(thread* next)
                    next->parent->get_address_space());
 }
 
-thread* create_kernel_thread(process* p, void (*entry_point)())
+thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
 {
     thread* kthread = p->create_thread();
-    addr_t* stack   = reinterpret_cast<addr_t*>(kthread->get_stack());
-    stack[-1]       = (addr_t)entry_point;             // RIP
-    stack[-2]       = 0x200;                           // RFLAGS
-    stack[-3]       = reinterpret_cast<addr_t>(stack); // RBP
+    struct thread_context ctx;
+    libcxx::memset(&ctx, 0, sizeof(ctx));
+    addr_t* stack = reinterpret_cast<addr_t*>(kthread->get_stack());
+    stack[-1]     = (addr_t)entry_point;             // RIP
+    stack[-2]     = 0x200;                           // RFLAGS
+    stack[-3]     = reinterpret_cast<addr_t>(stack); // RBP
     kthread->set_stack(reinterpret_cast<addr_t>(stack) - 64);
     return kthread;
 }

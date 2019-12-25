@@ -7,7 +7,7 @@ global syscall_sysret_wrapper
 syscall_sysret_wrapper:
     swapgs              ; Thread struct is saved in KernelGSBase, swap it into GS
     mov [gs:80], rsp    ; Save user RSP into thread->tcontext.rsp
-    mov rsp, [gs:184]   ; Load kernel RSP from thread->kernel_stack.
+    mov rsp, [gs:192]   ; Load kernel RSP from thread->kernel_stack_base
 
     ; Build a simulated interrupt frame
     push qword 0x1B ; SS

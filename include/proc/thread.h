@@ -77,9 +77,8 @@ private:
     struct {
         struct thread_context tcontext; // Thread execution state
         addr_t kernel_stack;
+        addr_t kernel_stack_base;
     } tcb;
-
-    addr_t kernel_stack_base;
 
     // Signals
     size_t signal_count;

@@ -32,8 +32,8 @@ public:
      * However, if you want to wait on multiple wait_queues (e.g. poll), use
      * insert to register this thread with the wait_queue.
      *
-     * Then, you will manually need to schedule away (by calling yield()) and
-     * checking for the wake reason
+     * Then, you will manually need to schedule away (by calling switch_next())
+     * and checking for the wake reason
      */
     int wait(int flags);
     bool insert(int flags);

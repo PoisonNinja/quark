@@ -14,7 +14,6 @@ bool remove(thread* thread);
 void init();
 void late_init();
 void switch_next();
-void yield();
 
 process* get_current_process();
 thread* get_current_thread();

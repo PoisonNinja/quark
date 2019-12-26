@@ -68,5 +68,5 @@ void thread::exit(bool is_signal, int val)
     // TODO: We need to clean up!
     scheduler::remove(this);
     this->parent->thread_exit(this, is_signal, val);
-    scheduler::yield();
+    scheduler::switch_next();
 }

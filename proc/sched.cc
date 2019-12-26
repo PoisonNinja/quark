@@ -84,11 +84,6 @@ void switch_next()
     old->switch_thread(next_thread);
 }
 
-void yield()
-{
-    switch_next();
-}
-
 void init()
 {
     // Print a message in case something goes wrong when initializing

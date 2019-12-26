@@ -75,7 +75,7 @@ int poll_table::poll(time_t timeout)
         if (found)
             break;
         scheduler::remove(scheduler::get_current_thread());
-        scheduler::yield();
+        scheduler::switch_next();
         // TODO: Check if a signal is the reason why we woke
     }
     // Now let's clean up :)

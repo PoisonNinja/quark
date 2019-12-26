@@ -63,47 +63,31 @@ thread* next()
     return next;
 }
 
-void switch_context(struct interrupt_context* ctx, thread* current,
-                    thread* next)
+void switch_next()
 {
-    current->save_state(ctx);
-    if (current) {
-        if (current->get_process()->get_address_space() !=
-            next->get_process()->get_address_space()) {
+    thread* old         = current_thread;
+    thread* next_thread = next();
+    if (next_thread == old) {
+        return;
+    }
+    if (current_thread) {
+        if (current_thread->get_process()->get_address_space() !=
+            next_thread->get_process()->get_address_space()) {
             memory::virt::set_address_space_root(
-                next->get_process()->get_address_space());
+                next_thread->get_process()->get_address_space());
         }
     } else {
         memory::virt::set_address_space_root(
-            next->get_process()->get_address_space());
+            next_thread->get_process()->get_address_space());
     }
-    next->load_state(ctx);
-}
-
-void switch_next(struct interrupt_context* ctx)
-{
-    thread* next_thread = next();
-    switch_context(ctx, current_thread, next_thread);
     current_thread = next_thread;
-    if (scheduler::online()) {
-        if (scheduler::get_current_thread()->is_signal_pending()) {
-            scheduler::get_current_thread()->handle_signal(ctx);
-        }
-    }
+    old->switch_thread(next_thread);
 }
-
-void yield_switch(int, void*, struct interrupt_context* ctx)
-{
-    switch_next(ctx);
-}
-
-interrupt::handler yield_handler(yield_switch, "yield", &yield_handler);
 
 void init()
 {
     // Print a message in case something goes wrong when initializing
     log::printk(log::log_level::INFO, "Initializing scheduler...\n");
-    interrupt::register_handler(0x81, yield_handler);
     kernel_process = new process(nullptr);
     kernel_process->set_address_space(memory::virt::get_address_space_root());
     // TODO: Move this to architecture specific

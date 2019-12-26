@@ -184,6 +184,7 @@ static long sys_fork()
     // Child process gets 0 returned from fork
     ctx.rax = 0;
     child_thread->set_context(ctx);
+    child_thread->fork_init();
     scheduler::insert(child_thread);
     return child->get_pid();
 }

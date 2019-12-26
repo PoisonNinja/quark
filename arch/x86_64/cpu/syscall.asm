@@ -2,11 +2,12 @@
 
 extern syscall_trampoline
 
+global syscall_return
 global syscall_sysret_wrapper
 syscall_sysret_wrapper:
     swapgs              ; Thread struct is saved in KernelGSBase, swap it into GS
     mov [gs:80], rsp    ; Save user RSP into thread->tcontext.rsp
-    mov rsp, [gs:184]   ; Load kernel RSP from thread->kernel_stack.
+    mov rsp, [gs:192]   ; Load kernel RSP from thread->kernel_stack_base
 
     ; Build a simulated interrupt frame
     push qword 0x1B ; SS
@@ -45,6 +46,7 @@ syscall_sysret_wrapper:
     mov rdi, rsp
     call syscall_trampoline
 
+syscall_return:
     ; There isn't really a reason for system calls to be modifying FS and GS
     pop r15
     pop r15

@@ -45,6 +45,17 @@ void dispatch(int int_no, struct interrupt_context* ctx)
     }
     if (!is_exception(int_no)) {
         irqchip::ack(interrupt::interrupt_to_irq(int_no));
+        if (scheduler::online() && scheduler::get_current_thread()->get_flag(
+                                       thread_flag::RESCHEDULE)) {
+            scheduler::get_current_thread()->set_flag(thread_flag::RESCHEDULE,
+                                                      false);
+            scheduler::switch_next();
+        }
+    }
+    if (scheduler::online()) {
+        if (scheduler::get_current_thread()->is_signal_pending()) {
+            scheduler::get_current_thread()->handle_signal(ctx);
+        }
     }
 }
 

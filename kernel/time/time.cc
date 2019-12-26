@@ -77,7 +77,8 @@ void tick(struct interrupt_context* ctx)
 {
     update();
     if (scheduler::online()) {
-        scheduler::switch_next(ctx);
+        scheduler::get_current_thread()->set_flag(thread_flag::RESCHEDULE,
+                                                  true);
     }
 }
 

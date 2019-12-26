@@ -12,7 +12,7 @@ int wait_queue::wait(int flags)
                      ? thread_state::SLEEPING_INTERRUPTIBLE
                      : thread_state::SLEEPING_UNINTERRUPTIBLE);
     scheduler::remove(t);
-    scheduler::yield();
+    scheduler::switch_next();
     int ret = 0;
     // Check if a signal is pending
     if (!node.normal_wake) {

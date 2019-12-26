@@ -63,20 +63,6 @@ thread* next()
     return next;
 }
 
-void switch_context(thread* current, thread* next)
-{
-    if (current) {
-        if (current->get_process()->get_address_space() !=
-            next->get_process()->get_address_space()) {
-            memory::virt::set_address_space_root(
-                next->get_process()->get_address_space());
-        }
-    } else {
-        memory::virt::set_address_space_root(
-            next->get_process()->get_address_space());
-    }
-}
-
 void switch_next()
 {
     thread* old         = current_thread;
@@ -84,7 +70,16 @@ void switch_next()
     if (next_thread == old) {
         return;
     }
-    switch_context(current_thread, next_thread);
+    if (current_thread) {
+        if (current_thread->get_process()->get_address_space() !=
+            next_thread->get_process()->get_address_space()) {
+            memory::virt::set_address_space_root(
+                next_thread->get_process()->get_address_space());
+        }
+    } else {
+        memory::virt::set_address_space_root(
+            next_thread->get_process()->get_address_space());
+    }
     current_thread = next_thread;
     old->switch_thread(next_thread);
 }

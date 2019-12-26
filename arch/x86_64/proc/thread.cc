@@ -19,6 +19,15 @@ void set_thread_base(addr_t base)
 {
     cpu::x86_64::wrmsr(cpu::x86_64::msr_kernel_gs_base, base);
 }
+
+unsigned prepare_stack(addr_t* stack, addr_t rip, addr_t rbp)
+{
+    stack[-1] = reinterpret_cast<addr_t>(rip); // RIP
+    stack[-2] = 0x200;                         // RFLAGS
+    stack[-3] = reinterpret_cast<addr_t>(rbp); // RBP
+    stack[-4] = stack[-5] = stack[-6] = stack[-7] = stack[-8] = 0;
+    return 64;
+}
 } // namespace
 
 void encode_tcontext(struct interrupt_context* ctx,
@@ -97,9 +106,9 @@ void thread::fork_init()
         &this->tcb.tcontext);
     addr_t* stack = reinterpret_cast<addr_t*>(this->tcb.kernel_stack);
     // Time to hack the stack
-    stack[-1] = reinterpret_cast<addr_t>(syscall_return); // RIP
-    stack[-2] = 0x200;                                    // RFLAGS
-    this->tcb.kernel_stack -= 64;
+    this->tcb.kernel_stack -=
+        prepare_stack(stack, reinterpret_cast<addr_t>(syscall_return), 0);
+    ;
 }
 
 addr_t thread::get_stack()
@@ -120,8 +129,6 @@ void thread::save_state(interrupt_context* ctx)
 void thread::load_state(interrupt_context* ctx)
 {
     decode_tcontext(ctx, &this->tcb.tcontext);
-    set_stack(this->tcb.kernel_stack);
-    set_thread_base(reinterpret_cast<addr_t>(&this->tcb));
 }
 
 extern "C" void do_task_switch(addr_t* old_stack, addr_t* new_stack);
@@ -139,11 +146,9 @@ thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
     struct thread_context ctx;
     libcxx::memset(&ctx, 0, sizeof(ctx));
     addr_t* stack = reinterpret_cast<addr_t*>(kthread->get_stack());
-    stack[-1]     = reinterpret_cast<addr_t>(entry_point); // RIP
-    stack[-2]     = 0x200;                                 // RFLAGS
-    stack[-3]     = reinterpret_cast<addr_t>(stack);       // RBP
-    stack[-4] = stack[-5] = stack[-6] = stack[-7] = stack[-8] = 0;
-    kthread->set_stack(reinterpret_cast<addr_t>(stack) - 64);
+    int offset    = prepare_stack(stack, reinterpret_cast<addr_t>(entry_point),
+                               reinterpret_cast<addr_t>(stack));
+    kthread->set_stack(reinterpret_cast<addr_t>(stack) - offset);
     return kthread;
 }
 

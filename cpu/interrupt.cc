@@ -51,10 +51,10 @@ void dispatch(int int_no, struct interrupt_context* ctx)
                                                       false);
             scheduler::switch_next();
         }
-        if (scheduler::online()) {
-            if (scheduler::get_current_thread()->is_signal_pending()) {
-                scheduler::get_current_thread()->handle_signal(ctx);
-            }
+    }
+    if (scheduler::online()) {
+        if (scheduler::get_current_thread()->is_signal_pending()) {
+            scheduler::get_current_thread()->handle_signal(ctx);
         }
     }
 }

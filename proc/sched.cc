@@ -87,11 +87,6 @@ void switch_next()
     switch_context(current_thread, next_thread);
     current_thread = next_thread;
     old->switch_thread(next_thread);
-    // if (scheduler::online()) {
-    //     if (scheduler::get_current_thread()->is_signal_pending()) {
-    //         scheduler::get_current_thread()->handle_signal(ctx);
-    //     }
-    // }
 }
 
 void yield()

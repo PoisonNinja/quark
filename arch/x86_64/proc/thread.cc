@@ -108,7 +108,6 @@ void thread::fork_init()
     // Time to hack the stack
     this->tcb.kernel_stack -=
         prepare_stack(stack, reinterpret_cast<addr_t>(syscall_return), 0);
-    ;
 }
 
 addr_t thread::get_stack()
@@ -158,5 +157,8 @@ void load_registers(struct thread_context& tcontext)
 {
     struct interrupt_context ctx;
     decode_tcontext(&ctx, &tcontext);
+    // Inject RFLAGS IOPORT privileges for userspace
+    // TODO: INSECURE, allows userspace to do ioport stuff
+    ctx.rflags |= 0x3000;
     load_register_state(&ctx);
 }

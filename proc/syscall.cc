@@ -332,36 +332,36 @@ static long sys_delete_module(const char* name, int flags)
 
 void init()
 {
-    syscall_table[SYS_read]        = reinterpret_cast<void*>(sys_read);
-    syscall_table[SYS_write]       = reinterpret_cast<void*>(sys_write);
-    syscall_table[SYS_open]        = reinterpret_cast<void*>(sys_open);
-    syscall_table[SYS_close]       = reinterpret_cast<void*>(sys_close);
-    syscall_table[SYS_stat]        = reinterpret_cast<void*>(sys_stat);
-    syscall_table[SYS_fstat]       = reinterpret_cast<void*>(sys_fstat);
-    syscall_table[SYS_poll]        = reinterpret_cast<void*>(sys_poll);
-    syscall_table[SYS_lseek]       = reinterpret_cast<void*>(sys_lseek);
-    syscall_table[SYS_mmap]        = reinterpret_cast<void*>(sys_mmap);
-    syscall_table[SYS_sigaction]   = reinterpret_cast<void*>(sys_sigaction);
-    syscall_table[SYS_sigprocmask] = reinterpret_cast<void*>(sys_sigprocmask);
-    syscall_table[SYS_sigreturn]   = reinterpret_cast<void*>(sys_sigreturn);
-    syscall_table[SYS_ioctl]       = reinterpret_cast<void*>(sys_ioctl);
-    syscall_table[SYS_dup]         = reinterpret_cast<void*>(sys_dup),
-    syscall_table[SYS_dup2]        = reinterpret_cast<void*>(sys_dup2),
-    syscall_table[SYS_getpid]      = reinterpret_cast<void*>(sys_getpid);
-    syscall_table[SYS_fork]        = reinterpret_cast<void*>(sys_fork);
-    syscall_table[SYS_execve]      = reinterpret_cast<void*>(sys_execve);
-    syscall_table[SYS_exit]        = reinterpret_cast<void*>(sys_exit);
-    syscall_table[SYS_wait]        = reinterpret_cast<void*>(sys_wait);
-    syscall_table[SYS_kill]        = reinterpret_cast<void*>(sys_kill);
-    syscall_table[SYS_chdir]       = reinterpret_cast<void*>(sys_chdir);
-    syscall_table[SYS_mkdir]       = reinterpret_cast<void*>(sys_mkdir);
-    syscall_table[SYS_sigpending]  = reinterpret_cast<void*>(sys_sigpending);
-    syscall_table[SYS_sigaltstack] = reinterpret_cast<void*>(sys_sigaltstack);
-    syscall_table[SYS_mknod]       = reinterpret_cast<void*>(sys_mknod);
-    syscall_table[SYS_chroot]      = reinterpret_cast<void*>(sys_chroot);
-    syscall_table[SYS_mount]       = reinterpret_cast<void*>(sys_mount);
-    syscall_table[SYS_init_module] = reinterpret_cast<void*>(sys_init_module);
-    syscall_table[SYS_delete_module] =
+    syscall_table[SYS_READ]        = reinterpret_cast<void*>(sys_read);
+    syscall_table[SYS_WRITE]       = reinterpret_cast<void*>(sys_write);
+    syscall_table[SYS_OPEN]        = reinterpret_cast<void*>(sys_open);
+    syscall_table[SYS_CLOSE]       = reinterpret_cast<void*>(sys_close);
+    syscall_table[SYS_STAT]        = reinterpret_cast<void*>(sys_stat);
+    syscall_table[SYS_FSTAT]       = reinterpret_cast<void*>(sys_fstat);
+    syscall_table[SYS_POLL]        = reinterpret_cast<void*>(sys_poll);
+    syscall_table[SYS_LSEEK]       = reinterpret_cast<void*>(sys_lseek);
+    syscall_table[SYS_MMAP]        = reinterpret_cast<void*>(sys_mmap);
+    syscall_table[SYS_SIGACTION]   = reinterpret_cast<void*>(sys_sigaction);
+    syscall_table[SYS_SIGPROCMASK] = reinterpret_cast<void*>(sys_sigprocmask);
+    syscall_table[SYS_SIGRETURN]   = reinterpret_cast<void*>(sys_sigreturn);
+    syscall_table[SYS_IOCTL]       = reinterpret_cast<void*>(sys_ioctl);
+    syscall_table[SYS_DUP]         = reinterpret_cast<void*>(sys_dup),
+    syscall_table[SYS_DUP2]        = reinterpret_cast<void*>(sys_dup2),
+    syscall_table[SYS_GETPID]      = reinterpret_cast<void*>(sys_getpid);
+    syscall_table[SYS_FORK]        = reinterpret_cast<void*>(sys_fork);
+    syscall_table[SYS_EXECVE]      = reinterpret_cast<void*>(sys_execve);
+    syscall_table[SYS_EXIT]        = reinterpret_cast<void*>(sys_exit);
+    syscall_table[SYS_WAIT]        = reinterpret_cast<void*>(sys_wait);
+    syscall_table[SYS_KILL]        = reinterpret_cast<void*>(sys_kill);
+    syscall_table[SYS_CHDIR]       = reinterpret_cast<void*>(sys_chdir);
+    syscall_table[SYS_MKDIR]       = reinterpret_cast<void*>(sys_mkdir);
+    syscall_table[SYS_SIGPENDING]  = reinterpret_cast<void*>(sys_sigpending);
+    syscall_table[SYS_SIGALTSTACK] = reinterpret_cast<void*>(sys_sigaltstack);
+    syscall_table[SYS_MKNOD]       = reinterpret_cast<void*>(sys_mknod);
+    syscall_table[SYS_CHROOT]      = reinterpret_cast<void*>(sys_chroot);
+    syscall_table[SYS_MOUNT]       = reinterpret_cast<void*>(sys_mount);
+    syscall_table[SYS_INIT_MODULE] = reinterpret_cast<void*>(sys_init_module);
+    syscall_table[SYS_DELETE_MODULE] =
         reinterpret_cast<void*>(sys_delete_module);
 }
 } // namespace syscall

@@ -8,11 +8,10 @@ int wait_queue::wait(int flags)
     thread* t = scheduler::get_current_thread();
     wait_queue_node node(t);
     this->waiters.push_back(node);
-    t->set_state((flags & wait_interruptible)
-                     ? thread_state::SLEEPING_INTERRUPTIBLE
-                     : thread_state::SLEEPING_UNINTERRUPTIBLE);
-    scheduler::remove(t);
-    scheduler::switch_next();
+    thread_state state = (flags & wait_interruptible)
+                             ? thread_state::SLEEPING_INTERRUPTIBLE
+                             : thread_state::SLEEPING_UNINTERRUPTIBLE;
+    scheduler::sleep(state);
     int ret = 0;
     // Check if a signal is pending
     if (!node.normal_wake) {
@@ -23,14 +22,11 @@ int wait_queue::wait(int flags)
     return ret;
 }
 
-bool wait_queue::insert(int flags)
+bool wait_queue::insert()
 {
     thread* t             = scheduler::get_current_thread();
     wait_queue_node* node = new wait_queue_node(t);
     this->waiters.push_back(*node);
-    t->set_state((flags & wait_interruptible)
-                     ? thread_state::SLEEPING_INTERRUPTIBLE
-                     : thread_state::SLEEPING_UNINTERRUPTIBLE);
     return true;
 }
 

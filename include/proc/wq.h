@@ -36,8 +36,8 @@ public:
      * and checking for the wake reason
      */
     int wait(int flags);
-    bool insert(int flags);
 
+    bool insert();
     bool remove();
 
     void wakeup();

@@ -74,8 +74,7 @@ int poll_table::poll(time_t timeout)
         // No gotos :(
         if (found)
             break;
-        scheduler::remove(scheduler::get_current_thread());
-        scheduler::switch_next();
+        scheduler::sleep(thread_state::SLEEPING_INTERRUPTIBLE);
         // TODO: Check if a signal is the reason why we woke
     }
     // Now let's clean up :)
@@ -94,7 +93,7 @@ void poll_table::bind(size_t offset, scheduler::wait_queue& queue)
 {
     if (!this->targets[offset].registered) {
         this->targets[offset].queue = &queue;
-        queue.insert(scheduler::wait_interruptible);
+        queue.insert();
         this->targets[offset].registered = true;
     }
 }

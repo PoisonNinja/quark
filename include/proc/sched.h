@@ -15,6 +15,9 @@ void init();
 void late_init();
 void switch_next();
 
+// Sets the process status, remove from the scheduler, and switch out
+void sleep(thread_state state);
+
 process* get_current_process();
 thread* get_current_thread();
 

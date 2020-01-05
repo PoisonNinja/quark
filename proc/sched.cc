@@ -84,6 +84,20 @@ void switch_next()
     old->switch_thread(next_thread);
 }
 
+void sleep(thread_state state)
+{
+    thread* curr = scheduler::get_current_thread();
+    if (state != thread_state::SLEEPING_INTERRUPTIBLE &&
+        state != thread_state::SLEEPING_UNINTERRUPTIBLE) {
+        log::printk(log::log_level::WARNING,
+                    "TID %d attempted to sleep with wrong state\n",
+                    curr->get_tid());
+    }
+    curr->set_state(state);
+    remove(curr);
+    switch_next();
+}
+
 void init()
 {
     // Print a message in case something goes wrong when initializing

@@ -8,15 +8,6 @@ namespace scheduler
 {
 constexpr int wait_interruptible = (1 << 0);
 
-struct wait_queue_node {
-    wait_queue_node(thread* t)
-        : waiter(t)
-        , normal_wake(false){};
-    thread* waiter;
-    libcxx::node<wait_queue_node> node;
-    bool normal_wake;
-};
-
 class wait_queue
 {
 public:
@@ -43,6 +34,15 @@ public:
     void wakeup();
 
 private:
+    struct wait_queue_node {
+        wait_queue_node(thread* t)
+            : waiter(t)
+            , normal_wake(false){};
+        thread* waiter;
+        libcxx::node<wait_queue_node> node;
+        bool normal_wake;
+    };
+
     libcxx::list<wait_queue_node, &wait_queue_node::node> waiters;
 };
 } // namespace scheduler

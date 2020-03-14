@@ -7,5 +7,6 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/signal.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/syscall.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/thread.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/work.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/wq.cc
 )

@@ -6,6 +6,7 @@
 #include <mm/virtual.h>
 #include <proc/ptable.h>
 #include <proc/sched.h>
+#include <proc/work.h>
 
 namespace scheduler
 {
@@ -121,6 +122,7 @@ void init()
 void late_init()
 {
     kidle = create_kernel_thread(idle, nullptr);
+    scheduler::work::init();
 }
 
 process* get_current_process()

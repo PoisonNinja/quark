@@ -139,7 +139,7 @@ void thread::switch_thread(thread* next)
     do_task_switch(&this->tcb.kernel_stack, &next->tcb.kernel_stack);
 }
 
-thread* create_kernel_thread(process* p, void (*entry_point)(void*), void* data)
+thread* create_thread(process* p, void (*entry_point)(void*), void* data)
 {
     thread* kthread = p->create_thread();
     struct thread_context ctx;

@@ -28,4 +28,6 @@ bool online();
 bool add_process(process* process);
 process* find_process(pid_t pid);
 bool remove_process(pid_t pid);
+
+thread* create_kernel_thread(void (*entry_point)(void*), void* data);
 }; // namespace scheduler

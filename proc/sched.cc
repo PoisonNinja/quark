@@ -120,7 +120,7 @@ void init()
 
 void late_init()
 {
-    kidle = create_kernel_thread(kernel_process, idle, nullptr);
+    kidle = create_kernel_thread(idle, nullptr);
 }
 
 process* get_current_process()
@@ -151,5 +151,10 @@ process* find_process(pid_t pid)
 bool remove_process(pid_t pid)
 {
     return ptable.remove(pid);
+}
+
+thread* create_kernel_thread(void (*entry_point)(void*), void* data)
+{
+    return create_thread(kernel_process, entry_point, data);
 }
 } // namespace scheduler

@@ -63,21 +63,14 @@ public:
         , prev(nullptr)
     {
     }
-    node(node const&)
-    {
-    }
-    node& operator=(node const& n)
-    {
-        this->next = n.next;
-        this->prev = n.prev;
-        return *this;
-    }
 };
 
 template <typename T, libcxx::node<T> T::*Link>
 class list
 {
+private:
     libcxx::node<T> content;
+    size_t _size;
 
 public:
     class iterator
@@ -132,9 +125,20 @@ public:
     };
 
     list()
+        : _size(0)
     {
         this->content.prev = &this->content;
     }
+
+    ~list()
+    {
+        // Do nothing
+    }
+
+    // It doesn't make sense to copy a list
+    list(const list& other) = delete;
+    list& operator=(const list& other) = delete;
+
     list<T, Link>::iterator begin()
     {
         return list<T, Link>::iterator(&this->content);
@@ -152,9 +156,25 @@ public:
     {
         return *(this->content.prev->prev->next);
     }
+    T& pop_front()
+    {
+        T& _front = front();
+        erase(iterator_to(_front));
+        return _front;
+    }
+    T& pop_back()
+    {
+        T& _back = back();
+        erase(iterator_to(_back));
+        return _back;
+    }
     bool empty() const
     {
         return &this->content == this->content.prev;
+    }
+    constexpr size_t size() const
+    {
+        return this->size;
     }
     void push_back(T& node)
     {
@@ -171,12 +191,15 @@ public:
                            : this->content.prev) = &(node.*Link);
         (node.*Link).prev                        = pos.current;
         pos.current->next                        = &node;
+
+        this->_size++;
     }
     list<T, Link>::iterator erase(list<T, Link>::iterator it)
     {
         it.current->next = (it.current->next->*Link).next;
         (it.current->next ? (it.current->next->*Link).prev
                           : this->content.prev) = it.current;
+        this->_size--;
         return it;
     }
     list<T, Link>::iterator iterator_to(T& value)
@@ -187,6 +210,7 @@ public:
     {
         this->content      = libcxx::node<T>();
         this->content.prev = &this->content;
+        this->_size        = 0;
     }
 };
 } // namespace libcxx

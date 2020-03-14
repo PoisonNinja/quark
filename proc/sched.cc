@@ -1,7 +1,7 @@
 #include <cpu/cpu.h>
 #include <cpu/interrupt.h>
 #include <kernel.h>
-#include <lib/list.h>
+#include <lib/queue.h>
 #include <lib/string.h>
 #include <mm/virtual.h>
 #include <proc/ptable.h>
@@ -11,7 +11,7 @@ namespace scheduler
 {
 namespace
 {
-libcxx::list<thread, &thread::scheduler_node> run_queue;
+libcxx::queue<thread, &thread::scheduler_node> run_queue;
 thread* current_thread  = nullptr;
 process* kernel_process = nullptr;
 thread* kidle           = nullptr;
@@ -40,13 +40,13 @@ pid_t get_free_pid()
 bool insert(thread* thread)
 {
     thread->set_state(thread_state::RUNNABLE);
-    run_queue.push_front(*thread);
+    run_queue.push(*thread);
     return true;
 }
 
 bool remove(thread* thread)
 {
-    run_queue.erase(run_queue.iterator_to(*thread));
+    run_queue.erase(*thread);
     return true;
 }
 
@@ -57,8 +57,8 @@ thread* next()
         next = kidle;
     } else {
         next = &(run_queue.front());
-        remove(next);
-        run_queue.push_back(*next);
+        run_queue.pop();
+        run_queue.push(*next);
     }
     return next;
 }

@@ -258,28 +258,24 @@ union aligned_storage_helper {
     maybe<long double> h;
 };
 
-template <size_t Cap,
-          size_t Align =
-              libcxx::alignment_of<aligned_storage_helper<Cap>>::value>
+template <size_t Cap, size_t Align = alignof(aligned_storage_helper<Cap>)>
 struct aligned_storage {
     using type = libcxx::aligned_storage_t<Cap, Align>;
 };
 
-template <size_t Cap,
-          size_t Align =
-              libcxx::alignment_of<aligned_storage_helper<Cap>>::value>
+template <size_t Cap, size_t Align = alignof(aligned_storage_helper<Cap>)>
 using aligned_storage_t = typename aligned_storage<Cap, Align>::type;
 #else
 using libcxx::aligned_storage;
 using libcxx::aligned_storage_t;
 #endif
 
-template <typename T>
+template <class T>
 struct wrapper {
     using type = T;
 };
 
-template <typename R, typename... Args>
+template <class R, typename... Args>
 struct vtable {
     using storage_ptr_t = void *;
 
@@ -297,18 +293,16 @@ struct vtable {
             // TODO: Probably should abort here
             // throw libcxx::bad_function_call();
         }}
-        , copy_ptr{[](storage_ptr_t, storage_ptr_t) noexcept->void{}}
-        , relocate_ptr{[](storage_ptr_t, storage_ptr_t) noexcept->void{}}
-        , destructor_ptr{[](storage_ptr_t) noexcept->void{}}
+        , copy_ptr{[](storage_ptr_t, storage_ptr_t) -> void {}}
+        , relocate_ptr{[](storage_ptr_t, storage_ptr_t) -> void {}}
+        , destructor_ptr{[](storage_ptr_t) -> void {}}
     {
     }
 
-    template <typename C>
+    template <class C>
     explicit constexpr vtable(wrapper<C>) noexcept
-        : invoke_ptr{[](storage_ptr_t storage_ptr, Args && ... args) noexcept(
-                         noexcept(libcxx::declval<C>()(args...)))
-                         ->R{return (*static_cast<C *>(storage_ptr))(
-                             libcxx::forward<Args>(args)...);
+        : invoke_ptr{ [](storage_ptr_t storage_ptr, Args&&... args) -> R{return (*static_cast<C *>(storage_ptr))(
+                             static_cast<Args&&>(args)...);
 }
 } // namespace function_detail
 ,
@@ -323,24 +317,23 @@ struct vtable {
             static_cast<C *>(src_ptr)->~C();
         } // namespace libcxx
     },
-    destructor_ptr{[](storage_ptr_t src_ptr) noexcept->void{
+    destructor_ptr{[](storage_ptr_t src_ptr) ->void{
         static_cast<C *>(src_ptr)->~C();
 } // namespace libcxx
 } // namespace libcxx
-{
-}
+    {
+    }
 
-vtable(const vtable &) = delete;
-vtable(vtable &&)      = delete;
+    vtable(const vtable &) = delete;
+    vtable(vtable &&)      = delete;
 
-vtable &operator=(const vtable &) = delete;
-vtable &operator=(vtable &&) = delete;
+    vtable &operator=(const vtable &) = delete;
+    vtable &operator=(vtable &&) = delete;
 
-~vtable() = default;
-}
-;
+    ~vtable() = default;
+};
 
-template <typename R, typename... Args>
+template <class R, class... Args>
 #if __cplusplus >= 201703L
 inline constexpr
 #endif
@@ -357,25 +350,65 @@ struct is_valid_inplace_dst : libcxx::true_type {
 
 } // namespace function_detail
 
-template <typename Signature,
-          size_t Capacity  = function_detail::InplaceFunctionDefaultCapacity,
-          size_t Alignment = libcxx::alignment_of<
-              function_detail::aligned_storage_t<Capacity>>::value>
+template <class Signature,
+          size_t Capacity = function_detail::InplaceFunctionDefaultCapacity,
+          size_t Alignment =
+              alignof(function_detail::aligned_storage_t<Capacity>)>
 class function; // unspecified
 
-template <typename R, typename... Args, size_t Capacity, size_t Alignment>
+namespace function_detail
+{
+template <class>
+struct is_function : libcxx::false_type {
+};
+template <class Sig, size_t Cap, size_t Align>
+struct is_function<function<Sig, Cap, Align>> : libcxx::true_type {
+};
+
+// C++11 MSVC compatible implementation of std::is_invocable_r.
+
+template <class R>
+void accept(R);
+
+template <class, class R, class F, class... Args>
+struct is_invocable_r_impl : libcxx::false_type {
+};
+
+template <class F, class... Args>
+struct is_invocable_r_impl<
+    decltype(libcxx::declval<F>()(libcxx::declval<Args>()...), void()), void, F,
+    Args...> : libcxx::true_type {
+};
+
+template <class F, class... Args>
+struct is_invocable_r_impl<
+    decltype(libcxx::declval<F>()(libcxx::declval<Args>()...), void()),
+    const void, F, Args...> : libcxx::true_type {
+};
+
+template <class R, class F, class... Args>
+struct is_invocable_r_impl<decltype(accept<R>(libcxx::declval<F>()(
+                               libcxx::declval<Args>()...))),
+                           R, F, Args...> : libcxx::true_type {
+};
+
+template <class R, class F, class... Args>
+using is_invocable_r = is_invocable_r_impl<void, R, F, Args...>;
+} // namespace function_detail
+
+template <class R, class... Args, size_t Capacity, size_t Alignment>
 class function<R(Args...), Capacity, Alignment>
 {
-public:
-    using capacity  = libcxx::integral_constant<size_t, Capacity>;
-    using alignment = libcxx::integral_constant<size_t, Alignment>;
-
     using storage_t = function_detail::aligned_storage_t<Capacity, Alignment>;
     using vtable_t  = function_detail::vtable<R, Args...>;
     using vtable_ptr_t = const vtable_t *;
 
-    template <typename, size_t, size_t>
+    template <class, size_t, size_t>
     friend class function;
+
+public:
+    using capacity  = libcxx::integral_constant<size_t, Capacity>;
+    using alignment = libcxx::integral_constant<size_t, Alignment>;
 
     function() noexcept
         : vtable_ptr_{
@@ -383,18 +416,17 @@ public:
     {
     }
 
-    template <typename T, typename C = libcxx::decay_t<T>,
-              typename = libcxx::enable_if_t<
-                  !(libcxx::is_same<C, function>::value ||
-                    libcxx::is_convertible<C, function>::value)>>
+    template <class T, class C = libcxx::decay_t<T>,
+              class = libcxx::enable_if_t<
+                  !function_detail::is_function<C>::value &&
+                  function_detail::is_invocable_r<R, C &, Args...>::value>>
     function(T &&closure)
     {
-
         static_assert(sizeof(C) <= Capacity,
                       "function cannot be constructed from object with "
                       "this (large) size");
 
-        static_assert(Alignment % libcxx::alignment_of<C>::value == 0,
+        static_assert(Alignment % alignof(C) == 0,
                       "function cannot be constructed from object with "
                       "this (large) alignment");
 
@@ -402,6 +434,29 @@ public:
         vtable_ptr_ = libcxx::addressof(vt);
 
         ::new (libcxx::addressof(storage_)) C{libcxx::forward<T>(closure)};
+    }
+
+    template <size_t Cap, size_t Align>
+    function(const function<R(Args...), Cap, Align> &other)
+        : function(other.vtable_ptr_, other.vtable_ptr_->copy_ptr,
+                   libcxx::addressof(other.storage_))
+    {
+        static_assert(function_detail::is_valid_inplace_dst<Capacity, Alignment,
+                                                            Cap, Align>::value,
+                      "conversion not allowed");
+    }
+
+    template <size_t Cap, size_t Align>
+    function(function<R(Args...), Cap, Align> &&other) noexcept
+        : function(other.vtable_ptr_, other.vtable_ptr_->relocate_ptr,
+                   libcxx::addressof(other.storage_))
+    {
+        static_assert(function_detail::is_valid_inplace_dst<Capacity, Alignment,
+                                                            Cap, Align>::value,
+                      "conversion not allowed");
+
+        other.vtable_ptr_ =
+            libcxx::addressof(function_detail::empty_vtable<R, Args...>);
     }
 
     function(std::nullptr_t) noexcept
@@ -434,29 +489,15 @@ public:
         return *this;
     }
 
-    function &operator=(const function &other)
+    function &operator=(function other) noexcept
     {
-        if (this != libcxx::addressof(other)) {
-            vtable_ptr_->destructor_ptr(libcxx::addressof(storage_));
+        vtable_ptr_->destructor_ptr(libcxx::addressof(storage_));
 
-            vtable_ptr_ = other.vtable_ptr_;
-            vtable_ptr_->copy_ptr(libcxx::addressof(storage_),
+        vtable_ptr_ = libcxx::exchange(
+            other.vtable_ptr_,
+            libcxx::addressof(function_detail::empty_vtable<R, Args...>));
+        vtable_ptr_->relocate_ptr(libcxx::addressof(storage_),
                                   libcxx::addressof(other.storage_));
-        }
-        return *this;
-    }
-
-    function &operator=(function &&other)
-    {
-        if (this != libcxx::addressof(other)) {
-            vtable_ptr_->destructor_ptr(libcxx::addressof(storage_));
-
-            vtable_ptr_ = libcxx::exchange(
-                other.vtable_ptr_,
-                libcxx::addressof(function_detail::empty_vtable<R, Args...>));
-            vtable_ptr_->relocate_ptr(libcxx::addressof(storage_),
-                                      libcxx::addressof(other.storage_));
-        }
         return *this;
     }
 
@@ -485,34 +526,6 @@ public:
     {
         return vtable_ptr_ !=
                libcxx::addressof(function_detail::empty_vtable<R, Args...>);
-    }
-
-    template <size_t Cap, size_t Align>
-    operator function<R(Args...), Cap, Align>() const &
-    {
-        static_assert(
-            function_detail::is_valid_inplace_dst<Cap, Align, Capacity,
-                                                  Alignment>::value,
-            "conversion not allowed");
-
-        return {vtable_ptr_, vtable_ptr_->copy_ptr,
-                libcxx::addressof(storage_)};
-    }
-
-    template <size_t Cap, size_t Align>
-    operator function<R(Args...), Cap, Align>() &&
-    {
-        static_assert(
-            function_detail::is_valid_inplace_dst<Cap, Align, Capacity,
-                                                  Alignment>::value,
-            "conversion not allowed");
-
-        auto vtable_ptr = libcxx::exchange(
-            vtable_ptr_,
-            libcxx::addressof(function_detail::empty_vtable<R, Args...>));
-
-        return {vtable_ptr, vtable_ptr->relocate_ptr,
-                libcxx::addressof(storage_)};
     }
 
     void swap(function &other)

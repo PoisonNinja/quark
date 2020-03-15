@@ -44,6 +44,7 @@ public:
                       addr_t alignment);
 
     void exit(bool is_signal, int val);
+    void cleanup();
 
     pid_t wait(pid_t pid, int* status, int options);
     void notify_exit(process* child);

@@ -11,6 +11,7 @@
 #include <proc/sched.h>
 #include <proc/uthread.h>
 #include <proc/wait.h>
+#include <proc/work.h>
 
 extern "C" void signal_return();
 void* signal_return_location = reinterpret_cast<void*>(&signal_return);
@@ -338,8 +339,14 @@ void process::exit(bool is_signal, int val)
     if (this->parent) {
         this->parent->notify_exit(this);
     }
-    // memory::physical::free(this->address_space);
+    scheduler::work::schedule(libcxx::bind(&process::cleanup, this));
     scheduler::remove_process(this->pid);
+}
+
+void process::cleanup()
+{
+    // TODO: Asserts
+    memory::physical::free(this->address_space);
 }
 
 pid_t process::wait(pid_t pid, int* status, int options)

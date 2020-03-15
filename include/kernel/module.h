@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/list.h>
-#include <proc/elf.h>
+#include <proc/binfmt/elf.h>
 #include <types.h>
 
 struct module {

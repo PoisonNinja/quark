@@ -5,7 +5,7 @@
 #include <kernel/symbol.h>
 #include <lib/string.h>
 #include <lib/utility.h>
-#include <proc/elf.h>
+#include <proc/binfmt/elf.h>
 
 namespace
 {

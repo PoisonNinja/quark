@@ -3,7 +3,7 @@
 #include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
-#include <proc/elf.h>
+#include <proc/binfmt/elf.h>
 #include <proc/process.h>
 #include <proc/sched.h>
 

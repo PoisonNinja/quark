@@ -1,6 +1,5 @@
 target_sources(quark.kernel
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/elf.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/process.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/ptable.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/sched.cc
@@ -10,3 +9,5 @@ target_sources(quark.kernel
     ${CMAKE_CURRENT_SOURCE_DIR}/work.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/wq.cc
 )
+
+add_subdirectory(binfmt)

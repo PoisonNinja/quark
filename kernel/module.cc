@@ -2,7 +2,7 @@
 #include <kernel/module.h>
 #include <kernel/symbol.h>
 #include <lib/string.h>
-#include <proc/elf.h>
+#include <proc/binfmt/elf.h>
 
 namespace
 {

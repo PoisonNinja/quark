@@ -1,7 +1,7 @@
 #include <kernel.h>
 #include <kernel/module.h>
 #include <kernel/symbol.h>
-#include <proc/elf.h>
+#include <proc/binfmt/elf.h>
 
 bool relocate_module(module* mod, elf::elf_sym* symtab,
                      const char* string_table)

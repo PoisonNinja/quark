@@ -6,7 +6,6 @@
 #include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
-#include <proc/elf.h>
 #include <proc/process.h>
 #include <proc/thread.h>
 #include <proc/uthread.h>

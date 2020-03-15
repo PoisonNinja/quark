@@ -19,15 +19,17 @@ scheduler::wait_queue worker_queue;
 
 void do_work(void*)
 {
-    if (work_queue.empty()) {
-        worker_queue.wait(wait_interruptible);
-    } else {
-        struct work& w = work_queue.front();
-        work_queue.pop();
-        w.handler();
-        delete (&w);
+    while (1) {
+        if (work_queue.empty()) {
+            worker_queue.wait(wait_interruptible);
+        } else {
+            struct work& w = work_queue.front();
+            work_queue.pop();
+            w.handler();
+            delete (&w);
+        }
     }
-}
+} // namespace
 } // namespace
 
 void schedule(work_handler_t handler)
@@ -35,11 +37,12 @@ void schedule(work_handler_t handler)
     struct work* w = new struct work;
     w->handler     = handler;
     work_queue.push(*w);
+    worker_queue.wakeup();
 }
 
 void init()
 {
-    create_kernel_thread(do_work, nullptr);
+    scheduler::insert(create_kernel_thread(do_work, nullptr));
 }
 } // namespace work
 } // namespace scheduler

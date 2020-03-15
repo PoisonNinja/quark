@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <lib/memory.h>
 #include <lib/new.h>
-#include <lib/type_traits.h>
 #include <lib/utility.h>
+#include <type_traits>
 #include <types.h>
 
 namespace libcxx
@@ -72,10 +73,10 @@ class reference_wrapper;
 namespace detail
 {
 template <class T>
-struct is_reference_wrapper : libcxx::false_type {
+struct is_reference_wrapper : std::false_type {
 };
 template <class U>
-struct is_reference_wrapper<libcxx::reference_wrapper<U>> : libcxx::true_type {
+struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {
 };
 template <class T>
 constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
@@ -88,18 +89,18 @@ constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
 template <class T, class Type, class T1, class... Args>
 decltype(auto) INVOKE(Type T::*f, T1 &&t1, Args &&... args)
 {
-    if constexpr (libcxx::is_member_function_pointer_v<decltype(f)>) {
-        if constexpr (libcxx::is_base_of_v<T, libcxx::decay_t<T1>>)
+    if constexpr (std::is_member_function_pointer_v<decltype(f)>) {
+        if constexpr (std::is_base_of_v<T, std::decay_t<T1>>)
             return (libcxx::forward<T1>(t1).*f)(libcxx::forward<Args>(args)...);
-        else if constexpr (is_reference_wrapper_v<libcxx::decay_t<T1>>)
+        else if constexpr (is_reference_wrapper_v<std::decay_t<T1>>)
             return (t1.get().*f)(libcxx::forward<Args>(args)...);
         else
             return ((*libcxx::forward<T1>(t1)).*
                     f)(libcxx::forward<Args>(args)...);
     } else {
-        if constexpr (libcxx::is_base_of_v<T, libcxx::decay_t<T1>>)
+        if constexpr (std::is_base_of_v<T, std::decay_t<T1>>)
             return libcxx::forward<T1>(t1).*f;
-        else if constexpr (is_reference_wrapper_v<libcxx::decay_t<T1>>)
+        else if constexpr (is_reference_wrapper_v<std::decay_t<T1>>)
             return t1.get().*f;
         else
             return (*libcxx::forward<T1>(t1)).*f;
@@ -116,11 +117,11 @@ template <typename AlwaysVoid, typename, typename...>
 struct invoke_result {
 };
 template <typename F, typename... Args>
-struct invoke_result<decltype(void(detail::INVOKE(libcxx::declval<F>(),
-                                                  libcxx::declval<Args>()...))),
+struct invoke_result<decltype(void(detail::INVOKE(std::declval<F>(),
+                                                  std::declval<Args>()...))),
                      F, Args...> {
-    using type = decltype(
-        detail::INVOKE(libcxx::declval<F>(), libcxx::declval<Args>()...));
+    using type =
+        decltype(detail::INVOKE(std::declval<F>(), std::declval<Args>()...));
 };
 } // namespace detail
 
@@ -194,11 +195,12 @@ reference_wrapper(reference_wrapper<T>)->reference_wrapper<T>;
  * From libcxx
  */
 template <class _Tp>
-struct __is_placeholder : public integral_constant<int, 0> {
+struct __is_placeholder : public std::integral_constant<int, 0> {
 };
 
 template <class _Tp>
-struct is_placeholder : public __is_placeholder<typename remove_cv<_Tp>::type> {
+struct is_placeholder
+    : public __is_placeholder<typename std::remove_cv<_Tp>::type> {
 };
 
 namespace placeholders
@@ -222,7 +224,7 @@ struct __ph {
 
 template <int _Np>
 struct __is_placeholder<placeholders::__ph<_Np>>
-    : public integral_constant<int, _Np> {
+    : public std::integral_constant<int, _Np> {
 };
 
 /*
@@ -246,7 +248,7 @@ union aligned_storage_helper {
         double a[4];
     };
     template <class T>
-    using maybe = libcxx::conditional_t<(Cap >= sizeof(T)), T, char>;
+    using maybe = std::conditional_t<(Cap >= sizeof(T)), T, char>;
     char real_data[Cap];
     maybe<int> a;
     maybe<long> b;
@@ -260,7 +262,7 @@ union aligned_storage_helper {
 
 template <size_t Cap, size_t Align = alignof(aligned_storage_helper<Cap>)>
 struct aligned_storage {
-    using type = libcxx::aligned_storage_t<Cap, Align>;
+    using type = std::aligned_storage_t<Cap, Align>;
 };
 
 template <size_t Cap, size_t Align = alignof(aligned_storage_helper<Cap>)>
@@ -341,7 +343,7 @@ inline constexpr
         empty_vtable{};
 
 template <size_t DstCap, size_t DstAlign, size_t SrcCap, size_t SrcAlign>
-struct is_valid_inplace_dst : libcxx::true_type {
+struct is_valid_inplace_dst : std::true_type {
     static_assert(DstCap >= SrcCap,
                   "Can't squeeze larger function into a smaller one");
 
@@ -359,10 +361,10 @@ class function; // unspecified
 namespace function_detail
 {
 template <class>
-struct is_function : libcxx::false_type {
+struct is_function : std::false_type {
 };
 template <class Sig, size_t Cap, size_t Align>
-struct is_function<function<Sig, Cap, Align>> : libcxx::true_type {
+struct is_function<function<Sig, Cap, Align>> : std::true_type {
 };
 
 // C++11 MSVC compatible implementation of std::is_invocable_r.
@@ -371,25 +373,25 @@ template <class R>
 void accept(R);
 
 template <class, class R, class F, class... Args>
-struct is_invocable_r_impl : libcxx::false_type {
+struct is_invocable_r_impl : std::false_type {
 };
 
 template <class F, class... Args>
-struct is_invocable_r_impl<
-    decltype(libcxx::declval<F>()(libcxx::declval<Args>()...), void()), void, F,
-    Args...> : libcxx::true_type {
+struct is_invocable_r_impl<decltype(std::declval<F>()(std::declval<Args>()...),
+                                    void()),
+                           void, F, Args...> : std::true_type {
 };
 
 template <class F, class... Args>
-struct is_invocable_r_impl<
-    decltype(libcxx::declval<F>()(libcxx::declval<Args>()...), void()),
-    const void, F, Args...> : libcxx::true_type {
+struct is_invocable_r_impl<decltype(std::declval<F>()(std::declval<Args>()...),
+                                    void()),
+                           const void, F, Args...> : std::true_type {
 };
 
 template <class R, class F, class... Args>
-struct is_invocable_r_impl<decltype(accept<R>(libcxx::declval<F>()(
-                               libcxx::declval<Args>()...))),
-                           R, F, Args...> : libcxx::true_type {
+struct is_invocable_r_impl<decltype(accept<R>(
+                               std::declval<F>()(std::declval<Args>()...))),
+                           R, F, Args...> : std::true_type {
 };
 
 template <class R, class F, class... Args>
@@ -407,8 +409,8 @@ class function<R(Args...), Capacity, Alignment>
     friend class function;
 
 public:
-    using capacity  = libcxx::integral_constant<size_t, Capacity>;
-    using alignment = libcxx::integral_constant<size_t, Alignment>;
+    using capacity  = std::integral_constant<size_t, Capacity>;
+    using alignment = std::integral_constant<size_t, Alignment>;
 
     function() noexcept
         : vtable_ptr_{
@@ -416,8 +418,8 @@ public:
     {
     }
 
-    template <class T, class C = libcxx::decay_t<T>,
-              class = libcxx::enable_if_t<
+    template <class T, class C = std::decay_t<T>,
+              class = std::enable_if_t<
                   !function_detail::is_function<C>::value &&
                   function_detail::is_invocable_r<R, C &, Args...>::value>>
     function(T &&closure)
@@ -579,10 +581,10 @@ private:
 // this is only an academic example, it should strive to stay extremly simple
 // and straightforward, so this improvment will not be applied. I just wanted
 // anyone wanting to use this somewhere to be aware of this caveheat. Moreover,
-// you should use libcxx::bind anyway.
+// you should use std::bind anyway.
 
 template <size_t n>
-using index_constant = libcxx::integral_constant<size_t, n>;
+using index_constant = std::integral_constant<size_t, n>;
 
 template <class... Args>
 class binder_list
@@ -615,16 +617,15 @@ public:
     }
 
     template <class T,
-              libcxx::enable_if_t<(libcxx::is_placeholder<
-                                       libcxx::remove_reference_t<T>>::value ==
-                                   0)> * = nullptr>
+              std::enable_if_t<(libcxx::is_placeholder<std::remove_reference_t<
+                                    T>>::value == 0)> * = nullptr>
     constexpr decltype(auto) operator[](T &&t)
     {
         return libcxx::forward<T>(t);
     }
 
-    template <class T, libcxx::enable_if_t<(libcxx::is_placeholder<T>::value !=
-                                            0)> * = nullptr>
+    template <class T, std::enable_if_t<(libcxx::is_placeholder<T>::value != 0)>
+                           * = nullptr>
     constexpr decltype(auto) operator[](T)
     {
         return libcxx::get<libcxx::is_placeholder<T>::value - 1>(

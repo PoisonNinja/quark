@@ -11,20 +11,6 @@
 
 void* syscall_table[256];
 
-namespace
-{
-libcxx::intrusive_ptr<filesystem::descriptor> get_start(const char* path)
-{
-    libcxx::intrusive_ptr<filesystem::descriptor> start(nullptr);
-    if (*path == '/') {
-        start = scheduler::get_current_process()->get_root();
-    } else {
-        start = start = scheduler::get_current_process()->get_cwd();
-    }
-    return start;
-}
-} // namespace
-
 namespace syscall
 {
 static long sys_read(int fd, void* buffer, size_t count)
@@ -53,7 +39,8 @@ static long sys_open(const char* path, int flags, mode_t mode)
 {
     log::printk(log::log_level::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
-    auto [err, file] = get_start(path)->open(path, flags, mode);
+    auto [err, file] = scheduler::get_current_process()->get_start(path)->open(
+        path, flags, mode);
     if (!file) {
         return -ENOENT;
     }
@@ -74,7 +61,8 @@ static long sys_close(int fd)
 static long sys_stat(const char* path, struct filesystem::stat* st)
 {
     log::printk(log::log_level::DEBUG, "[sys_stat] = %s, %p\n", path, st);
-    auto [err, file] = get_start(path)->open(path, 0, 0);
+    auto [err, file] =
+        scheduler::get_current_process()->get_start(path)->open(path, 0, 0);
     if (!file) {
         return -EBADF;
     }
@@ -211,7 +199,8 @@ static long sys_execve(const char* path, const char* old_argv[],
         envp[i] = new char[libcxx::strlen(old_envp[i])];
         libcxx::strcpy(const_cast<char*>(envp[i]), old_envp[i]);
     }
-    auto [err, file] = get_start(path)->open(path, 0, 0);
+    auto [err, file] =
+        scheduler::get_current_process()->get_start(path)->open(path, 0, 0);
     if (!file) {
         delete[] envp;
         delete[] argv;
@@ -260,8 +249,8 @@ static long sys_kill(pid_t pid, int signum)
 static long sys_chdir(const char* path)
 {
     log::printk(log::log_level::DEBUG, "[sys_chdir] %s\n", path);
-    auto [err, dir] =
-        get_start(path)->open(path, filesystem::descriptor_flags::F_READ, 0);
+    auto [err, dir] = scheduler::get_current_process()->get_start(path)->open(
+        path, filesystem::descriptor_flags::F_READ, 0);
     if (err) {
         return err;
     }
@@ -272,7 +261,7 @@ static long sys_chdir(const char* path)
 static long sys_mkdir(const char* path, mode_t mode)
 {
     log::printk(log::log_level::DEBUG, "[sys_mkdir] %s %X\n", path, mode);
-    return get_start(path)->mkdir(path, mode);
+    return scheduler::get_current_process()->get_start(path)->mkdir(path, mode);
 }
 
 static long sys_sigpending(sigset_t* set)
@@ -291,14 +280,15 @@ static long sys_mknod(const char* path, mode_t mode, dev_t dev)
 {
     log::printk(log::log_level::DEBUG, "[sys_mknod] %s %X %X\n", path, mode,
                 dev);
-    return get_start(path)->mknod(path, mode, dev);
+    return scheduler::get_current_process()->get_start(path)->mknod(path, mode,
+                                                                    dev);
 }
 
 static long sys_chroot(const char* path)
 {
     log::printk(log::log_level::DEBUG, "[sys_chroot] %s\n", path);
-    auto [err, dir] =
-        get_start(path)->open(path, filesystem::descriptor_flags::F_READ, 0);
+    auto [err, dir] = scheduler::get_current_process()->get_start(path)->open(
+        path, filesystem::descriptor_flags::F_READ, 0);
     if (err) {
         return err;
     }
@@ -312,7 +302,8 @@ static long sys_mount(const char* source, const char* target,
 {
     log::printk(log::log_level::DEBUG, "[sys_mount] %s %s %s %llX %p\n", source,
                 target, filesystemtype, mountflags, data);
-    return get_start(source)->mount(source, target, filesystemtype, mountflags);
+    return scheduler::get_current_process()->get_start(source)->mount(
+        source, target, filesystemtype, mountflags);
 }
 
 static long sys_init_module(void* module_image, unsigned long len,

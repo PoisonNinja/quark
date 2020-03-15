@@ -54,6 +54,7 @@ public:
     int load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
              const char* argv[], int envc, const char* envp[],
              struct thread_context& ctx);
+    libcxx::intrusive_ptr<filesystem::descriptor> get_start(const char* path);
 
     thread* create_thread();
 

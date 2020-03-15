@@ -84,6 +84,18 @@ bool process::remove_desc(int fd)
     return this->fds.remove(fd);
 }
 
+libcxx::intrusive_ptr<filesystem::descriptor>
+process::get_start(const char* path)
+{
+    libcxx::intrusive_ptr<filesystem::descriptor> start(nullptr);
+    if (*path == '/') {
+        start = this->root;
+    } else {
+        start = this->cwd;
+    }
+    return start;
+}
+
 void process::set_tls_data(addr_t base, addr_t filesz, addr_t memsz,
                            addr_t alignment)
 {

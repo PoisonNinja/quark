@@ -16,6 +16,9 @@ void* signal_return_location = reinterpret_cast<void*>(&signal_return);
 
 namespace elf
 {
+void setup_registers(struct thread_context& ctx, addr_t entry, uint64_t argc,
+                     addr_t argv, addr_t envp, addr_t uthread, addr_t stack);
+
 class ELF : public binfmt::binfmt
 {
 public:
@@ -245,18 +248,13 @@ int ELF::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     target_envp[envc] = 0;
     libcxx::memset(reinterpret_cast<void*>(stack_zone), 0, 0x1000);
 
-    // TODO: Move to architecture
-    libcxx::memset(&ctx, 0, sizeof(ctx));
-    ctx.rip = header->e_entry;
-    ctx.rdi = argc;
-    ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
-    ctx.rdx = reinterpret_cast<uint64_t>(target_envp);
-    ctx.cs  = 0x20 | 3;
-    ctx.ds  = 0x18 | 3;
-    ctx.ss  = 0x18 | 3;
-    ctx.fs  = reinterpret_cast<uint64_t>(uthread);
-    ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
-    ctx.rflags        = 0x200;
+    // Let the architecture setup the registers
+    setup_registers(ctx, header->e_entry, argc,
+                    reinterpret_cast<addr_t>(target_argv),
+                    reinterpret_cast<addr_t>(target_envp),
+                    reinterpret_cast<addr_t>(uthread),
+                    reinterpret_cast<addr_t>(stack_zone) + 0x1000);
+
     scheduler::get_current_thread()->set_context(ctx);
 
     return 0;

@@ -109,11 +109,16 @@ int Script::load(struct ::binfmt::binprm& prm)
 
     auto [err, f] = start->open(cmd_start, 0, 0);
     if (!f) {
+        delete[] new_argv;
         return -1;
     }
 
-    return scheduler::get_current_process()->load(
+    int ret = scheduler::get_current_process()->load(
         cmd_start, f, new_argc, new_argv, prm.envc, prm.envp, prm.ctx);
+
+    delete[] new_argv;
+
+    return ret;
 }
 
 namespace

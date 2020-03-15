@@ -30,6 +30,7 @@ namespace virt
 #define MAP_FILE 0x000
 #define MAP_ANONYMOUS 0x020
 #define MAP_ANON MAP_ANONYMOUS
+#define MAP_GROWSDOWN 0x40
 
 #define MAP_FAILED ((void *)-1)
 

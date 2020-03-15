@@ -283,16 +283,25 @@ void* process::mmap(addr_t addr, size_t length, int prot, int flags,
         // TODO: Verify the file is actually usable
     }
     addr_t placement = addr;
+
     if (!(flags & MAP_FIXED)) {
         log::printk(log::log_level::DEBUG, "[mmap] Kernel selecting mapping\n");
-        auto [ret, value] = this->vma.locate_range(
-            (addr) ? reinterpret_cast<addr_t>(addr) : USER_START, length);
+        bool ret;
+        addr_t value;
+        if (!(flags & MAP_GROWSDOWN)) {
+            libcxx::tie(ret, value) = this->vma.locate_range(
+                (addr) ? reinterpret_cast<addr_t>(addr) : USER_START, length);
+        } else {
+            libcxx::tie(ret, value) = this->vma.locate_range_reverse(
+                (addr) ? reinterpret_cast<addr_t>(addr) : USER_END, length);
+        }
         if (!ret) {
             log::printk(log::log_level::WARNING,
                         "[sys_mmap] Failed to allocate area for mmap\n");
             return MAP_FAILED;
         }
         log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n", value);
+        placement = value;
     } else {
         log::printk(log::log_level::DEBUG,
                     "[mmap] mmap requested with fixed address %p\n", addr);
@@ -301,7 +310,7 @@ void* process::mmap(addr_t addr, size_t length, int prot, int flags,
         }
     }
     // Remove old mappings
-    this->munmap(addr, length);
+    this->munmap(placement, length);
     this->vma.add_vmregion(placement, length);
     int real_flags = memory::virt::prot_to_flags(prot);
     memory::virt::map_range(placement, length,

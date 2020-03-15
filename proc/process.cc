@@ -6,15 +6,12 @@
 #include <lib/string.h>
 #include <mm/physical.h>
 #include <mm/virtual.h>
-#include <proc/binfmt/elf.h>
+#include <proc/binfmt/binfmt.h>
 #include <proc/process.h>
 #include <proc/sched.h>
 #include <proc/uthread.h>
 #include <proc/wait.h>
 #include <proc/work.h>
-
-extern "C" void signal_return();
-void* signal_return_location = reinterpret_cast<void*>(&signal_return);
 
 process::process(process* parent)
     : pid(scheduler::get_free_pid())
@@ -130,137 +127,27 @@ int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
                   const char* argv[], int envc, const char* envp[],
                   struct thread_context& ctx)
 {
+    binfmt::binfmt* fmt = binfmt::get(file);
+    if (!fmt) {
+        return -ENOENT;
+    }
+
+    log::printk(log::log_level::INFO,
+                "process::load: Using %s to load binary\n", fmt->name());
+
     this->vma.reset();
-    auto [success, entry] = elf::load(file);
-    /*
-     * elf::load returns a pair. The first parameter (bool) indicates status,
-     * and second parameter is the entry address. If the first parameter is
-     * false, the second parameter is undefined (but usually 0)
-     */
-    if (!success) {
-        return -1;
-    }
-    size_t argv_size = sizeof(char*) * (argc + 1); // argv is null terminated
-    size_t envp_size = sizeof(char*) * (envc + 1); // envp is null terminated
-    for (int i = 0; i < argc; i++) {
-        argv_size += libcxx::strlen(argv[i]) + 1;
-    };
-    for (int i = 0; i < envc; i++) {
-        envp_size += libcxx::strlen(envp[i]) + 1;
-    }
-
-    addr_t argv_zone, envp_zone, stack_zone, sigreturn_zone, tls_zone;
-
-    size_t tls_raw_size =
-        libcxx::round_up(this->tls_memsz, this->tls_alignment);
-    size_t tls_size = tls_raw_size + sizeof(struct uthread);
-    tls_size        = libcxx::round_up(tls_size, this->tls_alignment);
-
-    libcxx::tie(success, argv_zone) = this->vma.allocate(USER_START, argv_size);
-    if (success) {
-        log::printk(log::log_level::DEBUG, "argv located at %p\n", argv_zone);
-    } else {
-        log::printk(log::log_level::ERROR, "Failed to locate argv\n");
-        return false;
-    }
-    libcxx::tie(success, envp_zone) = this->vma.allocate(USER_START, envp_size);
-    if (success) {
-        log::printk(log::log_level::DEBUG, "envp located at %p\n", envp_zone);
-    } else {
-        log::printk(log::log_level::ERROR, "Failed to locate envp\n");
-        return false;
-    }
-    libcxx::tie(success, stack_zone) =
-        this->vma.allocate_reverse(USER_START, 0x1000);
-    if (success) {
-        log::printk(log::log_level::DEBUG, "Stack located at %p\n", stack_zone);
-    } else {
-        log::printk(log::log_level::ERROR, "Failed to locate stack\n");
-        return false;
-    }
-    libcxx::tie(success, sigreturn_zone) =
-        this->vma.allocate(USER_START, 0x1000);
-    if (success) {
-        log::printk(log::log_level::DEBUG, "Sigreturn page located at %p\n",
-                    sigreturn_zone);
-    } else {
-        log::printk(log::log_level::ERROR, "Failed to locate sigreturn page\n");
-        return false;
-    }
-    libcxx::tie(success, tls_zone) = this->vma.allocate(USER_START, tls_size);
-    if (success) {
-        log::printk(log::log_level::DEBUG, "TLS copy located at %p\n",
-                    tls_zone);
-    } else {
-        log::printk(log::log_level::ERROR, "Failed to locate TLS copy\n");
-        return false;
-    }
-    memory::virt::map_range(argv_zone, argv_size,
-                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    memory::virt::map_range(envp_zone, envp_size,
-                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    memory::virt::map_range(stack_zone, 0x1000,
-                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-    memory::virt::map_range(sigreturn_zone, 0x1000, PAGE_USER | PAGE_WRITABLE);
-    memory::virt::map_range(tls_zone, tls_size,
-                            PAGE_USER | PAGE_NX | PAGE_WRITABLE);
-
-    this->sigreturn = sigreturn_zone;
-    // Copy in sigreturn trampoline code
-    libcxx::memcpy(reinterpret_cast<void*>(sigreturn_zone),
-                   signal_return_location, 0x1000);
-
-    // Make it unwritable
-    memory::virt::protect(sigreturn_zone, PAGE_USER);
-
-    // Copy TLS data into thread specific data
-    libcxx::memcpy(reinterpret_cast<void*>(tls_zone),
-                   reinterpret_cast<void*>(this->tls_base), this->tls_filesz);
-    libcxx::memset(reinterpret_cast<void*>(tls_zone + this->tls_filesz), 0,
-                   this->tls_memsz - this->tls_filesz);
-
-    struct uthread* uthread =
-        reinterpret_cast<struct uthread*>(tls_zone + tls_raw_size);
-    uthread->self = uthread;
-
-    char* target =
-        reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
-    char** target_argv = reinterpret_cast<char**>(argv_zone);
-    for (int i = 0; i < argc; i++) {
-        libcxx::strcpy(target, argv[i]);
-        target_argv[i] = target;
-        target += libcxx::strlen(argv[i]) + 1;
-    }
-    target_argv[argc] = 0;
-    target = reinterpret_cast<char*>(envp_zone + (sizeof(char*) * (envc + 1)));
-    char** target_envp = reinterpret_cast<char**>(envp_zone);
-    for (int i = 0; i < envc; i++) {
-        libcxx::strcpy(target, envp[i]);
-        target_envp[i] = target;
-        target += libcxx::strlen(envp[i]) + 1;
-    }
-    target_envp[envc] = 0;
-    libcxx::memset(reinterpret_cast<void*>(stack_zone), 0, 0x1000);
-
-    // TODO: Move to architecture
-    libcxx::memset(&ctx, 0, sizeof(ctx));
-    ctx.rip = entry;
-    ctx.rdi = argc;
-    ctx.rsi = reinterpret_cast<uint64_t>(target_argv);
-    ctx.rdx = reinterpret_cast<uint64_t>(target_envp);
-    ctx.cs  = 0x20 | 3;
-    ctx.ds  = 0x18 | 3;
-    ctx.ss  = 0x18 | 3;
-    ctx.fs  = reinterpret_cast<uint64_t>(uthread);
-    ctx.rsp = ctx.rbp = reinterpret_cast<uint64_t>(stack_zone) + 0x1000;
-    ctx.rflags        = 0x200;
-    scheduler::get_current_thread()->set_context(ctx);
-    return 0;
+    int res = fmt->load(file, argc, argv, envc, envp, ctx);
+    return res;
 }
 
 addr_t process::get_sigreturn()
 {
     return this->sigreturn;
+}
+
+void process::set_sigreturn(addr_t addr)
+{
+    this->sigreturn = addr;
 }
 
 void* process::mmap(addr_t addr, size_t length, int prot, int flags,

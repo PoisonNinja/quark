@@ -33,6 +33,7 @@ public:
     bool remove_desc(int fd);
 
     addr_t get_sigreturn();
+    void set_sigreturn(addr_t);
 
     // Memory ops
     void* mmap(addr_t addr, size_t length, int prot, int flags,

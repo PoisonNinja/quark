@@ -1,9 +1,9 @@
 #pragma once
 
 #include <climits>
+#include <fs/descriptor.h>
 #include <lib/utility.h>
 #include <proc/thread.h>
-#include <fs/descriptor.h>
 #include <types.h>
 
 namespace elf
@@ -500,9 +500,6 @@ typedef struct elf64_note {
     Elf64_Word n_descsz; /* Content size */
     Elf64_Word n_type;   /* Content type */
 } Elf64_Nhdr;
-
-libcxx::pair<bool, addr_t>
-load(libcxx::intrusive_ptr<filesystem::descriptor> file);
 
 #if BITS == 64
 typedef Elf64_Sym elf_sym;

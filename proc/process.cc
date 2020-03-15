@@ -345,7 +345,9 @@ void process::exit(bool is_signal, int val)
 
 void process::cleanup()
 {
-    // TODO: Asserts
+    // Must be run from a worker thread
+    assert(scheduler::get_current_process() != this);
+
     memory::physical::free(this->address_space);
 }
 

@@ -25,9 +25,7 @@ public:
     virtual const char* name() override;
     virtual bool
     is_match(libcxx::intrusive_ptr<filesystem::descriptor> file) override;
-    int load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
-             const char* argv[], int envc, const char* envp[],
-             struct thread_context& ctx) override;
+    int load(struct ::binfmt::binprm& prm) override;
 };
 
 const char* ELF::name()
@@ -46,14 +44,12 @@ bool ELF::is_match(libcxx::intrusive_ptr<filesystem::descriptor> file)
     return true;
 }
 
-int ELF::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
-              const char* argv[], int envc, const char* envp[],
-              struct thread_context& ctx)
+int ELF::load(struct ::binfmt::binprm& prm)
 {
     process* current_process = scheduler::get_current_process();
 
     uint8_t buffer[sizeof(elf_ehdr)];
-    file->pread(buffer, sizeof(elf_ehdr), 0);
+    prm.file->pread(buffer, sizeof(elf_ehdr), 0);
     process* process = scheduler::get_current_process();
     elf_ehdr* header = reinterpret_cast<elf_ehdr*>(buffer);
     if (libcxx::memcmp(header->e_ident, ELFMAG, 4)) {
@@ -70,8 +66,8 @@ int ELF::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
 
     for (int i = 0; i < header->e_phnum; i++) {
         uint8_t phdr_buffer[sizeof(elf_phdr)];
-        file->pread(phdr_buffer, sizeof(elf_phdr),
-                    header->e_phoff + (header->e_phentsize * i));
+        prm.file->pread(phdr_buffer, sizeof(elf_phdr),
+                        header->e_phoff + (header->e_phentsize * i));
         elf_phdr* phdr = reinterpret_cast<elf_phdr*>(phdr_buffer);
         log::printk(log::log_level::DEBUG, "Header type: %X\n", phdr->p_type);
         if (phdr->p_type == PT_TLS) {
@@ -110,7 +106,7 @@ int ELF::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
             // Compute mmap flags
             int flags = MAP_FIXED | MAP_PRIVATE;
 
-            process->mmap(phdr->p_vaddr, phdr->p_memsz, prot, flags, file,
+            process->mmap(phdr->p_vaddr, phdr->p_memsz, prot, flags, prm.file,
                           phdr->p_offset);
             if (phdr->p_filesz < phdr->p_memsz) {
                 // We're supposed to zero out the remaining
@@ -147,13 +143,15 @@ int ELF::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     log::printk(log::log_level::DEBUG, "Entry point: %p\n", header->e_entry);
     // TODO: More sanity checks
 
-    size_t argv_size = sizeof(char*) * (argc + 1); // argv is null terminated
-    size_t envp_size = sizeof(char*) * (envc + 1); // envp is null terminated
-    for (int i = 0; i < argc; i++) {
-        argv_size += libcxx::strlen(argv[i]) + 1;
+    size_t argv_size =
+        sizeof(char*) * (prm.argc + 1); // argv is null terminated
+    size_t envp_size =
+        sizeof(char*) * (prm.envc + 1); // envp is null terminated
+    for (int i = 0; i < prm.argc; i++) {
+        argv_size += libcxx::strlen(prm.argv[i]) + 1;
     };
-    for (int i = 0; i < envc; i++) {
-        envp_size += libcxx::strlen(envp[i]) + 1;
+    for (int i = 0; i < prm.envc; i++) {
+        envp_size += libcxx::strlen(prm.envp[i]) + 1;
     }
 
     size_t tls_raw_size =
@@ -230,32 +228,33 @@ int ELF::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     uthread->self = uthread;
 
     char* target =
-        reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (argc + 1)));
+        reinterpret_cast<char*>(argv_zone + (sizeof(char*) * (prm.argc + 1)));
     char** target_argv = reinterpret_cast<char**>(argv_zone);
-    for (int i = 0; i < argc; i++) {
-        libcxx::strcpy(target, argv[i]);
+    for (int i = 0; i < prm.argc; i++) {
+        libcxx::strcpy(target, prm.argv[i]);
         target_argv[i] = target;
-        target += libcxx::strlen(argv[i]) + 1;
+        target += libcxx::strlen(prm.argv[i]) + 1;
     }
-    target_argv[argc] = 0;
-    target = reinterpret_cast<char*>(envp_zone + (sizeof(char*) * (envc + 1)));
+    target_argv[prm.argc] = 0;
+    target =
+        reinterpret_cast<char*>(envp_zone + (sizeof(char*) * (prm.envc + 1)));
     char** target_envp = reinterpret_cast<char**>(envp_zone);
-    for (int i = 0; i < envc; i++) {
-        libcxx::strcpy(target, envp[i]);
+    for (int i = 0; i < prm.envc; i++) {
+        libcxx::strcpy(target, prm.envp[i]);
         target_envp[i] = target;
-        target += libcxx::strlen(envp[i]) + 1;
+        target += libcxx::strlen(prm.envp[i]) + 1;
     }
-    target_envp[envc] = 0;
+    target_envp[prm.envc] = 0;
     libcxx::memset(reinterpret_cast<void*>(stack_zone), 0, 0x1000);
 
     // Let the architecture setup the registers
-    setup_registers(ctx, header->e_entry, argc,
+    setup_registers(prm.ctx, header->e_entry, prm.argc,
                     reinterpret_cast<addr_t>(target_argv),
                     reinterpret_cast<addr_t>(target_envp),
                     reinterpret_cast<addr_t>(uthread),
                     reinterpret_cast<addr_t>(stack_zone) + 0x1000);
 
-    scheduler::get_current_thread()->set_context(ctx);
+    scheduler::get_current_thread()->set_context(prm.ctx);
 
     return 0;
 }

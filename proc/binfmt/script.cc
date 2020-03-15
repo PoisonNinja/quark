@@ -12,9 +12,7 @@ public:
     virtual const char* name() override;
     virtual bool
     is_match(libcxx::intrusive_ptr<filesystem::descriptor> file) override;
-    int load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
-             const char* argv[], int envc, const char* envp[],
-             struct thread_context& ctx) override;
+    int load(struct ::binfmt::binprm& prm) override;
 };
 
 const char* Script::name()
@@ -32,14 +30,12 @@ bool Script::is_match(libcxx::intrusive_ptr<filesystem::descriptor> file)
     return true;
 }
 
-int Script::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
-                 const char* argv[], int envc, const char* envp[],
-                 struct thread_context& ctx)
+int Script::load(struct ::binfmt::binprm& prm)
 {
     // Capped at 128 chars for now
     // TODO: Move this out?
     uint8_t buffer[129];
-    file->pread(buffer, 128, 0);
+    prm.file->pread(buffer, 128, 0);
 
     // For safety null terminate it
     buffer[128] = '\0';
@@ -95,13 +91,13 @@ int Script::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     }
 
     // Time to construct the new argv
-    int new_argc          = argc + ((arg_start) ? 2 : 1);
+    int new_argc          = prm.argc + ((arg_start) ? 2 : 1);
     const char** new_argv = new const char*[new_argc];
     new_argv[0]           = cmd_start;
     new_argv[1]           = (arg_start) ? arg_start : "test";
     new_argv[2]           = (arg_start) ? "test" : nullptr;
     for (int i = 3; i < new_argc; i++) {
-        new_argv[i] = argv[i - 2];
+        new_argv[i] = prm.argv[i - 2];
     }
 
     libcxx::intrusive_ptr<filesystem::descriptor> start(nullptr);
@@ -116,8 +112,8 @@ int Script::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
         return -1;
     }
 
-    return scheduler::get_current_process()->load(f, new_argc, new_argv, envc,
-                                                  envp, ctx);
+    return scheduler::get_current_process()->load(f, new_argc, new_argv,
+                                                  prm.envc, prm.envp, prm.ctx);
 }
 
 namespace

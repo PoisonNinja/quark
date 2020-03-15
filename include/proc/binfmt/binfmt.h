@@ -7,15 +7,22 @@
 
 namespace binfmt
 {
+struct binprm {
+    libcxx::intrusive_ptr<filesystem::descriptor> file;
+    int argc;
+    const char** argv;
+    int envc;
+    const char** envp;
+    struct thread_context& ctx;
+};
+
 class binfmt
 {
 public:
     virtual const char* name() = 0;
     virtual bool
     is_match(libcxx::intrusive_ptr<filesystem::descriptor> file) = 0;
-    virtual int load(libcxx::intrusive_ptr<filesystem::descriptor> file,
-                     int argc, const char* argv[], int envc, const char* envp[],
-                     struct thread_context& ctx)                 = 0;
+    virtual int load(struct binprm& prm)                         = 0;
 
     libcxx::node<binfmt> node;
 };

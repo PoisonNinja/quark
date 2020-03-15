@@ -128,15 +128,24 @@ int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
                   struct thread_context& ctx)
 {
     binfmt::binfmt* fmt = binfmt::get(file);
+
     if (!fmt) {
-        return -ENOENT;
+        return -ENOEXEC;
     }
+
+    this->vma.reset();
 
     log::printk(log::log_level::INFO,
                 "process::load: Using %s to load binary\n", fmt->name());
 
-    this->vma.reset();
-    int res = fmt->load(file, argc, argv, envc, envp, ctx);
+    struct binfmt::binprm prm = {.file = file,
+                                 .argc = argc,
+                                 .argv = argv,
+                                 .envc = envc,
+                                 .envp = envp,
+                                 .ctx  = ctx};
+
+    int res = fmt->load(prm);
     return res;
 }
 

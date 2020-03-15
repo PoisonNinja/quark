@@ -13,7 +13,9 @@ void* syscall_table[256];
 
 namespace syscall
 {
-static long sys_read(int fd, void* buffer, size_t count)
+namespace
+{
+long sys_read(int fd, void* buffer, size_t count)
 {
     log::printk(log::log_level::DEBUG, "[sys_read] = %d, %p, %p\n", fd, buffer,
                 count);
@@ -24,7 +26,7 @@ static long sys_read(int fd, void* buffer, size_t count)
         static_cast<uint8_t*>(buffer), count);
 }
 
-static long sys_write(int fd, const void* buffer, size_t count)
+long sys_write(int fd, const void* buffer, size_t count)
 {
     log::printk(log::log_level::DEBUG, "[sys_write] = %d, %p, %X\n", fd, buffer,
                 count);
@@ -35,7 +37,7 @@ static long sys_write(int fd, const void* buffer, size_t count)
         static_cast<const uint8_t*>(buffer), count);
 }
 
-static long sys_open(const char* path, int flags, mode_t mode)
+long sys_open(const char* path, int flags, mode_t mode)
 {
     log::printk(log::log_level::DEBUG, "[sys_open] = %s, %X, %X\n", path, flags,
                 mode);
@@ -48,7 +50,7 @@ static long sys_open(const char* path, int flags, mode_t mode)
     return ret;
 }
 
-static long sys_close(int fd)
+long sys_close(int fd)
 {
     log::printk(log::log_level::DEBUG, "[sys_close] = %d\n", fd);
     if (!scheduler::get_current_process()->remove_desc(fd)) {
@@ -58,7 +60,7 @@ static long sys_close(int fd)
     }
 }
 
-static long sys_stat(const char* path, struct filesystem::stat* st)
+long sys_stat(const char* path, struct filesystem::stat* st)
 {
     log::printk(log::log_level::DEBUG, "[sys_stat] = %s, %p\n", path, st);
     auto [err, file] =
@@ -69,7 +71,7 @@ static long sys_stat(const char* path, struct filesystem::stat* st)
     return file->stat(st);
 }
 
-static long sys_fstat(int fd, struct filesystem::stat* st)
+long sys_fstat(int fd, struct filesystem::stat* st)
 {
     log::printk(log::log_level::DEBUG, "[sys_fstat] = %d, %p\n", fd, st);
     if (!scheduler::get_current_process()->get_desc(fd)) {
@@ -78,8 +80,8 @@ static long sys_fstat(int fd, struct filesystem::stat* st)
     return scheduler::get_current_process()->get_desc(fd)->stat(st);
 }
 
-static long sys_poll(struct filesystem::pollfd* fds, filesystem::nfds_t nfds,
-                     int timeout)
+long sys_poll(struct filesystem::pollfd* fds, filesystem::nfds_t nfds,
+              int timeout)
 {
     log::printk(log::log_level::DEBUG, "[sys_poll]: %p, %zu, %d\n", fds, nfds,
                 timeout);
@@ -87,7 +89,7 @@ static long sys_poll(struct filesystem::pollfd* fds, filesystem::nfds_t nfds,
     return poller.poll(timeout);
 }
 
-static long sys_lseek(int fd, off_t offset, int whence)
+long sys_lseek(int fd, off_t offset, int whence)
 {
     log::printk(log::log_level::DEBUG, "[sys_lseek] = %d, %llu, %d\n", fd,
                 offset, whence);
@@ -98,7 +100,7 @@ static long sys_lseek(int fd, off_t offset, int whence)
                                                                  whence);
 }
 
-static void* sys_mmap(struct mmap_wrapper* mmap_data)
+void* sys_mmap(struct mmap_wrapper* mmap_data)
 {
     log::printk(log::log_level::DEBUG,
                 "[sys_mmap] = %p, %p, %zX, %u, %u, %d, %zX\n", mmap_data,
@@ -109,28 +111,27 @@ static void* sys_mmap(struct mmap_wrapper* mmap_data)
         mmap_data->prot, mmap_data->flags, nullptr, mmap_data->offset);
 }
 
-static long sys_sigaction(int signum, struct sigaction* act,
-                          struct sigaction* oldact)
+long sys_sigaction(int signum, struct sigaction* act, struct sigaction* oldact)
 {
     log::printk(log::log_level::DEBUG, "[sys_sigaction]: %d %p %p\n", signum,
                 act, oldact);
     return scheduler::get_current_process()->sigaction(signum, act, oldact);
 }
 
-static long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
+long sys_sigprocmask(int how, const sigset_t* set, sigset_t* oldset)
 {
     log::printk(log::log_level::DEBUG, "[sys_sigprocmask] %d %p %p\n", how, set,
                 oldset);
     return scheduler::get_current_thread()->sigprocmask(how, set, oldset);
 }
 
-static void sys_sigreturn(ucontext_t* uctx)
+void sys_sigreturn(ucontext_t* uctx)
 {
     log::printk(log::log_level::DEBUG, "[sys_return] %p\n", uctx);
     scheduler::get_current_thread()->handle_sigreturn(uctx);
 }
 
-static long sys_ioctl(int fd, unsigned long request, char* argp)
+long sys_ioctl(int fd, unsigned long request, char* argp)
 {
     log::printk(log::log_level::DEBUG, "[sys_ioctl] = %d, 0x%lX, %p\n", fd,
                 request, argp);
@@ -140,7 +141,7 @@ static long sys_ioctl(int fd, unsigned long request, char* argp)
     return scheduler::get_current_process()->get_desc(fd)->ioctl(request, argp);
 }
 
-static long sys_dup(int oldfd)
+long sys_dup(int oldfd)
 {
     log::printk(log::log_level::DEBUG, "[sys_dup] = %d\n", oldfd);
     auto desc = scheduler::get_current_process()->get_desc(oldfd);
@@ -150,20 +151,20 @@ static long sys_dup(int oldfd)
     return scheduler::get_current_process()->install_desc(desc);
 }
 
-static long sys_dup2(int oldfd, int newfd)
+long sys_dup2(int oldfd, int newfd)
 {
     log::printk(log::log_level::DEBUG, "[sys_dup2] = %d %d\n", oldfd, newfd);
     return scheduler::get_current_process()->copy_desc(oldfd, newfd);
 }
 
-static long sys_getpid()
+long sys_getpid()
 {
     // Return process ID not thread ID
     log::printk(log::log_level::DEBUG, "[sys_getpid]\n");
     return scheduler::get_current_process()->get_pid();
 }
 
-static long sys_fork()
+long sys_fork()
 {
     log::printk(log::log_level::DEBUG, "[sys_fork]\n");
     process* child       = scheduler::get_current_process()->fork();
@@ -177,8 +178,8 @@ static long sys_fork()
     return child->get_pid();
 }
 
-static long sys_execve(const char* path, const char* old_argv[],
-                       const char* old_envp[])
+long sys_execve(const char* path, const char* old_argv[],
+                const char* old_envp[])
 {
     log::printk(log::log_level::DEBUG, "[sys_execve]: %s %p %p\n", path,
                 old_argv, old_envp);
@@ -218,20 +219,20 @@ static long sys_execve(const char* path, const char* old_argv[],
     __builtin_unreachable();
 }
 
-static void sys_exit(int val)
+void sys_exit(int val)
 {
     log::printk(log::log_level::DEBUG, "[sys_exit] = %d\n", val);
     scheduler::get_current_thread()->exit(false, val);
 }
 
-static long sys_wait(pid_t pid, int* status, int options)
+long sys_wait(pid_t pid, int* status, int options)
 {
     log::printk(log::log_level::DEBUG, "[sys_wait] %lld %p %d\n", pid, status,
                 options);
     return scheduler::get_current_process()->wait(pid, status, options);
 }
 
-static long sys_kill(pid_t pid, int signum)
+long sys_kill(pid_t pid, int signum)
 {
     log::printk(log::log_level::DEBUG, "[sys_kill] %u %d\n", pid, signum);
     process* process = scheduler::find_process(pid);
@@ -246,7 +247,7 @@ static long sys_kill(pid_t pid, int signum)
     return 0;
 }
 
-static long sys_chdir(const char* path)
+long sys_chdir(const char* path)
 {
     log::printk(log::log_level::DEBUG, "[sys_chdir] %s\n", path);
     auto [err, dir] = scheduler::get_current_process()->get_start(path)->open(
@@ -258,25 +259,25 @@ static long sys_chdir(const char* path)
     return 0;
 }
 
-static long sys_mkdir(const char* path, mode_t mode)
+long sys_mkdir(const char* path, mode_t mode)
 {
     log::printk(log::log_level::DEBUG, "[sys_mkdir] %s %X\n", path, mode);
     return scheduler::get_current_process()->get_start(path)->mkdir(path, mode);
 }
 
-static long sys_sigpending(sigset_t* set)
+long sys_sigpending(sigset_t* set)
 {
     log::printk(log::log_level::DEBUG, "[sys_sigpending] %p\n", set);
     return scheduler::get_current_thread()->sigpending(set);
 }
 
-static long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
+long sys_sigaltstack(const stack_t* ss, stack_t* oldss)
 {
     log::printk(log::log_level::DEBUG, "[sys_sigaltstack] %p %p\n", ss, oldss);
     return scheduler::get_current_thread()->sigaltstack(ss, oldss);
 }
 
-static long sys_mknod(const char* path, mode_t mode, dev_t dev)
+long sys_mknod(const char* path, mode_t mode, dev_t dev)
 {
     log::printk(log::log_level::DEBUG, "[sys_mknod] %s %X %X\n", path, mode,
                 dev);
@@ -284,7 +285,7 @@ static long sys_mknod(const char* path, mode_t mode, dev_t dev)
                                                                     dev);
 }
 
-static long sys_chroot(const char* path)
+long sys_chroot(const char* path)
 {
     log::printk(log::log_level::DEBUG, "[sys_chroot] %s\n", path);
     auto [err, dir] = scheduler::get_current_process()->get_start(path)->open(
@@ -296,9 +297,9 @@ static long sys_chroot(const char* path)
     return 0;
 }
 
-static long sys_mount(const char* source, const char* target,
-                      const char* filesystemtype, unsigned long mountflags,
-                      const void* data)
+long sys_mount(const char* source, const char* target,
+               const char* filesystemtype, unsigned long mountflags,
+               const void* data)
 {
     log::printk(log::log_level::DEBUG, "[sys_mount] %s %s %s %llX %p\n", source,
                 target, filesystemtype, mountflags, data);
@@ -306,20 +307,21 @@ static long sys_mount(const char* source, const char* target,
         source, target, filesystemtype, mountflags);
 }
 
-static long sys_init_module(void* module_image, unsigned long len,
-                            const char* param_values)
+long sys_init_module(void* module_image, unsigned long len,
+                     const char* param_values)
 {
     log::printk(log::log_level::DEBUG, "[sys_init_module] %p %llX %p\n",
                 module_image, len, param_values);
     return load_module(module_image);
 }
 
-static long sys_delete_module(const char* name, int flags)
+long sys_delete_module(const char* name, int flags)
 {
     log::printk(log::log_level::DEBUG, "[sys_delete_module] %s %X\n", name,
                 flags);
     return unload_module(name);
 }
+} // namespace
 
 void init()
 {

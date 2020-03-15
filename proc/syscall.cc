@@ -208,8 +208,8 @@ long sys_execve(const char* path, const char* old_argv[],
         return -ENOENT;
     }
     struct thread_context ctx;
-    if (scheduler::get_current_process()->load(file, argc, argv, envc, envp,
-                                               ctx)) {
+    if (scheduler::get_current_process()->load(path, file, argc, argv, envc,
+                                               envp, ctx)) {
         log::printk(log::log_level::ERROR, "Failed to load thread state\n");
         return -ENOEXEC;
     }

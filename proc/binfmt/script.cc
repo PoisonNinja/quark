@@ -94,8 +94,8 @@ int Script::load(struct ::binfmt::binprm& prm)
     int new_argc          = prm.argc + ((arg_start) ? 2 : 1);
     const char** new_argv = new const char*[new_argc];
     new_argv[0]           = cmd_start;
-    new_argv[1]           = (arg_start) ? arg_start : "test";
-    new_argv[2]           = (arg_start) ? "test" : nullptr;
+    new_argv[1]           = (arg_start) ? arg_start : prm.path;
+    new_argv[2]           = (arg_start) ? prm.path : nullptr;
     for (int i = 3; i < new_argc; i++) {
         new_argv[i] = prm.argv[i - 2];
     }
@@ -112,8 +112,8 @@ int Script::load(struct ::binfmt::binprm& prm)
         return -1;
     }
 
-    return scheduler::get_current_process()->load(f, new_argc, new_argv,
-                                                  prm.envc, prm.envp, prm.ctx);
+    return scheduler::get_current_process()->load(
+        cmd_start, f, new_argc, new_argv, prm.envc, prm.envp, prm.ctx);
 }
 
 namespace

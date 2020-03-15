@@ -8,6 +8,7 @@
 namespace binfmt
 {
 struct binprm {
+    const char* path;
     libcxx::intrusive_ptr<filesystem::descriptor> file;
     int argc;
     const char** argv;

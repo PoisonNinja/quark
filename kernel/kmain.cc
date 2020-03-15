@@ -36,8 +36,8 @@ void init_stage2(void*)
         "hello=world",
     };
     struct thread_context ctx;
-    if (scheduler::get_current_process()->load(init, argc, argv, envc, envp,
-                                               ctx)) {
+    if (scheduler::get_current_process()->load("/sbin/init", init, argc, argv,
+                                               envc, envp, ctx)) {
         kernel::panic("Failed to load init\n");
     } else {
         log::printk(log::log_level::DEBUG,

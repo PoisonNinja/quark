@@ -135,7 +135,8 @@ process* process::fork()
     return child;
 }
 
-int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
+int process::load(const char* path,
+                  libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
                   const char* argv[], int envc, const char* envp[],
                   struct thread_context& ctx)
 {
@@ -150,7 +151,8 @@ int process::load(libcxx::intrusive_ptr<filesystem::descriptor> file, int argc,
     log::printk(log::log_level::INFO,
                 "process::load: Using %s to load binary\n", fmt->name());
 
-    struct binfmt::binprm prm = {.file = file,
+    struct binfmt::binprm prm = {.path = path,
+                                 .file = file,
                                  .argc = argc,
                                  .argv = argv,
                                  .envc = envc,

@@ -30,7 +30,7 @@ SOFTWARE.
 
 
 --------------------------------------------------------------------------------
-Applies to: Portions of include/lib/type_traits.h
+Applies to: Portions of include/lib/functional.h
 Link: https://github.com/llvm-mirror/libcxx/blob/master/LICENSE.TXT
 Author: LLVM contributors
 Type: MIT
@@ -57,7 +57,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 --------------------------------------------------------------------------------
-Applies to: Portions of include/lib/{functional.h,memory.h,type_traits.h,utility.h}.
+Applies to: Portions of include/lib/{functional.h,memory.h,utility.h}.
 Link: https://en.cppreference.com/w/
 Author: Wiki contributors
 Type: CC-BY-SA 3.0
@@ -431,7 +431,7 @@ Type: CC-BY-SA 3.0
 ~~ See cppreference.com license ~~
 
 --------------------------------------------------------------------------------
-Applies to: integer_sequence (include/lib/type_traits.h)
+Applies to: integer_sequence (include/lib/utility.h)
 Link: https://stackoverflow.com/help/licensing
 Author: joki
 Type: CC-BY-SA 3.0
@@ -440,17 +440,43 @@ Type: CC-BY-SA 3.0
 
 --------------------------------------------------------------------------------
 Applies to: tuple (include/lib/utility.h)
-Link: https://stackoverflow.com/help/licensing
-Author: Casey
-Type: CC-BY-SA 3.0
+Link: https://github.com/electronicarts/EASTL/blob/master/LICENSE
+Author: Electronic Arts
+Type: BSD 3-Clause License
 --------------------------------------------------------------------------------
-~~ See cppreference.com license ~~
+Copyright (c) 2019, Electronic Arts
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
-Applies to: add_rvalue_reference (include/lib/type_traits.h)
-Link: https://www.boost.org/users/license.html
-Author: Boost contributors
-Type: Boost Software License Version 1.0
+Applies to: libcxx::function (include/lib/functional.h)
+Link: https://github.com/WG21-SG14/SG14
+Author: SG14 Contributors
+License: Boost Software License Version 1.0
 --------------------------------------------------------------------------------
 Boost Software License - Version 1.0 - August 17th, 2003
 
@@ -475,12 +501,3 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-
-
---------------------------------------------------------------------------------
-Applies to: libcxx::function (include/lib/functional.h)
-Link: https://github.com/WG21-SG14/SG14
-Author: SG14 Contributors
-License: Boost Software License Version 1.0
---------------------------------------------------------------------------------
-~~ See Boost license ~~

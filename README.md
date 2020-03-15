@@ -25,4 +25,4 @@ Quark is primarily designed to interface with the Pepper build system. Therefore
 # License
 Quark itself is licensed under the 3-clause BSD license, and the full text can be found in the file LICENSE.
 
-Quark uses code from third-parties. The specific third-party code descriptions and license terms are stated both in the actual code and in LICENSE-3RD-PARTY.
+Quark uses some code from third parties for its library implementations. The specific third-party code descriptions and license terms are stated both in the actual code and in LICENSE-3RD-PARTY.

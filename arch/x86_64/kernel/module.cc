@@ -55,11 +55,20 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
                 // Add the offset into the section
                 target += rel->r_offset;
 
-                addr_t addend;
-                addend = rel->r_addend;
+                addr_t addend = rel->r_addend;
 
                 switch (ELF_R_TYPE(rel->r_info)) {
                     // case R_386_32
+                    case R_X86_64_32:
+                        log::printk(log::log_level::DEBUG,
+                                    "[load_module] R_X86_64_32: %p %p %p %X\n",
+                                    addend, rel->r_offset, symaddr,
+                                    mod->shdrs[i].sh_info);
+                        // = S + A
+                        // Truncate down to 32 bits
+                        *(reinterpret_cast<uint32_t*>(target)) =
+                            static_cast<uint32_t>(symaddr + addend);
+                        break;
                     case R_X86_64_64:
                         log::printk(log::log_level::DEBUG,
                                     "[load_module] R_X86_64_64: %p %p %p %X\n",

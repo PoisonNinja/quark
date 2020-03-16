@@ -107,7 +107,7 @@ bool vma::add_vmregion(addr_t start, size_t size)
     return this->add_vmregion(section);
 }
 
-libcxx::pair<bool, addr_t> vma::locate_range(addr_t hint, size_t size)
+libcxx::optional<addr_t> vma::locate_range(addr_t hint, size_t size)
 {
     vmregion* curr    = tree.get_root();
     addr_t high_limit = this->upper_bound - size;
@@ -163,10 +163,10 @@ check_highest:
 
 found:
     ret = gap_start;
-    return libcxx::make_pair(true, ret);
+    return {ret};
 }
 
-libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
+libcxx::optional<addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
 {
     vmregion* curr    = tree.get_root();
     addr_t high_limit = this->upper_bound - size;
@@ -178,7 +178,7 @@ libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
     }
     if (!curr || curr->largest_subgap < size) {
         // TODO: ENOMEM
-        return libcxx::pair<bool, addr_t>(false, 0);
+        return libcxx::nullopt;
     }
     while (true) {
         gap_start = this->tree.prev(curr) ? this->tree.prev(curr)->end() : 0;
@@ -192,7 +192,7 @@ libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
         gap_end = curr->start();
         if (gap_end < low_limit) {
             // TODO: ENOMEM
-            return libcxx::pair<bool, addr_t>(false, 0);
+            return libcxx::nullopt;
         }
         if (gap_start <= high_limit && gap_end > gap_start &&
             gap_end - gap_start >= size) {
@@ -208,7 +208,7 @@ libcxx::pair<bool, addr_t> vma::locate_range_reverse(addr_t hint, size_t size)
             auto prev = curr;
             if (!this->tree.parent(curr)) {
                 // TODO: ENOMEM
-                return libcxx::pair<bool, addr_t>(false, 0);
+                return libcxx::nullopt;
             }
             curr = this->tree.parent(curr);
             if (prev == this->tree.right(curr)) {
@@ -227,7 +227,7 @@ found:
 found_highest:
     gap_end -= size;
     gap_end = memory::virt::align_down(gap_end);
-    return libcxx::make_pair(true, gap_end);
+    return {gap_end};
 }
 
 int vma::split(vmregion* region, addr_t addr)
@@ -361,20 +361,20 @@ void vma::calculate_largest_subgap(vmregion* section)
     section->largest_subgap = max;
 }
 
-libcxx::pair<bool, addr_t> vma::allocate(addr_t hint, size_t size)
+libcxx::optional<addr_t> vma::allocate(addr_t hint, size_t size)
 {
     auto res = locate_range(hint, size);
-    if (res.first) {
-        add_vmregion(res.second, size);
+    if (res) {
+        add_vmregion(*res, size);
     }
     return res;
 }
 
-libcxx::pair<bool, addr_t> vma::allocate_reverse(addr_t hint, size_t size)
+libcxx::optional<addr_t> vma::allocate_reverse(addr_t hint, size_t size)
 {
     auto res = locate_range_reverse(hint, size);
-    if (res.first) {
-        add_vmregion(res.second, size);
+    if (res) {
+        add_vmregion(*res, size);
     }
     return res;
 }

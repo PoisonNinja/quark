@@ -18,13 +18,13 @@ memory::vma dma_region(DMA_START, DMA_END);
 libcxx::optional<region> allocate(size_t size)
 {
     region region;
-    auto [virt_found, virt_address] = dma_region.allocate(0, size);
-    if (!virt_found) {
+    auto virt_address = dma_region.allocate(0, size);
+    if (!virt_address) {
         log::printk(log::log_level::WARNING,
                     "dma: Unable to find free space\n");
         return libcxx::nullopt;
     }
-    region.virtual_base  = virt_address;
+    region.virtual_base  = *virt_address;
     region.physical_base = memory::physical::allocate(size);
     region.size          = size;
     region.real_size     = size;
@@ -51,7 +51,6 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total)
         region region;
         region.physical_base = physical_base;
         region.real_size     = real_size;
-        allocated += real_size;
 
         if (allocated < total) {
             region.size = real_size;
@@ -59,12 +58,20 @@ sglist::sglist(size_t max_elements, size_t max_element_size, size_t total)
             region.size = total - (allocated - real_size);
         }
 
-        region.virtual_base = dma_region.allocate(0, real_size).second;
-        memory::virt::map_range(region.virtual_base, region.physical_base,
-                                region.real_size, PAGE_WRITABLE);
-        list.push_back(region);
-        num_regions++;
-        total_size += region.size;
+        auto dma_addr = dma_region.allocate(0, real_size);
+        if (dma_addr) {
+            region.virtual_base = *dma_addr;
+            memory::virt::map_range(region.virtual_base, region.physical_base,
+                                    region.real_size, PAGE_WRITABLE);
+            list.push_back(region);
+            num_regions++;
+            total_size += region.size;
+            allocated += real_size;
+        } else {
+            // TODO: Proper cleanup?
+            memory::physical::free(physical_base);
+            break;
+        }
     }
 }
 

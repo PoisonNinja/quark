@@ -196,22 +196,21 @@ void* process::mmap(addr_t addr, size_t length, int prot, int flags,
 
     if (!(flags & MAP_FIXED)) {
         log::printk(log::log_level::DEBUG, "[mmap] Kernel selecting mapping\n");
-        bool ret;
-        addr_t value;
+        libcxx::optional<addr_t> value;
         if (!(flags & MAP_GROWSDOWN)) {
-            libcxx::tie(ret, value) = this->vma.locate_range(
+            value = this->vma.locate_range(
                 (addr) ? reinterpret_cast<addr_t>(addr) : USER_START, length);
         } else {
-            libcxx::tie(ret, value) = this->vma.locate_range_reverse(
+            value = this->vma.locate_range_reverse(
                 (addr) ? reinterpret_cast<addr_t>(addr) : USER_END, length);
         }
-        if (!ret) {
+        if (!value) {
             log::printk(log::log_level::WARNING,
                         "[sys_mmap] Failed to allocate area for mmap\n");
             return MAP_FAILED;
         }
-        log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n", value);
-        placement = value;
+        log::printk(log::log_level::DEBUG, "[sys_mmap] Selected %p\n", *value);
+        placement = *value;
     } else {
         log::printk(log::log_level::DEBUG,
                     "[mmap] mmap requested with fixed address %p\n", addr);

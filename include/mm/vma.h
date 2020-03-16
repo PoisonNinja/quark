@@ -1,7 +1,7 @@
 #pragma once
 
+#include <lib/optional.h>
 #include <lib/rb.h>
-#include <lib/utility.h>
 #include <lib/vector.h>
 
 namespace memory
@@ -105,10 +105,10 @@ public:
     }
 
     bool add_vmregion(addr_t start, size_t size);
-    libcxx::pair<bool, addr_t> locate_range(addr_t hint, size_t size);
-    libcxx::pair<bool, addr_t> locate_range_reverse(addr_t hint, size_t size);
-    libcxx::pair<bool, addr_t> allocate(addr_t hint, size_t size);
-    libcxx::pair<bool, addr_t> allocate_reverse(addr_t hint, size_t size);
+    libcxx::optional<addr_t> locate_range(addr_t hint, size_t size);
+    libcxx::optional<addr_t> locate_range_reverse(addr_t hint, size_t size);
+    libcxx::optional<addr_t> allocate(addr_t hint, size_t size);
+    libcxx::optional<addr_t> allocate_reverse(addr_t hint, size_t size);
     libcxx::pair<int, libcxx::vector<libcxx::pair<addr_t, size_t>>>
     free(addr_t addr, size_t size);
     vmregion* find(addr_t addr);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/memory.h>
-#include <lib/utility.h>
+#include <lib/optional.h>
 #include <lib/vector.h>
 #include <types.h>
 
@@ -25,7 +25,7 @@ struct sglist {
     libcxx::vector<region> list;
 };
 
-libcxx::pair<bool, region> allocate(size_t size);
+libcxx::optional<region> allocate(size_t size);
 
 /*
  * Builds a scatter gather list with either max_elements regions or regions

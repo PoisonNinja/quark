@@ -6,6 +6,7 @@
 #include <fs/poll.h>
 #include <lib/list.h>
 #include <lib/memory.h>
+#include <lib/optional.h>
 #include <lib/utility.h>
 
 namespace filesystem
@@ -38,7 +39,7 @@ public:
     // VFS operations
     bool mounted();
     int mount(mount* mt);
-    libcxx::pair<bool, struct mount*> umount();
+    libcxx::optional<struct mount*> umount();
 
 private:
     libcxx::list<filesystem::mount, &mount::node> mounts;

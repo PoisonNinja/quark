@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/list.h>
-#include <lib/utility.h>
+#include <lib/optional.h>
 #include <types.h>
 
 namespace pci
@@ -135,6 +135,6 @@ constexpr uint8_t pci_bridge_control          = 0x3E;
 
 bool register_driver(driver& d);
 
-libcxx::pair<bool, addr_t> map(addr_t phys, size_t size);
+libcxx::optional<addr_t> map(addr_t phys, size_t size);
 void init();
 } // namespace pci

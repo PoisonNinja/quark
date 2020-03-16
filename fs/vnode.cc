@@ -56,14 +56,14 @@ int vnode::mount(filesystem::mount* mt)
     return 0;
 }
 
-libcxx::pair<bool, struct mount*> vnode::umount()
+libcxx::optional<struct mount*> vnode::umount()
 {
     if (this->mounts.empty()) {
-        return libcxx::pair<bool, struct mount*>(false, nullptr);
+        return libcxx::nullopt;
     } else {
         struct mount* mt = &(this->mounts.front());
         this->mounts.erase(this->mounts.begin());
-        return libcxx::make_pair(true, mt);
+        return {mt};
     }
 }
 

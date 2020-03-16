@@ -193,8 +193,9 @@ int descriptor::mount(const char* source, const char* target, const char* type,
             kernel::panic("Target cannot be root!\n");
             return -EINVAL;
         }
-        auto [success, mt] = source_desc->vno->umount();
-        target_desc->vno->mount(mt);
+        auto mt = source_desc->vno->umount();
+        if (mt)
+            target_desc->vno->mount(*mt);
         return 0;
     }
     superblock* sb = new superblock();

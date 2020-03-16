@@ -270,11 +270,11 @@ bool register_driver(driver& d)
     return true;
 }
 
-libcxx::pair<bool, addr_t> map(addr_t phys, size_t size)
+libcxx::optional<addr_t> map(addr_t phys, size_t size)
 {
     addr_t v = memory::vmalloc::allocate(size);
     memory::virt::map_range(v, phys, size, PAGE_WRITABLE);
-    return libcxx::make_pair(true, v);
+    return {v};
 }
 
 void init()

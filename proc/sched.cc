@@ -66,9 +66,13 @@ thread* next()
 
 void switch_next()
 {
+    int interrupt_status;
+    interrupt::save(interrupt_status);
+    interrupt::disable();
     thread* old         = current_thread;
     thread* next_thread = next();
     if (next_thread == old) {
+        interrupt::restore(interrupt_status);
         return;
     }
     if (current_thread) {
@@ -83,6 +87,7 @@ void switch_next()
     }
     current_thread = next_thread;
     old->switch_thread(next_thread);
+    interrupt::restore(interrupt_status);
 }
 
 void sleep(thread_state state)

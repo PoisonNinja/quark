@@ -66,8 +66,7 @@ thread* next()
 
 void switch_next()
 {
-    int interrupt_status;
-    interrupt::save(interrupt_status);
+    int interrupt_status = interrupt::save();
     interrupt::disable();
     thread* old         = current_thread;
     thread* next_thread = next();

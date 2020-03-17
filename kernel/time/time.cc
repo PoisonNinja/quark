@@ -87,8 +87,7 @@ void update()
     if (!current_clock) {
         return;
     }
-    int flags;
-    interrupt::save(flags);
+    int flags = interrupt::save();
     interrupt::disable();
     time_t current = current_clock->read();
     time_t offset  = current - last;

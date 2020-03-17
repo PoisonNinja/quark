@@ -12,12 +12,12 @@ static libcxx::list<interrupt::handler, &interrupt::handler::node>
 
 extern void arch_init();
 
-void save(int& store)
+int save()
 {
-    store = interrupts_enabled();
+    return interrupts_enabled();
 }
 
-void restore(int& store)
+void restore(int store)
 {
     if (store) {
         enable();

@@ -36,8 +36,8 @@ struct handler {
 void disable();
 void enable();
 
-void save(int &store);
-void restore(int &store);
+int save();
+void restore(int store);
 
 void dispatch(int int_no, struct interrupt_context *ctx);
 

@@ -53,6 +53,7 @@ int poll_table::poll(time_t timeout)
      * the descriptor's poll function returns we'll get events, which we can
      * then process.
      */
+    scoped_lock<mutex> lock(this->poll_lock);
     while (1) {
         bool found = false;
         for (size_t i = 0; i < user_fds_size; i++) {
@@ -91,6 +92,7 @@ int poll_table::poll(time_t timeout)
 
 void poll_table::bind(size_t offset, scheduler::wait_queue& queue)
 {
+    // poll_lock held by poll already
     if (!this->targets[offset].registered) {
         this->targets[offset].queue = &queue;
         queue.insert();

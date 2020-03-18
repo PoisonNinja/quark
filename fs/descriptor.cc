@@ -100,6 +100,7 @@ int descriptor::link(const char* name, libcxx::intrusive_ptr<descriptor> node)
 off_t descriptor::lseek(off_t offset, int whence)
 {
     off_t start;
+    scoped_lock<mutex> lock(current_offset_mutex);
     if (whence == SEEK_SET) {
         start = 0;
     } else if (whence == SEEK_CUR) {
@@ -285,6 +286,7 @@ ssize_t descriptor::read(uint8_t* buffer, size_t count)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
+    scoped_lock<mutex> lock(current_offset_mutex);
     ssize_t ret = pread(buffer, count, current_offset);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
@@ -305,6 +307,7 @@ ssize_t descriptor::write(const uint8_t* buffer, size_t count)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
+    scoped_lock<mutex> lock(current_offset_mutex);
     ssize_t ret = this->vno->write(buffer, count, current_offset, this->cookie);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows

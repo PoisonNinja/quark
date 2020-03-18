@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs/descriptor.h>
+#include <kernel/lock.h>
 #include <lib/memory.h>
 #include <lib/vector.h>
 
@@ -22,5 +23,6 @@ public:
 
 private:
     libcxx::vector<libcxx::intrusive_ptr<descriptor>> fds;
+    mutex fds_mutex;
 };
 } // namespace filesystem

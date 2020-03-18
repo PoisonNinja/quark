@@ -3,6 +3,7 @@
 #include <fs/inode.h>
 #include <fs/poll.h>
 #include <fs/vnode.h>
+#include <kernel/lock.h>
 #include <lib/memory.h>
 
 namespace filesystem
@@ -43,6 +44,7 @@ public:
 
 private:
     libcxx::intrusive_ptr<vnode> vno;
+    mutex current_offset_mutex;
     off_t current_offset;
     int flags;
     void* cookie;

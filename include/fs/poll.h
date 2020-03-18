@@ -1,5 +1,6 @@
 #pragma once
 
+#include <kernel/lock.h>
 #include <lib/functional.h>
 #include <lib/vector.h>
 
@@ -56,6 +57,7 @@ public:
 private:
     void bind(size_t offset, scheduler::wait_queue& queue);
 
+    mutex poll_lock;
     libcxx::vector<poll_table_elem> targets;
     struct pollfd* user_fds;
     size_t user_fds_size;

@@ -45,6 +45,7 @@ buddy::~buddy()
 
 addr_t buddy::__alloc(unsigned order)
 {
+    // Held by alloc
     if (order > this->max_order)
         kernel::panic("OOM\n");
     if (this->orders[order].free_stack->empty()) {
@@ -59,6 +60,7 @@ addr_t buddy::__alloc(unsigned order)
 
 addr_t buddy::alloc(size_t size)
 {
+    scoped_lock<spinlock> lock(_lock);
     unsigned order = libcxx::log2(size);
     if (order < this->min_order) {
         order = this->min_order;
@@ -73,6 +75,7 @@ addr_t buddy::alloc(size_t size)
 
 void buddy::__free(addr_t addr, unsigned order)
 {
+    // Held by free
     if (order > this->max_order) {
         return;
     }
@@ -88,6 +91,7 @@ void buddy::__free(addr_t addr, unsigned order)
 
 void buddy::free(addr_t addr, size_t size)
 {
+    scoped_lock<spinlock> lock(_lock);
     unsigned order = libcxx::log2(size);
     if (order < this->min_order) {
         order = this->min_order;
@@ -101,6 +105,7 @@ void buddy::free(addr_t addr, size_t size)
 
 bool buddy::available(size_t size)
 {
+    scoped_lock<spinlock> lock(_lock);
     uint32_t order = libcxx::log2(size);
     for (; order <= this->max_order; order++) {
         if (!this->orders[order].free_stack->empty()) {
@@ -112,6 +117,7 @@ bool buddy::available(size_t size)
 
 size_t buddy::total()
 {
+    scoped_lock<spinlock> lock(_lock);
     return total_free;
 }
 } // namespace memory

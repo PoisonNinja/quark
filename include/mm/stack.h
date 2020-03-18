@@ -1,5 +1,6 @@
 #pragma once
 
+#include <kernel/lock.h>
 #include <mm/virtual.h>
 #include <types.h>
 
@@ -20,6 +21,8 @@ public:
 
 private:
     size_t size;
+
+    spinlock lock;
     struct memory::page* top;
 };
 }; // namespace memory

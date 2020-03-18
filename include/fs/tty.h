@@ -2,6 +2,7 @@
 
 #include <fs/dev.h>
 #include <fs/inode.h>
+#include <kernel/lock.h>
 #include <proc/wq.h>
 
 namespace filesystem
@@ -250,13 +251,17 @@ private:
 
     struct termios termios;
     struct winsize ws;
+    mutex meta_lock;
 
     // TODO: Replace with flip buffer
     char ibuffer[4096];
     size_t itail;
+    mutex ibuffer_lock;
 
     char buffer[4096];
     size_t head, tail;
+    mutex buffer_lock;
+
     scheduler::wait_queue queue;
 };
 

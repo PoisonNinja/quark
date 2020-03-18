@@ -23,10 +23,10 @@ void spinlock::lock()
 
 int spinlock::lock_irq()
 {
+    this->_lock();
+
     int ret = interrupt::save();
     interrupt::disable();
-
-    this->_lock();
 
     return ret;
 }

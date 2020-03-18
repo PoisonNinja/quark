@@ -18,12 +18,14 @@ dtable::~dtable()
 
 dtable& dtable::operator=(const dtable& other)
 {
+    scoped_lock<mutex> lock(this->fds_mutex);
     this->fds = other.fds;
     return *this;
 }
 
 int dtable::add(libcxx::intrusive_ptr<descriptor> desc)
 {
+    scoped_lock<mutex> lock(this->fds_mutex);
     for (unsigned i = 0; i < fds.size(); i++) {
         if (!fds[i]) {
             fds[i] = desc;
@@ -37,6 +39,7 @@ int dtable::add(libcxx::intrusive_ptr<descriptor> desc)
 
 bool dtable::remove(int fd)
 {
+    scoped_lock<mutex> lock(this->fds_mutex);
     /*
      * Since we check if fd < 0 first thus short circuiting if it's true
      * casting fd to unsigned guarantees that we'll get a valid size
@@ -51,6 +54,7 @@ bool dtable::remove(int fd)
 
 libcxx::intrusive_ptr<descriptor> dtable::get(int index)
 {
+    scoped_lock<mutex> lock(this->fds_mutex);
     if (index < 0 || static_cast<unsigned>(index) >= fds.size()) {
         return libcxx::intrusive_ptr<descriptor>(nullptr);
     }
@@ -59,6 +63,7 @@ libcxx::intrusive_ptr<descriptor> dtable::get(int index)
 
 int dtable::copy(int oldfd, int newfd)
 {
+    scoped_lock<mutex> lock(this->fds_mutex);
     this->fds[oldfd] = this->fds[newfd];
     return oldfd;
 }

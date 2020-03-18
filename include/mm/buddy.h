@@ -1,5 +1,6 @@
 #pragma once
 
+#include <kernel/lock.h>
 #include <lib/bitset.h>
 #include <mm/stack.h>
 #include <types.h>
@@ -32,6 +33,8 @@ private:
     size_t total_free;
     size_t min_order;
     size_t max_order;
+
+    spinlock _lock;
     struct buddy_order* orders;
 };
 } // namespace memory

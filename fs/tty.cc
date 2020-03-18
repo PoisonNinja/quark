@@ -69,26 +69,29 @@ tty_core::tty_core(tty_driver* driver, struct termios& termios)
 
 int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
 {
-    switch (request) {
-        case TCGETS:
-            libcxx::memcpy(argp, &this->termios, sizeof(this->termios));
-            return 0;
-        case TCSETSW:
-            // TODO: Discard input
-        case TCSETSF:
-        // TODO: Flush
-        case TCSETS:
-            if (this->termios.c_iflag & ICANON &&
-                !((reinterpret_cast<struct termios*>(argp))->c_iflag &
-                  ICANON)) {
-                // Switching out of ICANON
-                this->dump_input();
-            }
-            libcxx::memcpy(&this->termios, argp, sizeof(this->termios));
-            return 0;
-        case TIOCGWINSZ:
-            libcxx::memcpy(argp, &this->ws, sizeof(this->ws));
-            return 0;
+    {
+        scoped_lock<mutex> mlock(this->meta_lock);
+        switch (request) {
+            case TCGETS:
+                libcxx::memcpy(argp, &this->termios, sizeof(this->termios));
+                return 0;
+            case TCSETSW:
+                // TODO: Discard input
+            case TCSETSF:
+            // TODO: Flush
+            case TCSETS:
+                if (this->termios.c_iflag & ICANON &&
+                    !((reinterpret_cast<struct termios*>(argp))->c_iflag &
+                      ICANON)) {
+                    // Switching out of ICANON
+                    this->dump_input();
+                }
+                libcxx::memcpy(&this->termios, argp, sizeof(this->termios));
+                return 0;
+            case TIOCGWINSZ:
+                libcxx::memcpy(argp, &this->ws, sizeof(this->ws));
+                return 0;
+        }
     }
     // We don't know how to handle it, punt it to the driver
     return this->driver->ioctl(request, argp);
@@ -102,9 +105,12 @@ libcxx::pair<int, void*> tty_core::open(const char* name)
 int tty_core::poll(filesystem::poll_register_func_t& callback, void* cookie)
 {
     callback(this->queue);
+
+    scoped_lock<mutex> lock(this->buffer_lock);
     if (this->head != this->tail) {
         return POLLIN;
     }
+
     return 0;
 }
 
@@ -114,21 +120,30 @@ ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
     if (!count)
         return 0;
     size_t read = 0;
+    this->buffer_lock.lock();
+
     if (this->head == this->tail) {
+        this->buffer_lock.unlock();
         this->queue.wait(scheduler::wait_interruptible);
+        this->buffer_lock.lock();
     }
+
     while (read < count) {
         if (this->tail == this->head) {
+            this->buffer_lock.unlock();
             return read;
         }
         buffer[read++] = this->buffer[this->tail++ % 4096];
     }
+
+    this->buffer_lock.unlock();
     return count;
 }
 
 ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
                         void* cookie)
 {
+    this->meta_lock.lock();
     libcxx::vector<uint8_t> real_buffer(count);
     for (size_t i = 0; i < count; i++) {
         if (this->termios.c_oflag & ONLCR && buffer[i] == '\n') {
@@ -141,11 +156,13 @@ ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
         }
         real_buffer.push_back(buffer[i]);
     }
+    this->meta_lock.unlock();
     return this->driver->write(real_buffer.data(), real_buffer.size());
 }
 
 ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
 {
+    this->meta_lock.lock();
     size_t i;
     for (i = 0; i < count; i++) {
         char c = buffer[i];
@@ -166,17 +183,25 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
             c = '\r';
         }
         if (this->termios.c_lflag & ICANON) {
-            if (c == this->termios.c_cc[VERASE]) {
-                if (this->itail) {
-                    this->ibuffer[--this->itail] = '\0';
-                    const uint8_t eraser[3]      = {'\010', ' ', '\010'};
-                    this->driver->write(eraser, 3);
+            {
+                scoped_lock<mutex> ilock(this->ibuffer_lock);
+                if (c == this->termios.c_cc[VERASE]) {
+                    if (this->itail) {
+                        this->ibuffer[--this->itail] = '\0';
+                        const uint8_t eraser[3]      = {'\010', ' ', '\010'};
+                        this->meta_lock.unlock();
+                        this->driver->write(eraser, 3);
+                        this->meta_lock.lock();
+                    }
+                    continue;
                 }
-                continue;
+                this->ibuffer[this->itail++] = c;
             }
-            this->ibuffer[this->itail++] = c;
+
             if (this->termios.c_lflag & ECHO) {
+                this->meta_lock.unlock();
                 this->driver->write(&buffer[i], 1);
+                this->meta_lock.lock();
             }
             if (c == '\n' ||
                 (this->termios.c_cc[VEOL] && c == this->termios.c_cc[VEOL])) {
@@ -184,27 +209,38 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
                 continue;
             }
         } else if (this->termios.c_lflag & ECHO) {
+            this->meta_lock.unlock();
             this->driver->write(&buffer[i], 1);
+            this->meta_lock.lock();
         } else {
-            this->buffer[this->head++ % 4096] = buffer[i];
+            {
+                scoped_lock<mutex> lock(this->buffer_lock);
+                this->buffer[this->head++ % 4096] = buffer[i];
+            }
             this->queue.wakeup();
         }
     }
+    this->meta_lock.unlock();
     return i;
 }
 
 void tty_core::winch(const struct winsize* ws)
 {
+    scoped_lock<mutex> mlock(this->meta_lock);
     this->ws = *ws;
     // TODO: Notify userspace through signals
 }
 
 ssize_t tty_core::dump_input()
 {
-    for (size_t i = 0; i < this->itail; i++) {
-        this->buffer[this->head++ % 4096] = this->ibuffer[i];
+    {
+        scoped_lock<mutex> lock(this->buffer_lock);
+        scoped_lock<mutex> ilock(this->ibuffer_lock);
+        for (size_t i = 0; i < this->itail; i++) {
+            this->buffer[this->head++ % 4096] = this->ibuffer[i];
+        }
+        this->itail = 0;
     }
-    this->itail = 0;
     this->queue.wakeup();
     return 0;
 }

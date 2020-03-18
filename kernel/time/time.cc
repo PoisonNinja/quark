@@ -1,15 +1,19 @@
-#include <cpu/interrupt.h>
 #include <kernel.h>
+#include <kernel/lock.h>
 #include <kernel/time/time.h>
 #include <proc/sched.h>
 
 namespace time
 {
-static libcxx::list<clock, &clock::node> clock_list;
-static clock* current_ticker = nullptr;
-static clock* current_clock  = nullptr;
-static volatile struct timespec current_time;
-static volatile time_t last = 0;
+namespace
+{
+libcxx::list<clock, &clock::node> clock_list;
+clock* current_ticker = nullptr;
+clock* current_clock  = nullptr;
+spinlock current_time_lock;
+volatile struct timespec current_time;
+volatile time_t last = 0;
+} // namespace
 
 extern void arch_init();
 
@@ -73,7 +77,7 @@ void mdelay(time_t msec)
     ndelay(msec * 1000 * 1000);
 }
 
-void tick(struct interrupt_context* ctx)
+void tick(struct ::interrupt_context* ctx)
 {
     update();
     if (scheduler::online()) {
@@ -87,8 +91,8 @@ void update()
     if (!current_clock) {
         return;
     }
-    int flags = interrupt::save();
-    interrupt::disable();
+    // Can be called from an interrupt context, must use spinlocks
+    scoped_lock_irq<spinlock> lock(current_time_lock);
     time_t current = current_clock->read();
     time_t offset  = current - last;
     time_t nsec    = offset * nsec_per_sec / current_clock->frequency();
@@ -98,8 +102,8 @@ void update()
         current_time.tv_nsec -= nsec_per_sec;
         current_time.tv_sec++;
     }
+    assert(last <= current);
     last = current;
-    interrupt::restore(flags);
 }
 
 struct timespec now()

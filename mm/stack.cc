@@ -10,6 +10,7 @@ namespace memory
 {
 void stack::push(addr_t address)
 {
+    scoped_lock<spinlock> _lock(this->lock);
     struct memory::page* pg = memory::pagedb::get(address);
     if (this->top) {
         top->prev = pg;
@@ -22,6 +23,7 @@ void stack::push(addr_t address)
 
 void stack::remove(addr_t address)
 {
+    scoped_lock<spinlock> _lock(this->lock);
     struct memory::page* pg = memory::pagedb::get(address);
     if (pg->next) {
         pg->next->prev = pg->prev;
@@ -37,6 +39,7 @@ void stack::remove(addr_t address)
 
 addr_t stack::pop()
 {
+    scoped_lock<spinlock> _lock(this->lock);
     if (!this->size) {
         kernel::panic("Attempted to pop empty stack\n");
     }

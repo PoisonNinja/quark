@@ -1,4 +1,5 @@
 set(CONFIG_PRINTK_MAX "1024" CACHE STRING "Set kernel printk buffer size" )
+set(CONFIG_PREEMPT "1" CACHE STRING "Enable kernel preemption during system calls" )
 
 target_sources(quark.kernel
     PRIVATE

@@ -32,9 +32,9 @@ int tty_driver::ioctl(unsigned long request, char* argp)
     return -EINVAL;
 }
 
-libcxx::pair<int, void*> tty_driver::open(const char* name)
+int tty_driver::open(const char* name)
 {
-    return libcxx::pair<int, void*>(0, nullptr);
+    return 0;
 }
 
 ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
@@ -67,7 +67,7 @@ tty_core::tty_core(tty_driver* driver, struct termios& termios)
 {
 }
 
-int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
+int tty_core::ioctl(unsigned long request, char* argp)
 {
     {
         scoped_lock<mutex> mlock(this->meta_lock);
@@ -97,12 +97,12 @@ int tty_core::ioctl(unsigned long request, char* argp, void* cookie)
     return this->driver->ioctl(request, argp);
 }
 
-libcxx::pair<int, void*> tty_core::open(const char* name)
+int tty_core::open(const char* name)
 {
     return this->driver->open(name);
 }
 
-int tty_core::poll(filesystem::poll_register_func_t& callback, void* cookie)
+int tty_core::poll(filesystem::poll_register_func_t& callback)
 {
     callback(this->queue);
 
@@ -114,8 +114,7 @@ int tty_core::poll(filesystem::poll_register_func_t& callback, void* cookie)
     return 0;
 }
 
-ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
-                       void* cookie)
+ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */)
 {
     if (!count)
         return 0;
@@ -140,8 +139,7 @@ ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */,
     return count;
 }
 
-ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */,
-                        void* cookie)
+ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */)
 {
     this->meta_lock.lock();
     libcxx::vector<uint8_t> real_buffer(count);

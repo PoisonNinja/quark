@@ -15,8 +15,7 @@ ext2_file::~ext2_file()
 {
 }
 
-ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset,
-                        void* cookie)
+ssize_t ext2_file::read(uint8_t* buffer, size_t count, off_t offset)
 {
     size_t start_block = offset / this->instance->geometry.block_size;
     size_t end_block   = (offset + count) / this->instance->geometry.block_size;

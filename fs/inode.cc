@@ -15,7 +15,7 @@ inode::~inode()
 {
 }
 
-int inode::ioctl(unsigned long request, char* argp, void* cookie)
+int inode::ioctl(unsigned long request, char* argp)
 {
     return -EINVAL;
 }
@@ -35,13 +35,12 @@ int inode::mknod(const char*, mode_t, dev_t)
     return -EBADF;
 }
 
-libcxx::pair<int, void*> inode::open(const char*)
+int inode::open(const char*)
 {
-    // Can't use make_pair here
-    return libcxx::pair<int, void*>(0, nullptr);
+    return 0;
 }
 
-int inode::poll(poll_register_func_t& callback, void* cookie)
+int inode::poll(poll_register_func_t& callback)
 {
     // Regular files are always ready to read, unless overridden
     return POLLIN;
@@ -52,12 +51,12 @@ libcxx::intrusive_ptr<inode> inode::lookup(const char*, int, mode_t)
     return libcxx::intrusive_ptr<inode>(nullptr);
 }
 
-ssize_t inode::read(uint8_t*, size_t, off_t, void*)
+ssize_t inode::read(uint8_t*, size_t, off_t)
 {
     return -EBADF;
 }
 
-ssize_t inode::write(const uint8_t*, size_t, off_t, void*)
+ssize_t inode::write(const uint8_t*, size_t, off_t)
 {
     return -EBADF;
 }

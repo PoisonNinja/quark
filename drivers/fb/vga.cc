@@ -32,8 +32,7 @@ vgafb::~vgafb()
     memory::vmalloc::free(reinterpret_cast<addr_t>(vga_buffer));
 }
 
-ssize_t vgafb::write(const uint8_t *buffer, size_t size, off_t offset,
-                     void * /* cookie */)
+ssize_t vgafb::write(const uint8_t *buffer, size_t size, off_t offset)
 {
     libcxx::memcpy((void *)((uint8_t *)vga_buffer + offset), buffer, size);
     return size;

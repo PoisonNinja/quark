@@ -62,44 +62,44 @@ ptmx::ptmx(ptsfs* fs)
     : kdevice(filesystem::CHR)
     , fs(fs)
 {
+    ptm* master = new ptm();
+    this->tty   = register_tty(master, 0, 0, tty_no_register);
+    this->index = this->fs->register_ptm(master);
 }
 
-int ptmx::ioctl(unsigned long request, char* argp, void* cookie)
+int ptmx::ioctl(unsigned long request, char* argp)
 {
     if (request == TIOCGPTN) {
-        *reinterpret_cast<int*>(argp) =
-            static_cast<ptmx_metadata*>(cookie)->index;
+        *reinterpret_cast<int*>(argp) = this->index;
         return 0;
     }
-    return static_cast<ptmx_metadata*>(cookie)->ptm->ioctl(request, argp,
-                                                           cookie);
+    return this->tty->ioctl(request, argp);
 }
 
-libcxx::pair<int, void*> ptmx::open(const char* name)
+int ptmx::poll(filesystem::poll_register_func_t& callback)
 {
-    ptm* master         = new ptm();
-    ptmx_metadata* meta = new ptmx_metadata;
-    meta->ptm           = register_tty(master, 0, 0, tty_no_register);
-    meta->index         = this->fs->register_ptm(master);
-    return libcxx::pair<int, void*>(0, meta);
+    return this->tty->poll(callback);
 }
 
-int ptmx::poll(filesystem::poll_register_func_t& callback, void* cookie)
+ssize_t ptmx::read(uint8_t* buffer, size_t count, off_t offset)
 {
-    return static_cast<ptmx_metadata*>(cookie)->ptm->poll(callback, cookie);
+    return this->tty->read(buffer, count, offset);
 }
 
-ssize_t ptmx::read(uint8_t* buffer, size_t count, off_t offset, void* cookie)
+ssize_t ptmx::write(const uint8_t* buffer, size_t count, off_t offset)
 {
-    return static_cast<ptmx_metadata*>(cookie)->ptm->read(buffer, count, offset,
-                                                          cookie);
+    return this->tty->write(buffer, count, offset);
 }
 
-ssize_t ptmx::write(const uint8_t* buffer, size_t count, off_t offset,
-                    void* cookie)
+ptmx_mux::ptmx_mux(ptsfs* fs)
+    : kdevice(filesystem::CHR)
+    , fs(fs)
 {
-    return static_cast<ptmx_metadata*>(cookie)->ptm->write(buffer, count,
-                                                           offset, cookie);
+}
+
+kdevice* ptmx_mux::factory()
+{
+    return new ptmx(fs);
 }
 
 } // namespace tty

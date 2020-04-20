@@ -130,30 +130,35 @@ kdevice* get_kdevice(mode_t mode, dev_t dev)
     }
 }
 
-libcxx::pair<int, void*> kdevice::open(const char*)
+int kdevice::open(const char*)
 {
-    return libcxx::pair<int, void*>(0, nullptr);
+    return 0;
 }
 
-int kdevice::ioctl(unsigned long, char*, void* cookie)
+int kdevice::ioctl(unsigned long, char*)
 {
     return -EINVAL;
 }
 
-int kdevice::poll(poll_register_func_t& callback, void* cookie)
+int kdevice::poll(poll_register_func_t& callback)
 {
     // TODO: Correct?
     return POLLIN;
 }
 
-ssize_t kdevice::read(uint8_t*, size_t, off_t, void*)
+ssize_t kdevice::read(uint8_t*, size_t, off_t)
 {
     return -EBADF;
 }
 
-ssize_t kdevice::write(const uint8_t*, size_t, off_t, void*)
+ssize_t kdevice::write(const uint8_t*, size_t, off_t)
 {
     return -EBADF;
+}
+
+kdevice* kdevice::factory()
+{
+    return this;
 }
 
 bool kdevice::seekable()

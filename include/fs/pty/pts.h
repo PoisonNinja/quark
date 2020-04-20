@@ -15,7 +15,7 @@ class pts : public tty_driver
 {
 public:
     pts(ptm* master);
-    libcxx::pair<int, void*> open(const char* name) override;
+    int open(const char* name) override;
     ssize_t write(const uint8_t* buffer, size_t count) override;
 
     ssize_t notify(const uint8_t* buffer, size_t count);

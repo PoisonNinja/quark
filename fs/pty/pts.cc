@@ -18,9 +18,9 @@ pts::pts(ptm* master)
 {
 }
 
-libcxx::pair<int, void*> pts::open(const char* name)
+int pts::open(const char* name)
 {
-    return libcxx::pair<int, void*>(0, nullptr);
+    return 0;
 }
 
 ssize_t pts::write(const uint8_t* buffer, size_t count)

@@ -32,10 +32,9 @@ class file : public inode
 public:
     file(ino_t ino, dev_t rdev, mode_t mode);
     virtual ~file();
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                         void* cookie) override;
-    virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                          void* cookie) override;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    virtual ssize_t write(const uint8_t* buffer, size_t count,
+                          off_t offset) override;
 
 private:
     uint8_t* data;

@@ -71,14 +71,13 @@ char* basename(const char* path)
 descriptor::descriptor(libcxx::intrusive_ptr<vnode> vnode, int flags)
 {
     this->vno            = vnode;
-    this->cookie         = nullptr;
     this->current_offset = 0;
     this->flags          = flags;
 }
 
 int descriptor::ioctl(unsigned long request, char* argp)
 {
-    return this->vno->ioctl(request, argp, this->cookie);
+    return this->vno->ioctl(request, argp);
 }
 
 int descriptor::link(const char* name, libcxx::intrusive_ptr<descriptor> node)
@@ -239,19 +238,14 @@ descriptor::open(const char* name, int flags, mode_t mode)
     }
     ret = libcxx::intrusive_ptr<descriptor>(
         new descriptor(curr_vnode, oflags_to_descriptor(flags)));
-    auto [status, _cookie] = curr_vnode->open(name);
-    if (!status) {
-        ret->cookie = _cookie;
-        log::printk(log::log_level::DEBUG,
-                    "[descriptor->open] Setting cookie to %p\n", ret->cookie);
-    }
+    int status = curr_vnode->open(name);
     delete[] path;
-    return libcxx::make_pair(0, ret);
+    return libcxx::make_pair(status, ret);
 }
 
 int descriptor::poll(poll_register_func_t& callback)
 {
-    return this->vno->poll(callback, this->cookie);
+    return this->vno->poll(callback);
 }
 
 ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
@@ -261,7 +255,7 @@ ssize_t descriptor::pread(uint8_t* buffer, size_t count, off_t offset)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    return vno->read(buffer, count, offset, this->cookie);
+    return vno->read(buffer, count, offset);
 }
 
 ssize_t descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
@@ -271,7 +265,7 @@ ssize_t descriptor::pwrite(const uint8_t* buffer, size_t count, off_t offset)
                     "Program tried to read without declaring F_READ\n");
         return -EBADF;
     }
-    return vno->write(buffer, count, offset, this->cookie);
+    return vno->write(buffer, count, offset);
 }
 
 bool descriptor::seekable()
@@ -308,7 +302,7 @@ ssize_t descriptor::write(const uint8_t* buffer, size_t count)
         return -EBADF;
     }
     scoped_lock<mutex> lock(current_offset_mutex);
-    ssize_t ret = this->vno->write(buffer, count, current_offset, this->cookie);
+    ssize_t ret = this->vno->write(buffer, count, current_offset);
     if (ret > 0 && this->seekable()) {
         // TODO: Properly handle overflows
         current_offset += ret;

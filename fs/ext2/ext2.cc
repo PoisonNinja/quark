@@ -19,7 +19,7 @@ bool driver::mount(superblock* sb)
 {
     ext2_instance* ext2_fs = new ext2_instance();
     sb->source->read(reinterpret_cast<uint8_t*>(&ext2_fs->sb),
-                     sizeof(ext2_superblock), 1024, nullptr);
+                     sizeof(ext2_superblock), 1024);
     if (ext2_fs->sb.magic != ext2_magic) {
         log::printk(log::log_level::ERROR,
                     "ext2: Bad magic. Expected %X, got %X\n", ext2_magic,
@@ -107,8 +107,7 @@ uint32_t driver::flags()
 ssize_t ext2_instance::read_block(uint8_t* buffer, uint32_t block_number)
 {
     return this->block_device->read(buffer, this->geometry.block_size,
-                                    this->geometry.block_size * block_number,
-                                    nullptr);
+                                    this->geometry.block_size * block_number);
 }
 
 namespace

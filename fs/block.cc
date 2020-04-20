@@ -12,10 +12,8 @@ public:
     block_wrapper(block_device* bd);
     ~block_wrapper();
 
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                 void* cookie) override;
-    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                  void* cookie) override;
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset) override;
 
 private:
     // TODO: Request queue
@@ -32,8 +30,7 @@ block_wrapper::~block_wrapper()
 {
 }
 
-ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
-                            void* cookie)
+ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset)
 {
     // TODO: Eventually implement a more intelligent scheduler
     size_t processed = 0;
@@ -97,8 +94,7 @@ ssize_t block_wrapper::read(uint8_t* buffer, size_t count, off_t offset,
     return count;
 }
 
-ssize_t block_wrapper::write(const uint8_t* buffer, size_t count, off_t offset,
-                             void* cookie)
+ssize_t block_wrapper::write(const uint8_t* buffer, size_t count, off_t offset)
 {
     // TODO: Eventually implement a more intelligent scheduler
     return 0;

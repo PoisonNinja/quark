@@ -217,7 +217,7 @@ class tty_driver
 public:
     tty_driver();
     virtual int ioctl(unsigned long request, char* argp);
-    virtual libcxx::pair<int, void*> open(const char* name);
+    virtual int open(const char* name);
     virtual ssize_t write(const uint8_t* buffer, size_t count);
     virtual void init_termios(struct termios& termios);
 
@@ -232,13 +232,11 @@ class tty_core : public kdevice
 {
 public:
     tty_core(tty_driver* driver, struct termios& termios);
-    int ioctl(unsigned long request, char* argp, void* cookie) override final;
-    libcxx::pair<int, void*> open(const char* name) override;
-    int poll(filesystem::poll_register_func_t& callback, void* cookie) override;
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                 void* cookie) override;
-    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                  void* cookie) override;
+    int ioctl(unsigned long request, char* argp) override final;
+    int open(const char* name) override;
+    int poll(filesystem::poll_register_func_t& callback) override;
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset) override;
 
 public:
     ssize_t notify(const uint8_t* buffer, size_t count);

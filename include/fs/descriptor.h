@@ -47,6 +47,5 @@ private:
     mutex current_offset_mutex;
     off_t current_offset;
     int flags;
-    void* cookie;
 };
 } // namespace filesystem

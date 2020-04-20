@@ -17,12 +17,10 @@ class intel8042 : public filesystem::kdevice
 public:
     intel8042();
 
-    virtual int poll(filesystem::poll_register_func_t& callback,
-                     void* cookie) override;
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                         void* cookie) override;
-    virtual ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                          void* cookie) override;
+    virtual int poll(filesystem::poll_register_func_t& callback) override;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    virtual ssize_t write(const uint8_t* buffer, size_t count,
+                          off_t offset) override;
 
     virtual bool seekable() override;
 
@@ -49,7 +47,7 @@ intel8042::intel8042()
     inb(0x60);
 }
 
-int intel8042::poll(filesystem::poll_register_func_t& callback, void* cookie)
+int intel8042::poll(filesystem::poll_register_func_t& callback)
 {
     /*
      * Register this thread with the queue
@@ -61,7 +59,7 @@ int intel8042::poll(filesystem::poll_register_func_t& callback, void* cookie)
     return 0;
 }
 
-ssize_t intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)
+ssize_t intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/)
 {
     size_t read = 0;
     while (read < count) {
@@ -73,7 +71,7 @@ ssize_t intel8042::read(uint8_t* buffer, size_t count, off_t /*offset*/, void*)
     return read;
 }
 
-ssize_t intel8042::write(const uint8_t*, size_t, off_t, void*)
+ssize_t intel8042::write(const uint8_t*, size_t, off_t)
 {
     return 0;
 }

@@ -24,7 +24,7 @@ void init()
     // Initialize the pts layer
     auto ptsfs = new filesystem::ptsfs();
     drivers::add("ptsfs", ptsfs);
-    filesystem::tty::ptmx* p = new filesystem::tty::ptmx(ptsfs);
+    filesystem::tty::ptmx_mux* p = new filesystem::tty::ptmx_mux(ptsfs);
     log::printk(log::log_level::INFO, "Registering ptmx character device\n");
     filesystem::register_class(filesystem::CHR, 5);
     filesystem::register_kdevice(filesystem::CHR, 5, p);

@@ -146,8 +146,7 @@ class ext2_file : public ext2_base_inode
 public:
     ext2_file(ino_t ino, ext2_instance* parent, ext2_real_inode real_inode);
     virtual ~ext2_file();
-    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                         void* cookie) override;
+    virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
 };
 
 class ext2_dir : public ext2_base_inode

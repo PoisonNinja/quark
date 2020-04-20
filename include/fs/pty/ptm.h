@@ -31,13 +31,22 @@ class ptmx : public kdevice
 {
 public:
     ptmx(ptsfs* fs);
-    int ioctl(unsigned long request, char* argp, void* cookie) override;
-    libcxx::pair<int, void*> open(const char* name) override;
-    int poll(filesystem::poll_register_func_t& callback, void* cookie) override;
-    ssize_t read(uint8_t* buffer, size_t count, off_t offset,
-                 void* cookie) override;
-    ssize_t write(const uint8_t* buffer, size_t count, off_t offset,
-                  void* cookie) override;
+    int ioctl(unsigned long request, char* argp) override;
+    int poll(filesystem::poll_register_func_t& callback) override;
+    ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
+    ssize_t write(const uint8_t* buffer, size_t count, off_t offset) override;
+
+private:
+    struct tty_core* tty;
+    size_t index;
+    ptsfs* fs;
+};
+
+class ptmx_mux : public kdevice
+{
+public:
+    ptmx_mux(ptsfs* fs);
+    kdevice* factory() override;
 
 private:
     ptsfs* fs;

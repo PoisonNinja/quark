@@ -1,4 +1,3 @@
-#include <drivers/fb/vga.h>
 #include <fs/descriptor.h>
 #include <fs/fs.h>
 #include <fs/inode.h>
@@ -8,6 +7,7 @@
 #include <fs/tmpfs/tmpfs.h>
 #include <fs/tty.h>
 #include <fs/vnode.h>
+#include <fs/vtty/vtty.h>
 #include <kernel.h>
 #include <proc/sched.h>
 
@@ -29,11 +29,6 @@ void init()
     filesystem::register_class(filesystem::CHR, 5);
     filesystem::register_kdevice(filesystem::CHR, 5, p);
 
-    vgafb* vga     = new vgafb();
-    auto vga_major = filesystem::locate_class(filesystem::CHR);
-    register_class(CHR, vga_major);
-    register_kdevice(CHR, vga_major, vga);
-
     // Initialize the root filesystem
     superblock* rootsb = new superblock();
     drivers::get("tmpfs")->mount(rootsb);
@@ -46,5 +41,7 @@ void init()
 
     scheduler::get_current_process()->set_cwd(droot);
     scheduler::get_current_process()->set_root(droot);
+
+    filesystem::tty::vtty_init();
 }
 } // namespace filesystem

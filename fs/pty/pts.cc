@@ -13,7 +13,7 @@ namespace filesystem
 {
 namespace terminal
 {
-pts::pts(ptm* master)
+pts::pts(tty* master)
     : master(master)
 {
 }
@@ -26,16 +26,6 @@ int pts::open(const char* name)
 ssize_t pts::write(const uint8_t* buffer, size_t count)
 {
     return this->master->notify(buffer, count);
-}
-
-ssize_t pts::notify(const uint8_t* buffer, size_t count)
-{
-    return this->core->notify(buffer, count);
-}
-
-void pts::winch(const struct winsize* sz)
-{
-    this->core->winch(sz);
 }
 
 void pts::init_termios(struct termios& termios)
@@ -67,15 +57,14 @@ bool ptsfs::mount(superblock* sb)
     return true;
 }
 
-int ptsfs::register_ptm(terminal::ptm* ptm)
+int ptsfs::register_ptm(terminal::tty* ptm)
 {
     char name[128];
     terminal::pts* pts = new terminal::pts(ptm);
-    ptm->set_pts(pts);
-    int real_index = index++;
-    terminal::register_tty(pts, pts_major, real_index, 0);
+    int real_index     = index++;
+    register_tty(pts, pts_major, real_index, 0);
     libcxx::sprintf(name, "%d", real_index);
     this->root->mknod(name, S_IFCHR | 0644, mkdev(pts_major, real_index));
-    return real_index;
+    return mkdev(pts_major, real_index);
 }
 } // namespace filesystem

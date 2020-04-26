@@ -232,7 +232,7 @@ class tty : public kdevice
 {
 public:
     tty(tty_driver* driver, struct termios& termios);
-    int ioctl(unsigned long request, char* argp) override final;
+    int ioctl(unsigned long request, char* argp) override;
     int open(const char* name) override;
     int poll(filesystem::poll_register_func_t& callback) override;
     ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
@@ -268,6 +268,7 @@ enum tty_flags {
 };
 
 tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags);
+tty* get_tty(dev_t major, dev_t minor);
 
 void init();
 } // namespace terminal

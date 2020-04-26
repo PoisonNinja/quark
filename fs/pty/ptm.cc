@@ -45,7 +45,7 @@ ssize_t ptm::notify(const uint8_t* buffer, size_t count)
     return this->core->notify(buffer, count);
 }
 
-void ptm::set_pts(pts* slave)
+void ptm::set_pts(tty* slave)
 {
     this->slave = slave;
 }
@@ -54,9 +54,11 @@ ptmx::ptmx(ptsfs* fs)
     : kdevice(filesystem::CHR)
     , fs(fs)
 {
-    ptm* master = new ptm();
-    this->tty   = register_tty(master, 0, 0, tty_no_register);
-    this->index = this->fs->register_ptm(master);
+    ptm* master   = new ptm();
+    this->tty     = register_tty(master, 0, 0, tty_no_register);
+    dev_t pts_dev = this->fs->register_ptm(this->tty);
+    this->index   = minor(pts_dev);
+    master->set_pts(get_tty(major(pts_dev), minor(pts_dev)));
 }
 
 int ptmx::ioctl(unsigned long request, char* argp)

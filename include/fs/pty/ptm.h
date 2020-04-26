@@ -21,10 +21,10 @@ public:
     ssize_t notify(const uint8_t* buffer, size_t count);
 
     void init_termios(struct termios& termios) override;
-    void set_pts(pts* slave);
+    void set_pts(tty* slave);
 
 private:
-    pts* slave;
+    tty* slave;
 };
 
 class ptmx : public kdevice

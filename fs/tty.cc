@@ -8,15 +8,22 @@
 #include <lib/string.h>
 #include <lib/unordered_map.h>
 
-namespace
-{
-dev_t tty_major = 0;
-} // namespace
-
 namespace filesystem
 {
 namespace terminal
 {
+namespace
+{
+dev_t tty_major = 0;
+
+struct tty_list_node {
+    libcxx::node<tty_list_node> node;
+    tty* data;
+    dev_t dev;
+};
+libcxx::list<tty_list_node, &tty_list_node::node> tty_list;
+} // namespace
+
 const char* init_cc =
     "\003\034\177\025\004\0\1\0\021\023\032\0\022\017\027\026\0";
 const size_t num_init_cc = 18;
@@ -261,8 +268,22 @@ tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags)
     driver->set_tty(t);
     if (!(flags & tty_no_register)) {
         register_kdevice(filesystem::CHR, major, minor, t);
+        tty_list_node* tty_node = new tty_list_node;
+        tty_node->dev           = mkdev(major, minor);
+        tty_node->data          = t;
+        tty_list.push_front(*tty_node);
     }
     return t;
+}
+
+tty* get_tty(dev_t major, dev_t minor)
+{
+    for (auto& t : tty_list) {
+        if (t.dev == mkdev(major, minor)) {
+            return t.data;
+        }
+    }
+    return nullptr;
 }
 
 void init()

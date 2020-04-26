@@ -37,7 +37,7 @@ public:
     ssize_t write(const uint8_t* buffer, size_t count, off_t offset) override;
 
 private:
-    struct tty_core* tty;
+    struct tty* tty;
     size_t index;
     ptsfs* fs;
 };

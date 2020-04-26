@@ -47,7 +47,7 @@ void tty_driver::init_termios(struct termios& termios)
 {
 }
 
-void tty_driver::set_core(tty_core* core)
+void tty_driver::set_tty(tty* core)
 {
     if (this->core) {
         log::printk(log::log_level::WARNING,
@@ -57,7 +57,7 @@ void tty_driver::set_core(tty_core* core)
     this->core = core;
 }
 
-tty_core::tty_core(tty_driver* driver, struct termios& termios)
+tty::tty(tty_driver* driver, struct termios& termios)
     : kdevice(CHR)
     , driver(driver)
     , termios(termios)
@@ -67,7 +67,7 @@ tty_core::tty_core(tty_driver* driver, struct termios& termios)
 {
 }
 
-int tty_core::ioctl(unsigned long request, char* argp)
+int tty::ioctl(unsigned long request, char* argp)
 {
     {
         scoped_lock<mutex> mlock(this->meta_lock);
@@ -97,12 +97,12 @@ int tty_core::ioctl(unsigned long request, char* argp)
     return this->driver->ioctl(request, argp);
 }
 
-int tty_core::open(const char* name)
+int tty::open(const char* name)
 {
     return this->driver->open(name);
 }
 
-int tty_core::poll(filesystem::poll_register_func_t& callback)
+int tty::poll(filesystem::poll_register_func_t& callback)
 {
     callback(this->queue);
 
@@ -114,7 +114,7 @@ int tty_core::poll(filesystem::poll_register_func_t& callback)
     return 0;
 }
 
-ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */)
+ssize_t tty::read(uint8_t* buffer, size_t count, off_t /* offset */)
 {
     if (!count)
         return 0;
@@ -139,7 +139,7 @@ ssize_t tty_core::read(uint8_t* buffer, size_t count, off_t /* offset */)
     return count;
 }
 
-ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */)
+ssize_t tty::write(const uint8_t* buffer, size_t count, off_t /* offset */)
 {
     this->meta_lock.lock();
     libcxx::vector<uint8_t> real_buffer(count);
@@ -158,7 +158,7 @@ ssize_t tty_core::write(const uint8_t* buffer, size_t count, off_t /* offset */)
     return this->driver->write(real_buffer.data(), real_buffer.size());
 }
 
-ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
+ssize_t tty::notify(const uint8_t* buffer, size_t count)
 {
     this->meta_lock.lock();
     size_t i;
@@ -222,14 +222,14 @@ ssize_t tty_core::notify(const uint8_t* buffer, size_t count)
     return i;
 }
 
-void tty_core::winch(const struct winsize* ws)
+void tty::winch(const struct winsize* ws)
 {
     scoped_lock<mutex> mlock(this->meta_lock);
     this->ws = *ws;
     // TODO: Notify userspace through signals
 }
 
-ssize_t tty_core::dump_input()
+ssize_t tty::dump_input()
 {
     {
         scoped_lock<mutex> lock(this->buffer_lock);
@@ -243,8 +243,7 @@ ssize_t tty_core::dump_input()
     return 0;
 }
 
-tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
-                       unsigned flags)
+tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags)
 {
     if (!driver) {
         return nullptr;
@@ -258,12 +257,12 @@ tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
     }
     struct termios kterm;
     driver->init_termios(kterm);
-    tty_core* tty = new tty_core(driver, kterm);
-    driver->set_core(tty);
+    tty* t = new tty(driver, kterm);
+    driver->set_tty(t);
     if (!(flags & tty_no_register)) {
-        register_kdevice(filesystem::CHR, major, minor, tty);
+        register_kdevice(filesystem::CHR, major, minor, t);
     }
-    return tty;
+    return t;
 }
 
 void init()

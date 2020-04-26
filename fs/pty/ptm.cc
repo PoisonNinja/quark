@@ -11,14 +11,6 @@ namespace filesystem
 {
 namespace terminal
 {
-namespace
-{
-struct ptmx_metadata {
-    struct tty_core* ptm;
-    size_t index;
-};
-} // namespace
-
 ptm::ptm()
     : slave(nullptr)
 {

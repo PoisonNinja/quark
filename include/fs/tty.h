@@ -9,7 +9,7 @@ namespace filesystem
 {
 namespace terminal
 {
-class tty_core;
+class tty;
 
 typedef unsigned char cc_t;
 typedef unsigned int speed_t;
@@ -222,16 +222,16 @@ public:
     virtual void init_termios(struct termios& termios);
 
 public:
-    void set_core(tty_core* core);
+    void set_tty(tty* core);
 
 protected:
-    tty_core* core;
+    tty* core;
 };
 
-class tty_core : public kdevice
+class tty : public kdevice
 {
 public:
-    tty_core(tty_driver* driver, struct termios& termios);
+    tty(tty_driver* driver, struct termios& termios);
     int ioctl(unsigned long request, char* argp) override final;
     int open(const char* name) override;
     int poll(filesystem::poll_register_func_t& callback) override;
@@ -267,8 +267,7 @@ enum tty_flags {
     tty_no_register = 0x1,
 };
 
-tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
-                       unsigned flags);
+tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags);
 
 void init();
 } // namespace terminal

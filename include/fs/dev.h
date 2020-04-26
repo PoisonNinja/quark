@@ -50,6 +50,7 @@ dev_t locate_class(device_class c);
 bool register_class(device_class c, dev_t major);
 
 bool register_kdevice(device_class c, dev_t major, kdevice* kdev);
+bool register_kdevice(device_class c, dev_t major, dev_t minor, kdevice* kdev);
 
 kdevice* get_kdevice(mode_t mode, dev_t dev);
 } // namespace filesystem

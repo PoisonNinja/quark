@@ -12,18 +12,27 @@ constexpr size_t max_minor = 256;
 
 struct KDeviceClass {
     kdevice* minors[max_minor];
+    int free_minor();
     kdevice* get_kdevice(int minor);
-    void add_kdevice(kdevice* kdevice);
+    void add_kdevice(kdevice* kdevice, int minor);
 };
 
-void KDeviceClass::add_kdevice(kdevice* kdevice)
+int KDeviceClass::free_minor()
 {
     for (size_t i = 0; i < max_minor; i++) {
         if (!minors[i]) {
-            minors[i] = kdevice;
-            return;
+            return i;
         }
     }
+    return -1;
+}
+
+void KDeviceClass::add_kdevice(kdevice* kdevice, int minor)
+{
+    assert(minor != -1);
+    assert(minors[minor] == nullptr);
+    minors[minor] = kdevice;
+    return;
 }
 
 kdevice* KDeviceClass::get_kdevice(int minor)
@@ -85,26 +94,66 @@ bool register_class(device_class c, dev_t major)
     }
 }
 
-bool register_kdevice(device_class c, dev_t major, kdevice* kdev)
+bool register_kdevice(device_class c, dev_t major, dev_t minor, kdevice* kdev)
 {
     switch (c) {
-        case BLK:
+        case BLK: {
             if (!blkdev[major]) {
                 log::printk(log::log_level::WARNING,
                             "Block device with major %llX not found\n", major);
                 return false;
             }
-            blkdev[major]->add_kdevice(kdev);
+            blkdev[major]->add_kdevice(kdev, minor);
             return true;
-        case CHR:
+        }
+        case CHR: {
             if (!chrdev[major]) {
                 log::printk(log::log_level::WARNING,
                             "Character device with major %llX not found\n",
                             major);
                 return false;
             }
-            chrdev[major]->add_kdevice(kdev);
+            chrdev[major]->add_kdevice(kdev, minor);
             return true;
+        }
+        default:
+            log::printk(log::log_level::ERROR,
+                        "Somehow got a invalid class while "
+                        "registering a kernel device\n");
+            return false;
+    }
+}
+
+bool register_kdevice(device_class c, dev_t major, kdevice* kdev)
+{
+    switch (c) {
+        case BLK: {
+            if (!blkdev[major]) {
+                log::printk(log::log_level::WARNING,
+                            "Block device with major %llX not found\n", major);
+                return false;
+            }
+            int minor = blkdev[major]->free_minor();
+            if (minor == -1)
+                kernel::panic("Out of minor slots for block major %llX\n",
+                              major);
+            blkdev[major]->add_kdevice(kdev, minor);
+            return true;
+        }
+        case CHR: {
+            if (!chrdev[major]) {
+                log::printk(log::log_level::WARNING,
+                            "Character device with major %llX not found\n",
+                            major);
+                return false;
+            }
+            int minor = chrdev[major]->free_minor();
+            if (minor == -1)
+                kernel::panic("Out of minor slots for block major %llX\n",
+                              major);
+            chrdev[major]->add_kdevice(kdev, minor);
+            return true;
+        }
         default:
             log::printk(log::log_level::ERROR,
                         "Somehow got a invalid class while "

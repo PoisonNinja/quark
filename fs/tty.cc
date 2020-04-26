@@ -261,7 +261,7 @@ tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
     tty_core* tty = new tty_core(driver, kterm);
     driver->set_core(tty);
     if (!(flags & tty_no_register)) {
-        register_kdevice(filesystem::CHR, major, tty);
+        register_kdevice(filesystem::CHR, major, minor, tty);
     }
     return tty;
 }

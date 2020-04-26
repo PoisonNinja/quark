@@ -9,7 +9,7 @@
 
 namespace filesystem
 {
-namespace tty
+namespace terminal
 {
 namespace
 {
@@ -102,5 +102,5 @@ kdevice* ptmx_mux::factory()
     return new ptmx(fs);
 }
 
-} // namespace tty
+} // namespace terminal
 } // namespace filesystem

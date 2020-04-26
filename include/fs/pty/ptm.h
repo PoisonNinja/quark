@@ -7,7 +7,7 @@ namespace filesystem
 {
 class ptsfs;
 
-namespace tty
+namespace terminal
 {
 class pts;
 
@@ -51,5 +51,5 @@ public:
 private:
     ptsfs* fs;
 };
-} // namespace tty
+} // namespace terminal
 } // namespace filesystem

@@ -11,7 +11,7 @@
 
 namespace filesystem
 {
-namespace tty
+namespace terminal
 {
 pts::pts(ptm* master)
     : master(master)
@@ -47,7 +47,7 @@ void pts::init_termios(struct termios& termios)
     termios.c_ispeed = termios.c_ospeed = 38400;
     libcxx::memcpy(termios.c_cc, init_cc, num_init_cc);
 }
-} // namespace tty
+} // namespace terminal
 
 namespace
 {
@@ -67,13 +67,13 @@ bool ptsfs::mount(superblock* sb)
     return true;
 }
 
-int ptsfs::register_ptm(tty::ptm* ptm)
+int ptsfs::register_ptm(terminal::ptm* ptm)
 {
     char name[128];
-    tty::pts* pts = new tty::pts(ptm);
+    terminal::pts* pts = new terminal::pts(ptm);
     ptm->set_pts(pts);
     int real_index = index++;
-    tty::register_tty(pts, pts_major, real_index, 0);
+    terminal::register_tty(pts, pts_major, real_index, 0);
     libcxx::sprintf(name, "%d", real_index);
     this->root->mknod(name, S_IFCHR | 0644, mkdev(pts_major, real_index));
     return real_index;

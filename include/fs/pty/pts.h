@@ -7,7 +7,7 @@
 
 namespace filesystem
 {
-namespace tty
+namespace terminal
 {
 class ptm;
 
@@ -26,7 +26,7 @@ public:
 private:
     ptm* master;
 };
-} // namespace tty
+} // namespace terminal
 
 /*
  * ptsfs is really an instance of tmpfs, just hacked to register things
@@ -36,7 +36,7 @@ class ptsfs : public tmpfs::driver
 {
 public:
     ptsfs();
-    int register_ptm(tty::ptm* ptm);
+    int register_ptm(terminal::ptm* ptm);
     bool mount(superblock* sb) override;
 
 private:

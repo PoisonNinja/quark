@@ -4,7 +4,7 @@
 
 namespace filesystem
 {
-namespace tty
+namespace terminal
 {
 class vtty : public tty_driver
 {
@@ -22,5 +22,5 @@ private:
 };
 
 void vtty_init();
-} // namespace tty
+} // namespace terminal
 } // namespace filesystem

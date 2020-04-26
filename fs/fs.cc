@@ -16,7 +16,7 @@ namespace filesystem
 void init()
 {
     // Initialize the TTY layer
-    tty::init();
+    terminal::init();
 
     // Register the filesystem drivers
     drivers::add("tmpfs", new tmpfs::driver());
@@ -24,7 +24,8 @@ void init()
     // Initialize the pts layer
     auto ptsfs = new filesystem::ptsfs();
     drivers::add("ptsfs", ptsfs);
-    filesystem::tty::ptmx_mux* p = new filesystem::tty::ptmx_mux(ptsfs);
+    filesystem::terminal::ptmx_mux* p =
+        new filesystem::terminal::ptmx_mux(ptsfs);
     log::printk(log::log_level::INFO, "Registering ptmx character device\n");
     filesystem::register_class(filesystem::CHR, 5);
     filesystem::register_kdevice(filesystem::CHR, 5, p);
@@ -42,6 +43,6 @@ void init()
     scheduler::get_current_process()->set_cwd(droot);
     scheduler::get_current_process()->set_root(droot);
 
-    filesystem::tty::vtty_init();
+    filesystem::terminal::vtty_init();
 }
 } // namespace filesystem

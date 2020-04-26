@@ -7,7 +7,7 @@
 
 namespace filesystem
 {
-namespace tty
+namespace terminal
 {
 class tty_core;
 
@@ -271,5 +271,5 @@ tty_core* register_tty(tty_driver* driver, dev_t major, dev_t minor,
                        unsigned flags);
 
 void init();
-} // namespace tty
+} // namespace terminal
 } // namespace filesystem

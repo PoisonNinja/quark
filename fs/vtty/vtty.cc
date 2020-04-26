@@ -7,7 +7,7 @@
 
 namespace filesystem
 {
-namespace tty
+namespace terminal
 {
 namespace
 {
@@ -243,5 +243,5 @@ void vtty_init()
     vtty* v = new vtty();
     register_tty(v, 4, 1, 0);
 }
-} // namespace tty
+} // namespace terminal
 } // namespace filesystem

@@ -17,9 +17,6 @@ public:
     ptm();
     int ioctl(unsigned long command, char* argp) override;
     ssize_t write(const uint8_t* buffer, size_t count) override;
-
-    ssize_t notify(const uint8_t* buffer, size_t count);
-
     void init_termios(struct termios& termios) override;
     void set_pts(tty* slave);
 

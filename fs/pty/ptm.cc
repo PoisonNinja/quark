@@ -40,11 +40,6 @@ void ptm::init_termios(struct termios& termios)
     termios.c_ispeed = termios.c_ospeed = 38400;
 }
 
-ssize_t ptm::notify(const uint8_t* buffer, size_t count)
-{
-    return this->core->notify(buffer, count);
-}
-
 void ptm::set_pts(tty* slave)
 {
     this->slave = slave;

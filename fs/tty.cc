@@ -29,7 +29,6 @@ const char* init_cc =
 const size_t num_init_cc = 18;
 
 tty_driver::tty_driver()
-    : core(nullptr)
 {
 }
 
@@ -52,16 +51,6 @@ ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
 
 void tty_driver::init_termios(struct termios& termios)
 {
-}
-
-void tty_driver::set_tty(tty* core)
-{
-    if (this->core) {
-        log::printk(log::log_level::WARNING,
-                    "tty: Uhh, you already have a core driver, this is "
-                    "probably not what you want\n");
-    }
-    this->core = core;
 }
 
 tty::tty(tty_driver* driver, struct termios& termios)
@@ -265,7 +254,6 @@ tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags)
     struct termios kterm;
     driver->init_termios(kterm);
     tty* t = new tty(driver, kterm);
-    driver->set_tty(t);
     if (!(flags & tty_no_register)) {
         register_kdevice(filesystem::CHR, major, minor, t);
         tty_list_node* tty_node = new tty_list_node;

@@ -220,6 +220,10 @@ public:
     virtual int open(const char* name);
     virtual ssize_t write(const uint8_t* buffer, size_t count);
     virtual void init_termios(struct termios& termios);
+    void set_tty(tty* t);
+
+protected:
+    tty* ptty;
 };
 
 class tty : public kdevice

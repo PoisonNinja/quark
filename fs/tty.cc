@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fs/dev.h>
+#include <fs/devnum.h>
 #include <fs/ioctl.h>
 #include <fs/stat.h>
 #include <fs/tty.h>
@@ -14,8 +15,6 @@ namespace terminal
 {
 namespace
 {
-dev_t tty_major = 0;
-
 struct tty_list_node {
     libcxx::node<tty_list_node> node;
     tty* data;
@@ -51,6 +50,11 @@ ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
 
 void tty_driver::init_termios(struct termios& termios)
 {
+}
+
+void tty_driver::set_tty(tty* t)
+{
+    this->ptty = t;
 }
 
 tty::tty(tty_driver* driver, struct termios& termios)
@@ -261,6 +265,7 @@ tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags)
         tty_node->data          = t;
         tty_list.push_front(*tty_node);
     }
+    driver->set_tty(t);
     return t;
 }
 

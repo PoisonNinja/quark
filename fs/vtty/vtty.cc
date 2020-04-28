@@ -1,9 +1,14 @@
 #include <arch/drivers/io.h>
+#include <drivers/input/codes.h>
+#include <fs/devnum.h>
 #include <fs/vtty/vtty.h>
 #include <kernel.h>
 #include <lib/string.h>
 #include <mm/virtual.h>
 #include <mm/vmalloc.h>
+
+using namespace libcxx::placeholders;
+using namespace input;
 
 namespace filesystem
 {
@@ -16,7 +21,12 @@ const size_t VGA_BUFFER_SIZE = 0x8000;
 const int VGA_HEIGHT         = 25;
 const int VGA_WIDTH          = 80;
 
+constexpr int NUM_VTTYS = 7;
+
 uint16_t* vga_buffer = nullptr;
+
+// 7 virtual ttys
+tty* ttys[NUM_VTTYS];
 
 void update_cursor(int col, int row)
 {
@@ -49,6 +59,9 @@ vtty::vtty()
     , bg(0)
     , fg(15)
 {
+    handler = new input::input_handler(
+        libcxx::bind(&vtty::handle_kb, this, _1, _2, _3));
+    input::register_handler(*this->handler);
     libcxx::memset(this->internal_buffer, 0, sizeof(this->internal_buffer));
     for (int i = 0; i < 80 * 25; i++) {
         internal_buffer[i] = 15 << 8;
@@ -69,6 +82,7 @@ ssize_t vtty::write(const uint8_t* buffer, size_t count)
 {
     for (const uint8_t* written = buffer; written < buffer + count; written++) {
         char val = *written;
+
         if (val == '\n') {
             x = 0;
             y++;
@@ -77,121 +91,121 @@ ssize_t vtty::write(const uint8_t* buffer, size_t count)
         } else if (val == '\b') {
             if (x)
                 x--;
-            // } else if (val == '\e') {
-            //     read(ptm, buffer, 3);
-            //     val = buffer[2];
-            //     if (buffer[1] == '3') {
-            //         switch (val) {
-            //             case '0':
-            //                 fg = 0; // Black
-            //                 break;
-            //             case '1':
-            //                 fg = 4; // Red
-            //                 break;
-            //             case '2':
-            //                 fg = 2; // Green
-            //                 break;
-            //             case '3':
-            //                 fg = 14; // Yellow
-            //                 break;
-            //             case '4':
-            //                 fg = 1; // Blue
-            //                 break;
-            //             case '5':
-            //                 fg = 5; // Magenta
-            //                 break;
-            //             case '6':
-            //                 fg = 3; // Cyan
-            //                 break;
-            //             case '7':
-            //                 fg = 7; // Light gray
-            //                 break;
-            //         }
-            //     } else if (buffer[1] == '9') {
-            //         switch (val) {
-            //             case '0':
-            //                 fg = 8; // Dark gray
-            //                 break;
-            //             case '1':
-            //                 fg = 12; // Light Red
-            //                 break;
-            //             case '2':
-            //                 fg = 10; // Light Green
-            //                 break;
-            //             case '3':
-            //                 fg = 14; // Yellow
-            //                 break;
-            //             case '4':
-            //                 fg = 9; // Light blue
-            //                 break;
-            //             case '5':
-            //                 fg = 13; // Light Magenta
-            //                 break;
-            //             case '6':
-            //                 fg = 11; // Light Cyan
-            //                 break;
-            //             case '7':
-            //                 fg = 15; // White
-            //                 break;
-            //         }
-            //     } else if (buffer[1] == '4') {
-            //         switch (val) {
-            //             case '0':
-            //                 bg = 0; // Black
-            //                 break;
-            //             case '1':
-            //                 bg = 4; // Red
-            //                 break;
-            //             case '2':
-            //                 bg = 2; // Green
-            //                 break;
-            //             case '3':
-            //                 bg = 14; // Yellow
-            //                 break;
-            //             case '4':
-            //                 bg = 1; // Blue
-            //                 break;
-            //             case '5':
-            //                 bg = 5; // Magenta
-            //                 break;
-            //             case '6':
-            //                 bg = 3; // Cyan
-            //                 break;
-            //             case '7':
-            //                 bg = 7; // Light gray
-            //                 break;
-            //         }
-            //     } else if (buffer[1] == '7') {
-            //         // read(ptm, buffer, 1);
-            //         // val = buffer[0];
-            //         switch (val) {
-            //             case '0':
-            //                 bg = 8; // Dark gray
-            //                 break;
-            //             case '1':
-            //                 bg = 12; // Light Red
-            //                 break;
-            //             case '2':
-            //                 bg = 10; // Light Green
-            //                 break;
-            //             case '3':
-            //                 bg = 14; // Yellow
-            //                 break;
-            //             case '4':
-            //                 bg = 9; // Light blue
-            //                 break;
-            //             case '5':
-            //                 bg = 13; // Light Magenta
-            //                 break;
-            //             case '6':
-            //                 bg = 11; // Light Cyan
-            //                 break;
-            //             case '7':
-            //                 bg = 15; // White
-            //                 break;
-            //         }
-            //     }
-            //     read(ptm, buffer, 1);
+        } else if (val == '\e') {
+            val = written[3];
+            if (written[2] == '3') {
+                switch (val) {
+                    case '0':
+                        fg = 0; // Black
+                        break;
+                    case '1':
+                        fg = 4; // Red
+                        break;
+                    case '2':
+                        fg = 2; // Green
+                        break;
+                    case '3':
+                        fg = 14; // Yellow
+                        break;
+                    case '4':
+                        fg = 1; // Blue
+                        break;
+                    case '5':
+                        fg = 5; // Magenta
+                        break;
+                    case '6':
+                        fg = 3; // Cyan
+                        break;
+                    case '7':
+                        fg = 7; // Light gray
+                        break;
+                    case '9':
+                        fg = 15;
+                        break;
+                }
+            } else if (written[2] == '9') {
+                switch (val) {
+                    case '0':
+                        fg = 8; // Dark gray
+                        break;
+                    case '1':
+                        fg = 12; // Light Red
+                        break;
+                    case '2':
+                        fg = 10; // Light Green
+                        break;
+                    case '3':
+                        fg = 14; // Yellow
+                        break;
+                    case '4':
+                        fg = 9; // Light blue
+                        break;
+                    case '5':
+                        fg = 13; // Light Magenta
+                        break;
+                    case '6':
+                        fg = 11; // Light Cyan
+                        break;
+                    case '7':
+                        fg = 15; // White
+                        break;
+                }
+            } else if (written[2] == '4') {
+                switch (val) {
+                    case '0':
+                        bg = 0; // Black
+                        break;
+                    case '1':
+                        bg = 4; // Red
+                        break;
+                    case '2':
+                        bg = 2; // Green
+                        break;
+                    case '3':
+                        bg = 14; // Yellow
+                        break;
+                    case '4':
+                        bg = 1; // Blue
+                        break;
+                    case '5':
+                        bg = 5; // Magenta
+                        break;
+                    case '6':
+                        bg = 3; // Cyan
+                        break;
+                    case '7':
+                        bg = 7; // Light gray
+                        break;
+                }
+            } else if (written[2] == '7') {
+                switch (val) {
+                    case '0':
+                        bg = 8; // Dark gray
+                        break;
+                    case '1':
+                        bg = 12; // Light Red
+                        break;
+                    case '2':
+                        bg = 10; // Light Green
+                        break;
+                    case '3':
+                        bg = 14; // Yellow
+                        break;
+                    case '4':
+                        bg = 9; // Light blue
+                        break;
+                    case '5':
+                        bg = 13; // Light Magenta
+                        break;
+                    case '6':
+                        bg = 11; // Light Cyan
+                        break;
+                    case '7':
+                        bg = 15; // White
+                        break;
+                }
+            }
+            written += 4;
         } else {
             size_t index           = y * VGA_WIDTH + x++;
             uint8_t color          = ((0xF & bg) << 4) | (0xF & fg);
@@ -212,10 +226,78 @@ ssize_t vtty::write(const uint8_t* buffer, size_t count)
                 2 * VGA_WIDTH);
             y = VGA_HEIGHT - 1;
         }
-        libcxx::memcpy(vga_buffer, internal_buffer, sizeof(internal_buffer));
-        update_cursor(x, y);
     }
+    libcxx::memcpy(vga_buffer, internal_buffer, sizeof(internal_buffer));
+    update_cursor(x, y);
     return count;
+}
+
+bool vtty::handle_kb(input::dtk_event_type type, unsigned code, int value)
+{
+    if (current_vtty() == this->ptty && type == input::dtk_event_type::key) {
+        if (value != 0) {
+            switch (code) {
+                case KEY_LEFTCTRL:
+                case KEY_RIGHTCTRL:
+                    state.ctrl = true;
+                    return true;
+                case KEY_LEFTALT:
+                case KEY_RIGHTALT:
+                    state.alt = true;
+                    return true;
+                case KEY_LEFTSHIFT:
+                case KEY_RIGHTSHIFT:
+                    state.shift = true;
+                    return true;
+                case KEY_LEFTMETA:
+                case KEY_RIGHTMETA:
+                    log::printk(log::log_level::INFO, "Meta key");
+                    state.meta = true;
+                    return true;
+            }
+        } else {
+            switch (code) {
+                case KEY_LEFTCTRL:
+                case KEY_RIGHTCTRL:
+                    state.ctrl = false;
+                    break;
+                case KEY_LEFTALT:
+                case KEY_RIGHTALT:
+                    state.alt = false;
+                    break;
+                case KEY_LEFTSHIFT:
+                case KEY_RIGHTSHIFT:
+                    state.shift = false;
+                    break;
+                case KEY_LEFTMETA:
+                case KEY_RIGHTMETA:
+                    state.meta = false;
+                    break;
+            }
+            return true;
+        }
+        uint16_t* key_map = base_map;
+        // TODO: Caps lock?
+        if (state.shift == true) {
+            key_map = shift_map;
+        }
+        if (code < NUM_CODES) {
+            uint16_t key = key_map[code];
+            uint8_t type = (key >> 8) & 0xFF;
+            uint8_t val  = key & 0xFF;
+            switch (type) {
+                case 0xF2: {
+                    if (val == 0x01) {
+                        val = '\r';
+                    }
+                }
+                default:
+                    this->ptty->notify(&val, 1);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 void vtty::init_termios(struct termios& termios)
@@ -228,6 +310,11 @@ void vtty::init_termios(struct termios& termios)
     libcxx::memcpy(termios.c_cc, init_cc, num_init_cc);
 }
 
+tty* current_vtty()
+{
+    return ttys[0];
+}
+
 void vtty_init()
 {
     addr_t virt = memory::vmalloc::allocate(VGA_BUFFER_SIZE);
@@ -238,10 +325,10 @@ void vtty_init()
     }
     vga_buffer = reinterpret_cast<uint16_t*>(virt);
 
-    // enable_cursor();
+    enable_cursor();
 
     vtty* v = new vtty();
-    register_tty(v, 4, 1, 0);
+    ttys[0] = register_tty(v, vtty_major, 1, 0);
 }
 } // namespace terminal
 } // namespace filesystem

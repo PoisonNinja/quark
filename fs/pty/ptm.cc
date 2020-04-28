@@ -50,7 +50,7 @@ ptmx::ptmx(ptsfs* fs)
     , fs(fs)
 {
     ptm* master   = new ptm();
-    this->tty     = register_tty(master, 0, 0, tty_no_register);
+    this->tty     = register_tty(master, 0, 0);
     dev_t pts_dev = this->fs->register_ptm(this->tty);
     this->index   = minor(pts_dev);
     master->set_pts(get_tty(major(pts_dev), minor(pts_dev)));

@@ -258,11 +258,15 @@ private:
     scheduler::wait_queue queue;
 };
 
-enum tty_flags {
-    tty_no_register = 0x1,
-};
-
-tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags);
+/*
+ * Register a TTY with the TTY subsystem. major/minor are only required if the
+ * TTY being registered should be accessible from get_tty().
+ *
+ * Note that you will need to register yourself with the kdevice subsystem.
+ *
+ * If not supplying a major/minor, set major to 0 (minor undefined)
+ */
+tty* register_tty(tty_driver* driver, dev_t major, dev_t minor);
 tty* get_tty(dev_t major, dev_t minor);
 
 void init();

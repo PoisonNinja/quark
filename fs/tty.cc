@@ -215,23 +215,15 @@ ssize_t tty::dump_input()
     return 0;
 }
 
-tty* register_tty(tty_driver* driver, dev_t major, dev_t minor, unsigned flags)
+tty* register_tty(tty_driver* driver, dev_t major, dev_t minor)
 {
     if (!driver) {
         return nullptr;
     }
-    if (!(flags & tty_no_register)) {
-        if (!major) {
-            major = tty_major;
-        } else {
-            register_class(filesystem::CHR, major);
-        }
-    }
     struct termios kterm;
     driver->init_termios(kterm);
     tty* t = new tty(driver, kterm);
-    if (!(flags & tty_no_register)) {
-        register_kdevice(filesystem::CHR, major, minor, t);
+    if (major) {
         tty_list_node* tty_node = new tty_list_node;
         tty_node->dev           = mkdev(major, minor);
         tty_node->data          = t;

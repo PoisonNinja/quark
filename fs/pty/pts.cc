@@ -62,7 +62,8 @@ int ptsfs::register_ptm(terminal::tty* ptm)
     char name[128];
     terminal::pts* pts = new terminal::pts(ptm);
     int real_index     = index++;
-    register_tty(pts, pts_major, real_index, 0);
+    terminal::tty* t   = register_tty(pts, pts_major, real_index);
+    register_kdevice(device_class::CHR, pts_major, real_index, t);
     libcxx::sprintf(name, "%d", real_index);
     this->root->mknod(name, S_IFCHR | 0644, mkdev(pts_major, real_index));
     return mkdev(pts_major, real_index);

@@ -359,11 +359,13 @@ void vtty_init()
     vga_buffer = reinterpret_cast<uint16_t*>(virt);
 
     enable_cursor();
+    register_class(device_class::CHR, vtty_major);
 
     for (int i = 1; i <= NUM_VTTYS; i++) {
         vtty* v  = new vtty(i);
         vttys[i] = v;
-        ttys[i]  = register_tty(v, vtty_major, i, 0);
+        ttys[i]  = register_tty(v, vtty_major, i);
+        register_kdevice(device_class::CHR, vtty_major, i, ttys[i]);
     }
     current_tty = 1;
 }

@@ -27,6 +27,16 @@ struct event_data {
     int value;
 };
 
+using input_handler_t =
+    libcxx::function<bool(dtk_event_type type, unsigned code, int value), 64>;
+
+struct input_handler {
+    input_handler(input_handler_t handler)
+        : handler(handler){};
+    input_handler_t handler;
+    libcxx::node<input_handler> node;
+};
+
 class input_kdevice : public filesystem::kdevice
 {
 public:
@@ -35,7 +45,7 @@ public:
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     virtual bool seekable() override;
 
-    void append(unsigned type, unsigned code, int val);
+    void append(dtk_event_type type, unsigned code, int val);
 
 private:
     event_data buffer[buffer_size];
@@ -56,6 +66,7 @@ private:
     input_kdevice* kdev;
 };
 
+bool register_handler(input_handler& handler);
 bool register_device(device* dev);
 void report_event(device* dev, dtk_event_type type, unsigned code, int value);
 } // namespace input

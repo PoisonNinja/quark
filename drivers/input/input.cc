@@ -1,13 +1,16 @@
 #include <drivers/input/input.h>
+#include <fs/devnum.h>
+#include <fs/tty.h>
+#include <fs/vtty/vtty.h>
 #include <kernel/init.h>
+#include <lib/printf.h>
 #include <lib/string.h>
 
 namespace input
 {
 namespace
 {
-// TODO: Place this somewhere more central
-dev_t input_major = 13;
+libcxx::list<input_handler, &input_handler::node> input_handlers;
 } // namespace
 
 input_kdevice::input_kdevice()
@@ -49,10 +52,10 @@ bool input_kdevice::seekable()
     return false;
 }
 
-void input_kdevice::append(unsigned type, unsigned code, int val)
+void input_kdevice::append(dtk_event_type type, unsigned code, int val)
 {
     event_data* ptr = &this->buffer[head % buffer_size];
-    ptr->type       = type;
+    ptr->type       = static_cast<unsigned>(type);
     ptr->code       = code;
     ptr->value      = val;
     this->queue.wakeup();
@@ -77,6 +80,12 @@ input_kdevice* device::get_kdevice()
     return this->kdev;
 }
 
+bool register_handler(input_handler& handler)
+{
+    input_handlers.push_back(handler);
+    return true;
+}
+
 bool register_device(device* dev)
 {
     input_kdevice* k = new input_kdevice;
@@ -87,12 +96,14 @@ bool register_device(device* dev)
 
 void report_event(device* dev, dtk_event_type type, unsigned code, int value)
 {
-    log::printk(log::log_level::INFO, "Got input event\n");
     if (dev == nullptr) {
         return;
     }
     input_kdevice* k = dev->get_kdevice();
-    k->append(static_cast<unsigned>(type), code, value);
+    k->append(type, code, value);
+    for (auto& handler : input_handlers) {
+        handler.handler(type, code, value);
+    }
 }
 
 namespace

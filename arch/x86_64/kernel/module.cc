@@ -24,9 +24,7 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
                     reinterpret_cast<elf::elf_rela*>(mod->sections[i] + x);
                 // Get the symbol offset
                 elf::elf_sym* sym = symtab + ELF_R_SYM(rel->r_info);
-                log::printk(log::log_level::DEBUG, "[load_module] Name: %s\n",
-                            string_table + sym->st_name);
-                addr_t symaddr = 0;
+                addr_t symaddr    = 0;
                 /*
                  * If st_shndx is 0, we need to resolve it to a global/external
                  * symbol. Otherwise, it's an internal reference that we need
@@ -60,28 +58,16 @@ bool relocate_module(module* mod, elf::elf_sym* symtab,
                 switch (ELF_R_TYPE(rel->r_info)) {
                     // case R_386_32
                     case R_X86_64_32:
-                        log::printk(log::log_level::DEBUG,
-                                    "[load_module] R_X86_64_32: %p %p %p %X\n",
-                                    addend, rel->r_offset, symaddr,
-                                    mod->shdrs[i].sh_info);
                         // = S + A
                         // Truncate down to 32 bits
                         *(reinterpret_cast<uint32_t*>(target)) =
                             static_cast<uint32_t>(symaddr + addend);
                         break;
                     case R_X86_64_64:
-                        log::printk(log::log_level::DEBUG,
-                                    "[load_module] R_X86_64_64: %p %p %p %X\n",
-                                    addend, rel->r_offset, symaddr,
-                                    mod->shdrs[i].sh_info);
                         // = S + A
                         *(reinterpret_cast<addr_t*>(target)) = symaddr + addend;
                         break;
                     case R_386_PC32:
-                        log::printk(log::log_level::DEBUG,
-                                    "[load_module] R_386_PC32: %p %p %p %X\n",
-                                    addend, target, symaddr,
-                                    mod->shdrs[i].sh_info);
                         *(reinterpret_cast<addr_t*>(target)) =
                             symaddr + addend - target;
                         break;

@@ -25,8 +25,9 @@ constexpr int NUM_VTTYS = 7;
 
 uint16_t* vga_buffer = nullptr;
 
-// 7 virtual ttys
-tty* ttys[NUM_VTTYS];
+tty* ttys[NUM_VTTYS + 1];
+vtty* vttys[NUM_VTTYS + 1];
+int current_tty;
 
 void update_cursor(int col, int row)
 {
@@ -53,8 +54,9 @@ void enable_cursor()
 }
 } // namespace
 
-vtty::vtty()
-    : x(0)
+vtty::vtty(int id)
+    : id(id)
+    , x(0)
     , y(0)
     , bg(0)
     , fg(15)
@@ -84,7 +86,6 @@ ssize_t vtty::write(const uint8_t* buffer, size_t count)
         char val = *written;
 
         if (val == '\n') {
-            x = 0;
             y++;
         } else if (val == '\r') {
             x = 0;
@@ -227,8 +228,10 @@ ssize_t vtty::write(const uint8_t* buffer, size_t count)
             y = VGA_HEIGHT - 1;
         }
     }
-    libcxx::memcpy(vga_buffer, internal_buffer, sizeof(internal_buffer));
-    update_cursor(x, y);
+    if (this->id == current_tty) {
+        libcxx::memcpy(vga_buffer, internal_buffer, sizeof(internal_buffer));
+        update_cursor(x, y);
+    }
     return count;
 }
 
@@ -286,11 +289,18 @@ bool vtty::handle_kb(input::dtk_event_type type, unsigned code, int value)
             uint8_t type = (key >> 8) & 0xFF;
             uint8_t val  = key & 0xFF;
             switch (type) {
-                case 0xF2: {
+                case 0xF1:
+                    // FN keys
+                    if (state.ctrl && state.alt) {
+                        switch_vtty(val + 1);
+                    }
+                    break;
+                case 0xF2:
                     if (val == 0x01) {
                         val = '\r';
                     }
-                }
+                    this->ptty->notify(&val, 1);
+                    break;
                 default:
                     this->ptty->notify(&val, 1);
             }
@@ -310,9 +320,32 @@ void vtty::init_termios(struct termios& termios)
     libcxx::memcpy(termios.c_cc, init_cc, num_init_cc);
 }
 
+int vtty::get_id()
+{
+    return this->id;
+}
+
+void vtty::restore()
+{
+    libcxx::memcpy(vga_buffer, internal_buffer, sizeof(internal_buffer));
+    update_cursor(x, y);
+}
+
+void switch_vtty(int next)
+{
+    if (next < 1 || next > NUM_VTTYS) {
+        return;
+    }
+    if (next == current_tty) {
+        return;
+    }
+    current_tty = next;
+    vttys[current_tty]->restore();
+}
+
 tty* current_vtty()
 {
-    return ttys[0];
+    return ttys[current_tty];
 }
 
 void vtty_init()
@@ -327,8 +360,12 @@ void vtty_init()
 
     enable_cursor();
 
-    vtty* v = new vtty();
-    ttys[0] = register_tty(v, vtty_major, 1, 0);
+    for (int i = 1; i <= NUM_VTTYS; i++) {
+        vtty* v  = new vtty(i);
+        vttys[i] = v;
+        ttys[i]  = register_tty(v, vtty_major, i, 0);
+    }
+    current_tty = 1;
 }
 } // namespace terminal
 } // namespace filesystem

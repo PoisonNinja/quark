@@ -30,6 +30,8 @@
  */
 
 #include <config.h>
+#include <fs/devnum.h>
+#include <fs/tty.h>
 #include <kernel.h>
 #include <kernel/log.h>
 #include <kernel/time/time.h>
@@ -56,6 +58,8 @@ size_t printk(log_level level, const char* format, ...)
 #ifndef QUARK_DEBUG
     if (level != log::log_level::DEBUG) {
 #endif
+        filesystem::terminal::tty* t =
+            filesystem::terminal::get_tty(vtty_major, 1);
         size_t r = 0;
         if (level < log::log_level::CONTINUE) {
             libcxx::memset(printk_buffer, 0, log::printk_max);
@@ -67,6 +71,9 @@ size_t printk(log_level level, const char* format, ...)
             for (auto& i : output) {
                 i.write(printk_buffer, r);
             }
+            if (t) {
+                t->write(reinterpret_cast<uint8_t*>(printk_buffer), r, 0);
+            }
         }
         libcxx::memset(printk_buffer, 0, log::printk_max);
         va_list args;
@@ -75,6 +82,9 @@ size_t printk(log_level level, const char* format, ...)
         va_end(args);
         for (auto& i : output) {
             i.write(printk_buffer, r);
+        }
+        if (t) {
+            t->write(reinterpret_cast<uint8_t*>(printk_buffer), r, 0);
         }
         return r;
 #ifndef QUARK_DEBUG

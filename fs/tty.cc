@@ -61,9 +61,8 @@ tty::tty(tty_driver* driver, struct termios& termios)
     : kdevice(CHR)
     , driver(driver)
     , termios(termios)
-    , itail(0)
-    , head(0)
-    , tail(0)
+    , input_queue(4096)
+    , output_queue(4096)
 {
 }
 
@@ -105,7 +104,7 @@ int tty::poll(filesystem::poll_register_func_t& callback)
 {
     callback(this->queue);
 
-    if (this->head != this->tail) {
+    if (!this->output_queue.empty()) {
         return POLLIN;
     }
 
@@ -118,15 +117,15 @@ ssize_t tty::read(uint8_t* buffer, size_t count, off_t /* offset */)
         return 0;
     size_t read = 0;
 
-    if (this->head == this->tail) {
+    if (this->output_queue.empty()) {
         this->queue.wait(scheduler::wait_interruptible);
     }
 
     while (read < count) {
-        if (this->tail == this->head) {
+        if (this->output_queue.empty()) {
             return read;
         }
-        buffer[read++] = this->buffer[this->tail++ % 4096];
+        buffer[read++] = this->output_queue.pop();
     }
 
     return count;
@@ -172,15 +171,16 @@ ssize_t tty::notify(const uint8_t* buffer, size_t count)
         }
         if (this->termios.c_lflag & ICANON) {
             if (c == this->termios.c_cc[VERASE]) {
-                if (this->itail) {
-                    this->ibuffer[--this->itail] = '\0';
-                    const uint8_t eraser[3]      = {'\010', ' ', '\010'};
+                if (!this->input_queue.empty()) {
+                    this->input_queue.pop_back();
+                    const uint8_t eraser[3] = {'\010', ' ', '\010'};
                     this->driver->write(eraser, 3);
                 }
                 continue;
             }
-            this->ibuffer[this->itail++] = c;
-
+            if (!this->input_queue.full()) {
+                this->input_queue.push(c);
+            }
             if (this->termios.c_lflag & ECHO) {
                 this->driver->write(reinterpret_cast<uint8_t*>(&c), 1);
             }
@@ -192,7 +192,9 @@ ssize_t tty::notify(const uint8_t* buffer, size_t count)
         } else if (this->termios.c_lflag & ECHO) {
             this->driver->write(reinterpret_cast<uint8_t*>(&c), 1);
         } else {
-            this->buffer[this->head++ % 4096] = c;
+            if (!this->output_queue.full()) {
+                this->output_queue.push(c);
+            }
             this->queue.wakeup();
         }
     }
@@ -207,10 +209,11 @@ void tty::winch(const struct winsize* ws)
 
 ssize_t tty::dump_input()
 {
-    for (size_t i = 0; i < this->itail; i++) {
-        this->buffer[this->head++ % 4096] = this->ibuffer[i];
+    while (!this->input_queue.empty()) {
+        if (!this->output_queue.full()) {
+            this->output_queue.push(this->input_queue.pop());
+        }
     }
-    this->itail = 0;
     this->queue.wakeup();
     return 0;
 }

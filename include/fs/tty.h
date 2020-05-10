@@ -3,6 +3,7 @@
 #include <fs/dev.h>
 #include <fs/inode.h>
 #include <kernel/lock.h>
+#include <lib/cqueue.h>
 #include <proc/wq.h>
 
 namespace filesystem
@@ -248,12 +249,8 @@ private:
     struct termios termios;
     struct winsize ws;
 
-    // TODO: Replace with flip buffer
-    char ibuffer[4096];
-    size_t itail;
-
-    char buffer[4096];
-    size_t head, tail;
+    libcxx::cqueue<char> input_queue;
+    libcxx::cqueue<char> output_queue;
 
     scheduler::wait_queue queue;
 };

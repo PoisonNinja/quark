@@ -41,10 +41,9 @@ public:
         swap(other);
     }
 
-    vector<T>& operator=(const vector<T>& other)
+    vector<T>& operator=(vector<T> other)
     {
-        vector<T> tmp(other);
-        swap(tmp);
+        swap(other);
         return *this;
     }
 

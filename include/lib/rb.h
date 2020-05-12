@@ -46,7 +46,7 @@ template <class T, rbnode<T> T::*Link>
 class rbtree
 {
 public:
-    typedef libcxx::function<void(T*)> rb_callback_t;
+    using rb_callback_t = libcxx::function<void(T*)>;
     rbtree();
     ~rbtree();
     void insert(T& value);

@@ -9,6 +9,7 @@
 
 namespace libcxx
 {
+void __attribute__((noreturn)) __bad_function_call();
 /*
  * From cppreference.com
  *
@@ -293,7 +294,7 @@ struct vtable {
     explicit constexpr vtable() noexcept
         : invoke_ptr{[](storage_ptr_t, Args &&...) -> R {
             // TODO: Probably should abort here
-            // throw libcxx::bad_function_call();
+            libcxx::__bad_function_call();
         }}
         , copy_ptr{[](storage_ptr_t, storage_ptr_t) -> void {}}
         , relocate_ptr{[](storage_ptr_t, storage_ptr_t) -> void {}}

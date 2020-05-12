@@ -141,4 +141,9 @@ void __cxa_finalize(void *f)
     };
 };
 }
+
+void __bad_function_call()
+{
+    kernel::panic("Bad function call");
+}
 } // namespace libcxx

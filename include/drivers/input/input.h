@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs/dev.h>
+#include <lib/functional.h>
 #include <lib/list.h>
 
 namespace input
@@ -37,15 +38,17 @@ struct input_handler {
     libcxx::node<input_handler> node;
 };
 
+class device;
+
 class input_kdevice : public filesystem::kdevice
 {
 public:
-    input_kdevice();
+    input_kdevice(device* dev);
     virtual int poll(filesystem::poll_register_func_t& callback) override;
     virtual ssize_t read(uint8_t* buffer, size_t count, off_t offset) override;
     virtual bool seekable() override;
 
-    void append(dtk_event_type type, unsigned code, int val);
+    void input_handler(dtk_event_type type, unsigned code, int val);
 
 private:
     event_data buffer[buffer_size];
@@ -53,17 +56,23 @@ private:
     scheduler::wait_queue queue;
 };
 
+// No need for libcxx::function since the target is known
+using input_event_handler_t =
+    libcxx::function<void(dtk_event_type type, unsigned code, int val), 64>;
+
 class device
 {
 public:
     device();
     virtual int event(ktd_event_type type, unsigned code, int value);
 
-    void set_kdevice(input_kdevice*);
-    input_kdevice* get_kdevice();
+    void set_event_handler(input_event_handler_t handler);
+
+protected:
+    void handle_event(dtk_event_type type, unsigned code, int val);
 
 private:
-    input_kdevice* kdev;
+    input_event_handler_t handler;
 };
 
 bool register_handler(input_handler& handler);

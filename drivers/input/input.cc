@@ -13,11 +13,15 @@ namespace
 libcxx::list<input_handler, &input_handler::node> input_handlers;
 } // namespace
 
-input_kdevice::input_kdevice()
+using namespace libcxx::placeholders;
+
+input_kdevice::input_kdevice(device* dev)
     : kdevice(filesystem::CHR)
     , head(0)
     , tail(0)
 {
+    dev->set_event_handler(
+        libcxx::bind(&input_kdevice::input_handler, this, _1, _2, _3));
 }
 
 int input_kdevice::poll(filesystem::poll_register_func_t& callback)
@@ -52,13 +56,16 @@ bool input_kdevice::seekable()
     return false;
 }
 
-void input_kdevice::append(dtk_event_type type, unsigned code, int val)
+void input_kdevice::input_handler(dtk_event_type type, unsigned code, int val)
 {
     event_data* ptr = &this->buffer[head % buffer_size];
     ptr->type       = static_cast<unsigned>(type);
     ptr->code       = code;
     ptr->value      = val;
     this->queue.wakeup();
+    for (auto& handler : input_handlers) {
+        handler.handler(type, code, val);
+    }
 }
 
 device::device()
@@ -70,14 +77,16 @@ int device::event(ktd_event_type type, unsigned code, int value)
     return 0;
 }
 
-void device::set_kdevice(input_kdevice* k)
+void device::set_event_handler(input_event_handler_t handler)
 {
-    this->kdev = k;
+    this->handler = handler;
 }
 
-input_kdevice* device::get_kdevice()
+void device::handle_event(dtk_event_type type, unsigned code, int val)
 {
-    return this->kdev;
+    if (this->handler) {
+        this->handler(type, code, val);
+    }
 }
 
 bool register_handler(input_handler& handler)
@@ -88,22 +97,9 @@ bool register_handler(input_handler& handler)
 
 bool register_device(device* dev)
 {
-    input_kdevice* k = new input_kdevice;
-    dev->set_kdevice(k);
+    input_kdevice* k = new input_kdevice(dev);
     filesystem::register_kdevice(filesystem::CHR, input_major, k);
     return true;
-}
-
-void report_event(device* dev, dtk_event_type type, unsigned code, int value)
-{
-    if (dev == nullptr) {
-        return;
-    }
-    input_kdevice* k = dev->get_kdevice();
-    k->append(type, code, value);
-    for (auto& handler : input_handlers) {
-        handler.handler(type, code, value);
-    }
 }
 
 namespace

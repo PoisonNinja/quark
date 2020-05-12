@@ -137,8 +137,8 @@ void intel8042::handler(int, void* dev_id, struct interrupt_context*)
         is_press = 0;
         scancode &= ~0x80;
     }
-    input::report_event(this, input::dtk_event_type::key,
-                        scancode_to_inputcode(scancode), is_press);
+    this->handle_event(input::dtk_event_type::key,
+                       scancode_to_inputcode(scancode), is_press);
 }
 
 unsigned intel8042::scancode_to_inputcode(unsigned scancode)

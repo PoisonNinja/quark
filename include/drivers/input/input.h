@@ -56,7 +56,6 @@ private:
     scheduler::wait_queue queue;
 };
 
-// No need for libcxx::function since the target is known
 using input_event_handler_t =
     libcxx::function<void(dtk_event_type type, unsigned code, int val), 64>;
 

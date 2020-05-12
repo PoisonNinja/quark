@@ -79,6 +79,7 @@ int device::event(ktd_event_type type, unsigned code, int value)
 
 void device::set_event_handler(input_event_handler_t handler)
 {
+    assert(!this->handler);
     this->handler = handler;
 }
 

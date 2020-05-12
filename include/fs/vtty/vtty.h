@@ -43,7 +43,6 @@ private:
 };
 
 void switch_vtty(int next);
-tty* current_vtty();
 void vtty_init();
 } // namespace terminal
 } // namespace filesystem

@@ -28,7 +28,7 @@ int ptm::ioctl(unsigned long command, char* argp)
 
 ssize_t ptm::write(const uint8_t* buffer, size_t count)
 {
-    return this->slave->notify(buffer, count);
+    return this->slave->handle_input(buffer, count);
 }
 
 void ptm::init_termios(struct termios& termios)

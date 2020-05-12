@@ -4,6 +4,7 @@
 #include <fs/inode.h>
 #include <kernel/lock.h>
 #include <lib/cqueue.h>
+#include <lib/functional.h>
 #include <proc/wq.h>
 
 namespace filesystem
@@ -213,6 +214,9 @@ struct winsize {
     unsigned short ws_ypixel; /* vertical size, pixels - not used */
 };
 
+using tty_event_handler_t =
+    libcxx::function<ssize_t(const uint8_t* buffer, size_t count), 64>;
+
 class tty_driver
 {
 public:
@@ -221,10 +225,14 @@ public:
     virtual int open(const char* name);
     virtual ssize_t write(const uint8_t* buffer, size_t count);
     virtual void init_termios(struct termios& termios);
-    void set_tty(tty* t);
+
+    void set_event_handler(tty_event_handler_t t);
 
 protected:
-    tty* ptty;
+    void handle_input(const uint8_t* buffer, size_t count);
+
+private:
+    tty_event_handler_t handler;
 };
 
 class tty : public kdevice
@@ -238,7 +246,7 @@ public:
     ssize_t write(const uint8_t* buffer, size_t count, off_t offset) override;
 
 public:
-    ssize_t notify(const uint8_t* buffer, size_t count);
+    ssize_t handle_input(const uint8_t* buffer, size_t count);
     void winch(const struct winsize* ws);
 
 private:

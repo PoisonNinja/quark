@@ -25,7 +25,7 @@ int pts::open(const char* name)
 
 ssize_t pts::write(const uint8_t* buffer, size_t count)
 {
-    return this->master->notify(buffer, count);
+    return this->master->handle_input(buffer, count);
 }
 
 void pts::init_termios(struct termios& termios)

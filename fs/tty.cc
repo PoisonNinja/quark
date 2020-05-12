@@ -9,6 +9,8 @@
 #include <lib/string.h>
 #include <lib/unordered_map.h>
 
+using namespace libcxx::placeholders;
+
 namespace filesystem
 {
 namespace terminal
@@ -48,13 +50,21 @@ ssize_t tty_driver::write(const uint8_t* buffer, size_t count)
     return count;
 }
 
+void tty_driver::handle_input(const uint8_t* buffer, size_t count)
+{
+    if (this->handler) {
+        this->handler(buffer, count);
+    }
+}
+
 void tty_driver::init_termios(struct termios& termios)
 {
 }
 
-void tty_driver::set_tty(tty* t)
+void tty_driver::set_event_handler(tty_event_handler_t h)
 {
-    this->ptty = t;
+    assert(!this->handler);
+    this->handler = h;
 }
 
 tty::tty(tty_driver* driver, struct termios& termios)
@@ -64,6 +74,7 @@ tty::tty(tty_driver* driver, struct termios& termios)
     , input_queue(4096)
     , output_queue(4096)
 {
+    driver->set_event_handler(libcxx::bind(&tty::handle_input, this, _1, _2));
 }
 
 int tty::ioctl(unsigned long request, char* argp)
@@ -148,7 +159,7 @@ ssize_t tty::write(const uint8_t* buffer, size_t count, off_t /* offset */)
     return this->driver->write(real_buffer.data(), real_buffer.size());
 }
 
-ssize_t tty::notify(const uint8_t* buffer, size_t count)
+ssize_t tty::handle_input(const uint8_t* buffer, size_t count)
 {
     size_t i;
     for (i = 0; i < count; i++) {
@@ -232,7 +243,6 @@ tty* register_tty(tty_driver* driver, dev_t major, dev_t minor)
         tty_node->data          = t;
         tty_list.push_front(*tty_node);
     }
-    driver->set_tty(t);
     return t;
 }
 

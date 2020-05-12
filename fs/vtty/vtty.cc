@@ -25,7 +25,6 @@ constexpr int NUM_VTTYS = 7;
 
 uint16_t* vga_buffer = nullptr;
 
-tty* ttys[NUM_VTTYS + 1];
 vtty* vttys[NUM_VTTYS + 1];
 int current_tty = -1;
 
@@ -237,7 +236,7 @@ ssize_t vtty::write(const uint8_t* buffer, size_t count)
 
 bool vtty::handle_kb(input::dtk_event_type type, unsigned code, int value)
 {
-    if (current_vtty() == this->ptty && type == input::dtk_event_type::key) {
+    if (current_tty == this->id && type == input::dtk_event_type::key) {
         if (value != 0) {
             switch (code) {
                 case KEY_LEFTCTRL:
@@ -299,10 +298,10 @@ bool vtty::handle_kb(input::dtk_event_type type, unsigned code, int value)
                     if (val == 0x01) {
                         val = '\r';
                     }
-                    this->ptty->notify(&val, 1);
+                    this->handle_input(&val, 1);
                     break;
                 default:
-                    this->ptty->notify(&val, 1);
+                    this->handle_input(&val, 1);
             }
             return true;
         }
@@ -343,11 +342,6 @@ void switch_vtty(int next)
     vttys[current_tty]->restore();
 }
 
-tty* current_vtty()
-{
-    return ttys[current_tty];
-}
-
 void vtty_init()
 {
     addr_t virt = memory::vmalloc::allocate(VGA_BUFFER_SIZE);
@@ -364,8 +358,8 @@ void vtty_init()
     for (int i = 1; i <= NUM_VTTYS; i++) {
         vtty* v  = new vtty(i);
         vttys[i] = v;
-        ttys[i]  = register_tty(v, vtty_major, i);
-        register_kdevice(device_class::CHR, vtty_major, i, ttys[i]);
+        register_kdevice(device_class::CHR, vtty_major, i,
+                         register_tty(v, vtty_major, i));
     }
     current_tty = 1;
 }

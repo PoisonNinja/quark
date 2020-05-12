@@ -27,7 +27,7 @@ uint16_t* vga_buffer = nullptr;
 
 tty* ttys[NUM_VTTYS + 1];
 vtty* vttys[NUM_VTTYS + 1];
-int current_tty;
+int current_tty = -1;
 
 void update_cursor(int col, int row)
 {

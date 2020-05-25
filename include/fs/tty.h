@@ -251,6 +251,7 @@ public:
 
 private:
     ssize_t dump_input();
+    ssize_t write_to_driver(const uint8_t* buffer, size_t size);
 
     tty_driver* driver;
 

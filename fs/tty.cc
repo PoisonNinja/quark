@@ -23,6 +23,7 @@ struct tty_list_node {
     dev_t dev;
 };
 libcxx::list<tty_list_node, &tty_list_node::node> tty_list;
+
 } // namespace
 
 const char* init_cc =
@@ -142,10 +143,10 @@ ssize_t tty::read(uint8_t* buffer, size_t count, off_t /* offset */)
     return count;
 }
 
-ssize_t tty::write(const uint8_t* buffer, size_t count, off_t /* offset */)
+ssize_t tty::write_to_driver(const uint8_t* buffer, size_t size)
 {
-    libcxx::vector<uint8_t> real_buffer(count);
-    for (size_t i = 0; i < count; i++) {
+    libcxx::vector<uint8_t> real_buffer(size);
+    for (size_t i = 0; i < size; i++) {
         if (this->termios.c_oflag & ONLCR && buffer[i] == '\n') {
             real_buffer.push_back('\n');
             real_buffer.push_back('\r');
@@ -157,6 +158,11 @@ ssize_t tty::write(const uint8_t* buffer, size_t count, off_t /* offset */)
         real_buffer.push_back(buffer[i]);
     }
     return this->driver->write(real_buffer.data(), real_buffer.size());
+}
+
+ssize_t tty::write(const uint8_t* buffer, size_t count, off_t /* offset */)
+{
+    return this->write_to_driver(buffer, count);
 }
 
 ssize_t tty::handle_input(const uint8_t* buffer, size_t count)
@@ -185,7 +191,7 @@ ssize_t tty::handle_input(const uint8_t* buffer, size_t count)
                 if (!this->input_queue.empty()) {
                     this->input_queue.pop_back();
                     const uint8_t eraser[3] = {'\010', ' ', '\010'};
-                    this->driver->write(eraser, 3);
+                    this->write_to_driver(eraser, 3);
                 }
                 continue;
             }
@@ -193,7 +199,7 @@ ssize_t tty::handle_input(const uint8_t* buffer, size_t count)
                 this->input_queue.push(c);
             }
             if (this->termios.c_lflag & ECHO) {
-                this->driver->write(reinterpret_cast<uint8_t*>(&c), 1);
+                this->write_to_driver(reinterpret_cast<uint8_t*>(&c), 1);
             }
             if (c == '\n' ||
                 (this->termios.c_cc[VEOL] && c == this->termios.c_cc[VEOL])) {
@@ -201,7 +207,7 @@ ssize_t tty::handle_input(const uint8_t* buffer, size_t count)
                 continue;
             }
         } else if (this->termios.c_lflag & ECHO) {
-            this->driver->write(reinterpret_cast<uint8_t*>(&c), 1);
+            this->write_to_driver(reinterpret_cast<uint8_t*>(&c), 1);
         } else {
             if (!this->output_queue.full()) {
                 this->output_queue.push(c);

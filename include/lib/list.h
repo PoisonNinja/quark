@@ -63,6 +63,10 @@ public:
         , prev(nullptr)
     {
     }
+    bool connected() const
+    {
+        return next != nullptr && prev != nullptr;
+    }
 };
 
 template <typename T, libcxx::node<T> T::*Link>
@@ -196,9 +200,12 @@ public:
     }
     list<T, Link>::iterator erase(list<T, Link>::iterator it)
     {
-        it.current->next = (it.current->next->*Link).next;
+        libcxx::node<T>& node = (it.current->next->*Link);
+        it.current->next      = (it.current->next->*Link).next;
         (it.current->next ? (it.current->next->*Link).prev
                           : this->content.prev) = it.current;
+        node.prev                               = nullptr;
+        node.next                               = nullptr;
         this->_size--;
         return it;
     }

@@ -82,7 +82,7 @@ int poll_table::poll(time_t timeout)
     for (auto& elem : targets) {
         // Remove us
         if (elem.queue) {
-            elem.queue->remove();
+            elem.queue->remove(elem.node);
         }
         delete elem.fd;
     }
@@ -95,7 +95,7 @@ void poll_table::bind(size_t offset, scheduler::wait_queue& queue)
     // poll_lock held by poll already
     if (!this->targets[offset].registered) {
         this->targets[offset].queue = &queue;
-        queue.insert();
+        queue.insert(this->targets[offset].node);
         this->targets[offset].registered = true;
     }
 }

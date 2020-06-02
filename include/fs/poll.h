@@ -45,6 +45,7 @@ private:
         bool registered;
         struct pollfd* fd;
         scheduler::wait_queue* queue;
+        scheduler::wait_queue_node node;
     };
 
 public:

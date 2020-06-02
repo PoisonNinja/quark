@@ -26,7 +26,9 @@ bool wait_queue::insert(wait_queue_node& node)
 bool wait_queue::remove(wait_queue_node& node)
 {
     // TODO: Validate this somehow
-    waiters.erase(waiters.iterator_to(node));
+    if (node.node.connected()) {
+        waiters.erase(waiters.iterator_to(node));
+    }
 }
 
 void wait_queue::wakeup()

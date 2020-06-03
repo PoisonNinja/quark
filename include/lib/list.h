@@ -178,7 +178,7 @@ public:
     }
     constexpr size_t size() const
     {
-        return this->size;
+        return this->_size;
     }
     void push_back(T& node)
     {

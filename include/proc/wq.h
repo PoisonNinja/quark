@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lib/functional.h>
 #include <lib/list.h>
 
 class thread;
@@ -20,25 +21,41 @@ public:
     ~wait_queue(){}; // TODO: We should probably do something when deallocating
 
     /*
-     * Should you wait or insert?
+     * Basically handles all aspects of waiting for you. condition must be true
+     * when wait is terminating (e.g. waiting for condition to become true).
      *
-     * If you only want to wait exclusively on this wait_queue, use wait. It
-     * will handle everything for you incl. signals
-     *
-     * However, if you want to wait on multiple wait_queues (e.g. poll), use
-     * insert to register this thread with the wait_queue.
-     *
-     * Then, you will manually need to schedule away (by calling switch_next())
-     * and checking for the wake reason
+     * Internally, it'll call prepare and remove on behalf of you.
      */
-    int wait(int flags);
+    bool wait(int flags, libcxx::function<bool()> condition);
 
-    bool insert(wait_queue_node& node);
-    bool remove(wait_queue_node& node);
+    /*
+     * If you need more fine grained control, use the below functions.
+     */
+    /*
+     * Inserts the node into the wait queue and set the appropriate thread
+     * state. If a signal is pending, it'll abort and return true. Otherwise,
+     * it'll insert the node and modify the state so that on the next task
+     * switch the thread will not be scheduled.
+     */
+    bool prepare(int flags, wait_queue_node& node);
+    // Only inserts the node into the wait queue
+    void insert(wait_queue_node& node);
+    /*
+     * Removes the node from the wait queue and also sets the current thread
+     * state to RUNNABLE.
+     */
+    void remove(wait_queue_node& node);
 
     void wakeup();
 
 private:
+    /*
+     * Safely removes a node from the queue. It'll only remove if the
+     * node is actually connected in the list, making it safe to call multiple
+     * times with the same node.
+     */
+    void safe_remove(wait_queue_node& node);
+
     libcxx::list<wait_queue_node, &wait_queue_node::node> waiters;
 };
 } // namespace scheduler

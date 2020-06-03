@@ -130,7 +130,8 @@ ssize_t tty::read(uint8_t* buffer, size_t count, off_t /* offset */)
     size_t read = 0;
 
     if (this->output_queue.empty()) {
-        this->queue.wait(scheduler::wait_interruptible);
+        this->queue.wait(scheduler::wait_interruptible,
+                         [&]() { return !this->output_queue.empty(); });
     }
 
     while (read < count) {

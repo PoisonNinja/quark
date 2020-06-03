@@ -41,7 +41,8 @@ ssize_t input_kdevice::read(uint8_t* buffer, size_t count, off_t /*offset*/)
     size_t read = 0;
     while (read + sizeof(event_data) <= count) {
         if (this->head == this->tail) {
-            this->queue.wait(scheduler::wait_interruptible);
+            this->queue.wait(scheduler::wait_interruptible,
+                             [&]() { return this->head != this->tail; });
         }
         libcxx::memcpy(buffer + read, &this->buffer[tail % buffer_size],
                        sizeof(event_data));

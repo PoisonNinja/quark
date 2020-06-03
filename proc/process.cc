@@ -308,7 +308,8 @@ pid_t process::wait(pid_t pid, int* status, int options)
         if (options & WNOHANG) {
             return 0;
         }
-        int ret = this->waiters.wait(scheduler::wait_interruptible);
+        bool ret = this->waiters.wait(scheduler::wait_interruptible,
+                                      [&]() { return !zombies.empty(); });
         if (ret) {
             if (status)
                 *status = -EINTR;

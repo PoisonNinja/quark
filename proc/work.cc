@@ -21,7 +21,8 @@ void do_work(void*)
 {
     while (1) {
         if (work_queue.empty()) {
-            worker_queue.wait(wait_interruptible);
+            worker_queue.wait(wait_interruptible,
+                              [&]() { return !work_queue.empty(); });
         } else {
             struct work& w = work_queue.front();
             work_queue.pop();

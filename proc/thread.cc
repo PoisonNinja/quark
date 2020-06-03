@@ -15,6 +15,7 @@ thread::thread(process* p, tid_t tid)
     }
     signal::sigemptyset(&this->signal_mask);
     signal::sigemptyset(&this->signal_pending);
+    this->refresh_signal();
 }
 
 thread::~thread()

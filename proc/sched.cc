@@ -40,14 +40,23 @@ pid_t get_free_pid()
 
 bool insert(thread* thread)
 {
-    thread->set_state(thread_state::RUNNABLE);
+    int interrupt_status = interrupt::save();
+    interrupt::disable();
+
     run_queue.push(*thread);
+
+    interrupt::restore(interrupt_status);
     return true;
 }
 
 bool remove(thread* thread)
 {
+    int interrupt_status = interrupt::save();
+    interrupt::disable();
+
     run_queue.erase(*thread);
+
+    interrupt::restore(interrupt_status);
     return true;
 }
 

@@ -59,7 +59,6 @@ thread* next()
     } else {
         next = &(run_queue.front());
         run_queue.pop();
-        run_queue.push(*next);
     }
     return next;
 }
@@ -68,7 +67,13 @@ void switch_next()
 {
     int interrupt_status = interrupt::save();
     interrupt::disable();
-    thread* old         = current_thread;
+
+    thread* old = current_thread;
+    if (old && old != kidle) {
+        if (old->get_state() == thread_state::RUNNABLE) {
+            run_queue.push(*old);
+        }
+    }
     thread* next_thread = next();
     if (next_thread == old) {
         interrupt::restore(interrupt_status);
@@ -99,7 +104,6 @@ void sleep(thread_state state)
                     curr->get_tid());
     }
     curr->set_state(state);
-    remove(curr);
     switch_next();
 }
 
@@ -111,7 +115,7 @@ void init()
     kernel_process->set_address_space(memory::virt::get_address_space_root());
     // TODO: Move this to architecture specific
     thread* kinit = kernel_process->create_thread();
-    scheduler::insert(kinit);
+    kinit->set_state(thread_state::RUNNABLE);
     /*
      * Set kinit as current_thread, so on the first task switch caused by the
      * timer, it will save the kernel context into the kinit task, but since

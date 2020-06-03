@@ -15,6 +15,7 @@ enum class thread_state {
     SLEEPING_INTERRUPTIBLE,
     RUNNABLE,
     RUNNING,
+    ZOMBIE,
 };
 
 enum class thread_flag : int {

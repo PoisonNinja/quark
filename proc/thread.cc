@@ -49,12 +49,6 @@ void thread::set_flag(thread_flag flag, bool value)
 
 void thread::set_state(thread_state state)
 {
-    if (this->state == state) {
-        log::printk(
-            log::log_level::WARNING,
-            "thread: Attempting to set state to same state for thread %u\n",
-            this->tid);
-    }
     this->state = state;
 }
 

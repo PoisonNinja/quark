@@ -67,7 +67,7 @@ void thread::exit(bool is_signal, int val)
         return;
     }
     // TODO: We need to clean up!
-    scheduler::remove(this);
+    this->set_state(thread_state::ZOMBIE);
     this->parent->thread_exit(this, is_signal, val);
     scheduler::switch_next();
 }

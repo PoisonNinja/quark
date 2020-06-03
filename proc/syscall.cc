@@ -174,6 +174,7 @@ long sys_fork()
     ctx.rax = 0;
     child_thread->set_context(ctx);
     child_thread->fork_init();
+    child_thread->set_state(thread_state::RUNNABLE);
     scheduler::insert(child_thread);
     return child->get_pid();
 }

@@ -34,8 +34,8 @@ bool wait_queue::remove(wait_queue_node& node)
 void wait_queue::wakeup()
 {
     for (auto it = this->waiters.begin(); it != this->waiters.end();) {
+        (*it).waiter->set_state(thread_state::RUNNABLE);
         scheduler::insert((*it).waiter);
-        auto ptr = &(*it);
         // Erase the element
         it = this->waiters.erase(it);
     }

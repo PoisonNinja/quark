@@ -131,6 +131,7 @@ bool thread::send_signal(int signum)
     this->refresh_signal();
     if (this->is_signal_pending() &&
         this->state == thread_state::SLEEPING_INTERRUPTIBLE) {
+        this->set_state(thread_state::RUNNABLE);
         scheduler::insert(this);
     }
     return true;

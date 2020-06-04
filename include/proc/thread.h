@@ -67,25 +67,11 @@ public:
     int sigaltstack(const stack_t *ss, stack_t *oldss);
     bool send_signal(int signal);
 
-    bool is_on_rq()
-    {
-        return on_rq;
-    }
-    void put_on_rq()
-    {
-        on_rq = true;
-    }
-    void remove_from_rq()
-    {
-        on_rq = false;
-    }
-
 private:
     tid_t tid;
     thread_state state;
     bool flags[1];
     process *parent;
-    bool on_rq;
 
     struct {
         struct thread_context tcontext; // Thread execution state

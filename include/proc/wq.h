@@ -42,7 +42,7 @@ public:
     void insert(wait_queue_node& node);
     /*
      * Removes the node from the wait queue and also sets the current thread
-     * state to RUNNABLE.
+     * state to RUNNING.
      */
     void remove(wait_queue_node& node);
 

@@ -51,7 +51,7 @@ void init_stage1()
     process* initp = scheduler::get_current_process()->fork();
     thread* stage2 = create_thread(initp, init_stage2, nullptr);
     scheduler::late_init();
-    stage2->set_state(thread_state::RUNNABLE);
+    stage2->set_state(thread_state::RUNNING);
     scheduler::insert(stage2);
     scheduler::get_current_process()->wait(-1, nullptr, 0);
     kernel::panic("init exited!\n");

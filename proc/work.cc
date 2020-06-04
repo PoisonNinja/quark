@@ -44,7 +44,7 @@ void schedule(work_handler_t handler)
 void init()
 {
     thread* worker_thread = create_kernel_thread(do_work, nullptr);
-    worker_thread->set_state(thread_state::RUNNABLE);
+    worker_thread->set_state(thread_state::RUNNING);
     scheduler::insert(worker_thread);
 }
 } // namespace work

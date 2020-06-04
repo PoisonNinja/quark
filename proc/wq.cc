@@ -46,14 +46,14 @@ void wait_queue::insert(wait_queue_node& node)
 
 void wait_queue::remove(wait_queue_node& node)
 {
-    node.waiter->set_state(thread_state::RUNNABLE);
+    node.waiter->set_state(thread_state::RUNNING);
     this->safe_remove(node);
 }
 
 void wait_queue::wakeup()
 {
     for (auto it = this->waiters.begin(); it != this->waiters.end();) {
-        (*it).waiter->set_state(thread_state::RUNNABLE);
+        (*it).waiter->set_state(thread_state::RUNNING);
         scheduler::insert((*it).waiter);
         // Erase the element
         it = this->waiters.erase(it);

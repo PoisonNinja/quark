@@ -10,10 +10,8 @@ struct interrupt_context;
 class process;
 
 enum class thread_state {
-    UNMANAGED,
     SLEEPING_UNINTERRUPTIBLE,
     SLEEPING_INTERRUPTIBLE,
-    RUNNABLE,
     RUNNING,
     ZOMBIE,
 };

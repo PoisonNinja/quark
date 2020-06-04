@@ -56,16 +56,18 @@ class node
 
     T* next;
     libcxx::node<T>* prev;
+    bool _connected;
 
 public:
     node()
         : next(nullptr)
         , prev(nullptr)
+        , _connected(false)
     {
     }
     bool connected() const
     {
-        return next != nullptr && prev != nullptr;
+        return _connected;
     }
 };
 
@@ -131,7 +133,8 @@ public:
     list()
         : _size(0)
     {
-        this->content.prev = &this->content;
+        this->content.prev       = &this->content;
+        this->content._connected = true;
     }
 
     ~list()
@@ -195,7 +198,7 @@ public:
                            : this->content.prev) = &(node.*Link);
         (node.*Link).prev                        = pos.current;
         pos.current->next                        = &node;
-
+        (node.*Link)._connected                  = true;
         this->_size++;
     }
     list<T, Link>::iterator erase(list<T, Link>::iterator it)
@@ -204,8 +207,7 @@ public:
         it.current->next      = (it.current->next->*Link).next;
         (it.current->next ? (it.current->next->*Link).prev
                           : this->content.prev) = it.current;
-        node.prev                               = nullptr;
-        node.next                               = nullptr;
+        node._connected                         = false;
         this->_size--;
         return it;
     }

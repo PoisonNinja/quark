@@ -51,5 +51,11 @@ public:
     {
         this->container.erase(this->container.iterator_to(node));
     }
+
+    // Escape hatch
+    Container& get_container()
+    {
+        return this->container;
+    }
 };
 } // namespace libcxx

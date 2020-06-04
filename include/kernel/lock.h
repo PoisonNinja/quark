@@ -1,43 +1,8 @@
 #pragma once
 
-#include <atomic>
-#include <proc/wq.h>
+#include <kernel/mutex.h>
+#include <kernel/spinlock.h>
 #include <type_traits>
-
-class spinlock
-{
-public:
-    spinlock();
-
-    void lock();
-    int lock_irq();
-
-    void unlock();
-    void unlock_irq(int save);
-
-    spinlock(const spinlock&) = delete;
-    spinlock& operator=(const spinlock&) = delete;
-
-private:
-    void _lock();
-    void _unlock();
-    std::atomic_flag locked;
-};
-
-class mutex
-{
-public:
-    mutex();
-    void lock();
-    void unlock();
-
-    mutex(const mutex&) = delete;
-    mutex& operator=(const mutex&) = delete;
-
-private:
-    std::atomic_flag locked;
-    scheduler::wait_queue queue;
-};
 
 template <class T, class Enable = void>
 class scoped_lock;

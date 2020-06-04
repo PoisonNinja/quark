@@ -1,6 +1,6 @@
 #include <cpu/cpu.h>
 #include <cpu/interrupt.h>
-#include <kernel/lock.h>
+#include <kernel/spinlock.h>
 
 spinlock::spinlock()
     : locked(ATOMIC_FLAG_INIT)

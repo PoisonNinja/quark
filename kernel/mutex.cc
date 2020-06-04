@@ -1,4 +1,4 @@
-#include <kernel/lock.h>
+#include <kernel/mutex.h>
 
 mutex::mutex()
     : locked(ATOMIC_FLAG_INIT)

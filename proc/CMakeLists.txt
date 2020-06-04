@@ -1,3 +1,8 @@
+set(CONFIG_SCHED_PARANOID "0" CACHE STRING "Enable additional (slow) checks to
+    ensure scheduler behavior is correct. Generally this is not what you want
+    unless you suspect the scheduler is to blame since this slows down overall
+    performance" )
+
 target_sources(quark.kernel
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/process.cc

@@ -1,3 +1,4 @@
+#include <config.h>
 #include <cpu/cpu.h>
 #include <cpu/interrupt.h>
 #include <kernel.h>
@@ -45,6 +46,11 @@ bool insert(thread* thread)
 
     if (!thread->is_on_rq()) {
         run_queue.push(*thread);
+#ifdef CONFIG_SCHED_PARANOID
+        for (auto& t : run_queue.get_container()) {
+            assert(t.get_tid() != thread->get_tid());
+        }
+#endif
         thread->put_on_rq();
     }
 

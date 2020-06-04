@@ -43,7 +43,10 @@ bool insert(thread* thread)
     int interrupt_status = interrupt::save();
     interrupt::disable();
 
-    run_queue.push(*thread);
+    if (!thread->is_on_rq()) {
+        run_queue.push(*thread);
+        thread->put_on_rq();
+    }
 
     interrupt::restore(interrupt_status);
     return true;
@@ -55,6 +58,7 @@ bool remove(thread* thread)
     interrupt::disable();
 
     run_queue.erase(*thread);
+    thread->remove_from_rq();
 
     interrupt::restore(interrupt_status);
     return true;
@@ -81,6 +85,8 @@ void switch_next()
     if (old && old != kidle) {
         if (old->get_state() == thread_state::RUNNING) {
             run_queue.push(*old);
+        } else {
+            old->remove_from_rq();
         }
     }
     thread* next_thread = next();

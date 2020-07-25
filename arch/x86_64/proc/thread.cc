@@ -156,8 +156,5 @@ void load_registers(struct thread_context& tcontext)
 {
     struct interrupt_context ctx;
     decode_tcontext(&ctx, &tcontext);
-    // Inject RFLAGS IOPORT privileges for userspace
-    // TODO: INSECURE, allows userspace to do ioport stuff
-    ctx.rflags |= 0x3000;
     load_register_state(&ctx);
 }
